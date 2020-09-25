@@ -1,2 +1,2 @@
-# YtBookManagerCore
-蔵書・スキャンデータ管理
+# YtAppCSharp
+C# アプリ用プロジェクト
