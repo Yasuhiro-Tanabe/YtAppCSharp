@@ -2,4 +2,5 @@
 # この .gitignore ファイルは Microsoft(R) Visual Studio によって自動的に作成されました。
 ################################################################################
 
-/YtBookManagerCore/obj
+/BookManager/YtBookManagerCore/bin
+/BookManager/YtBookManagerCore/obj
