@@ -14,3 +14,7 @@
 /SimpleDigitalClock/SimpleDigitalClockInstaller/Debug
 /SimpleDigitalClock/SimpleDigitalClock/obj
 /SimpleDigitalClock/SimpleDigitalClock/bin/Debug/netcoreapp3.1
+/DDLGenerator/.vs
+/DDLGenerator/DDLGenerator/bin
+/DDLGenerator/DDLGenerator/obj
+
