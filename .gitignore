@@ -7,3 +7,10 @@
 /BookManager/YtBookManagerCore/.vs
 /.vs
 
+/BookManager/.vs/YtBookManagerCore
+/SimpleDigitalClock/.vs/SimpleDigitalClock
+/SimpleDigitalClock/SimpleDigitalClock/SimpleDigitalClock/bin/Debug/netcoreapp3.1
+/SimpleDigitalClock/SimpleDigitalClock/SimpleDigitalClock/obj
+/SimpleDigitalClock/SimpleDigitalClockInstaller/Debug
+/SimpleDigitalClock/SimpleDigitalClock/obj
+/SimpleDigitalClock/SimpleDigitalClock/bin/Debug/netcoreapp3.1

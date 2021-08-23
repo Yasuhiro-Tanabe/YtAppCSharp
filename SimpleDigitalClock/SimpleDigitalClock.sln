@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31229.75
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleDigitalClock", "SimpleDigitalClock\SimpleDigitalClock.csproj", "{57CCA670-6E6B-4412-9798-015927F4D450}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SimpleDigitalClockInstaller", "SimpleDigitalClockInstaller\SimpleDigitalClockInstaller.vdproj", "{044B8420-40D0-4687-914B-F41207C54CE5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57CCA670-6E6B-4412-9798-015927F4D450}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57CCA670-6E6B-4412-9798-015927F4D450}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57CCA670-6E6B-4412-9798-015927F4D450}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57CCA670-6E6B-4412-9798-015927F4D450}.Release|Any CPU.Build.0 = Release|Any CPU
+		{044B8420-40D0-4687-914B-F41207C54CE5}.Debug|Any CPU.ActiveCfg = Debug
+		{044B8420-40D0-4687-914B-F41207C54CE5}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0D485588-D3D5-42E7-8163-C24889B9CFDB}
+	EndGlobalSection
+EndGlobal
