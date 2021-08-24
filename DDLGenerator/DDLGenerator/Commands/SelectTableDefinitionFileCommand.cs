@@ -17,6 +17,9 @@ namespace DDLGenerator.Commands
     {
         public event EventHandler CanExecuteChanged;
 
+        /// <summary>
+        /// コマンドが割り当てられたビューモデル
+        /// </summary>
         private MainWindowViewModel _vm;
 
         public SelectTableDefinitionFileCommand(MainWindowViewModel vm)
@@ -48,11 +51,6 @@ namespace DDLGenerator.Commands
                 LogUtil.Info("入力ファイル：" + dialog.FileName);
                 _vm.TableDefinitionFilePath = dialog.FileName;
             }
-            else
-            {
-                LogUtil.Warn("入力ファイルが選択されませんでした。");
-            }
-
         }
     }
 }

@@ -80,13 +80,14 @@ namespace DDLGenerator.ViewModels
         /// <summary>
         /// 出力となるテーブル定義スクリプト選択ダイアログを開くコマンド
         /// </summary>
-        public ICommand SelectOutputFile { get; private set; } = new SelectOutputFileCommand();
+        public ICommand SelectOutputFile { get; private set; }
 
         public MainWindowViewModel()
         {
             LogUtil.Appender.PropertyChanged += OnLogRefreshed;
 
             SelectInputFile = new SelectTableDefinitionFileCommand(this);
+            SelectOutputFile = new SelectOutputFileCommand(this);
 
             LogUtil.Debug($"MainWindowViewModel Generated.");
         }
