@@ -4,7 +4,16 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>DDLGenerator.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="DDLGenerator.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="DDLGenerator.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.12" />
