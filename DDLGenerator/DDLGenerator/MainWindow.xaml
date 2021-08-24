@@ -48,7 +48,7 @@
                  Margin="10" Padding="10,0,0,0"
                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                  VerticalContentAlignment="Center" HorizontalContentAlignment="Left"
-                 Text="{Binding TableDefinitionFilePath}"/>
+                 Text="{Binding OutputDdlFilePath}"/>
         <Button Grid.Row="1" Grid.Column="2"
                 Margin="20,10"
                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"

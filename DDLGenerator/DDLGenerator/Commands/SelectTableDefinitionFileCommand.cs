@@ -1,10 +1,14 @@
 ﻿using DDLGenerator.Models.Logging;
+using DDLGenerator.ViewModels;
+
+using Microsoft.Win32;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DDLGenerator.Commands
@@ -12,6 +16,13 @@ namespace DDLGenerator.Commands
     class SelectTableDefinitionFileCommand : ICommand
     {
         public event EventHandler CanExecuteChanged;
+
+        private MainWindowViewModel _vm;
+
+        public SelectTableDefinitionFileCommand(MainWindowViewModel vm)
+        {
+            _vm = vm;
+        }
 
         public bool CanExecute(object parameter)
         {
@@ -23,7 +34,25 @@ namespace DDLGenerator.Commands
         {
             LogUtil.Debug($"{this.GetType().Name}#Execute() called. parameter={parameter?.GetType().Name}");
 
-            LogUtil.Info("入力ファイル：");
+            var dialog = new OpenFileDialog();
+            dialog.Title = "データベース定義書の選択";
+            dialog.Filter = "Excel ファイル (*.xlsx)|*.xlsx";
+            dialog.DefaultExt = ".xlsx";
+            dialog.CheckFileExists = true;
+            dialog.CheckPathExists = true;
+
+            var result = dialog.ShowDialog();
+
+            if(result.HasValue && result.Value)
+            {
+                LogUtil.Info("入力ファイル：" + dialog.FileName);
+                _vm.TableDefinitionFilePath = dialog.FileName;
+            }
+            else
+            {
+                LogUtil.Warn("入力ファイルが選択されませんでした。");
+            }
+
         }
     }
 }

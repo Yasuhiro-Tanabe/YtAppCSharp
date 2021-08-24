@@ -75,7 +75,7 @@ namespace DDLGenerator.ViewModels
         /// <summary>
         /// 入力となるテーブル定義書ファイル選択ダイアログを開くコマンド
         /// </summary>
-        public ICommand SelectInputFile { get; private set; } = new SelectTableDefinitionFileCommand();
+        public ICommand SelectInputFile { get; private set; }
 
         /// <summary>
         /// 出力となるテーブル定義スクリプト選択ダイアログを開くコマンド
@@ -85,6 +85,8 @@ namespace DDLGenerator.ViewModels
         public MainWindowViewModel()
         {
             LogUtil.Appender.PropertyChanged += OnLogRefreshed;
+
+            SelectInputFile = new SelectTableDefinitionFileCommand(this);
 
             LogUtil.Debug($"MainWindowViewModel Generated.");
         }
