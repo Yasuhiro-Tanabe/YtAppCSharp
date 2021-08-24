@@ -25,11 +25,11 @@ namespace DDLGenerator.Models
                 LogUtil.Debug($"Table: {tbl.TableName}, NumRows={tbl.Rows.Count}, countPK={countPK}");
 
 
-                WriteLine($"-- テーブル：{tbl.TableName} ({tbl.TableComment})");
-                WriteLine($"DROP TABLE IF EXISTS {tbl.TableName};");
-                WriteLine($"CREATE TABLE {tbl.TableName} (");
-
                 builder.Clear();
+                builder.AppendLine($"-- テーブル：{tbl.TableName} ({tbl.TableComment})")
+                    .AppendLine($"DROP TABLE IF EXISTS {tbl.TableName};")
+                    .AppendLine($"CREATE TABLE {tbl.TableName} ("); 
+
                 var numCols = 0;
                 foreach (var row in tbl.Rows)
                 {
