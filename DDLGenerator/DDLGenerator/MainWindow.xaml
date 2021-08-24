@@ -73,11 +73,12 @@
         </Grid>
 
         <!-- 4段目：作業ログ出力 -->
-        <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
-                 Margin="10" Padding="5"
-                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                 Text="{Binding Log, Mode=OneWay}"
-                 VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"/>
-
+        <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                Margin="5" Padding="5"
+                BorderBrush="Black" BorderThickness="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock Text="{Binding Log, Mode=OneWay}"/>
+            </ScrollViewer>
+        </Border>
     </Grid>
 </Window>
