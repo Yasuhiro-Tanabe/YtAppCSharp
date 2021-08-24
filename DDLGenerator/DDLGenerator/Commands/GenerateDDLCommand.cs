@@ -1,4 +1,5 @@
 ﻿using DDLGenerator.Models.Logging;
+using DDLGenerator.ViewModels;
 
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,16 @@ namespace DDLGenerator.Commands
     {
         public event EventHandler CanExecuteChanged;
 
+        /// <summary>
+        /// コマンドが割り当てられたビューモデル
+        /// </summary>
+        private MainWindowViewModel _vm;
+
+        public GenerateDDLCommand(MainWindowViewModel vm)
+        {
+            _vm = vm;
+        }
+
         public bool CanExecute(object parameter)
         {
             LogUtil.Debug($"{this.GetType().Name}#CanExecute() called. parameter={parameter?.GetType().Name}");
@@ -24,6 +35,7 @@ namespace DDLGenerator.Commands
             LogUtil.Debug($"{this.GetType().Name}#Execute() called. parameter={parameter?.GetType().Name}");
 
 
+            Models.DDLGenerator.Generate(_vm.TableDefinitionFilePath, _vm.OutputDdlFilePath);
             LogUtil.Info("ファイル出力完了");
         }
     }

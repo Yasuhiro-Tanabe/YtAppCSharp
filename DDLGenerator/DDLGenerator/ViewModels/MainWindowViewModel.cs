@@ -70,7 +70,7 @@ namespace DDLGenerator.ViewModels
         /// <summary>
         /// DDL生成コマンド
         /// </summary>
-        public ICommand GenerateDDL { get; private set; } = new GenerateDDLCommand();
+        public ICommand GenerateDDL { get; private set; }
 
         /// <summary>
         /// 入力となるテーブル定義書ファイル選択ダイアログを開くコマンド
@@ -88,6 +88,7 @@ namespace DDLGenerator.ViewModels
 
             SelectInputFile = new SelectTableDefinitionFileCommand(this);
             SelectOutputFile = new SelectOutputFileCommand(this);
+            GenerateDDL = new GenerateDDLCommand(this);
 
             LogUtil.Debug($"MainWindowViewModel Generated.");
         }
