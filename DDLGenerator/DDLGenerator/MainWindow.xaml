@@ -63,13 +63,14 @@
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0"
-                Margin="20,10,20,10"
-                VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                Content="生成"/>
+                    Margin="20,10,20,10"
+                    VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                    Content="生成"/>
             <Button Grid.Column="2"
-                Margin="20,10,20,10"
-                VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                Content="終了"/>
+                    Margin="20,10,20,10"
+                    VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                    Content="終了"
+                    Command="{Binding QuitCommand}"/>
         </Grid>
 
         <!-- 4段目：作業ログ出力 -->
