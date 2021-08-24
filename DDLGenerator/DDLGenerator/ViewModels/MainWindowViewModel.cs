@@ -28,11 +28,34 @@ namespace DDLGenerator.ViewModels
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(caller));
         }
 
-        private string _title = "DDL Generator";
+        private string _title = "データ定義ファイルジェネレータ";
+        /// <summary>
+        /// ウィンドウタイトルバーに表示する文字列
+        /// </summary>
         public string WindowTitle
         {
             get { return _title; }
             set { SetProperty(ref _title, value); }
+        }
+
+        private string _tableDefinitionFile;
+        /// <summary>
+        /// テーブル定義書ファイル名 (パスを含む)
+        /// </summary>
+        public string TableDefinitionFilePath
+        {
+            get { return _tableDefinitionFile; }
+            set { SetProperty(ref _tableDefinitionFile, value); }
+        }
+
+        private string _outputFIle;
+        /// <summary>
+        /// 生成するデータ定義スクリプトファイル名 (パスを含む)
+        /// </summary>
+        public string OutputDdlFilePath
+        {
+            get { return _outputFIle; }
+            set { SetProperty(ref _outputFIle, value); }
         }
 
 
