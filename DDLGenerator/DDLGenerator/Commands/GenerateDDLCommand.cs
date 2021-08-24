@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace DDLGenerator.Commands
 {
@@ -34,9 +35,11 @@ namespace DDLGenerator.Commands
         {
             LogUtil.Debug($"{this.GetType().Name}#Execute() called. parameter={parameter?.GetType().Name}");
 
-
-            Models.DDLGenerator.Generate(_vm.TableDefinitionFilePath, _vm.OutputDdlFilePath);
-            LogUtil.Info("ファイル出力完了");
+            Task.Run(() => Dispatcher.CurrentDispatcher.Invoke(() =>
+            {
+                Models.DDLGenerator.Generate(_vm.TableDefinitionFilePath, _vm.OutputDdlFilePath);
+                LogUtil.Info("ファイル出力完了");
+            }));
         }
     }
 }
