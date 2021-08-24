@@ -17,28 +17,30 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="120"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="80"/>
         </Grid.ColumnDefinitions>
 
 
+        <!-- 1段目：データベース定義書 -->
         <TextBlock Grid.Row="0" Grid.Column="0"
-                   Margin="10"
+                   Margin="10,0,0,0"
                    VerticalAlignment="Center" HorizontalAlignment="Left"
-                   Text="データ定義書："/>
+                   Text="データベース定義書："/>
         <TextBox Grid.Row="0" Grid.Column="1" x:Name="TableDefinitionFile"
                  Margin="10" Padding="10,0,0,0"
                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                  VerticalContentAlignment="Center" HorizontalContentAlignment="Left"
                  Text="{Binding TableDefinitionFilePath}"/>
         <Button Grid.Row="0" Grid.Column="2"
-                Margin="30,10,30,10"
+                Margin="20,10"
                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                 Content="..."/>
 
+        <!-- 2段目：データ定義スクリプト -->
         <TextBlock Grid.Row="1" Grid.Column="0"
-                   Margin="10"
+                   Margin="10,0,0,0"
                    VerticalAlignment="Center" HorizontalAlignment="Left"
                    Text="DDLスクリプト："/>
         <TextBox Grid.Row="1" Grid.Column="1" x:Name="OutputDdlFile"
@@ -47,8 +49,34 @@
                  VerticalContentAlignment="Center" HorizontalContentAlignment="Left"
                  Text="{Binding TableDefinitionFilePath}"/>
         <Button Grid.Row="1" Grid.Column="2"
-                Margin="30,10,30,10"
+                Margin="20,10"
                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                 Content="..."/>
+
+        <!-- 3段目：操作コマンド -->
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+              Margin="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0"
+                Margin="20,10,20,10"
+                VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                Content="生成"/>
+            <Button Grid.Column="2"
+                Margin="20,10,20,10"
+                VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                Content="終了"/>
+        </Grid>
+
+        <!-- 4段目：作業ログ出力 -->
+        <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                 Margin="10" Padding="5"
+                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                 Text=""
+                 VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"/>
+
     </Grid>
 </Window>
