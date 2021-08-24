@@ -37,7 +37,7 @@
         <Button Grid.Row="0" Grid.Column="2"
                 Margin="20,10"
                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                Content="..."/>
+                Content="..." Command="{Binding SelectInputFile}"/>
 
         <!-- 2段目：データ定義スクリプト -->
         <TextBlock Grid.Row="1" Grid.Column="0"
@@ -52,7 +52,7 @@
         <Button Grid.Row="1" Grid.Column="2"
                 Margin="20,10"
                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                Content="..."/>
+                Content="..." Command="{Binding SelectOutputFile}"/>
 
         <!-- 3段目：操作コマンド -->
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
@@ -65,19 +65,18 @@
             <Button Grid.Column="0"
                     Margin="20,10,20,10"
                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                    Content="生成"/>
+                    Content="生成" Command="{Binding GenerateDDL}"/>
             <Button Grid.Column="2"
                     Margin="20,10,20,10"
                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                    Content="終了"
-                    Command="{Binding QuitCommand}"/>
+                    Content="終了" Command="{Binding QuitApplication}"/>
         </Grid>
 
         <!-- 4段目：作業ログ出力 -->
         <TextBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
                  Margin="10" Padding="5"
                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                 Text=""
+                 Text="{Binding Log, Mode=OneWay}"
                  VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto"/>
 
     </Grid>

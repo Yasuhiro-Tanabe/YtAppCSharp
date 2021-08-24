@@ -1,7 +1,9 @@
 ﻿using DDLGenerator.Commands;
+using DDLGenerator.Models.Logging;
 
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DDLGenerator.ViewModels
@@ -57,9 +59,43 @@ namespace DDLGenerator.ViewModels
         }
 
         /// <summary>
+        /// 画面出力するログ文言
+        /// </summary>
+        public string Log { get { return LogUtil.Appender?.Notification; } }
+
+        /// <summary>
         /// アプリケーション終了コマンド
         /// </summary>
-        public ICommand QuitCommand { get; private set; } = new QuitCommand();
+        public ICommand QuitApplication { get; private set; } = new QuitCommand();
+        /// <summary>
+        /// DDL生成コマンド
+        /// </summary>
+        public ICommand GenerateDDL { get; private set; } = new GenerateDDLCommand();
+
+        /// <summary>
+        /// 入力となるテーブル定義書ファイル選択ダイアログを開くコマンド
+        /// </summary>
+        public ICommand SelectInputFile { get; private set; } = new SelectTableDefinitionFileCommand();
+
+        /// <summary>
+        /// 出力となるテーブル定義スクリプト選択ダイアログを開くコマンド
+        /// </summary>
+        public ICommand SelectOutputFile { get; private set; } = new SelectOutputFileCommand();
+
+        public MainWindowViewModel()
+        {
+            LogUtil.Appender.PropertyChanged += OnLogRefreshed;
+
+            LogUtil.Debug($"MainWindowViewModel Generated.");
+        }
+
+        public void OnLogRefreshed(object sender, PropertyChangedEventArgs args)
+        {
+            if(args.PropertyName.Equals(nameof(LogUtil.Appender.Notification)))
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Log)));
+            }
+        }
 
     }
 }

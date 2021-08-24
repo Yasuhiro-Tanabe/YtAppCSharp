@@ -12,7 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Logging\" />
+    <None Update="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
