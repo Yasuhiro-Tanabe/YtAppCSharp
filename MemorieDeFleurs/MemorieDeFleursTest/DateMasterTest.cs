@@ -60,8 +60,8 @@ namespace MemorieDeFleursTest
         [TestMethod]
         public void NoDatesInEmptyDb()
         {
-            Assert.AreEqual(-1, EmptyDateMaster.FirstDate);
-            Assert.AreEqual(-1, EmptyDateMaster.LastDate);
+            Assert.AreEqual(DateMaster.InvalidDate, EmptyDateMaster.FirstDate);
+            Assert.AreEqual(DateMaster.InvalidDate, EmptyDateMaster.LastDate);
         }
 
         [TestMethod]
@@ -69,15 +69,14 @@ namespace MemorieDeFleursTest
         {
             var startDate = 20200101;
             var endDate = 20221231;
-            var invalidDate = -1;
 
             TestDateMaster.Fill(startDate, endDate);
             Assert.AreEqual(startDate, TestDateMaster.FirstDate);
             Assert.AreEqual(endDate, TestDateMaster.LastDate);
 
             TestDateMaster.Clear();
-            Assert.AreEqual(invalidDate, TestDateMaster.FirstDate);
-            Assert.AreEqual(invalidDate, TestDateMaster.LastDate);
+            Assert.AreEqual(DateMaster.InvalidDateIndex, TestDateMaster.FirstDate);
+            Assert.AreEqual(DateMaster.InvalidDateIndex, TestDateMaster.LastDate);
         }
 
         [TestMethod]

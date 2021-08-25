@@ -3,15 +3,37 @@ using System.Data.SQLite;
 
 namespace MemorieDeFleurs
 {
+    /// <summary>
+    /// 日付マスタテーブルの操作
+    /// </summary>
     public class DateMaster
     {
+        /// <summary>
+        /// 不正な日付を表す定数値
+        /// </summary>
+        public const int InvalidDate = -1;
+
+        /// <summary>
+        /// 不正な日付インデックスを表す定数値
+        /// </summary>
+        public const int InvalidDateIndex = -1; 
+
         public SQLiteConnection Connection { get; private set; }
 
+        /// <summary>
+        /// コンストラクタ。
+        /// 
+        /// テストでの使い勝手をよくするため、DBとの接続は外部から注入させる。
+        /// </summary>
+        /// <param name="conn">接続先DB</param>
         public DateMaster(SQLiteConnection conn)
         {
             Connection = conn;
         }
 
+        /// <summary>
+        /// 日付マスタに登録されている最も古い日付、日付マスタに何も登録されていないときは InvalidDate を返す。
+        /// </summary>
         public int FirstDate
         {
             get
@@ -34,6 +56,9 @@ namespace MemorieDeFleurs
             }
         }
 
+        /// <summary>
+        /// 日付登録されている最も新しい日付、日付マスタに何も登録されていないときは InvalidDate を返す。
+        /// </summary>
         public int LastDate
         {
             get
@@ -67,6 +92,11 @@ namespace MemorieDeFleurs
             return DateTime.Parse($"{date / 10000:0000}-{(date % 10000) / 100}-{date % 100}");
         }
 
+        /// <summary>
+        /// 日付マスタに start ～ end の日付を登録する
+        /// </summary>
+        /// <param name="start">最も古い日付</param>
+        /// <param name="end">最も新しい日付</param>
         public void Fill(int start, int end)
         {
             if(start <= FirstDate)
@@ -125,6 +155,14 @@ namespace MemorieDeFleurs
             }
         }
 
+        /// <summary>
+        /// 日付として正しいデータかどうかのチェックを行う：日付は整数値なので、20201234や20200230といった
+        /// 日付として正しくないデータを扱えてしまう。本メソッドで、日付としての正しさをチェックする。
+        /// </summary>
+        /// <param name="date">チェック対象日付</param>
+        /// <returns>日付として正しい値は真、正しくない値は偽。
+        /// 20210229 (閏年でない年の閏日)や 21000229 (閏年だが西暦年%400=100，200，300の時は閏日がない) なども、
+        /// 「正しくない日付」として判定する</returns>
         public bool IsValidDate(int date)
         {
             DateTime dt;
@@ -159,6 +197,10 @@ namespace MemorieDeFleurs
 
             }
         }
+
+        /// <summary>
+        /// 日付マスタから全データを削除する
+        /// </summary>
 
         public void Clear()
         {
