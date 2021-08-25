@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31613.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemorieDeFleurs", "MemorieDeFleurs\MemorieDeFleurs.csproj", "{7425C08E-93FA-4C65-9BCB-76B899CBA149}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemorieDeFleursTest", "MemorieDeFleursTest\MemorieDeFleursTest.csproj", "{46F987CC-8705-4609-9860-856142492FE8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7425C08E-93FA-4C65-9BCB-76B899CBA149}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7425C08E-93FA-4C65-9BCB-76B899CBA149}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7425C08E-93FA-4C65-9BCB-76B899CBA149}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7425C08E-93FA-4C65-9BCB-76B899CBA149}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46F987CC-8705-4609-9860-856142492FE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46F987CC-8705-4609-9860-856142492FE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46F987CC-8705-4609-9860-856142492FE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46F987CC-8705-4609-9860-856142492FE8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3D7F2EEC-7E2F-48D6-A21F-7146CDE7C29E}
+	EndGlobalSection
+EndGlobal

@@ -21,3 +21,8 @@
 /DDLGenerator/DDLGeneratorInstaller/Debug
 /DDLGenerator/DDLGeneratorInstaller/Release
 
+/MemorieDeFleurs/.vs/MemorieDeFleurs/v16
+/MemorieDeFleurs/MemorieDeFleurs/bin/Debug/net5.0
+/MemorieDeFleurs/MemorieDeFleurs/obj
+/MemorieDeFleurs/MemorieDeFleursTest/bin/Debug/net5.0
+/MemorieDeFleurs/MemorieDeFleursTest/obj
