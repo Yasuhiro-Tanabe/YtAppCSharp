@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Data.SQLite;
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace MemorieDeFleursTest
 {
@@ -97,6 +98,40 @@ namespace MemorieDeFleursTest
             Assert.IsFalse(EmptyDateMaster.IsValidDate(20231131));
             Assert.IsFalse(EmptyDateMaster.IsValidDate(20210229));// 閏年ではない
             Assert.IsFalse(EmptyDateMaster.IsValidDate(21000229));// 閏年だが閏日がない(400年に3回、西暦年%400=100,200,300の年)
+        }
+
+        [TestMethod]
+        public void NextDayOf20200331Is20200401()
+        {
+            TestDateMaster.Fill(20200101, 20201231);
+
+            Assert.AreEqual(20200401, TestDateMaster.Add(20200331, 1));
+        }
+
+        [TestMethod]
+        public void PreviousDayOf20200401Is20200331()
+        {
+            TestDateMaster.Fill(20200101, 20201231);
+
+            Assert.AreEqual(20200331, TestDateMaster.Add(20200401, -1));
+        }
+
+        public void PreviousDayIsNotRegisteredDateMaster()
+        {
+            var startDate = 20200101;
+            var endDate = 20201231;
+            TestDateMaster.Fill(startDate, endDate);
+
+            Assert.AreEqual(DateMaster.InvalidDate, TestDateMaster.Add(startDate, -1));
+        }
+
+        public void NextDayIsNotRegisteredInDateMaster()
+        {
+            var startDate = 20200101;
+            var endDate = 20201231;
+            TestDateMaster.Fill(startDate, endDate);
+
+            Assert.AreEqual(DateMaster.InvalidDate, TestDateMaster.Add(endDate, 1));
         }
     }
 }

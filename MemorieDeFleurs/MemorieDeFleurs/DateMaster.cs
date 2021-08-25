@@ -169,6 +169,11 @@ namespace MemorieDeFleurs
             return DateTime.TryParse($"{date / 10000:0000}-{(date % 10000) / 100}-{date % 100}", out dt);
         }
 
+        public int Add(int date, int shift)
+        {
+            return IndexToDate(DateToIndex(date) + shift);
+        }
+
         private int DateToIndex(int date)
         {
             if(date < FirstDate || LastDate < date)
@@ -194,7 +199,30 @@ namespace MemorieDeFleurs
                         return -1;
                     }
                 }
+            }
+        }
 
+        private int IndexToDate(int index)
+        {
+            if(index < 0) 
+            {
+                throw new IndexOutOfRangeException($"不正な日付インデックスです：{index}");
+            }
+
+            using (var cmd = Connection.CreateCommand())
+            {
+                cmd.CommandText = $"select DATE from DATE_MASTER where DATE_INDEX={index}";
+                using (var result = cmd.ExecuteReader())
+                {
+                    if (result.HasRows && result.Read() && !result.IsDBNull(0))
+                    {
+                        return result.GetInt32(0);
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                }
             }
         }
 
