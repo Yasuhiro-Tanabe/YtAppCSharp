@@ -118,7 +118,7 @@ namespace MemorieDeFleurs
                 }
                 transaction.Commit();
             }
-            catch(Exception ex)
+            catch(Exception)
             {
                 transaction.Rollback();
                 throw;
