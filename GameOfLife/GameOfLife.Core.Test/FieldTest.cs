@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
+using System.Linq;
 
 namespace GameOfLife.Core.Test
 {
@@ -41,10 +42,10 @@ namespace GameOfLife.Core.Test
             var height = 10u;
             var field = new Field(width, height);
 
-            var x = 0u;
-            var y = 0u;
+            var allX = Enumerable.Range(0, (int)width).Select(x => (uint)x);
+            var allY = Enumerable.Range(0, (int)height).Select(x => (uint)x);
 
-            Assert.IsFalse(field[x, y]);
+            Assert.IsTrue(allX.All(x => allY.All(y => !field[x,y])));
         }
     }
 }
