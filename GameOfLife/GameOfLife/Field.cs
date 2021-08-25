@@ -2,8 +2,16 @@
 
 namespace GameOfLife.Core
 {
+    /// <summary>
+    /// ライフゲームのフィールド
+    /// </summary>
     public class Field
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="width">幅(セル数)</param>
+        /// <param name="height">高さ(セル数)</param>
         public Field(UInt32 width, UInt32 height)
         {
             if(width == 0) { throw new ArgumentOutOfRangeException(nameof(width), $"Invalid value: {width}"); }
@@ -12,9 +20,22 @@ namespace GameOfLife.Core
             Height = height;
         }
 
+        /// <summary>
+        /// 幅(セル数)
+        /// </summary>
         public UInt32 Width { get; private set; }
+
+        /// <summary>
+        /// 高さ(セル数)
+        /// </summary>
         public UInt32 Height { get; private set; }
 
+        /// <summary>
+        /// インデクサ
+        /// </summary>
+        /// <param name="x">幅方向のセル番号</param>
+        /// <param name="y">高さ方向のセル番号</param>
+        /// <returns>セルの状態：生きているとき真、死んでいるとき偽</returns>
         public bool this[UInt32 x, UInt32 y] { get { return false; } }
     }
 }
