@@ -6,8 +6,9 @@ namespace GameOfLife.Core.Test
     public class FieldTest
     {
         [TestMethod]
-        public void TestMethod1()
+        public void FieldIsCreatableWithFieldSize()
         {
+            var field = new Field(10, 10);
         }
     }
 }
