@@ -10,8 +10,8 @@ namespace GameOfLife.Core.Test
         [TestMethod]
         public void FieldIsCreatableWithFieldSize()
         {
-            var width = 10;
-            var height = 12;
+            var width = 10u;
+            var height = 12u;
             var field = new Field(width, height);
 
             Assert.AreEqual(width, field.Width);
@@ -21,32 +21,16 @@ namespace GameOfLife.Core.Test
         [TestMethod,ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void FieldCannotCreateWhenWidthIsZero()
         {
-            var width = 0;
-            var height = 10;
-            var field = new Field(width, height);
-        }
-
-        [TestMethod,ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void FieldCannotCreateWhenWidthIsMinusValue()
-        {
-            var width = -10;
-            var height = 10;
+            var width = 0u;
+            var height = 10u;
             var field = new Field(width, height);
         }
 
         [TestMethod, ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void FieldCannotCreateWhenHeightIsZero()
         {
-            var width = 10;
-            var height = 0;
-            var field = new Field(width, height);
-        }
-
-        [TestMethod, ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void FieldCannotCreateWhenHeightIsMinusValue()
-        {
-            var width = 10;
-            var height = -12;
+            var width = 10u;
+            var height = 0u;
             var field = new Field(width, height);
         }
     }

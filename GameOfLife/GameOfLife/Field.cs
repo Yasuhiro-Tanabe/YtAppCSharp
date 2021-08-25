@@ -4,15 +4,15 @@ namespace GameOfLife.Core
 {
     public class Field
     {
-        public Field(int width, int height)
+        public Field(UInt32 width, UInt32 height)
         {
-            if(width <= 0) { throw new ArgumentOutOfRangeException(nameof(width), $"Invalid value: {width}"); }
-            if(height <= 0) { throw new ArgumentOutOfRangeException(nameof(height), $"Invalid value: {height}"); }
+            if(width == 0) { throw new ArgumentOutOfRangeException(nameof(width), $"Invalid value: {width}"); }
+            if(height == 0) { throw new ArgumentOutOfRangeException(nameof(height), $"Invalid value: {height}"); }
             Width = width;
             Height = height;
         }
 
-        public int Width { get; private set; }
-        public int Height { get; private set; }
+        public UInt32 Width { get; private set; }
+        public UInt32 Height { get; private set; }
     }
 }
