@@ -33,5 +33,18 @@ namespace GameOfLife.Core.Test
             var height = 0u;
             var field = new Field(width, height);
         }
+
+        [TestMethod]
+        public void AllCellsAreDeadInInitialField()
+        {
+            var width = 10u;
+            var height = 10u;
+            var field = new Field(width, height);
+
+            var x = 0u;
+            var y = 0u;
+
+            Assert.IsFalse(field[x, y]);
+        }
     }
 }

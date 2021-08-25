@@ -14,5 +14,7 @@ namespace GameOfLife.Core
 
         public UInt32 Width { get; private set; }
         public UInt32 Height { get; private set; }
+
+        public bool this[UInt32 x, UInt32 y] { get { return false; } }
     }
 }
