@@ -50,6 +50,7 @@ namespace MemorieDeFleursTest
         [TestCleanup]
         public void TearDown()
         {
+            TestSequence.Clear();
             TestDB.Close();
         }
 
@@ -62,6 +63,7 @@ namespace MemorieDeFleursTest
         [TestMethod]
         public void GetSeqCostomersNextValue()
         {
+            var tmp = TestSequence.SEQ_CUSTOMERS.Next;
             Assert.AreEqual(2, TestSequence.SEQ_CUSTOMERS.Next);
         }
 
@@ -74,6 +76,7 @@ namespace MemorieDeFleursTest
         [TestMethod]
         public void GetSeqShippingNextValue()
         {
+            var tmp = TestSequence.SEQ_SHIPPING.Next;
             Assert.AreEqual(2, TestSequence.SEQ_SHIPPING.Next);
         }
     }

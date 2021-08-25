@@ -146,5 +146,14 @@ namespace MemorieDeFleurs
             }
         }
 
+
+        public void Clear()
+        {
+            using (var cmd = Connection.CreateCommand())
+            {
+                cmd.CommandText = "delete from SEQUENCES";
+                cmd.ExecuteNonQuery();
+            }
+        }
     }
 }
