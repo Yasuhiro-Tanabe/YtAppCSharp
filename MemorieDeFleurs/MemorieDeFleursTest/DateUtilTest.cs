@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 namespace MemorieDeFleursTest
 {
     [TestClass]
-    public class DateMasterTest
+    public class DateUtilTest
     {
         private static string TestDBFile = "./testdata/db/MemorieDeFleurs.db";
         private static string EmptyDBFile = "./testdata/db/MemorieDeFleursEmpty.db";
@@ -18,15 +18,15 @@ namespace MemorieDeFleursTest
         private SQLiteConnection TestDB { get; set; }
         private SQLiteConnection EmptyDB { get; set; }
 
-        private DateMaster TestDateMaster { get; set; }
-        private DateMaster EmptyDateMaster { get; set; }
+        private DateUtil TestDateMaster { get; set; }
+        private DateUtil EmptyDateMaster { get; set; }
 
-        public DateMasterTest()
+        public DateUtilTest()
         {
             TestDB = CreateDBConnection(TestDBFile);
             EmptyDB = CreateDBConnection(EmptyDBFile);
-            TestDateMaster = new DateMaster(TestDB);
-            EmptyDateMaster = new DateMaster(EmptyDB);
+            TestDateMaster = new DateUtil(TestDB);
+            EmptyDateMaster = new DateUtil(EmptyDB);
         }
 
         private SQLiteConnection CreateDBConnection(string dbFileName)
@@ -61,8 +61,8 @@ namespace MemorieDeFleursTest
         [TestMethod]
         public void NoDatesInEmptyDb()
         {
-            Assert.AreEqual(DateMaster.InvalidDate, EmptyDateMaster.FirstDate);
-            Assert.AreEqual(DateMaster.InvalidDate, EmptyDateMaster.LastDate);
+            Assert.AreEqual(DateUtil.InvalidDate, EmptyDateMaster.FirstDate);
+            Assert.AreEqual(DateUtil.InvalidDate, EmptyDateMaster.LastDate);
         }
 
         [TestMethod]
@@ -76,8 +76,8 @@ namespace MemorieDeFleursTest
             Assert.AreEqual(endDate, TestDateMaster.LastDate);
 
             TestDateMaster.Clear();
-            Assert.AreEqual(DateMaster.InvalidDateIndex, TestDateMaster.FirstDate);
-            Assert.AreEqual(DateMaster.InvalidDateIndex, TestDateMaster.LastDate);
+            Assert.AreEqual(DateUtil.InvalidDateIndex, TestDateMaster.FirstDate);
+            Assert.AreEqual(DateUtil.InvalidDateIndex, TestDateMaster.LastDate);
         }
 
         [TestMethod]
@@ -122,7 +122,7 @@ namespace MemorieDeFleursTest
             var endDate = 20201231;
             TestDateMaster.Fill(startDate, endDate);
 
-            Assert.AreEqual(DateMaster.InvalidDate, TestDateMaster.Add(startDate, -1));
+            Assert.AreEqual(DateUtil.InvalidDate, TestDateMaster.Add(startDate, -1));
         }
 
         public void NextDayIsNotRegisteredInDateMaster()
@@ -131,7 +131,7 @@ namespace MemorieDeFleursTest
             var endDate = 20201231;
             TestDateMaster.Fill(startDate, endDate);
 
-            Assert.AreEqual(DateMaster.InvalidDate, TestDateMaster.Add(endDate, 1));
+            Assert.AreEqual(DateUtil.InvalidDate, TestDateMaster.Add(endDate, 1));
         }
     }
 }

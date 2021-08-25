@@ -6,7 +6,7 @@ namespace MemorieDeFleurs
     /// <summary>
     /// 日付マスタテーブルの操作
     /// </summary>
-    public class DateMaster
+    public class DateUtil
     {
         /// <summary>
         /// 不正な日付を表す定数値
@@ -26,7 +26,7 @@ namespace MemorieDeFleurs
         /// テストでの使い勝手をよくするため、DBとの接続は外部から注入させる。
         /// </summary>
         /// <param name="conn">接続先DB</param>
-        public DateMaster(SQLiteConnection conn)
+        public DateUtil(SQLiteConnection conn)
         {
             Connection = conn;
         }
