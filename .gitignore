@@ -7,13 +7,14 @@
 /BookManager/YtBookManagerCore/.vs
 /.vs
 
-/BookManager/.vs/YtBookManagerCore
+/BookManager/.vs
 /SimpleDigitalClock/.vs/SimpleDigitalClock
-/SimpleDigitalClock/SimpleDigitalClock/SimpleDigitalClock/bin/Debug/netcoreapp3.1
+/SimpleDigitalClock/SimpleDigitalClock/SimpleDigitalClock/bin
 /SimpleDigitalClock/SimpleDigitalClock/SimpleDigitalClock/obj
 /SimpleDigitalClock/SimpleDigitalClockInstaller/Debug
+/SimpleDigitalClock/SimpleDigitalClockInstaller/Release
 /SimpleDigitalClock/SimpleDigitalClock/obj
-/SimpleDigitalClock/SimpleDigitalClock/bin/Debug/netcoreapp3.1
+/SimpleDigitalClock/SimpleDigitalClock/bin
 /DDLGenerator/.vs
 /DDLGenerator/DDLGenerator/bin
 /DDLGenerator/DDLGenerator/obj
@@ -21,8 +22,15 @@
 /DDLGenerator/DDLGeneratorInstaller/Debug
 /DDLGenerator/DDLGeneratorInstaller/Release
 
-/MemorieDeFleurs/.vs/MemorieDeFleurs/v16
-/MemorieDeFleurs/MemorieDeFleurs/bin/Debug/net5.0
+/MemorieDeFleurs/.vs
+/MemorieDeFleurs/MemorieDeFleurs/bin
 /MemorieDeFleurs/MemorieDeFleurs/obj
-/MemorieDeFleurs/MemorieDeFleursTest/bin/Debug/net5.0
+/MemorieDeFleurs/MemorieDeFleursTest/bin
 /MemorieDeFleurs/MemorieDeFleursTest/obj
+/GameOfLife/.vs
+/GameOfLife/GameOfLife/bin
+/GameOfLife/GameOfLife/obj
+/GameOfLife/GameOfLife.Core.Test/bin
+/GameOfLife/GameOfLife.Core.Test/obj
+/GameOfLife/GameOfLife.UI/bin
+/GameOfLife/GameOfLife.UI/obj
