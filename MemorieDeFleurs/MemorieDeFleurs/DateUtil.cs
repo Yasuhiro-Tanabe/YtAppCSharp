@@ -1,5 +1,6 @@
-﻿using System;
-using System.Data.SQLite;
+﻿using Microsoft.Data.Sqlite;
+
+using System;
 
 namespace MemorieDeFleurs
 {
@@ -8,6 +9,16 @@ namespace MemorieDeFleurs
     /// </summary>
     public class DateUtil
     {
+        private const string Date = "@date";
+        private const string Index = "@index";
+        private const string InsertDateSQL = "insert into DATE_MASTER values ( @date, @index )";
+        private const string FindDateSQL = "select DATE from DATE_MASTER where DATE_INDEX=@index";
+        private const string FindDateIndexSQL = "select DATE_INDEX from DATE_MASTER where DATE=@date";
+
+        private SqliteCommand InsertDateCommand { get; set; }
+        private SqliteCommand FindDateCommand { get; set; }
+        private SqliteCommand FindDateIndexCommand { get; set; }
+
         /// <summary>
         /// 不正な日付を表す定数値
         /// </summary>
@@ -18,7 +29,7 @@ namespace MemorieDeFleurs
         /// </summary>
         public const int InvalidDateIndex = -1; 
 
-        public SQLiteConnection Connection { get; private set; }
+        public SqliteConnection Connection { get; private set; }
 
         /// <summary>
         /// コンストラクタ。
@@ -26,9 +37,22 @@ namespace MemorieDeFleurs
         /// テストでの使い勝手をよくするため、DBとの接続は外部から注入させる。
         /// </summary>
         /// <param name="conn">接続先DB</param>
-        public DateUtil(SQLiteConnection conn)
+        public DateUtil(SqliteConnection conn)
         {
             Connection = conn;
+
+            InsertDateCommand = Connection.CreateCommand();
+            InsertDateCommand.CommandText = InsertDateSQL;
+            InsertDateCommand.Parameters.Add(Date, SqliteType.Integer);
+            InsertDateCommand.Parameters.Add(Index, SqliteType.Integer);
+
+            FindDateCommand = Connection.CreateCommand();
+            FindDateCommand.CommandText = FindDateSQL;
+            FindDateCommand.Parameters.Add(Index, SqliteType.Integer);
+
+            FindDateIndexCommand = Connection.CreateCommand();
+            FindDateIndexCommand.CommandText = FindDateIndexSQL;
+            FindDateIndexCommand.Parameters.Add(Date, SqliteType.Integer);
         }
 
         /// <summary>
@@ -133,18 +157,18 @@ namespace MemorieDeFleurs
 
             try
             {
-                using(var cmd = Connection.CreateCommand())
-                {
-                    cmd.Transaction = transaction;
-                    cmd.CommandText = "insert into DATE_MASTER values ( @date, @index )";
 
-                    var index = LastDate < 0 ? 0 : DateToIndex(LastDate) + 1;
-                    for (var d = startDate; d <= endDate; d = d.AddDays(1), index++)
-                    {
-                        cmd.Parameters.AddWithValue("@date", DateTimeToDate(d));
-                        cmd.Parameters.AddWithValue("@index", index);
-                        cmd.ExecuteNonQuery();
-                    }
+                InsertDateCommand.Transaction = transaction;
+
+                var index = LastDate < 0 ? 0 : DateToIndex(LastDate) + 1;
+                for (var d = startDate; d <= endDate; d = d.AddDays(1), index++)
+                {
+                    InsertDateCommand.Parameters[Date].Value = DateTimeToDate(d);
+                    InsertDateCommand.Parameters[Index].Value = index;
+                    InsertDateCommand.ExecuteNonQuery();
+                }
+                using (var cmd = Connection.CreateCommand())
+                {
                 }
                 transaction.Commit();
             }
@@ -185,19 +209,17 @@ namespace MemorieDeFleurs
                 throw new IndexOutOfRangeException($"不正な日付です：{date}");
             }
 
-            using (var cmd = Connection.CreateCommand())
+            FindDateIndexCommand.Parameters[Date].Value = date;
+
+            using (var result = FindDateIndexCommand.ExecuteReader())
             {
-                cmd.CommandText = $"select DATE_INDEX from DATE_MASTER where DATE={date}";
-                using (var result = cmd.ExecuteReader())
+                if (result.HasRows && result.Read() && !result.IsDBNull(0))
                 {
-                    if (result.HasRows && result.Read() && !result.IsDBNull(0))
-                    {
-                        return result.GetInt32(0);
-                    }
-                    else
-                    {
-                        return -1;
-                    }
+                    return result.GetInt32(0);
+                }
+                else
+                {
+                    return -1;
                 }
             }
         }
@@ -209,19 +231,16 @@ namespace MemorieDeFleurs
                 throw new IndexOutOfRangeException($"不正な日付インデックスです：{index}");
             }
 
-            using (var cmd = Connection.CreateCommand())
+            FindDateCommand.Parameters[Index].Value = index;
+            using (var result = FindDateCommand.ExecuteReader())
             {
-                cmd.CommandText = $"select DATE from DATE_MASTER where DATE_INDEX={index}";
-                using (var result = cmd.ExecuteReader())
+                if (result.HasRows && result.Read() && !result.IsDBNull(0))
                 {
-                    if (result.HasRows && result.Read() && !result.IsDBNull(0))
-                    {
-                        return result.GetInt32(0);
-                    }
-                    else
-                    {
-                        return -1;
-                    }
+                    return result.GetInt32(0);
+                }
+                else
+                {
+                    return -1;
                 }
             }
         }

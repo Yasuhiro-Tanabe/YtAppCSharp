@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using Microsoft.Data.Sqlite;
+
+using System;
 
 namespace MemorieDeFleurs
 {
@@ -20,11 +15,11 @@ namespace MemorieDeFleurs
         private const string Value = "@value";
         private const string Name = "@name";
 
-        private SQLiteCommand GetStatement;
-        private SQLiteCommand SetStatement;
-        private SQLiteCommand CreateStatement;
+        private SqliteCommand GetStatement;
+        private SqliteCommand SetStatement;
+        private SqliteCommand CreateStatement;
 
-        private SQLiteConnection Connection { get; set; }
+        private SqliteConnection Connection { get; set; }
 
         public class SequenceValue
         {
@@ -78,23 +73,23 @@ namespace MemorieDeFleurs
         /// テストでの使い勝手をよくするため、DBとの接続は外部から注入させる。
         /// </summary>
         /// <param name="conn">接続先DB</param>
-        public SequenceUtil(SQLiteConnection conn)
+        public SequenceUtil(SqliteConnection conn)
         {
             Connection = conn;
 
             GetStatement = conn.CreateCommand();
             GetStatement.CommandText = GetSQL;
-            GetStatement.Parameters.AddWithValue(Name, ""); ;
+            GetStatement.Parameters.Add(Name, SqliteType.Text);
 
             SetStatement = conn.CreateCommand();
             SetStatement.CommandText = SetSQL;
-            SetStatement.Parameters.Add(Name, DbType.String);
-            SetStatement.Parameters.Add(Value, DbType.Int32);
+            SetStatement.Parameters.Add(Name, SqliteType.Text);
+            SetStatement.Parameters.Add(Value, SqliteType.Integer);
 
             CreateStatement = conn.CreateCommand();
             CreateStatement.CommandText = CreateSQL;
-            CreateStatement.Parameters.Add(Name, DbType.String);
-            CreateStatement.Parameters.Add(Value, DbType.Int32);
+            CreateStatement.Parameters.Add(Name, SqliteType.Text);
+            CreateStatement.Parameters.Add(Value, SqliteType.Integer);
 
             SEQ_CUSTOMERS = new SequenceValue("SEQ_CUSTOMERS", this);
             SEQ_SHIPPING = new SequenceValue("SEQ_SHIPPING", this);

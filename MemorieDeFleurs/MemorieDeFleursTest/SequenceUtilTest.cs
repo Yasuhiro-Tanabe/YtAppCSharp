@@ -1,13 +1,7 @@
 ﻿using MemorieDeFleurs;
 
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System;
-using System.Collections.Generic;
-using System.Data.SQLite;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MemorieDeFleursTest
 {
@@ -16,7 +10,7 @@ namespace MemorieDeFleursTest
     {
         private static string TestDBFile = "./testdata/db/MemorieDeFleurs.db";
 
-        private SQLiteConnection TestDB { get; set; }
+        private SqliteConnection TestDB { get; set; }
 
         private SequenceUtil TestSequence { get; set; }
 
@@ -27,18 +21,16 @@ namespace MemorieDeFleursTest
             TestSequence = new SequenceUtil(TestDB);
         }
 
-        private SQLiteConnection CreateDBConnection(string dbFileName)
+        private SqliteConnection CreateDBConnection(string dbFileName)
         {
-            var builder = new SQLiteConnectionStringBuilder();
+            var builder = new SqliteConnectionStringBuilder();
 
-            builder.SetDefaults = true;
             builder.DataSource = dbFileName;
             builder.ForeignKeys = true;
-            builder.ReadOnly = false;
-            builder.SyncMode = SynchronizationModes.Normal;
+            builder.Mode = SqliteOpenMode.ReadWrite;
 
             LogUtil.Debug($"CreateConnection({dbFileName})=>DataSource={builder.ToString()}");
-            return new SQLiteConnection(builder.ToString());
+            return new SqliteConnection(builder.ToString());
         }
 
         [TestInitialize]
