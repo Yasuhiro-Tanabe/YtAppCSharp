@@ -14,30 +14,28 @@ using System.Threading.Tasks;
 namespace MemorieDeFleursTest
 {
     [TestClass]
-    public class EFStockActionTest
+    public class EFStockActionTest : MemorieDeFleursTestBase
     {
-        private static string TestDBFile = "./testdata/db/MemorieDeFleurs.db";
-
-        private SqliteConnection TestDB { get; set; }
-
         private MemorieDeFleursDbContext DbContext { get; set; }
-
-        public EFStockActionTest()
-        {
-            TestDB = CreateDBConnection(TestDBFile);
-        }
 
         private static string CodeKey = "@code";
         private static string NameKey = "@name";
         private static string ExpectedCode = "BA001";
         private static string ExpectedName = "薔薇(赤)";
 
-        [TestInitialize]
-        public void Setup()
+
+        public EFStockActionTest() : base()
+        {
+            AfterTestBaseInitializing += AppendBouquetParts;
+            BeforeTestBaseCleaningUp += CleanupTestData;
+            
+        }
+
+        private void AppendBouquetParts(object sender, EventArgs unused)
         {
             // DbContext を継承したクラスのコンストラクタを適宜用意することで、
             // 接続文字列や DbConnection を DbContext に渡すことができる。
-            TestDB.Open();
+            DbContext = new MemorieDeFleursDbContext(TestDB);
 
             using (var cmd = TestDB.CreateCommand())
             {
@@ -46,30 +44,15 @@ namespace MemorieDeFleursTest
                 cmd.Parameters.AddWithValue(NameKey, ExpectedName);
                 cmd.ExecuteNonQuery();
             }
-
-            DbContext = new MemorieDeFleursDbContext(TestDB);
         }
 
-        [TestCleanup]
-        public void TearDown()
+        private void CleanupTestData(object sender, EventArgs unused)
         {
             // テーブル全削除はORマッピングフレームワークが持つ「DBを隠蔽する」意図にそぐわないため
             // DbContext.Customers.Clear() のような操作は用意されていない。
             // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
             DbContext.Database.ExecuteSqlRaw("delete from STOCK_ACTIONS");
             DbContext.Dispose();
-            TestDB.Close();
-        }
-
-        private SqliteConnection CreateDBConnection(string dbFileName)
-        {
-            var builder = new SqliteConnectionStringBuilder();
-
-            builder.DataSource = dbFileName;
-            builder.ForeignKeys = true;
-            builder.Mode = SqliteOpenMode.ReadWrite;
-
-            return new SqliteConnection(builder.ToString());
         }
 
         [TestMethod]

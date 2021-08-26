@@ -3,54 +3,27 @@ using MemorieDeFleurs;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Data.Sqlite;
+using System;
 
 namespace MemorieDeFleursTest
 {
     [TestClass]
-    public class DateUtilTest
+    public class DateUtilTest : MemorieDeFleursTestBase
     {
-        private static string TestDBFile = "./testdata/db/MemorieDeFleurs.db";
-        private static string EmptyDBFile = "./testdata/db/MemorieDeFleursEmpty.db";
-
-        private SqliteConnection TestDB { get; set; }
-        private SqliteConnection EmptyDB { get; set; }
-
         private DateUtil TestDateMaster { get; set; }
         private DateUtil EmptyDateMaster { get; set; }
 
-        public DateUtilTest()
+        public DateUtilTest() : base()
         {
-            TestDB = CreateDBConnection(TestDBFile);
-            EmptyDB = CreateDBConnection(EmptyDBFile);
             TestDateMaster = new DateUtil(TestDB);
             EmptyDateMaster = new DateUtil(EmptyDB);
+
+            AfterTestBaseInitializing += CleanupDateMaster;
         }
 
-        private SqliteConnection CreateDBConnection(string dbFileName)
-        {
-            var builder = new SqliteConnectionStringBuilder();
-
-            builder.DataSource = dbFileName;
-            builder.ForeignKeys = true;
-            builder.Mode = SqliteOpenMode.ReadWrite;
-
-            LogUtil.Debug($"CreateConnection({dbFileName})=>DataSource={builder.ToString()}");
-            return new SqliteConnection(builder.ToString());
-        }
-
-        [TestInitialize]
-        public void Setup()
-        {
-            TestDB.Open();
-            EmptyDB.Open();
-        }
-
-        [TestCleanup]
-        public void TearDown()
+        public void CleanupDateMaster(object sender, EventArgs unused)
         {
             TestDateMaster.Clear();
-            TestDB.Close();
-            EmptyDB.Close();
         }
 
         [TestMethod]

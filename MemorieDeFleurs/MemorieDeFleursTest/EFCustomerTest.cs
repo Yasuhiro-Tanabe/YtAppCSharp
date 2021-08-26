@@ -15,48 +15,30 @@ namespace MemorieDeFleursTest
     /// DbContext を直接使って CUSTOMERS テーブルを操作するテスト
     /// </summary>
     [TestClass]
-    public class EFCustomerTest
+    public class EFCustomerTest : MemorieDeFleursTestBase
     {
-        private static string TestDBFile = "./testdata/db/MemorieDeFleurs.db";
+        private MemorieDeFleursDbContext TestDBContext { get; set; }
 
-        private SqliteConnection TestDB { get; set; }
-
-        private MemorieDeFleursDbContext DbContext { get; set; }
-
-        public EFCustomerTest()
+        public EFCustomerTest() : base()
         {
-            TestDB = CreateDBConnection(TestDBFile);
+            AfterTestBaseInitializing += SetupDBContext;
+            BeforeTestBaseCleaningUp += CleanupDatabase;
         }
 
-        [TestInitialize]
-        public void Setup()
+        private void SetupDBContext(object sender, EventArgs unused)
         {
             // DbContext を継承したクラスのコンストラクタを適宜用意することで、
             // 接続文字列や DbConnection を DbContext に渡すことができる。
-            TestDB.Open();
-            DbContext = new MemorieDeFleursDbContext(TestDB);
+            TestDBContext = new MemorieDeFleursDbContext(TestDB);
         }
 
-        [TestCleanup]
-        public void TearDown()
+        private void CleanupDatabase(object sender, EventArgs unused)
         {
             // テーブル全削除はORマッピングフレームワークが持つ「DBを隠蔽する」意図にそぐわないため
             // DbContext.Customers.Clear() のような操作は用意されていない。
             // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
-            DbContext.Database.ExecuteSqlRaw("delete from CUSTOMERS");
-            DbContext.Dispose();
-            TestDB.Close();
-        }
-
-        private SqliteConnection CreateDBConnection(string dbFileName)
-        {
-            var builder = new SqliteConnectionStringBuilder();
-
-            builder.DataSource = dbFileName;
-            builder.ForeignKeys = true;
-            builder.Mode = SqliteOpenMode.ReadWrite;
-
-            return new SqliteConnection(builder.ToString());
+            TestDBContext.Database.ExecuteSqlRaw("delete from CUSTOMERS");
+            TestDBContext.Dispose();
         }
 
         [TestMethod]
@@ -72,8 +54,8 @@ namespace MemorieDeFleursTest
             };
 
             // Add/Remove したら SaveChanges を忘れないこと
-            DbContext.Customers.Add(customer);
-            DbContext.SaveChanges();
+            TestDBContext.Customers.Add(customer);
+            TestDBContext.SaveChanges();
         }
 
         [TestMethod, ExpectedException(typeof(DbUpdateException))]
@@ -90,8 +72,8 @@ namespace MemorieDeFleursTest
 
             // NOT NULL や PRIMARY KEY などの制約違反が発生するのは
             // Add ではなく SaveChanges のタイミング
-            DbContext.Customers.Add(customer);
-            DbContext.SaveChanges();
+            TestDBContext.Customers.Add(customer);
+            TestDBContext.SaveChanges();
         }
 
         [TestMethod]
@@ -122,10 +104,10 @@ namespace MemorieDeFleursTest
                 STATUS = 0
             };
 
-            DbContext.Customers.Add(customer1);
-            DbContext.Customers.Add(customer2);
-            DbContext.Customers.Add(customer3);
-            DbContext.SaveChanges();
+            TestDBContext.Customers.Add(customer1);
+            TestDBContext.Customers.Add(customer2);
+            TestDBContext.Customers.Add(customer3);
+            TestDBContext.SaveChanges();
         }
 
         [TestMethod,ExpectedException(typeof(InvalidOperationException))]
@@ -148,9 +130,9 @@ namespace MemorieDeFleursTest
                 STATUS = 0
             };
 
-            DbContext.Customers.Add(customer1);
-            DbContext.Customers.Add(customer2);
-            DbContext.SaveChanges();
+            TestDBContext.Customers.Add(customer1);
+            TestDBContext.Customers.Add(customer2);
+            TestDBContext.SaveChanges();
         }
     }
 }

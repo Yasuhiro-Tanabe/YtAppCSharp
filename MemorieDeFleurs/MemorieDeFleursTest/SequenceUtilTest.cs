@@ -3,47 +3,27 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using System;
+
 namespace MemorieDeFleursTest
 {
     [TestClass]
-    public class SequenceUtilTest
+    public class SequenceUtilTest : MemorieDeFleursTestBase
     {
-        private static string TestDBFile = "./testdata/db/MemorieDeFleurs.db";
-
-        private SqliteConnection TestDB { get; set; }
-
         private SequenceUtil TestSequence { get; set; }
 
 
-        public SequenceUtilTest()
+        public SequenceUtilTest() : base()
         {
-            TestDB = CreateDBConnection(TestDBFile);
             TestSequence = new SequenceUtil(TestDB);
+
+            BeforeTestBaseCleaningUp += ClearTestSequence;
         }
 
-        private SqliteConnection CreateDBConnection(string dbFileName)
-        {
-            var builder = new SqliteConnectionStringBuilder();
-
-            builder.DataSource = dbFileName;
-            builder.ForeignKeys = true;
-            builder.Mode = SqliteOpenMode.ReadWrite;
-
-            LogUtil.Debug($"CreateConnection({dbFileName})=>DataSource={builder.ToString()}");
-            return new SqliteConnection(builder.ToString());
-        }
-
-        [TestInitialize]
-        public void SetUp()
-        {
-            TestDB.Open();
-        }
-
-        [TestCleanup]
-        public void TearDown()
+        private void ClearTestSequence(object sender, EventArgs unused)
         {
             TestSequence.Clear();
-            TestDB.Close();
+
         }
 
         [TestMethod]
