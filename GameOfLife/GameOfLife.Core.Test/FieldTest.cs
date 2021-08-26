@@ -47,5 +47,33 @@ namespace GameOfLife.Core.Test
 
             Assert.IsTrue(allX.All(x => allY.All(y => !field[x,y])));
         }
+
+        [TestMethod]
+        public void OneCellChangesAliveButOthersAreNotAlive()
+        {
+            var width = 10u;
+            var height = 10u;
+            var x1 = 0u;
+            var y1 = 0u;
+            var field = new Field(width, height);
+
+            field[x1, y1] = true;
+
+            foreach (var x in Enumerable.Range(0, (int)width).Select(x => (UInt32)x))
+            {
+                foreach (var y in Enumerable.Range(0, (int)height).Select(y => (UInt32)y))
+                {
+                    if (x == x1 && y == y1)
+                    {
+                        Assert.IsTrue(field[x, y], $"field[{x},{y}] expected true but false.");
+                    }
+                    else
+                    {
+                        Assert.IsFalse(field[x, y], $"field[{x},{y}] expected false but true.");
+                    }
+                }
+
+            }
+        }
     }
 }
