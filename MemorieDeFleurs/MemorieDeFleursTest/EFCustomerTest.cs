@@ -15,21 +15,11 @@ namespace MemorieDeFleursTest
     /// DbContext を直接使って CUSTOMERS テーブルを操作するテスト
     /// </summary>
     [TestClass]
-    public class EFCustomerTest : MemorieDeFleursTestBase
+    public class EFCustomerTest : MemorieDeFleursDbContextTestBase
     {
-        private MemorieDeFleursDbContext TestDBContext { get; set; }
-
         public EFCustomerTest() : base()
         {
-            AfterTestBaseInitializing += SetupDBContext;
             BeforeTestBaseCleaningUp += CleanupDatabase;
-        }
-
-        private void SetupDBContext(object sender, EventArgs unused)
-        {
-            // DbContext を継承したクラスのコンストラクタを適宜用意することで、
-            // 接続文字列や DbConnection を DbContext に渡すことができる。
-            TestDBContext = new MemorieDeFleursDbContext(TestDB);
         }
 
         private void CleanupDatabase(object sender, EventArgs unused)
@@ -38,7 +28,6 @@ namespace MemorieDeFleursTest
             // DbContext.Customers.Clear() のような操作は用意されていない。
             // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
             TestDBContext.Database.ExecuteSqlRaw("delete from CUSTOMERS");
-            TestDBContext.Dispose();
         }
 
         [TestMethod]

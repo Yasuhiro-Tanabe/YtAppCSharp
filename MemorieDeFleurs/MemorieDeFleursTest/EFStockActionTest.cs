@@ -14,10 +14,8 @@ using System.Threading.Tasks;
 namespace MemorieDeFleursTest
 {
     [TestClass]
-    public class EFStockActionTest : MemorieDeFleursTestBase
+    public class EFStockActionTest : MemorieDeFleursDbContextTestBase
     {
-        private MemorieDeFleursDbContext DbContext { get; set; }
-
         private static string CodeKey = "@code";
         private static string NameKey = "@name";
         private static string ExpectedCode = "BA001";
@@ -33,10 +31,8 @@ namespace MemorieDeFleursTest
 
         private void AppendBouquetParts(object sender, EventArgs unused)
         {
-            // DbContext を継承したクラスのコンストラクタを適宜用意することで、
-            // 接続文字列や DbConnection を DbContext に渡すことができる。
-            DbContext = new MemorieDeFleursDbContext(TestDB);
-
+            LogUtil.Debug($"EFStockActionTest#AppendBouquetParts() is called.");
+            // Entity 未作成の単品情報は、SQLを使って直接登録する
             using (var cmd = TestDB.CreateCommand())
             {
                 cmd.CommandText = $"insert into BOUQUET_PARTS values ( {CodeKey}, {NameKey}, 1, 100, 3, 0 )";
@@ -48,11 +44,11 @@ namespace MemorieDeFleursTest
 
         private void CleanupTestData(object sender, EventArgs unused)
         {
+            LogUtil.Debug($"EFStockActionTest#CleanupTestData() is called.");
             // テーブル全削除はORマッピングフレームワークが持つ「DBを隠蔽する」意図にそぐわないため
             // DbContext.Customers.Clear() のような操作は用意されていない。
             // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
-            DbContext.Database.ExecuteSqlRaw("delete from STOCK_ACTIONS");
-            DbContext.Dispose();
+            TestDBContext.Database.ExecuteSqlRaw("delete from STOCK_ACTIONS");
         }
 
         [TestMethod]
@@ -71,12 +67,12 @@ namespace MemorieDeFleursTest
                 REMAIN = 200
             };
 
-            DbContext.StockActions.Add(action);
-            DbContext.SaveChanges();
+            TestDBContext.StockActions.Add(action);
+            TestDBContext.SaveChanges();
 
-            Assert.AreEqual(1, DbContext.StockActions
+            Assert.AreEqual(1, TestDBContext.StockActions
                 .Count(x => x.BOUQUET_PARTS_CODE == ExpectedCode));
-            Assert.IsTrue(DbContext.StockActions
+            Assert.IsTrue(TestDBContext.StockActions
                 .Where(x => x.BOUQUET_PARTS_CODE == ExpectedCode)
                 .All(x => x.BouquetPart.NAME == ExpectedName));
         }
