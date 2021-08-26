@@ -36,10 +36,10 @@ namespace MemorieDeFleursTest
             var customer = new Customer()
             {
                 ID = 1,
-                NAME = "Test User",
-                E_MAIL = "foo@localdomain",
-                CARD_NO = "0000111122223333",
-                STATUS = 0
+                Name = "Test User",
+                EmailAddress = "foo@localdomain",
+                CardNo = "0000111122223333",
+                Status = 0
             };
 
             // Add/Remove したら SaveChanges を忘れないこと
@@ -53,10 +53,10 @@ namespace MemorieDeFleursTest
             var customer = new Customer()
             {
                 ID = 1,
-                NAME = null,
-                E_MAIL = "foo@localdomain",
-                CARD_NO = "0000111122223333",
-                STATUS = 0
+                Name = null,
+                EmailAddress = "foo@localdomain",
+                CardNo = "0000111122223333",
+                Status = 0
             };
 
             // NOT NULL や PRIMARY KEY などの制約違反が発生するのは
@@ -71,26 +71,26 @@ namespace MemorieDeFleursTest
             var customer1 = new Customer()
             {
                 ID = 1,
-                NAME = "Test User",
-                E_MAIL = "foo@localdomain",
-                CARD_NO = "0000111122223333",
-                STATUS = 0
+                Name = "Test User",
+                EmailAddress = "foo@localdomain",
+                CardNo = "0000111122223333",
+                Status = 0
             };
             var customer2 = new Customer()
             {
                 ID = 2,
-                NAME = "Test User2",
-                E_MAIL = "bar@localdomain",
-                CARD_NO = "1234567890123456",
-                STATUS = 0
+                Name = "Test User2",
+                EmailAddress = "bar@localdomain",
+                CardNo = "1234567890123456",
+                Status = 0
             };
             var customer3 = new Customer()
             {
                 ID = 3,
-                NAME = "Test User3",
-                E_MAIL = "hoge@localdomain",
-                CARD_NO = "1122334455667788",
-                STATUS = 0
+                Name = "Test User3",
+                EmailAddress = "hoge@localdomain",
+                CardNo = "1122334455667788",
+                Status = 0
             };
 
             TestDBContext.Customers.Add(customer1);
@@ -105,18 +105,18 @@ namespace MemorieDeFleursTest
             var customer1 = new Customer()
             {
                 ID = 1,
-                NAME = "Test User",
-                E_MAIL = "foo@localdomain",
-                CARD_NO = "0000111122223333",
-                STATUS = 0
+                Name = "Test User",
+                EmailAddress = "foo@localdomain",
+                CardNo = "0000111122223333",
+                Status = 0
             };
             var customer2 = new Customer()
             {
                 ID = 1,
-                NAME = "Test User2",
-                E_MAIL = "bar@localdomain",
-                CARD_NO = "1234567890123456",
-                STATUS = 0
+                Name = "Test User2",
+                EmailAddress = "bar@localdomain",
+                CardNo = "1234567890123456",
+                Status = 0
             };
 
             TestDBContext.Customers.Add(customer1);

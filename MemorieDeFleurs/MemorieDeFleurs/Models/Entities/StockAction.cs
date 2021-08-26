@@ -17,42 +17,49 @@ namespace MemorieDeFleurs.Models.Entities
         /// <summary>
         /// 基準日
         /// </summary>
-        public int ACTION_DATE { get; set; }
+        [Column("ACTION_DATE")]
+        public int ActionDate { get; set; }
 
         /// <summary>
         /// アクション
         /// </summary>
-        public StockActionType ACTION { get; set; }
+        [Column("ACTION")]
+        public StockActionType Action { get; set; }
 
         /// <summary>
         /// 花コード
         /// </summary>
-        public string BOUQUET_PARTS_CODE { get; set; }
+        [Column("BOUQUET_PARTS_CODE")]
+        public string PartsCode { get; set; }
 
         /// <summary>
         /// 入荷日
         /// </summary>
-        public int ARRIVAL_DATE { get; set; }
+        [Column("ARRIVAL_DATE")]
+        public int ArrivalDate { get; set; }
 
         /// <summary>
         /// 在庫ロット番号
         /// </summary>
-        public int LOT_NO { get; set; }
+        [Column("LOT_NO")]
+        public int StockLotNo { get; set; }
 
         /// <summary>
         /// 数量：入荷(予定)数、加工(予定)数、破棄(予定)数
         /// </summary>
-        public int QUANTITY { get; set; }
+        [Column("QUANTITY")]
+        public int Quantity { get; set; }
 
         /// <summary>
         /// 残数
         /// </summary>
-        public int REMAIN { get; set; }
+        [Column("REMAIN")]
+        public int Remain { get; set; }
 
         /// <summary>
         /// 花コードに対応する単品情報
         /// </summary>
-        [ForeignKey("BOUQUET_PARTS_CODE")]
+        [ForeignKey("PartsCode")]
         public BouquetPart BouquetPart { get; set; }
     }
 }

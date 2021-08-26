@@ -58,23 +58,23 @@ namespace MemorieDeFleursTest
 
             StockAction action = new StockAction()
             {
-                ACTION_DATE = 20040330,
-                ACTION = StockActionType.SCHEDULED_TO_ARRIVE,
-                BOUQUET_PARTS_CODE = ExpectedCode,
-                ARRIVAL_DATE = 20040330,
-                LOT_NO = 1,
-                QUANTITY = 200,
-                REMAIN = 200
+                ActionDate = 20040330,
+                Action = StockActionType.SCHEDULED_TO_ARRIVE,
+                PartsCode = ExpectedCode,
+                ArrivalDate = 20040330,
+                StockLotNo = 1,
+                Quantity = 200,
+                Remain = 200
             };
 
             TestDBContext.StockActions.Add(action);
             TestDBContext.SaveChanges();
 
             Assert.AreEqual(1, TestDBContext.StockActions
-                .Count(x => x.BOUQUET_PARTS_CODE == ExpectedCode));
+                .Count(x => x.PartsCode == ExpectedCode));
             Assert.IsTrue(TestDBContext.StockActions
-                .Where(x => x.BOUQUET_PARTS_CODE == ExpectedCode)
-                .All(x => x.BouquetPart.NAME == ExpectedName));
+                .Where(x => x.PartsCode == ExpectedCode)
+                .All(x => x.BouquetPart.Name == ExpectedName));
         }
     }
 }

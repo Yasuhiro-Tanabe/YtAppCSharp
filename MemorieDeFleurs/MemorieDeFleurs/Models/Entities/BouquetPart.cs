@@ -14,33 +14,38 @@ namespace MemorieDeFleurs.Models.Entities
         /// <summary>
         /// 花コード
         /// </summary>
-        [Key]
-        public string CODE { get; set; }
+        [Key, Column("CODE")]
+        public string Code { get; set; }
 
         /// <summary>
         /// 花名称
         /// </summary>
-        public string NAME { get; set; }
+        [Column("NAME")]
+        public string Name { get; set; }
 
 
         /// <summary>
         /// リードタイム
         /// </summary>
-        public int LEAD_TIME { get; set; }
+        [Column("LEAD_TIME")]
+        public int LeadTime { get; set; }
 
         /// <summary>
         /// 購入単位数
         /// </summary>
-        public int NUM_PAR_LOT { get; set; }
+        [Column("NUM_PAR_LOT")]
+        public int QuantitiesPerLot { get; set; }
 
         /// <summary>
         /// 品質維持可能日数
         /// </summary>
-        public int EXPIRY_DATE { get; set; }
+        [Column("EXPIRY_DATE")]
+        public int ExpiryDate { get; set; }
 
         /// <summary>
         /// 状態
         /// </summary>
-        public int STATUS { get; set; }
+        [Column("STATUS")]
+        public int Status { get; set; }
     }
 }

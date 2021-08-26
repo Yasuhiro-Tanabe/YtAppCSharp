@@ -60,7 +60,7 @@ namespace MemorieDeFleurs.Models
         {
             modelBuilder
                 .Entity<StockAction>()
-                .HasKey("ACTION_DATE", "ACTION", "BOUQUET_PARTS_CODE", "ARRIVAL_DATE", "LOT_NO");
+                .HasKey("ActionDate", "Action", "PartsCode", "ArrivalDate", "StockLotNo");
         }
 
         /// <summary>
