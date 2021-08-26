@@ -75,5 +75,51 @@ namespace GameOfLife.Core.Test
 
             }
         }
+
+        [TestMethod,ExpectedException(typeof(IndexOutOfRangeException))]
+        public void SetterThrowExceptionWhenXisMoreThanOrEqualsWith()
+        {
+            var width = 10u;
+            var height = 10u;
+            var y = 0u;
+            var field = new Field(width, height);
+
+            field[width, y] = true;
+            Assert.Fail("Setter‚ª—áŠO‚ð“f‚­‚Í‚¸");
+        }
+
+        [TestMethod, ExpectedException(typeof(IndexOutOfRangeException))]
+        public void GetterThrowExceptionWhenXisMoreThanOrEqualsWith()
+        {
+            var width = 10u;
+            var height = 10u;
+            var y = 0u;
+            var field = new Field(width, height);
+
+            if(field[width, y]) { Assert.Fail("Getter‚ª—áŠO‚ð“f‚­‚Í‚¸"); }
+        }
+
+        [TestMethod,ExpectedException(typeof(IndexOutOfRangeException))]
+        public void SetterThrowExceptionWhenYisMoreThanOrEqualsHeight()
+        {
+            var width = 10u;
+            var height = 10u;
+            var x = 0u;
+            var field = new Field(width, height);
+
+            field[x, height] = true;
+            Assert.Fail("Setter‚ª—áŠO‚ð“f‚­‚Í‚¸");
+        }
+
+        [TestMethod, ExpectedException(typeof(IndexOutOfRangeException))]
+        public void GetterThrowExceptionWhenYisMoreThanOrEqualsHeight()
+        {
+            var width = 10u;
+            var height = 10u;
+            var x = 0u;
+            var field = new Field(width, height);
+
+            if(field[x,height]) { Assert.Fail("Getter‚ª—áŠO‚ð“f‚­‚Í‚¸"); }
+        }
     }
 }

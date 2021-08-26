@@ -41,8 +41,14 @@ namespace GameOfLife.Core
         /// <returns>セルの状態：生きているとき真、死んでいるとき偽</returns>
         public bool this[UInt32 x, UInt32 y] 
         { 
-            get { return alliveCells.Contains(Tuple.Create(x,y)); }
-            set {
+            get
+            {
+                ValidateRangeOfCoordinate(x, y);
+                return alliveCells.Contains(Tuple.Create(x,y));
+            }
+            set 
+            {
+                ValidateRangeOfCoordinate(x, y);
                 var pos = Tuple.Create(x, y);
                 if(value == true)
                 {
@@ -52,6 +58,18 @@ namespace GameOfLife.Core
                 {
                     alliveCells.Remove(pos);
                 }
+            }
+        }
+
+        private void ValidateRangeOfCoordinate(UInt32 x, UInt32 y)
+        {
+            if(x >= Width) 
+            {
+                throw new IndexOutOfRangeException($"Invalid x: {x}. It shall be from 0 to {Width - 1}.");
+            }
+            if(y >= Height)
+            {
+                throw new IndexOutOfRangeException($"Invalid y: {y}. It shall be from 0 to {Height - 1}.");
             }
         }
     }
