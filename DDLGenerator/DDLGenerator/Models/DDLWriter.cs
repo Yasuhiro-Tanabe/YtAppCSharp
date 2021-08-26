@@ -64,7 +64,7 @@ namespace DDLGenerator.Models
                     numCols++;
                 }
 
-                if (countPK > 2)
+                if (countPK > 1)
                 {
                     // 複数列でプライマリキーを構成する場合は、各列に PRIMARY KEY をつけず列定義の後に PRIMERY KEY ( K1, K2, ... ) と記載する
                     builder.AppendLine(",");
