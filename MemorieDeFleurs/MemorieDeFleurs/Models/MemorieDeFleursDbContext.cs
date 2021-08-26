@@ -1,14 +1,10 @@
 ﻿using MemorieDeFleurs.Entities;
+using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-using System;
-using System.Collections.Generic;
 using System.Data.Common;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MemorieDeFleurs.Models
 {
@@ -60,9 +56,21 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder
+                .Entity<StockAction>()
+                .HasKey("ACTION_DATE", "ACTION", "BOUQUET_PARTS_CODE", "ARRIVAL_DATE", "LOT_NO");
+        }
+
         /// <summary>
         /// 得意先
         /// </summary>
         public DbSet<Customer> Customers { get; set; }
+
+        /// <summary>
+        /// 在庫アクション
+        /// </summary>
+        public DbSet<StockAction> StockActions { get; set; }
     }
 }
