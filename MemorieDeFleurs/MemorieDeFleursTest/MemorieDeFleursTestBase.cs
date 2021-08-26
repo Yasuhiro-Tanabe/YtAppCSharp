@@ -42,20 +42,32 @@ namespace MemorieDeFleursTest
         [TestInitialize]
         public void BaseInitialize()
         {
+            LogUtil.Debug("Start: MemorieDeFleursTestBase#BaseInitialize()");
             TestDB.Open();
             EmptyDB.Open();
 
             AfterTestBaseInitializing?.Invoke(this, null);
+            LogUtil.Debug("Done: MemorieDeFleursTestBase#BaseInitialize()");
         }
 
         [TestCleanup]
         public void BaseCleanup()
         {
-
-            BeforeTestBaseCleaningUp?.Invoke(this, null);
+            LogUtil.Debug("Start: MemorieDeFleursTestBase#BaseCleanup()");
+            // 登録したイベントハンドラを、登録したときと逆順に呼び出す
+            if (BeforeTestBaseCleaningUp != null)
+            {
+                // IList<>.ForEach() を使うためには IEnumerable<>.ToList<>() が必要。
+                // このときデータコピーが発生するのはうれしくない。
+                foreach(var handler in BeforeTestBaseCleaningUp.GetInvocationList().Reverse().Cast<EventHandler>())
+                {
+                    handler(this, null);
+                }
+            }
 
             TestDB.Close();
             EmptyDB.Close();
+            LogUtil.Debug("Done: MemorieDeFleursTestBase#BaseCleanup()");
         }
     }
 }
