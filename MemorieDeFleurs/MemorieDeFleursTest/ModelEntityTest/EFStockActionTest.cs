@@ -14,7 +14,6 @@ namespace MemorieDeFleursTest.ModelEntityTest
         private static string PartCodeKey = "@part";
         private static string SupplierCodeKey = "@supplier";
         private static string NameKey = "@name";
-        private static string AddressKey = "@address";
         private static string ExpectedPartCode = "BA001";
         private static string ExpectedPartName = "薔薇(赤)";
         private static int ExpectedSupplierCode = 1;
