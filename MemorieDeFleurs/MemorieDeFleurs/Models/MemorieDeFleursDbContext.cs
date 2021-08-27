@@ -61,6 +61,9 @@ namespace MemorieDeFleurs.Models
             modelBuilder
                 .Entity<StockAction>()
                 .HasKey("ActionDate", "Action", "PartsCode", "ArrivalDate", "StockLotNo");
+            modelBuilder
+                .Entity<PartSupplier>()
+                .HasKey("SupplierCode", "PartCode");
         }
 
         /// <summary>
@@ -72,5 +75,10 @@ namespace MemorieDeFleurs.Models
         /// 在庫アクション
         /// </summary>
         public DbSet<StockAction> StockActions { get; set; }
+
+        /// <summary>
+        /// 仕入先
+        /// </summary>
+        public DbSet<Supplier> Suppliers { get; set; }
     }
 }

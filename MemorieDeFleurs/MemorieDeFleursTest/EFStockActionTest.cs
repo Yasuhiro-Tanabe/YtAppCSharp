@@ -16,28 +16,63 @@ namespace MemorieDeFleursTest
     [TestClass]
     public class EFStockActionTest : MemorieDeFleursDbContextTestBase
     {
-        private static string CodeKey = "@code";
+        private static string PartCodeKey = "@part";
+        private static string SupplierCodeKey = "@supplier";
         private static string NameKey = "@name";
-        private static string ExpectedCode = "BA001";
-        private static string ExpectedName = "薔薇(赤)";
+        private static string AddressKey = "@address";
+        private static string ExpectedPartCode = "BA001";
+        private static string ExpectedPartName = "薔薇(赤)";
+        private static int ExpectedSupplierCode = 1;
+        private static string ExpectedSupplierName = "新橋園芸";
+        private static string ExpectedSupplierAddress = "東京都中央区銀座";
 
 
         public EFStockActionTest() : base()
         {
-            AfterTestBaseInitializing += AppendBouquetParts;
+            AfterTestBaseInitializing += AppendSomeObjects;
             BeforeTestBaseCleaningUp += CleanupTestData;
             
         }
 
-        private void AppendBouquetParts(object sender, EventArgs unused)
+        private void AppendSomeObjects(object sender, EventArgs unused)
         {
             LogUtil.Debug($"EFStockActionTest#AppendBouquetParts() is called.");
             // Entity 未作成の単品情報は、SQLを使って直接登録する
+            AppendBouquetParts();
+            AppendSuppliers();
+            AppendPartSuppliers();
+        }
+
+        private void AppendBouquetParts()
+        {
             using (var cmd = TestDB.CreateCommand())
             {
-                cmd.CommandText = $"insert into BOUQUET_PARTS values ( {CodeKey}, {NameKey}, 1, 100, 3, 0 )";
-                cmd.Parameters.AddWithValue(CodeKey, ExpectedCode);
-                cmd.Parameters.AddWithValue(NameKey, ExpectedName);
+                cmd.CommandText = $"insert into BOUQUET_PARTS values ( {PartCodeKey}, {NameKey}, 1, 100, 3, 0 )";
+                cmd.Parameters.AddWithValue(PartCodeKey, ExpectedPartCode);
+                cmd.Parameters.AddWithValue(NameKey, ExpectedPartName);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private void AppendSuppliers()
+        {
+            using (var cmd = TestDB.CreateCommand())
+            {
+                cmd.CommandText = $"insert into SUPPLIERS values ( {SupplierCodeKey}, {NameKey}, {AddressKey}, null, null, null, null )";
+                cmd.Parameters.AddWithValue(SupplierCodeKey, ExpectedSupplierCode);
+                cmd.Parameters.AddWithValue(NameKey, ExpectedSupplierName);
+                cmd.Parameters.AddWithValue(AddressKey, ExpectedSupplierAddress);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private void AppendPartSuppliers()
+        {
+            using (var cmd = TestDB.CreateCommand())
+            {
+                cmd.CommandText = $"insert into BOUQUET_SUPPLIERS values ( {SupplierCodeKey}, {PartCodeKey} )";
+                cmd.Parameters.AddWithValue(SupplierCodeKey, ExpectedSupplierCode);
+                cmd.Parameters.AddWithValue(PartCodeKey, ExpectedPartCode);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -45,22 +80,26 @@ namespace MemorieDeFleursTest
         private void CleanupTestData(object sender, EventArgs unused)
         {
             LogUtil.Debug($"EFStockActionTest#CleanupTestData() is called.");
+
             // テーブル全削除はORマッピングフレームワークが持つ「DBを隠蔽する」意図にそぐわないため
             // DbContext.Customers.Clear() のような操作は用意されていない。
             // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
             TestDBContext.Database.ExecuteSqlRaw("delete from STOCK_ACTIONS");
+            TestDBContext.Database.ExecuteSqlRaw("delete from BOUQUET_SUPPLIERS");
+            TestDBContext.Database.ExecuteSqlRaw("delete from BOUQUET_PARTS");
+            TestDBContext.Database.ExecuteSqlRaw("delete from SUPPLIERS");
         }
 
         [TestMethod]
         public void CanAddStockAction()
         {
-            var code = ExpectedCode;
+            var code = ExpectedPartCode;
 
             StockAction action = new StockAction()
             {
                 ActionDate = 20040330,
                 Action = StockActionType.SCHEDULED_TO_ARRIVE,
-                PartsCode = ExpectedCode,
+                PartsCode = ExpectedPartCode,
                 ArrivalDate = 20040330,
                 StockLotNo = 1,
                 Quantity = 200,
@@ -71,10 +110,10 @@ namespace MemorieDeFleursTest
             TestDBContext.SaveChanges();
 
             Assert.AreEqual(1, TestDBContext.StockActions
-                .Count(x => x.PartsCode == ExpectedCode));
+                .Count(x => x.PartsCode == ExpectedPartCode));
             Assert.IsTrue(TestDBContext.StockActions
-                .Where(x => x.PartsCode == ExpectedCode)
-                .All(x => x.BouquetPart.Name == ExpectedName));
+                .Where(x => x.PartsCode == ExpectedPartCode)
+                .All(x => x.BouquetPart.Name == ExpectedPartName));
         }
     }
 }
