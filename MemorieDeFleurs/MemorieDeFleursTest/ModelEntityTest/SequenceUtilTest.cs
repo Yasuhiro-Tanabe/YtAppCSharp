@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
 
-namespace MemorieDeFleursTest
+namespace MemorieDeFleursTest.ModelEntityTest
 {
     [TestClass]
     public class SequenceUtilTest : MemorieDeFleursTestBase

@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Data.Sqlite;
 using System;
 
-namespace MemorieDeFleursTest
+namespace MemorieDeFleursTest.ModelEntityTest
 {
     [TestClass]
     public class DateUtilTest : MemorieDeFleursTestBase

@@ -8,7 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 
-namespace MemorieDeFleursTest
+namespace MemorieDeFleursTest.ModelEntityTest
 {
     /// <summary>
     /// EntityFrameworkCore の試行：
