@@ -47,16 +47,11 @@ namespace MemorieDeFleursTest.ModelTest
 
             ExpectedSupplerCode = s.Code;
             ExpectedPartCode = p.Code;
-
-            LogUtil.Debug($"DateMaster: from {Model.DateMaster.FirstDate} to {Model.DateMaster.LastDate}");
-            Model.DateMaster.Fill(20200401, 20200531);
         }
 
         private void CleanupDb(object sender, EventArgs unused)
         {
             ClearAll();
-            var date = new DateUtil(TestDB);
-            LogUtil.Debug($"Datemaster: from {date.FirstDate} to {date.LastDate}");
         }
 
         /// <summary>
