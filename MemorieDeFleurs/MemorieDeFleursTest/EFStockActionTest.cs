@@ -56,14 +56,14 @@ namespace MemorieDeFleursTest
 
         private void AppendSuppliers()
         {
-            using (var cmd = TestDB.CreateCommand())
+            var supplier = new Supplier()
             {
-                cmd.CommandText = $"insert into SUPPLIERS values ( {SupplierCodeKey}, {NameKey}, {AddressKey}, null, null, null, null )";
-                cmd.Parameters.AddWithValue(SupplierCodeKey, ExpectedSupplierCode);
-                cmd.Parameters.AddWithValue(NameKey, ExpectedSupplierName);
-                cmd.Parameters.AddWithValue(AddressKey, ExpectedSupplierAddress);
-                cmd.ExecuteNonQuery();
-            }
+                Code = ExpectedSupplierCode,
+                Name = ExpectedSupplierName,
+                Address1 = ExpectedSupplierAddress,
+            };
+            TestDBContext.Suppliers.Add(supplier);
+            TestDBContext.SaveChanges();
         }
 
         private void AppendPartSuppliers()
