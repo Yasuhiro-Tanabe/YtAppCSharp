@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace MemorieDeFleurs.Models
 {
+    /// <summary>
+    /// 仕入先モデル：仕入先と、関連する情報の管理を行う。
+    /// </summary>
     public class SupplierModel
     {
         private MemorieDeFleursDbContext DbContext { get; set; }
@@ -31,6 +34,12 @@ namespace MemorieDeFleurs.Models
             Sequence = new SequenceUtil(DbContext.Database.GetDbConnection() as SqliteConnection);
         }
 
+        /// <summary>
+        /// 仕入先オブジェクトの生成器
+        /// 
+        /// 仕入先の各プロパティは、フルーエントインタフェース形式で入力する。
+        /// 必要なプロパティを入力後、Create() を実行することでオブジェクトが生成されDBに登録される。
+        /// </summary>
         public class SupplierProcesser
         {
             private SupplierModel _model;
@@ -51,12 +60,25 @@ namespace MemorieDeFleurs.Models
                 _model = model;
             }
 
+            /// <summary>
+            /// 仕入先名称を登録/変更する
+            /// </summary>
+            /// <param name="name">仕入先名称</param>
+            /// <returns>仕入先名称変更後の仕入先オブジェクト生成器(自分自身)</returns>
             public SupplierProcesser NameIs(string name)
             {
                 _name = name;
                 return this;
             }
 
+            /// <summary>
+            /// 仕入先住所を登録/変更する
+            /// 
+            /// 仕入先住所1,2 を分けて入力する。
+            /// </summary>
+            /// <param name="address1">住所1</param>
+            /// <param name="address2">住所2、省略可。省略したときは null が指定されたものと見なす。</param>
+            /// <returns>住所変更後の仕入先オブジェクト生成器(自分自身)</returns>
             public SupplierProcesser AddressIs(string address1, string address2 = null)
             {
                 _address1 = address1;
@@ -64,24 +86,45 @@ namespace MemorieDeFleurs.Models
                 return this;
             }
 
+            /// <summary>
+            /// 仕入先電話番号を登録/変更する
+            /// </summary>
+            /// <param name="tel">電話番号</param>
+            /// <returns>電話番号変更後の仕入先オブジェクト生成器(自分自身)</returns>
             public SupplierProcesser PhoneNumberIs(string tel)
             {
                 _tel = tel;
                 return this;
             }
 
+            /// <summary>
+            /// 仕入先FAX番号を登録/変更する
+            /// </summary>
+            /// <param name="fax">FAX番号</param>
+            /// <returns>FAX番号変更後の仕入先オブジェクト生成器(自分自身)</returns>
             public SupplierProcesser FaxNumberIs(string fax)
             {
                 _fax = fax;
                 return this;
             }
 
+            /// <summary>
+            /// 仕入先e-メールアドレスを登録/変更する
+            /// </summary>
+            /// <param name="email">e-メールアドレス</param>
+            /// <returns>e-メールアドレス変更後の仕入先オブジェクト生成器(自分自身)</returns>
             public SupplierProcesser EmailIs(string email)
             {
                 _email = email;
                 return this;
             }
 
+            /// <summary>
+            /// 登録変更した内容で仕入先を登録する
+            /// 
+            /// 仕入先コードの採番はこのメソッド内で行われる。
+            /// </summary>
+            /// <returns>登録された仕入先オブジェクト</returns>
             public Supplier Create()
             {
                 var s = new Supplier()
@@ -101,22 +144,77 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 仕入先コードの採番：次の未使用コードを返す。
+        /// </summary>
         internal int NextSequenceCode { get { return Sequence.SEQ_SUPPLIERS.Next; } }
 
+        /// <summary>
+        /// DB登録オブジェクト生成器を取得する
+        /// </summary>
+        /// <typeparam name="Sypplier">DB登録オブジェクト生成器が生成するオブジェクト：仕入先</typeparam>
+        /// <returns>仕入先オブジェクト生成器</returns>
         public SupplierProcesser Entity<Sypplier>()
         {
             return SupplierProcesser.GetInstance(this);
         }
 
+        /// <summary>
+        /// 条件を満たす仕入先オブジェクトを取得する
+        /// </summary>
+        /// <param name="condition">取得条件</param>
+        /// <returns>仕入先オブジェクトの列挙(<see cref="IEnumerable{Supplier}()"/>)。
+        /// 条件を満たす仕入先が1つしかない場合でも列挙として返すので注意。</returns>
         public IEnumerable<Supplier> Find(Func<Supplier,bool> condition)
         {
             return DbContext.Suppliers.Where(condition);
         }
 
-        public Supplier Find(int code)
+        /// <summary>
+        /// 仕入先コードをキーに仕入先オブジェクトを取得する
+        /// </summary>
+        /// <param name="supplierCode">仕入先コード</param>
+        /// <returns>仕入先オブジェクト、仕入先コードに該当する仕入先が存在しないときはnull。</returns>
+        public Supplier Find(int supplierCode)
         {
-            return DbContext.Suppliers.SingleOrDefault(s => s.Code == code);
+            return DbContext.Suppliers.SingleOrDefault(s => s.Code == supplierCode);
         }
 
+        /// <summary>
+        /// 更新した仕入先オブジェクトでデータベースを更新する
+        /// </summary>
+        /// <param name="s">仕入先オブジェクト。nullの場合は更新処理を行わずに処理を抜ける。</param>
+        /// <remarks>呼び出し前に仕入先コードを書き換えないこと。意図しない仕入先の内容が変更されることがある。</remarks>
+        public void Replace(Supplier s)
+        {
+            if(s == null) { return; }
+            DbContext.Suppliers.Update(s);
+            DbContext.SaveChanges();
+        }
+
+        /// <summary>
+        /// 仕入先オブジェクトをデータベースから削除する
+        /// </summary>
+        /// <param name="s">仕入先オブジェクト。nullの場合は削除処理を行わずに処理を抜ける。</param>
+        /// <remarks>呼び出し前に仕入先コードを書き換えないこと。意図しない仕入先が削除されることがある。</remarks>
+        public void Remove(Supplier s)
+        {
+            if(s == null) { return; }
+            DbContext.Suppliers.Remove(s);
+            DbContext.SaveChanges();
+        }
+
+        /// <summary>
+        /// 仕入先コード指定で仕入先をデータベースから削除する。
+        /// 該当する仕入先が見つからないときは何もしない。
+        /// </summary>
+        /// <param name="supplierCode">仕入先コード</param>
+        /// <remarks>内部で <see cref="Find(int)"/> を呼び出し、
+        /// 見つかった仕入先オブジェクトを <see cref="Remove(Supplier)"/> で破棄する。</remarks>
+        public void Remove(int supplierCode)
+        {
+            var found = DbContext.Suppliers.SingleOrDefault(s => s.Code == supplierCode);
+            Remove(found);
+        }
     }
 }

@@ -14,6 +14,9 @@ namespace MemorieDeFleursTest.ModelTest
     [TestClass]
     public class SupplierModelTest : MemorieDeFleursDbContextTestBase
     {
+        private const string expectedName = "農園1";
+        private const string expectedAddress = "住所1";
+
         private MemorieDeFleursModel Model { get; set; }
 
         public SupplierModelTest() : base()
@@ -27,11 +30,8 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         [TestMethod]
-        public void CanRegisterNewUser()
+        public void CanRegisterNewSupplier()
         {
-            string expectedName = "染井花卉農園";
-            string expectedAddress = "千葉県香取郡多古町染井";
-
             var created = Model.SupplierModel.Entity<Supplier>()
                 .NameIs(expectedName)
                 .AddressIs(expectedAddress)
@@ -41,6 +41,56 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.IsNotNull(found);
             Assert.AreEqual(expectedName, found.Name);
             Assert.AreEqual(expectedAddress, found.Address1);
+        }
+
+        [TestMethod]
+        public void CannotAbortWhenNoSuppliersFoundFromDb()
+        {
+            // キーに負数は入れない仕様なので、負数のキーは常に見つからないはず。
+            Assert.IsNull(Model.SupplierModel.Find(-1));
+        }
+
+        [TestMethod]
+        public void SupplierIsChangable()
+        {
+            var expectedEmailAddress = "foo@localdomain";
+
+            var created = Model.SupplierModel.Entity<Supplier>()
+                .NameIs(expectedName)
+                .AddressIs(expectedAddress)
+                .Create();
+
+            created.EmailAddress = expectedEmailAddress;
+            Model.SupplierModel.Replace(created);
+
+            var found = Model.SupplierModel.Find(created.Code);
+            Assert.AreEqual(expectedEmailAddress, found.EmailAddress);
+        }
+
+        [TestMethod]
+        public void UpdatingNullObjectHasNoEffectsForSuppliers()
+        {
+            var created = Model.SupplierModel.Entity<Supplier>()
+                .NameIs(expectedName)
+                .AddressIs(expectedAddress)
+                .Create();
+
+            Model.SupplierModel.Replace(null);
+
+            Assert.IsNotNull(Model.SupplierModel.Find(created.Code));
+        }
+
+        [TestMethod]
+
+        public void CanRemoveExistingSupplier()
+        {
+            var created = Model.SupplierModel.Entity<Supplier>()
+                .NameIs(expectedName)
+                .AddressIs(expectedAddress)
+                .Create();
+
+            Model.SupplierModel.Remove(created);
+            Assert.IsNull(Model.SupplierModel.Find(created.Code));
         }
     }
 }
