@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,8 +18,14 @@ namespace MemorieDeFleurs.Models
         /// (パッケージ内限定) Entity Framework Data Context
         /// </summary>
         internal MemorieDeFleursDbContext DbContext { get; private set; }
+        internal SqliteConnection DbConnection { get; private set; }
         
         public SupplierModel SupplierModel { get; private set; }
+
+        public BouquetModel BouquetModel { get; private set; }
+
+        public DateUtil DateMaster { get; private set; }
+        public SequenceUtil Sequences { get; set; }
 
         /// <summary>
         /// データモデルを生成する。
@@ -28,7 +37,13 @@ namespace MemorieDeFleurs.Models
         public MemorieDeFleursModel(MemorieDeFleursDbContext db)
         {
             DbContext = db;
+            DbConnection = db.Database.GetDbConnection() as SqliteConnection;
+
             SupplierModel = new SupplierModel(this);
+            BouquetModel = new BouquetModel(this);
+            
+            DateMaster = new DateUtil(DbConnection);
+            Sequences = new SequenceUtil(DbConnection);
 
         }
     }

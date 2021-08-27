@@ -80,5 +80,10 @@ namespace MemorieDeFleurs.Models
         /// 仕入先
         /// </summary>
         public DbSet<Supplier> Suppliers { get; set; }
+
+        /// <summary>
+        /// 単品
+        /// </summary>
+        public DbSet<BouquetPart> BouquetParts { get; set; }
     }
 }

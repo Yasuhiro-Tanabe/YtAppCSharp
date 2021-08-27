@@ -18,7 +18,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
             TestDateMaster = new DateUtil(TestDB);
             EmptyDateMaster = new DateUtil(EmptyDB);
 
-            AfterTestBaseInitializing += CleanupDateMaster;
+            BeforeTestBaseCleaningUp += CleanupDateMaster;
         }
 
         public void CleanupDateMaster(object sender, EventArgs unused)

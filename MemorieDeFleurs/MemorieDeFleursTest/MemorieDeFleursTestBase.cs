@@ -69,5 +69,42 @@ namespace MemorieDeFleursTest
             EmptyDB.Close();
             LogUtil.Debug("Done: MemorieDeFleursTestBase#BaseCleanup()");
         }
+
+        /// <summary>
+        /// データベース内の全データを削除する。
+        /// 
+        /// 常時全削除、ではないので、必要なときに呼び出すこと。
+        /// </summary>
+        protected void ClearAll()
+        {
+            // 削除対象テーブル、削除順
+            var tables = new List<string>()
+            {
+                "STOCK_ACTIONS",
+                "ORDER_DETAILS_FROM_CUSTOMER",
+                "ORDER_DETAILS_TO_SUPPLIER",
+                "BOUQUET_PARTS_LIST",
+                "BOUQUET_SUPPLIERS",
+                "ORDER_FROM_CUSTOMER",
+                "ORDERS_TO_SUPPLIER",
+                "SHIPPING_ADDRESS",
+                "CUSTOMERS",
+                "SUPPLIERS",
+                "BOUQUET_SET",
+                "BOUQUET_PARTS",
+                "SEQUENCES",
+                "DATE_MASTER",
+            };
+
+            using (var cmd = TestDB.CreateCommand())
+            {
+                foreach (var t in tables)
+                {
+                    cmd.CommandText = $"delete from {t}";
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+        }
     }
 }

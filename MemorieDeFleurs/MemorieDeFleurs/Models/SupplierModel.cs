@@ -19,7 +19,7 @@ namespace MemorieDeFleurs.Models
         private MemorieDeFleursDbContext DbContext { get; set; }
         private MemorieDeFleursModel Parent { get; set; }
 
-        private SequenceUtil Sequence { get; set; }
+        private SequenceUtil Sequences { get { return Parent.Sequences; } }
 
         /// <summary>
         /// (パッケージ内限定)コンストラクタ
@@ -31,7 +31,6 @@ namespace MemorieDeFleurs.Models
         {
             Parent = parent;
             DbContext = parent.DbContext;
-            Sequence = new SequenceUtil(DbContext.Database.GetDbConnection() as SqliteConnection);
         }
 
         /// <summary>
@@ -147,7 +146,7 @@ namespace MemorieDeFleurs.Models
         /// <summary>
         /// 仕入先コードの採番：次の未使用コードを返す。
         /// </summary>
-        internal int NextSequenceCode { get { return Sequence.SEQ_SUPPLIERS.Next; } }
+        internal int NextSequenceCode { get { return Sequences.SEQ_SUPPLIERS.Next; } }
 
         /// <summary>
         /// DB登録オブジェクト生成器を取得する
@@ -159,6 +158,7 @@ namespace MemorieDeFleurs.Models
             return SupplierProcesser.GetInstance(this);
         }
 
+        #region Supplier の生成・更新・削除
         /// <summary>
         /// 条件を満たす仕入先オブジェクトを取得する
         /// </summary>
@@ -216,5 +216,39 @@ namespace MemorieDeFleurs.Models
             var found = DbContext.Suppliers.SingleOrDefault(s => s.Code == supplierCode);
             Remove(found);
         }
+        #endregion // Supplier の生成・更新・削除
+
+        #region 発注
+        /// <summary>
+        /// (試作) 注文処理に伴う在庫アクション登録
+        /// </summary>
+        /// <param name="orderDate">発注日</param>
+        /// <param name="supplier">仕入先</param>
+        /// <param name="part">単品</param>
+        /// <param name="numLot">注文ロット数</param>
+        /// <param name="arrivalDate">納品予定日</param>
+        public int Order(int orderDate, BouquetPart part, int numLot, int arrivalDate)
+        {
+            // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
+            var lotNo = 1;
+
+
+            var action = new StockAction()
+            {
+                ActionDate = arrivalDate,
+                Action = StockActionType.SCHEDULED_TO_ARRIVE,
+                PartsCode = part.Code,
+                StockLotNo = lotNo,
+                ArrivalDate = arrivalDate,
+                Quantity = numLot * part.QuantitiesPerLot,
+                Remain = numLot * part.QuantitiesPerLot
+            };
+            DbContext.StockActions.Add(action);
+            DbContext.SaveChanges();
+
+            return lotNo;
+
+        }
+        #endregion // 発注
     }
 }
