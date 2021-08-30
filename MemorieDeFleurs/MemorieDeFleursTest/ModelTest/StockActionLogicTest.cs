@@ -58,7 +58,7 @@ namespace MemorieDeFleursTest.ModelTest
         /// 発注時に所定の在庫アクションが登録されるかどうかのテスト
         /// </summary>
         [TestMethod]
-        public void ScheduledToAllivalStockActionShallBeCreated()
+        public void CanAddOneOrderToSingleSupplier()
         {
             var supplier = Model.SupplierModel.Find(ExpectedSupplerCode);
             var part = Model.BouquetModel.Find(ExpectedPartCode);
