@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs;
-using MemorieDeFleurs.Models;
+﻿using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -7,8 +6,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MemorieDeFleursTest.ModelTest
 {
@@ -78,46 +75,41 @@ namespace MemorieDeFleursTest.ModelTest
                 // 入荷予定日当日～破棄予定日当日 の間の使用予定在庫アクションが登録されている
                 AssertStockAction(StockActionType.SCHEDULED_TO_USE, d, arrivalDate, part.Code, orderLotNo, 0, numParts);
             }
-#if false
+        }
 
-            var order = new {
+        [TestMethod]
+        public void CanAddManyOrdersToSingleSupplier()
+        {
+            var orders = new
+            {
                 Supplier = Model.SupplierModel.Find(ExpectedSupplerCode),
                 Part = Model.BouquetModel.Find(ExpectedPartCode),
-                OrderDate = 20200425,
-                OrderBody = new List<object> {
-                    new {
-                        Arrival = 20200430,
-                        Lot = 2
-                    },
-
-                    new {
-                        Arrival = 20200501,
-                        Lot = 3
-                    },
-
-                    new {
-                        Arrival = 20200502,
-                        Lot = 2
-                    },
-
-                    new {
-                        Arrival = 20200503,
-                        Lot = 2
-                    },
-
-                    new {
-                        Arrival = 20200506,
-                        Lot = 1
-                    },
+                OrderDate = new DateTime(2020,4,25),
+                OrderBody = new List<Tuple<DateTime,int>>() {
+                    Tuple.Create(new DateTime(2020,4,30), 2),
+                    Tuple.Create(new DateTime(2020,5,1), 2),
+                    Tuple.Create(new DateTime(2020,5,2), 3),
+                    Tuple.Create(new DateTime(2020,5,3), 2),
+                    Tuple.Create(new DateTime(2020,5,6), 1)
                 }
             };
+            var expectedCountOfOrders = orders.OrderBody.Count;
+            var expectedCountOfScheduledToUseStockActions = orders.Part.ExpiryDate * expectedCountOfOrders;
 
-            foreach(var o in order.OrderBody)
+            var lotNumbers = new List<int>();
+
+            foreach (var o in orders.OrderBody)
             {
-
+                lotNumbers.Add(Model.SupplierModel.Order(orders.OrderDate, orders.Part, o.Item2, o.Item1));
             }
-#endif
+            
+            Assert.AreEqual(expectedCountOfOrders, lotNumbers.Count, $"注文数と発注ロット数の不一致：仕入先={orders.Supplier.Name}, 花コード={orders.Part.Name}");
+            AssertAllLotNumbersAreUnique(lotNumbers);
+            AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_ARRIVE);
+            AssertStockActionCount(expectedCountOfScheduledToUseStockActions, StockActionType.SCHEDULED_TO_USE);
+            AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_DISCARD);
         }
+
 
         private void AssertStockAction(StockActionType type, DateTime targetDate, DateTime arrivalDate, string partCode, int lotno, int quantity, int remain)
         {
@@ -138,6 +130,17 @@ namespace MemorieDeFleursTest.ModelTest
 
             Assert.AreEqual(quantity, action.Quantity, "数量不一致：" + key);
             Assert.AreEqual(remain, action.Remain, "残数不一致：" + key);
+        }
+
+        private void AssertStockActionCount(int expected, StockActionType type)
+        {
+            int actual = TestDBContext.StockActions.Count(a => a.Action == type);
+            Assert.AreEqual(expected, actual, $"登録されるべき在庫アクション数の不一致：アクション={type.ToString()}");
+        }
+
+        private void AssertAllLotNumbersAreUnique(List<int> lotNumbers)
+        {
+            lotNumbers.ForEach(i => Assert.AreEqual(1, TestDBContext.StockActions.Count(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == i)));
         }
     }
 }

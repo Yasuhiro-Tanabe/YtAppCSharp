@@ -67,6 +67,8 @@ namespace MemorieDeFleurs
         /// </summary>
         public SequenceValue SEQ_SESSION { get; private set; }
 
+        public SequenceValue SEQ_STOCK_LOT_NUMBER { get; private set; }
+
         /// <summary>
         /// コンストラクタ。
         /// 
@@ -95,6 +97,7 @@ namespace MemorieDeFleurs
             SEQ_SHIPPING = new SequenceValue("SEQ_SHIPPING", this);
             SEQ_SUPPLIERS = new SequenceValue("SEQ_SUPPLIERS", this);
             SEQ_SESSION = new SequenceValue("SEQ_SESSION", this);
+            SEQ_STOCK_LOT_NUMBER = new SequenceValue("SEQ_STOCK_LOT_NUMBER", this);
         }
 
         private int Next(string sequenceName)

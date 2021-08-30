@@ -272,7 +272,7 @@ namespace MemorieDeFleurs.Models
         public int Order(DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
-            var lotNo = 1;
+            var lotNo = Sequences.SEQ_STOCK_LOT_NUMBER.Next;
 
             var param = new StockActionParameterToOrder(arrivalDate, part, lotNo, quantityOfLot);
 
