@@ -223,17 +223,17 @@ namespace MemorieDeFleurs.Models
         /// (試作) 注文処理に伴う在庫アクション登録
         /// </summary>
         /// <param name="orderDate">発注日</param>
-        /// <param name="supplier">仕入先</param>
         /// <param name="part">単品</param>
         /// <param name="numLot">注文ロット数</param>
         /// <param name="arrivalDate">納品予定日</param>
+        /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
         public int Order(DateTime orderDate, BouquetPart part, int numLot, DateTime arrivalDate)
         {
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
             var lotNo = 1;
 
 
-            var action = new StockAction()
+            var arrive = new StockAction()
             {
                 ActionDate = arrivalDate,
                 Action = StockActionType.SCHEDULED_TO_ARRIVE,
@@ -243,7 +243,36 @@ namespace MemorieDeFleurs.Models
                 Quantity = numLot * part.QuantitiesPerLot,
                 Remain = numLot * part.QuantitiesPerLot
             };
-            DbContext.StockActions.Add(action);
+            DbContext.StockActions.Add(arrive);
+
+            var discard = new StockAction()
+            {
+                ActionDate = arrivalDate.AddDays(part.ExpiryDate),
+                Action = StockActionType.SCHEDULED_TO_DISCARD,
+                PartsCode = part.Code,
+                StockLotNo = lotNo,
+                ArrivalDate = arrivalDate,
+                Quantity = numLot * part.QuantitiesPerLot,
+                Remain = 0
+            };
+            DbContext.StockActions.Add(discard);
+
+            foreach(var d in Enumerable.Range(0, part.ExpiryDate).Select(i => arrivalDate.AddDays(i)))
+            {
+                var toUse = new StockAction()
+                {
+                    ActionDate = d,
+                    Action = StockActionType.SCHEDULED_TO_USE,
+                    PartsCode = part.Code,
+                    StockLotNo = lotNo,
+                    ArrivalDate = arrivalDate,
+                    Quantity = 0,
+                    Remain = numLot * part.QuantitiesPerLot
+                };
+                DbContext.StockActions.Add(toUse);
+
+            }
+
             DbContext.SaveChanges();
 
             return lotNo;

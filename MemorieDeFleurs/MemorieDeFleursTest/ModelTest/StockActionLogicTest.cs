@@ -64,12 +64,20 @@ namespace MemorieDeFleursTest.ModelTest
             var part = Model.BouquetModel.Find(ExpectedPartCode);
             var orderDate = new DateTime(2020, 4, 25);
             var arrivalDate = new DateTime(2020, 4, 30);
+            var discardDate = arrivalDate.AddDays(part.ExpiryDate);
             var numLot = 2;
             var numParts = numLot * part.QuantitiesPerLot;
 
             var orderLotNo = Model.SupplierModel.Order(orderDate, part, numLot, arrivalDate);
 
+            //入荷予定と破棄予定の各在庫アクションが正しい日付、登録数、破棄数で登録されている
             AssertStockAction(StockActionType.SCHEDULED_TO_ARRIVE, arrivalDate, arrivalDate, part.Code, orderLotNo, numParts, numParts);
+            AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, discardDate, arrivalDate, part.Code, orderLotNo, numParts, 0);
+            foreach(var d in Enumerable.Range(0, part.ExpiryDate).Select(i => arrivalDate.AddDays(i)))
+            {
+                // 入荷予定日当日～破棄予定日当日 の間の使用予定在庫アクションが登録されている
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, d, arrivalDate, part.Code, orderLotNo, 0, numParts);
+            }
 #if false
 
             var order = new {
@@ -113,7 +121,7 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void AssertStockAction(StockActionType type, DateTime targetDate, DateTime arrivalDate, string partCode, int lotno, int quantity, int remain)
         {
-            var key = $"基準日={targetDate.ToString("yyyymmdd")}, アクション={type.ToString()}, 花コード={partCode}, 在庫ロット番号={lotno}, 入荷日={arrivalDate.ToString("yyyymmdd")}";
+            var key = $"基準日={targetDate.ToString("yyyyMMdd")}, アクション={type.ToString()}, 花コード={partCode}, 在庫ロット番号={lotno}, 入荷日={arrivalDate.ToString("yyyyMMdd")}";
 
             var candidate = TestDBContext.StockActions
                 .Where(a => a.Action == type)
