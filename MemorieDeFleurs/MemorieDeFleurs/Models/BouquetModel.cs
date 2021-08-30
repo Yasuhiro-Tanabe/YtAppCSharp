@@ -34,6 +34,7 @@ namespace MemorieDeFleurs.Models
             Sequence = new SequenceUtil(DbContext.Database.GetDbConnection() as SqliteConnection);
         }
 
+        #region BouquetPart の生成/更新/削除
         /// <summary>
         /// 単品オブジェクト生成器
         /// 
@@ -134,6 +135,7 @@ namespace MemorieDeFleurs.Models
                 return p;
             }
         }
+        #endregion // BouquetPart の生成/更新/削除
 
         /// <summary>
         /// DB登録オブジェクト生成器を取得する
@@ -200,6 +202,179 @@ namespace MemorieDeFleurs.Models
         public void Remove(string partCode)
         {
             Remove(Find(partCode));
+        }
+
+        /// <summary>
+        /// 在庫から使用した単品を指定個数取り去る
+        /// </summary>
+        /// <param name="part">対象となる単品</param>
+        /// <param name="date">日付</param>
+        /// <param name="quantity">取り去る数量</param>
+        /// <returns>取り去った後の在庫数量：当日分複数ロットの合計値</returns>
+        public int UseBouquetPart(BouquetPart part, DateTime date, int quantity)
+        {
+            var stocks = DbContext.StockActions
+                .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
+                .Where(a => 0 == a.ActionDate.CompareTo(date))
+                .Where(a => a.Remain > 0)
+                .OrderBy(a => a.ArrivalDate)
+                .ToList();
+
+            foreach(var s in stocks)
+            {
+                if(s.Remain >= quantity)
+                {
+                    s.Quantity += quantity;
+                    s.Remain -= quantity;
+
+                    // 同一ロットの翌日以降の残数更新
+                    var daysAfter = DbContext.StockActions
+                        .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
+                        .Where(a => a.StockLotNo == s.StockLotNo)
+                        .Where(a => a.ActionDate > s.ActionDate)
+                        .OrderBy(a => a.ActionDate)
+                        .ToList();
+                    foreach (var a in daysAfter)
+                    {
+                        a.Remain -= quantity;
+                        DbContext.StockActions.Update(a);
+
+                    }
+
+                    // 同一ロットの破棄数更新
+                    var discarding = DbContext.StockActions
+                        .Where(a => a.Action == StockActionType.SCHEDULED_TO_DISCARD)
+                        .Where(a => a.StockLotNo == s.StockLotNo)
+                        .Single();
+                    discarding.Quantity -= quantity;
+                    DbContext.StockActions.Update(discarding);
+                }
+                else // s.Remain < quantity
+                {
+                    var outOfStock = quantity - s.Remain;
+                    s.Quantity += s.Remain;
+                    s.Remain = 0;
+                    quantity = -outOfStock;
+
+                    // 同一ロットの翌日以降の残数更新
+                    var daysAfter = DbContext.StockActions
+                        .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
+                        .Where(a => a.StockLotNo == s.StockLotNo)
+                        .Where(a => a.ActionDate > s.ActionDate)
+                        .OrderBy(a => a.ActionDate)
+                        .ToList();
+                    foreach (var a in daysAfter)
+                    {
+                        if(a.Quantity > 0)
+                        {
+                            // [TODO] この日加工していた分は別のロットで加工させる
+                        }
+                        a.Remain = 0;
+                        DbContext.StockActions.Update(a);
+                    }
+
+                    // 同一ロットの破棄数更新
+                    var discarding = DbContext.StockActions
+                        .Where(a => a.Action == StockActionType.SCHEDULED_TO_DISCARD)
+                        .Where(a => a.StockLotNo == s.StockLotNo)
+                        .Single();
+                    if(discarding.Quantity > 0)
+                    {
+                        discarding.Quantity = 0;
+                        DbContext.StockActions.Update(discarding);
+                    }
+
+                    // 在庫不足レコード追加
+                    var outOfStockAction = new StockAction()
+                    {
+                        Action = StockActionType.OUT_OF_STOCK,
+                        ActionDate = s.ActionDate,
+                        ArrivalDate = s.ArrivalDate,
+                        PartsCode = s.PartsCode,
+                        StockLotNo = s.StockLotNo,
+                        Quantity = outOfStock,
+                        Remain = -outOfStock
+                    };
+                    DbContext.StockActions.Add(outOfStockAction);
+                }
+            }
+
+            DbContext.SaveChanges();
+
+            return DbContext.StockActions
+                .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE || a.Action == StockActionType.OUT_OF_STOCK)
+                .Where(a => 0 == a.ActionDate.CompareTo(date))
+                .Sum(a => a.Remain);
+        }
+
+        private int UseBouquetPartImpl(List<StockAction> stocks, int quantity)
+        {
+            foreach (var s in stocks)
+            {
+                if (quantity > 0)
+                {
+                    if (s.Remain >= quantity)
+                    {
+                        s.Quantity += quantity;
+                        s.Remain -= quantity;
+
+                        // [TODO] 同じロットの翌日以降の在庫を順次更新する
+                        var theDayAfter = DbContext.StockActions
+                            .Where(a => a.StockLotNo == s.StockLotNo)
+                            .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
+                            .Where(a => s.ActionDate > s.ActionDate)
+                            .OrderBy(a => a.ActionDate)
+                            .ToList();
+                        foreach(var ss in theDayAfter)
+                        {
+                            if(ss.Remain >= quantity)
+                            {
+                                ss.Remain -= quantity;
+                            }
+                            else
+                            {
+                                var usedToday = quantity - ss.Remain;
+                                ss.Remain = 0;
+                                quantity -= usedToday;
+
+                                // [TODO] 同じ日付の別ロットから残りを引く
+                            }
+                        }
+
+                        // [TODO] 同じロットの破棄予定数を更新する
+                        var theDiscard = DbContext.StockActions
+                            .Where(a => a.StockLotNo == s.StockLotNo)
+                            .Where(a => a.Action == StockActionType.SCHEDULED_TO_DISCARD)
+                            .Single();
+                        if(theDiscard.Quantity >= quantity)
+                        {
+                            theDiscard.Quantity -= quantity;
+                        }
+                        else
+                        {
+                            // 多分在庫エラー。
+
+                        }
+
+                        quantity = 0;
+                    }
+                    else
+                    {
+                        s.Quantity += s.Remain;
+                        quantity -= s.Remain;
+                        s.Remain = 0;
+
+                        // [TODO] 同じロットの翌日以降の在庫はゼロなので、翌日以降の加工分を次のロットで処理させる
+                    }
+                    DbContext.StockActions.Update(s);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return quantity;
         }
     }
 }

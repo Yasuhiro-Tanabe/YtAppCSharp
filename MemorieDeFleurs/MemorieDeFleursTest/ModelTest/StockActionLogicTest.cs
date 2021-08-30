@@ -141,7 +141,93 @@ namespace MemorieDeFleursTest.ModelTest
             AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_DISCARD);
         }
 
+        [TestMethod]
+        public void CanRemoveUsedQuantityOfPartsFromStockAction()
+        {
+            var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
+            var expectedUsedDate = new DateTime(2020, 4, 30);
+            var expectedArrivalDate = expectedUsedDate;
+            var expectedLotNumber = InitialOrderLotNumbers[0];
+            var quantity = 20;
+            var expectedRemain = 180;
 
+            var actualRemain = Model.BouquetModel.UseBouquetPart(expectedPart, expectedUsedDate, quantity);
+
+            // 加工当日分残数は正しいか
+            Assert.AreEqual(expectedRemain, actualRemain);
+            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expectedUsedDate, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, quantity, expectedRemain);
+
+            // 翌日から破棄予定日までの残数に反映されているか (翌日からなので列挙の要素数は「品質維持可能日数-1」個)
+            foreach(var day in Enumerable.Range(1, expectedPart.ExpiryDate-1).Select(i => expectedArrivalDate.AddDays(i)))
+            {
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, day, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, 0, expectedRemain);
+            }
+
+            // 破棄された数はあっているか
+            var discardDate = expectedArrivalDate.AddDays(expectedPart.ExpiryDate);
+            AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, discardDate, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, expectedRemain, 0);
+        }
+
+        [TestMethod]
+        public void AllStocksInTheDayIsUsed()
+        {
+            var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
+            var expectedUsedDate = new DateTime(2020, 4, 30);
+            var expectedArrivalDate = expectedUsedDate;
+            var expectedLotNumber = InitialOrderLotNumbers[0];
+            var quantity = 200;
+            var expectedRemain = 0;
+
+            var actualRemain = Model.BouquetModel.UseBouquetPart(expectedPart, expectedUsedDate, quantity);
+
+            // 加工当日分残数は正しいか
+            Assert.AreEqual(expectedRemain, actualRemain);
+            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expectedUsedDate, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, quantity, expectedRemain);
+
+            // 翌日から破棄予定日までの残数に反映されているか (翌日からなので列挙の要素数は「品質維持可能日数-1」個)
+            foreach (var day in Enumerable.Range(1, expectedPart.ExpiryDate - 1).Select(i => expectedArrivalDate.AddDays(i)))
+            {
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, day, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, 0, expectedRemain);
+            }
+
+            // 破棄された数はあっているか
+            var discardDate = expectedArrivalDate.AddDays(expectedPart.ExpiryDate);
+            AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, discardDate, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, expectedRemain, 0);
+        }
+
+        [TestMethod]
+        public void NotEnoughStocksInTheDay_andOutofStockRecordGenerated()
+        {
+            var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
+            var expectedUsedDate = new DateTime(2020, 4, 30);
+            var expectedArrivalDate = expectedUsedDate;
+            var expectedLotNumber = InitialOrderLotNumbers[0];
+            var quantity = 220;
+            var expectedUsedQuantity = 200;
+            var expectedOutOfStock = 20;
+
+            var actualRemain = Model.BouquetModel.UseBouquetPart(expectedPart, expectedUsedDate, quantity);
+
+            // 加工当日分残数は正しいか
+            Assert.AreEqual(-expectedOutOfStock, actualRemain);
+            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expectedUsedDate, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, expectedUsedQuantity, 0);
+
+            // 翌日から破棄予定日までの残数に反映されているか (翌日からなので列挙の要素数は「品質維持可能日数-1」個)
+            foreach (var day in Enumerable.Range(1, expectedPart.ExpiryDate - 1).Select(i => expectedArrivalDate.AddDays(i)))
+            {
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, day, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, 0, 0);
+            }
+
+            // 破棄された数はあっているか
+            var discardDate = expectedArrivalDate.AddDays(expectedPart.ExpiryDate);
+            AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, discardDate, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, 0, 0);
+
+            // 在庫不足の在庫アクションが登録されているか
+            AssertStockAction(StockActionType.OUT_OF_STOCK, expectedArrivalDate, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, expectedOutOfStock, -expectedOutOfStock);
+
+        }
+
+        #region 在庫アクションに関する検証用サポート関数
         /// <summary>
         /// 特定の１在庫アクションが、数量や残数も含めすべて意図通り登録されているかどうかを検証する
         /// </summary>
@@ -202,5 +288,6 @@ namespace MemorieDeFleursTest.ModelTest
         {
             Assert.AreEqual(0, TestDBContext.StockActions.Count(a => a.Action == type && a.StockLotNo == lotNo));
         }
+        #endregion // 在庫アクションに関する検証用サポート関数
     }
 }
