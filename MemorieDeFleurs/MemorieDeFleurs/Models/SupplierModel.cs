@@ -337,5 +337,16 @@ namespace MemorieDeFleurs.Models
             DbContext.StockActions.Add(arrive);
         }
         #endregion // 発注
+
+        #region 発注取消
+        public void CancelOrder(int lotNo)
+        {
+            var actions = DbContext.StockActions.Where(a => a.StockLotNo == lotNo).ToList();
+
+            DbContext.StockActions.RemoveRange(actions);
+            DbContext.SaveChanges();
+
+        }
+        #endregion // 発注取消
     }
 }

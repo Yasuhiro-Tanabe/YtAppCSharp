@@ -110,6 +110,52 @@ namespace MemorieDeFleursTest.ModelTest
             AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_DISCARD);
         }
 
+        [TestMethod]
+        public void CanRemoveOneOrdersOfSingleSupplier()
+        {
+            var orders = new
+            {
+                Supplier = Model.SupplierModel.Find(ExpectedSupplerCode),
+                Part = Model.BouquetModel.Find(ExpectedPartCode),
+                OrderDate = new DateTime(2020, 4, 25),
+                OrderBody = new List<Tuple<DateTime, int>>() {
+                    Tuple.Create(new DateTime(2020,4,30), 2),
+                    Tuple.Create(new DateTime(2020,5,1), 2),
+                    Tuple.Create(new DateTime(2020,5,2), 3),
+                    Tuple.Create(new DateTime(2020,5,3), 2),
+                    Tuple.Create(new DateTime(2020,5,6), 1)
+                }
+            };
+            var indexOfCancelOrder = 2; // 20200502 のオーダー
+            var expectedCountOfOrders = orders.OrderBody.Count - 1;
+            var expectedCountOfScheduledToUseStockActions = orders.Part.ExpiryDate * expectedCountOfOrders;
+
+            var lotNumbers = new List<int>();
+
+            foreach (var o in orders.OrderBody)
+            {
+                lotNumbers.Add(Model.SupplierModel.Order(orders.OrderDate, orders.Part, o.Item2, o.Item1));
+            }
+
+            var expectedCanceledLotNumber = lotNumbers[indexOfCancelOrder]; 
+
+            Model.SupplierModel.CancelOrder(expectedCanceledLotNumber);
+            lotNumbers.RemoveAt(indexOfCancelOrder);
+
+            Assert.AreEqual(expectedCountOfOrders, lotNumbers.Count, $"注文数と発注ロット数の不一致：仕入先={orders.Supplier.Name}, 花コード={orders.Part.Name}");
+
+            // 対象在庫ロットに関する在庫アクションが消えていること
+            AssertNoStockActions(StockActionType.SCHEDULED_TO_ARRIVE, expectedCanceledLotNumber);
+            AssertNoStockActions(StockActionType.SCHEDULED_TO_USE, expectedCanceledLotNumber);
+            AssertNoStockActions(StockActionType.SCHEDULED_TO_DISCARD, expectedCanceledLotNumber);
+
+            // ほかの在庫ロットアクションが消えていないこと
+            AssertAllLotNumbersAreUnique(lotNumbers);
+            AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_ARRIVE);
+            AssertStockActionCount(expectedCountOfScheduledToUseStockActions, StockActionType.SCHEDULED_TO_USE);
+            AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_DISCARD);
+        }
+
 
         private void AssertStockAction(StockActionType type, DateTime targetDate, DateTime arrivalDate, string partCode, int lotno, int quantity, int remain)
         {
@@ -141,6 +187,11 @@ namespace MemorieDeFleursTest.ModelTest
         private void AssertAllLotNumbersAreUnique(List<int> lotNumbers)
         {
             lotNumbers.ForEach(i => Assert.AreEqual(1, TestDBContext.StockActions.Count(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == i)));
+        }
+
+        private void AssertNoStockActions(StockActionType type, int lotNo)
+        {
+            Assert.AreEqual(0, TestDBContext.StockActions.Count(a => a.Action == type && a.StockLotNo == lotNo));
         }
     }
 }
