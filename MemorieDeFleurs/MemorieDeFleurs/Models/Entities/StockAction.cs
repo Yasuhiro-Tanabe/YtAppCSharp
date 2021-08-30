@@ -18,7 +18,7 @@ namespace MemorieDeFleurs.Models.Entities
         /// 基準日
         /// </summary>
         [Column("ACTION_DATE")]
-        public int ActionDate { get; set; }
+        public DateTime ActionDate { get; set; }
 
         /// <summary>
         /// アクション
@@ -36,7 +36,7 @@ namespace MemorieDeFleurs.Models.Entities
         /// 入荷日
         /// </summary>
         [Column("ARRIVAL_DATE")]
-        public int ArrivalDate { get; set; }
+        public DateTime ArrivalDate { get; set; }
 
         /// <summary>
         /// 在庫ロット番号

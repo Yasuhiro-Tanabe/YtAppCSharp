@@ -1,9 +1,12 @@
 ﻿using MemorieDeFleurs.Entities;
+using MemorieDeFleurs.Models.Converters;
 using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
+using System;
 using System.Data.Common;
 
 namespace MemorieDeFleurs.Models
@@ -58,12 +61,25 @@ namespace MemorieDeFleurs.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            var converter = new DateTimeConverter();
+
             modelBuilder
                 .Entity<StockAction>()
                 .HasKey("ActionDate", "Action", "PartsCode", "ArrivalDate", "StockLotNo");
+
             modelBuilder
                 .Entity<PartSupplier>()
                 .HasKey("SupplierCode", "PartCode");
+
+            modelBuilder
+                .Entity<StockAction>()
+                .Property(a => a.ActionDate)
+                .HasConversion(converter);
+
+            modelBuilder
+                .Entity<StockAction>()
+                .Property(a => a.ArrivalDate)
+                .HasConversion(converter);
         }
 
         /// <summary>

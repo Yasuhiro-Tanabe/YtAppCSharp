@@ -91,10 +91,10 @@ namespace MemorieDeFleursTest.ModelEntityTest
 
             StockAction action = new StockAction()
             {
-                ActionDate = 20040330,
+                ActionDate = new DateTime(2004,03,30),
                 Action = StockActionType.SCHEDULED_TO_ARRIVE,
                 PartsCode = ExpectedPartCode,
-                ArrivalDate = 20040330,
+                ArrivalDate = new DateTime(2004,03,30),
                 StockLotNo = 1,
                 Quantity = 200,
                 Remain = 200

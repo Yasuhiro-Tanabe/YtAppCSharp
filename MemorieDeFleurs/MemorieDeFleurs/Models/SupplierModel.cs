@@ -227,7 +227,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="part">単品</param>
         /// <param name="numLot">注文ロット数</param>
         /// <param name="arrivalDate">納品予定日</param>
-        public int Order(int orderDate, BouquetPart part, int numLot, int arrivalDate)
+        public int Order(DateTime orderDate, BouquetPart part, int numLot, DateTime arrivalDate)
         {
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
             var lotNo = 1;
