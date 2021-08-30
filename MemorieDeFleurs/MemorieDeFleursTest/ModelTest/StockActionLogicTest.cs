@@ -157,6 +157,16 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
 
+        /// <summary>
+        /// 特定の１在庫アクションが、数量や残数も含めすべて意図通り登録されているかどうかを検証する
+        /// </summary>
+        /// <param name="type">在庫アクション</param>
+        /// <param name="targetDate">基準日</param>
+        /// <param name="arrivalDate">入荷(予定)日</param>
+        /// <param name="partCode">花コード</param>
+        /// <param name="lotno">在庫ロット番号</param>
+        /// <param name="quantity">数量</param>
+        /// <param name="remain">残数</param>
         private void AssertStockAction(StockActionType type, DateTime targetDate, DateTime arrivalDate, string partCode, int lotno, int quantity, int remain)
         {
             var key = $"基準日={targetDate.ToString("yyyyMMdd")}, アクション={type.ToString()}, 花コード={partCode}, 在庫ロット番号={lotno}, 入荷日={arrivalDate.ToString("yyyyMMdd")}";
@@ -178,17 +188,31 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(remain, action.Remain, "残数不一致：" + key);
         }
 
+        /// <summary>
+        /// 特定のアクションタイプを持つ在庫アクションが指定個数登録されているかどうかを検証する
+        /// </summary>
+        /// <param name="expected">在庫アクション数の期待値</param>
+        /// <param name="type">検証対象の在庫アクションタイプ</param>
         private void AssertStockActionCount(int expected, StockActionType type)
         {
             int actual = TestDBContext.StockActions.Count(a => a.Action == type);
             Assert.AreEqual(expected, actual, $"登録されるべき在庫アクション数の不一致：アクション={type.ToString()}");
         }
 
+        /// <summary>
+        /// 各ロット毎の入荷予定在庫アクションを数え、指定ロット番号の在庫アクションが登録されているか、ロット番号に重複がないかどうかを検証する
+        /// </summary>
+        /// <param name="lotNumbers">懸賞対象ロット番号の一覧</param>
         private void AssertAllLotNumbersAreUnique(List<int> lotNumbers)
         {
             lotNumbers.ForEach(i => Assert.AreEqual(1, TestDBContext.StockActions.Count(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == i)));
         }
 
+        /// <summary>
+        /// 指定ロット番号の、指定された在庫アクションが登録されて*いない*ことを検証する
+        /// </summary>
+        /// <param name="type">在庫アクションタイプ</param>
+        /// <param name="lotNo">在庫ロット番号</param>
         private void AssertNoStockActions(StockActionType type, int lotNo)
         {
             Assert.AreEqual(0, TestDBContext.StockActions.Count(a => a.Action == type && a.StockLotNo == lotNo));
