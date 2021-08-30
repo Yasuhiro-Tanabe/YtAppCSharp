@@ -148,6 +148,7 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         internal int NextSequenceCode { get { return Sequences.SEQ_SUPPLIERS.Next; } }
 
+
         /// <summary>
         /// DB登録オブジェクト生成器を取得する
         /// </summary>
@@ -219,64 +220,121 @@ namespace MemorieDeFleurs.Models
         #endregion // Supplier の生成・更新・削除
 
         #region 発注
+
+        /// <summary>
+        /// 発注時に登録する在庫アクションの共通パラメータ
+        /// </summary>
+        private class StockActionParameterToOrder
+        {
+            /// <summary>
+            /// 到着予定日
+            /// </summary>
+            public DateTime ArrivalDate { get; private set; }
+
+            /// <summary>
+            /// 花コード
+            /// </summary>
+            public string PartsCode { get; private set; }
+
+            /// <summary>
+            /// 在庫ロット番号
+            /// </summary>
+            public int StockActionLotNo { get; private set; }
+
+            /// <summary>
+            /// 数量[本]：初期登録時は入荷時の数量を全量破棄する
+            /// </summary>
+            public int Quantity { get; private set; }
+
+            /// <summary>
+            /// 品質維持可能日数[日]：加工予定および破棄予定の在庫アクションで日付計算のために使用する。
+            /// </summary>
+            public int DaysToExpire { get; private set; }
+
+            public StockActionParameterToOrder(DateTime arrival, BouquetPart part, int lotNo, int quantityOfLot)
+            {
+                ArrivalDate = arrival;
+                PartsCode = part.Code;
+                StockActionLotNo = lotNo;
+                Quantity = quantityOfLot * part.QuantitiesPerLot;
+                DaysToExpire = part.ExpiryDate;
+            }
+        }
+
         /// <summary>
         /// (試作) 注文処理に伴う在庫アクション登録
         /// </summary>
         /// <param name="orderDate">発注日</param>
         /// <param name="part">単品</param>
-        /// <param name="numLot">注文ロット数</param>
+        /// <param name="quantityOfLot">注文ロット数</param>
         /// <param name="arrivalDate">納品予定日</param>
         /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
-        public int Order(DateTime orderDate, BouquetPart part, int numLot, DateTime arrivalDate)
+        public int Order(DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
             var lotNo = 1;
 
+            var param = new StockActionParameterToOrder(arrivalDate, part, lotNo, quantityOfLot);
 
-            var arrive = new StockAction()
-            {
-                ActionDate = arrivalDate,
-                Action = StockActionType.SCHEDULED_TO_ARRIVE,
-                PartsCode = part.Code,
-                StockLotNo = lotNo,
-                ArrivalDate = arrivalDate,
-                Quantity = numLot * part.QuantitiesPerLot,
-                Remain = numLot * part.QuantitiesPerLot
-            };
-            DbContext.StockActions.Add(arrive);
+            AddScheduledToArriveStockAction(param);
 
-            var discard = new StockAction()
-            {
-                ActionDate = arrivalDate.AddDays(part.ExpiryDate),
-                Action = StockActionType.SCHEDULED_TO_DISCARD,
-                PartsCode = part.Code,
-                StockLotNo = lotNo,
-                ArrivalDate = arrivalDate,
-                Quantity = numLot * part.QuantitiesPerLot,
-                Remain = 0
-            };
-            DbContext.StockActions.Add(discard);
+            AddScheduledToDiscardStockAction(param);
 
-            foreach(var d in Enumerable.Range(0, part.ExpiryDate).Select(i => arrivalDate.AddDays(i)))
-            {
-                var toUse = new StockAction()
-                {
-                    ActionDate = d,
-                    Action = StockActionType.SCHEDULED_TO_USE,
-                    PartsCode = part.Code,
-                    StockLotNo = lotNo,
-                    ArrivalDate = arrivalDate,
-                    Quantity = 0,
-                    Remain = numLot * part.QuantitiesPerLot
-                };
-                DbContext.StockActions.Add(toUse);
-
-            }
+            AddScheduledToUseStockAction(param);
 
             DbContext.SaveChanges();
 
             return lotNo;
 
+        }
+
+        private void AddScheduledToUseStockAction(StockActionParameterToOrder param)
+        {
+            foreach (var d in Enumerable.Range(0, param.DaysToExpire).Select(i => param.ArrivalDate.AddDays(i)))
+            {
+                var toUse = new StockAction()
+                {
+                    ActionDate = d,
+                    Action = StockActionType.SCHEDULED_TO_USE,
+                    PartsCode = param.PartsCode,
+                    StockLotNo = param.StockActionLotNo,
+                    ArrivalDate = param.ArrivalDate,
+                    Quantity = 0,
+                    Remain = param.Quantity
+                };
+                DbContext.StockActions.Add(toUse);
+
+            }
+        }
+
+        private void AddScheduledToDiscardStockAction(StockActionParameterToOrder param)
+        {
+            var discard = new StockAction()
+            {
+                ActionDate = param.ArrivalDate.AddDays(param.DaysToExpire),
+                Action = StockActionType.SCHEDULED_TO_DISCARD,
+                PartsCode = param.PartsCode,
+                StockLotNo = param.StockActionLotNo,
+                ArrivalDate = param.ArrivalDate,
+                Quantity = param.Quantity,
+                Remain = 0
+            };
+            DbContext.StockActions.Add(discard);
+        }
+
+        private void AddScheduledToArriveStockAction(StockActionParameterToOrder param)
+        {
+            var arrive = new StockAction()
+            {
+                ActionDate = param.ArrivalDate,
+                Action = StockActionType.SCHEDULED_TO_ARRIVE,
+                PartsCode = param.PartsCode,
+                StockLotNo = param.StockActionLotNo,
+                ArrivalDate = param.ArrivalDate,
+                Quantity = param.Quantity,
+                Remain = param.Quantity
+            };
+            DbContext.StockActions.Add(arrive);
         }
         #endregion // 発注
     }
