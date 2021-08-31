@@ -224,7 +224,7 @@ namespace MemorieDeFleurs.Models
             {
                 if(s.Remain >= quantity)
                 {
-                    // この在庫アクションで全量加工できない
+                    // この在庫アクションで全量加工できる
                     s.Quantity += quantity;
                     s.Remain -= quantity;
 
@@ -313,74 +313,5 @@ namespace MemorieDeFleurs.Models
                 .Sum(a => a.Remain);
         }
 
-        private int UseBouquetPartImpl(List<StockAction> stocks, int quantity)
-        {
-            foreach (var s in stocks)
-            {
-                if (quantity > 0)
-                {
-                    if (s.Remain >= quantity)
-                    {
-                        s.Quantity += quantity;
-                        s.Remain -= quantity;
-
-                        // [TODO] 同じロットの翌日以降の在庫を順次更新する
-                        var theDayAfter = DbContext.StockActions
-                            .Where(a => a.StockLotNo == s.StockLotNo)
-                            .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
-                            .Where(a => s.ActionDate > s.ActionDate)
-                            .OrderBy(a => a.ActionDate)
-                            .ToList();
-                        foreach(var ss in theDayAfter)
-                        {
-                            if(ss.Remain >= quantity)
-                            {
-                                ss.Remain -= quantity;
-                            }
-                            else
-                            {
-                                var usedToday = quantity - ss.Remain;
-                                ss.Remain = 0;
-                                quantity -= usedToday;
-
-                                // [TODO] 同じ日付の別ロットから残りを引く
-                            }
-                        }
-
-                        // [TODO] 同じロットの破棄予定数を更新する
-                        var theDiscard = DbContext.StockActions
-                            .Where(a => a.StockLotNo == s.StockLotNo)
-                            .Where(a => a.Action == StockActionType.SCHEDULED_TO_DISCARD)
-                            .Single();
-                        if(theDiscard.Quantity >= quantity)
-                        {
-                            theDiscard.Quantity -= quantity;
-                        }
-                        else
-                        {
-                            // 多分在庫エラー。
-
-                        }
-
-                        quantity = 0;
-                    }
-                    else
-                    {
-                        s.Quantity += s.Remain;
-                        quantity -= s.Remain;
-                        s.Remain = 0;
-
-                        // [TODO] 同じロットの翌日以降の在庫はゼロなので、翌日以降の加工分を次のロットで処理させる
-                    }
-                    DbContext.StockActions.Update(s);
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return quantity;
-        }
     }
 }
