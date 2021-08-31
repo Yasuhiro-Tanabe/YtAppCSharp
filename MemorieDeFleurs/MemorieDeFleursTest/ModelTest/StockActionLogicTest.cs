@@ -18,7 +18,7 @@ namespace MemorieDeFleursTest.ModelTest
         private int ExpectedSupplerCode { get; set; }
         private string ExpectedPartCode { get; set; }
 
-        private List<int> InitialOrderLotNumbers { get; } = new List<int>();
+        private IDictionary<DateTime, ISet<int>> ArrivedLotNumbers { get; } = new SortedDictionary<DateTime, ISet<int>>();
 
         public StockActionLogicTest() : base()
         {
@@ -59,7 +59,14 @@ namespace MemorieDeFleursTest.ModelTest
             };
             foreach (var o in orders.OrderBody)
             {
-                InitialOrderLotNumbers.Add(Model.SupplierModel.Order(orders.OrderDate, p, o.Item2, o.Item1));
+                ISet<int> lotNumbers;
+                if(!ArrivedLotNumbers.TryGetValue(o.Item1, out lotNumbers))
+                {
+                    lotNumbers = new SortedSet<int>();
+                    ArrivedLotNumbers.Add(o.Item1, lotNumbers);
+                }
+
+                lotNumbers.Add(Model.SupplierModel.Order(orders.OrderDate, p, o.Item2, o.Item1));
             }
 
 
@@ -106,29 +113,28 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var expectedSupplier = Model.SupplierModel.Find(ExpectedSupplerCode);
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var expectedCountOfOrders = InitialOrderLotNumbers.Count;
+            var expectedCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count();
             var expectedCountOfScheduledToUseStockActions = expectedPart.ExpiryDate * expectedCountOfOrders;
             
             // 登録は TestInitialize で行っている処理で代用
 
             Assert.AreEqual(expectedCountOfOrders, expectedCountOfOrders, $"注文数と発注ロット数の不一致：仕入先={expectedSupplier.Name}, 花コード={expectedPart.Name}");
-            AssertAllLotNumbersAreUnique(InitialOrderLotNumbers);
+            AssertAllLotNumbersAreUnique();
             AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_ARRIVE);
             AssertStockActionCount(expectedCountOfScheduledToUseStockActions, StockActionType.SCHEDULED_TO_USE);
             AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_DISCARD);
         }
 
         /// <summary>
-        /// 複数ロットの入荷(予定)在庫アクションに潤沢な数量がある状態では、入荷日の一番若い在庫ロットから順に引当されることの確認
+        /// 複数ロットの入荷(予定)在庫アクションに潤沢な数量がある状態では、入荷日の一番若い在庫ロットの数量ないで加工が行われることの確認
         /// </summary>
         [TestMethod]
         public void WillBeUsedEarliestArrivedStockLotWhenTwoOrMoreLotHasEnoughQuantity()
         {
             var expectedSupplier = Model.SupplierModel.Find(ExpectedSupplerCode);
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-
             var expected = new {
-                LotNo = InitialOrderLotNumbers[0],
+                LotNo = ArrivedLotNumbers[new DateTime(2020,4,30)].First(),
                 Arrival = new DateTime(2020, 4, 30),
                 PreviousDay = new DateTime(2020, 4, 30),
                 Today = new DateTime(2020, 5, 1),
@@ -140,7 +146,7 @@ namespace MemorieDeFleursTest.ModelTest
             };
             var another = new
             {
-                LotNo = InitialOrderLotNumbers[1],
+                LotNo = ArrivedLotNumbers[new DateTime(2020,5,1)].First(),
                 Arrival = new DateTime(2020, 5, 1),
                 Today = new DateTime(2020, 5, 1),
                 NextDay = new DateTime(2020, 5, 2),
@@ -168,16 +174,18 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var expectedSupplier = Model.SupplierModel.Find(ExpectedSupplerCode);
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var indexOfCancelOrder = 2; // 20200502 のオーダー
-            var expectedCountOfOrders = InitialOrderLotNumbers.Count - 1;
+            var orderCancelDate = new DateTime(2020,5,2);
+            var expectedCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count() - 1;
             var expectedCountOfScheduledToUseStockActions = expectedPart.ExpiryDate * expectedCountOfOrders;
 
-            var expectedCanceledLotNumber = InitialOrderLotNumbers[indexOfCancelOrder]; 
+            var expectedCanceledLotNumber = ArrivedLotNumbers[orderCancelDate].First(); 
 
             Model.SupplierModel.CancelOrder(expectedCanceledLotNumber);
-            InitialOrderLotNumbers.RemoveAt(indexOfCancelOrder);
+            ArrivedLotNumbers[orderCancelDate].Remove(expectedCanceledLotNumber);
 
-            Assert.AreEqual(expectedCountOfOrders, InitialOrderLotNumbers.Count, $"注文数と発注ロット数の不一致：仕入先={expectedSupplier.Name}, 花コード={expectedPart.Name}");
+
+            var actualCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count();
+            Assert.AreEqual(expectedCountOfOrders, actualCountOfOrders, $"注文数と発注ロット数の不一致：仕入先={expectedSupplier.Name}, 花コード={expectedPart.Name}");
 
             // 対象在庫ロットに関する在庫アクションが消えていること
             AssertNoStockActions(StockActionType.SCHEDULED_TO_ARRIVE, expectedCanceledLotNumber);
@@ -185,7 +193,7 @@ namespace MemorieDeFleursTest.ModelTest
             AssertNoStockActions(StockActionType.SCHEDULED_TO_DISCARD, expectedCanceledLotNumber);
 
             // ほかの在庫ロットアクションが消えていないこと
-            AssertAllLotNumbersAreUnique(InitialOrderLotNumbers);
+            AssertAllLotNumbersAreUnique();
             AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_ARRIVE);
             AssertStockActionCount(expectedCountOfScheduledToUseStockActions, StockActionType.SCHEDULED_TO_USE);
             AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_DISCARD);
@@ -197,7 +205,7 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
             var expectedUsedDate = new DateTime(2020, 4, 30);
             var expectedArrivalDate = expectedUsedDate;
-            var expectedLotNumber = InitialOrderLotNumbers[0];
+            var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
             var quantity = 20;
             var expectedRemain = 180;
 
@@ -224,7 +232,7 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
             var expectedUsedDate = new DateTime(2020, 4, 30);
             var expectedArrivalDate = expectedUsedDate;
-            var expectedLotNumber = InitialOrderLotNumbers[0];
+            var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
             var quantity = 200;
             var expectedRemain = 0;
 
@@ -251,7 +259,7 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
             var expectedUsedDate = new DateTime(2020, 4, 30);
             var expectedArrivalDate = expectedUsedDate;
-            var expectedLotNumber = InitialOrderLotNumbers[0];
+            var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
             var quantity = 220;
             var expectedUsedQuantity = 200;
             var expectedOutOfStock = 20;
@@ -323,10 +331,19 @@ namespace MemorieDeFleursTest.ModelTest
         /// <summary>
         /// 各ロット毎の入荷予定在庫アクションを数え、指定ロット番号の在庫アクションが登録されているか、ロット番号に重複がないかどうかを検証する
         /// </summary>
-        /// <param name="lotNumbers">懸賞対象ロット番号の一覧</param>
-        private void AssertAllLotNumbersAreUnique(List<int> lotNumbers)
+        private void AssertAllLotNumbersAreUnique()
         {
-            lotNumbers.ForEach(i => Assert.AreEqual(1, TestDBContext.StockActions.Count(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == i)));
+            // Linqで全ロット番号を一つの IEnumerable に変形する手段もあるが、それだとアサーション発生したロットの入荷日がわからないので
+            // 愚直に二重ループを回す
+            foreach(var i in ArrivedLotNumbers)
+            {
+                foreach(var j in i.Value)
+                {
+                    var actual = TestDBContext.StockActions.Count(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == j);
+                    var days = TestDBContext.StockActions.Where(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == j).Select(a => a.ArrivalDate);
+                    Assert.AreEqual(1, actual, $"ロット番号={j}, 入荷日=[{string.Join(", ", days)}]");
+                }
+            }
         }
 
         /// <summary>
