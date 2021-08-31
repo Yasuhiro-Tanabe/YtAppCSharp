@@ -152,5 +152,23 @@ namespace GameOfLife.Core.Test
 
             if(field[x,height]) { Assert.Fail("Getterが例外を吐くはず"); }
         }
+
+        /// <summary>
+        /// 世代交代の実装：全セル死滅状態の時は、世代交代しても全セル死滅状態のまま
+        /// </summary>
+        [TestMethod]
+        public void NextGenerationIsDeadAllWhenPreviousGenerationIsDeadAll()
+        {
+            var width = 10u;
+            var height = 12u;
+            var field = new Field(width, height);
+
+            field.AdvanceGeneration();
+
+            var allX = Enumerable.Range(0, (int)width).Select(i => (uint)i);
+            var allY = Enumerable.Range(0, (int)height).Select(i => (uint)i);
+
+            Assert.IsTrue(allX.All(x => allY.All(y => field[x, y] == false)));
+        }
     }
 }

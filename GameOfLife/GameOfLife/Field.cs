@@ -72,5 +72,13 @@ namespace GameOfLife.Core
                 throw new IndexOutOfRangeException($"Invalid y: {y}. It shall be from 0 to {Height - 1}.");
             }
         }
+
+        /// <summary>
+        /// セルの世代交代をする
+        /// </summary>
+        public void AdvanceGeneration()
+        {
+
+        }
     }
 }
