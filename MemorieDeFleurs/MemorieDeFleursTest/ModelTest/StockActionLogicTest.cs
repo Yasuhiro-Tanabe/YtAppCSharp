@@ -29,6 +29,9 @@ namespace MemorieDeFleursTest.ModelTest
             public static DateTime May4th { get; } = new DateTime(2020, 5, 4);
             public static DateTime May5th { get; } = new DateTime(2020, 5, 5);
             public static DateTime May6th { get; } = new DateTime(2020, 5, 6);
+            public static DateTime May7th { get; } = new DateTime(2020, 5, 7);
+            public static DateTime May8th { get; } = new DateTime(2020, 5, 8);
+            public static DateTime May9th { get; } = new DateTime(2020, 5, 9);
 
         }
 
@@ -67,8 +70,8 @@ namespace MemorieDeFleursTest.ModelTest
                 OrderDate = new DateTime(2020, 4, 25),
                 OrderBody = new List<Tuple<DateTime, int>>() {
                     Tuple.Create(Date.April30th, 2),
-                    Tuple.Create(Date.May1st, 2),
-                    Tuple.Create(Date.May2nd, 3),
+                    Tuple.Create(Date.May1st, 3),
+                    Tuple.Create(Date.May2nd, 2),
                     Tuple.Create(Date.May3rd, 2),
                     Tuple.Create(Date.May6th, 1)
                 }
@@ -166,9 +169,9 @@ namespace MemorieDeFleursTest.ModelTest
                 Arrival = Date.May1st,
                 Today = Date.May1st,
                 NextDay = Date.May2nd,
-                InitialQuantity = 200,
+                InitialQuantity = 300,
                 Used = 0,
-                Remain = 200
+                Remain = 300
             };
 
             var actualRemain = Model.BouquetModel.UseBouquetPart(expectedPart, expected.Today, expected.Used);
@@ -331,9 +334,9 @@ namespace MemorieDeFleursTest.ModelTest
                     Today = actionDate,
                     Next = actionDate.AddDays(1),
                     Discard = Date.May1st.AddDays(expectedPart.ExpiryDate),
-                    Initial = 200,
+                    Initial = 300,
                     Used = 80,
-                    Remain = 120
+                    Remain = 220
                 },
                 Third = new
                 {
@@ -342,9 +345,9 @@ namespace MemorieDeFleursTest.ModelTest
                     Today = actionDate,
                     Next = actionDate.AddDays(1),
                     Discard = Date.May2nd.AddDays(expectedPart.ExpiryDate),
-                    Initial = 300,
+                    Initial = 200,
                     Used = 0,
-                    Remain = 300
+                    Remain = 200
                 }
             };
 
@@ -394,6 +397,136 @@ namespace MemorieDeFleursTest.ModelTest
             }
 
             // 一日の在庫はトータルすれば潤沢なので、残数不足の在庫アクションは生成されない
+            AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
+        }
+
+        #region 複合テスト用サポートクラス
+        private class ExpectedStockAction
+        {
+            public StockActionType Type { get; private set; }
+
+            private ExpectedStockAction(StockActionType t, int q, int r)
+            {
+                Type = t;
+                Quantity = q;
+                Remain = r;
+            }
+
+            public int Quantity { get; private set; }
+            public int Remain { get; private set; }
+
+            public static ExpectedStockAction CreateArrivedAction(int arrived)
+            {
+                return new ExpectedStockAction(StockActionType.SCHEDULED_TO_ARRIVE, arrived, arrived);
+            }
+
+            public static ExpectedStockAction CreateUsedAction(int used, int remain)
+            {
+                return new ExpectedStockAction(StockActionType.SCHEDULED_TO_USE, used, remain);
+            }
+            public static ExpectedStockAction CreateDiscardAction(int discarded)
+            {
+                return new ExpectedStockAction(StockActionType.SCHEDULED_TO_DISCARD, discarded, 0);
+            }
+        }
+
+        #endregion // 複合テスト用サポートクラス
+
+        [TestMethod]
+        public void CompositeTestFromApril30ToMay7th()
+        {
+            var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
+
+            var test = new Dictionary<DateTime, int>()
+            {
+                { Date.April30th, 20 },
+                { Date.May1st, 50 },
+                { Date.May2nd, 80 },
+                { Date.May3rd, 20 },
+                { Date.May4th, 400 },
+                { Date.May5th, 170 },
+                { Date.May6th, 40 }
+            };
+            var expected = new List<Tuple<DateTime, List<Tuple<DateTime, ExpectedStockAction>>>>() {
+                Tuple.Create(
+                    Date.April30th,
+                    new List<Tuple<DateTime,ExpectedStockAction>>()
+                    {
+                        Tuple.Create(Date.April30th, ExpectedStockAction.CreateArrivedAction(200)),
+                        Tuple.Create(Date.April30th, ExpectedStockAction.CreateUsedAction(20, 180)),
+                        Tuple.Create(Date.May1st, ExpectedStockAction.CreateUsedAction(50, 130)),
+                        Tuple.Create(Date.May2nd, ExpectedStockAction.CreateUsedAction(80, 50)),
+                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateUsedAction(20, 30)),
+                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateDiscardAction(30))
+                    }),
+                Tuple.Create(
+                    Date.May1st,
+                    new List<Tuple<DateTime,ExpectedStockAction>>()
+                    {
+                        Tuple.Create(Date.May1st, ExpectedStockAction.CreateArrivedAction(300)),
+                        Tuple.Create(Date.May1st, ExpectedStockAction.CreateUsedAction(0, 300)),
+                        Tuple.Create(Date.May2nd, ExpectedStockAction.CreateUsedAction(0, 300)),
+                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateUsedAction(0, 300)),
+                        Tuple.Create(Date.May4th, ExpectedStockAction.CreateUsedAction(300, 0)),
+                        Tuple.Create(Date.May4th, ExpectedStockAction.CreateDiscardAction(0))
+                    }),
+                Tuple.Create(
+                    Date.May2nd,
+                    new List<Tuple<DateTime,ExpectedStockAction>>()
+                    {
+                        Tuple.Create(Date.May2nd, ExpectedStockAction.CreateArrivedAction(200)  ),
+                        Tuple.Create(Date.May2nd, ExpectedStockAction.CreateUsedAction(0, 200)  ),
+                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateUsedAction(0, 200)  ),
+                        Tuple.Create(Date.May4th, ExpectedStockAction.CreateUsedAction(100, 100)),
+                        Tuple.Create(Date.May5th, ExpectedStockAction.CreateUsedAction(100, 0)  ),
+                        Tuple.Create(Date.May5th, ExpectedStockAction.CreateDiscardAction(0)    )
+                    }),
+                Tuple.Create(
+                    Date.May3rd,
+                    new List<Tuple<DateTime,ExpectedStockAction>>()
+                    {
+                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateArrivedAction(200) ),
+                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateUsedAction(0, 200) ),
+                        Tuple.Create(Date.May4th, ExpectedStockAction.CreateUsedAction(0, 200) ),
+                        Tuple.Create(Date.May5th, ExpectedStockAction.CreateUsedAction(70, 130)),
+                        Tuple.Create(Date.May6th, ExpectedStockAction.CreateUsedAction(40, 90) ),
+                        Tuple.Create(Date.May6th, ExpectedStockAction.CreateDiscardAction(90)  )
+                    }),
+                Tuple.Create(
+                    Date.May6th,
+                    new List<Tuple<DateTime,ExpectedStockAction>>()
+                    {
+                        Tuple.Create(Date.May6th, ExpectedStockAction.CreateArrivedAction(100)),
+                        Tuple.Create(Date.May6th, ExpectedStockAction.CreateUsedAction(0, 100)),
+                        Tuple.Create(Date.May7th, ExpectedStockAction.CreateUsedAction(0, 100)),
+                        Tuple.Create(Date.May8th, ExpectedStockAction.CreateUsedAction(0, 100)),
+                        Tuple.Create(Date.May9th, ExpectedStockAction.CreateUsedAction(0, 100)),
+                        Tuple.Create(Date.May9th, ExpectedStockAction.CreateDiscardAction(100))
+                    })
+            };
+
+            // テスト：全加工予定の登録
+            foreach(var u in test)
+            {
+                Model.BouquetModel.UseBouquetPart(expectedPart, u.Key, u.Value);
+            }
+
+            // 検証1：全在庫アクションが意図通り変更されていること
+            foreach(var e in expected)
+            {
+                var arrived = e.Item1;
+                var lotNo = ArrivedLotNumbers[arrived].First();
+                foreach(var a in e.Item2)
+                {
+                    var date = a.Item1;
+                    var type = a.Item2.Type;
+                    var quantity = a.Item2.Quantity;
+                    var remain = a.Item2.Remain;
+                    AssertStockAction(type, date, arrived, ExpectedPartCode, lotNo, quantity, remain);
+                }
+            }
+
+            // 検証2：在庫不足が発生していないこと
             AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
         }
 
