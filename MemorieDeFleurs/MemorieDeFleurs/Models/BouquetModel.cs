@@ -213,96 +213,20 @@ namespace MemorieDeFleurs.Models
         /// <returns>取り去った後の在庫数量：当日分複数ロットの合計値</returns>
         public int UseBouquetPart(BouquetPart part, DateTime date, int quantity)
         {
-            var stocks = DbContext.StockActions
+            var stock = DbContext.StockActions
                 .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
                 .Where(a => 0 == a.ActionDate.CompareTo(date))
                 .Where(a => a.Remain > 0)
                 .OrderBy(a => a.ArrivalDate)
-                .ToList();
+                .FirstOrDefault();
 
-            foreach(var s in stocks)
+            if(stock == null)
             {
-                if(s.Remain >= quantity)
-                {
-                    // この在庫アクションで全量加工できる
-                    s.Quantity += quantity;
-                    s.Remain -= quantity;
-
-                    // 同一ロットの翌日以降の残数更新
-                    var daysAfter = DbContext.StockActions
-                        .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
-                        .Where(a => a.StockLotNo == s.StockLotNo)
-                        .Where(a => a.ActionDate > s.ActionDate)
-                        .OrderBy(a => a.ActionDate)
-                        .ToList();
-                    foreach (var a in daysAfter)
-                    {
-                        a.Remain -= quantity;
-                        DbContext.StockActions.Update(a);
-
-                    }
-
-                    // 同一ロットの破棄数更新
-                    var discarding = DbContext.StockActions
-                        .Where(a => a.Action == StockActionType.SCHEDULED_TO_DISCARD)
-                        .Where(a => a.StockLotNo == s.StockLotNo)
-                        .Single();
-                    discarding.Quantity -= quantity;
-                    DbContext.StockActions.Update(discarding);
-
-                    // 在庫アクションの更新終了
-                    quantity = 0;
-                    break;
-                }
-                else // s.Remain < quantity
-                {
-                    // この在庫アクションだけでは全量を加工できない
-                    var outOfStock = quantity - s.Remain;
-                    s.Quantity += s.Remain;
-                    s.Remain = 0;
-                    quantity = -outOfStock;
-
-                    // 同一ロットの翌日以降の残数更新
-                    var daysAfter = DbContext.StockActions
-                        .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
-                        .Where(a => a.StockLotNo == s.StockLotNo)
-                        .Where(a => a.ActionDate > s.ActionDate)
-                        .OrderBy(a => a.ActionDate)
-                        .ToList();
-                    foreach (var a in daysAfter)
-                    {
-                        if(a.Quantity > 0)
-                        {
-                            // [TODO] この日加工していた分は別のロットで加工させる
-                        }
-                        a.Remain = 0;
-                        DbContext.StockActions.Update(a);
-                    }
-
-                    // 同一ロットの破棄数更新
-                    var discarding = DbContext.StockActions
-                        .Where(a => a.Action == StockActionType.SCHEDULED_TO_DISCARD)
-                        .Where(a => a.StockLotNo == s.StockLotNo)
-                        .Single();
-                    if(discarding.Quantity > 0)
-                    {
-                        discarding.Quantity = 0;
-                        DbContext.StockActions.Update(discarding);
-                    }
-
-                    // 在庫不足レコード追加
-                    var outOfStockAction = new StockAction()
-                    {
-                        Action = StockActionType.OUT_OF_STOCK,
-                        ActionDate = s.ActionDate,
-                        ArrivalDate = s.ArrivalDate,
-                        PartsCode = s.PartsCode,
-                        StockLotNo = s.StockLotNo,
-                        Quantity = outOfStock,
-                        Remain = -outOfStock
-                    };
-                    DbContext.StockActions.Add(outOfStockAction);
-                }
+                throw new NotImplementedException($"該当ストックなし：基準日={date.ToString("yyyyMMdd")}, 花コード{part.Code}, 数量={quantity}");
+            }
+            else
+            {
+                UseBouquetPartFromTheStockAction(stock, quantity);
             }
 
             DbContext.SaveChanges();
@@ -313,5 +237,87 @@ namespace MemorieDeFleurs.Models
                 .Sum(a => a.Remain);
         }
 
+        private void UseBouquetPartFromTheStockAction(StockAction stock, int quantity)
+        {
+            if (stock.Remain >= quantity)
+            {
+                // この在庫アクションで全量加工できる
+                stock.Quantity += quantity;
+                stock.Remain -= quantity;
+                DbContext.StockActions.Update(stock);
+
+                UpdateRemainAndDiscardQuantitiesOfThisStockLot(stock, quantity);
+
+                // 在庫アクションの更新終了
+                quantity = 0;
+            }
+            else // s.Remain < quantity
+            {
+                // この在庫アクションだけでは全量を加工できない
+                var outOfStock = quantity - stock.Remain;
+                var useFromThisLot = stock.Remain;
+
+                stock.Quantity += useFromThisLot;
+                stock.Remain = 0;
+                DbContext.StockActions.Update(stock);
+
+                UpdateRemainAndDiscardQuantitiesOfThisStockLot(stock, useFromThisLot);
+
+                // outOfStock 分を同日分で入荷予定日が一番若い在庫アクションから引く
+                var nextStock = DbContext.StockActions
+                    .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
+                    .Where(a => 0 == a.ActionDate.CompareTo(stock.ActionDate))
+                    .Where(a => a.Remain > 0)
+                    .Where(a => a.StockLotNo != stock.StockLotNo)
+                    .OrderBy(a => a.ArrivalDate)
+                    .FirstOrDefault();
+
+                if(nextStock == null)
+                {
+                    // 在庫不足レコード追加
+                    var outOfStockAction = new StockAction()
+                    {
+                        Action = StockActionType.OUT_OF_STOCK,
+                        ActionDate = stock.ActionDate,
+                        ArrivalDate = stock.ArrivalDate,
+                        PartsCode = stock.PartsCode,
+                        StockLotNo = stock.StockLotNo,
+                        Quantity = outOfStock,
+                        Remain = -outOfStock
+                    };
+                    DbContext.StockActions.Add(outOfStockAction);
+                }
+                else
+                {
+                    // nextStock を対象に自分自身を再帰呼び出し
+                    UseBouquetPartFromTheStockAction(nextStock, outOfStock);
+                }
+            }
+        }
+
+        private void UpdateRemainAndDiscardQuantitiesOfThisStockLot(StockAction stock, int quantity)
+        {
+            // 同一ロットの翌日以降の残数更新
+            var daysAfter = DbContext.StockActions
+                .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
+                .Where(a => a.StockLotNo == stock.StockLotNo)
+                .Where(a => a.ActionDate > stock.ActionDate)
+                .OrderBy(a => a.ActionDate)
+                .ToList();
+            foreach (var a in daysAfter)
+            {
+                a.Remain -= quantity;
+                DbContext.StockActions.Update(a);
+
+            }
+
+            // 同一ロットの破棄数更新
+            var discarding = DbContext.StockActions
+                .Where(a => a.Action == StockActionType.SCHEDULED_TO_DISCARD)
+                .Where(a => a.StockLotNo == stock.StockLotNo)
+                .Single();
+            discarding.Quantity -= quantity;
+            DbContext.StockActions.Update(discarding);
+        }
     }
 }
