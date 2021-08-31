@@ -73,7 +73,7 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         /// <summary>
-        /// 発注時に所定の在庫アクションが登録されるかどうかのテスト
+        /// 発注時に所定の在庫アクションが所定の日数分登録されることを確認する
         /// </summary>
         [TestMethod]
         public void CanAddOneOrderToSingleSupplier()
@@ -98,6 +98,9 @@ namespace MemorieDeFleursTest.ModelTest
             }
         }
 
+        /// <summary>
+        /// 複数の入荷(入荷日の重複なし)により必要な数の在庫アクションが登録されることを確認する
+        /// </summary>
         [TestMethod]
         public void CanAddManyOrdersToSingleSupplier()
         {
@@ -106,11 +109,58 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedCountOfOrders = InitialOrderLotNumbers.Count;
             var expectedCountOfScheduledToUseStockActions = expectedPart.ExpiryDate * expectedCountOfOrders;
             
+            // 登録は TestInitialize で行っている処理で代用
+
             Assert.AreEqual(expectedCountOfOrders, expectedCountOfOrders, $"注文数と発注ロット数の不一致：仕入先={expectedSupplier.Name}, 花コード={expectedPart.Name}");
             AssertAllLotNumbersAreUnique(InitialOrderLotNumbers);
             AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_ARRIVE);
             AssertStockActionCount(expectedCountOfScheduledToUseStockActions, StockActionType.SCHEDULED_TO_USE);
             AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_DISCARD);
+        }
+
+        /// <summary>
+        /// 複数ロットの入荷(予定)在庫アクションに潤沢な数量がある状態では、入荷日の一番若い在庫ロットから順に引当されることの確認
+        /// </summary>
+        [TestMethod]
+        public void WillBeUsedEarliestArrivedStockLotWhenTwoOrMoreLotHasEnoughQuantity()
+        {
+            var expectedSupplier = Model.SupplierModel.Find(ExpectedSupplerCode);
+            var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
+
+            var expected = new {
+                LotNo = InitialOrderLotNumbers[0],
+                Arrival = new DateTime(2020, 4, 30),
+                PreviousDay = new DateTime(2020, 4, 30),
+                Today = new DateTime(2020, 5, 1),
+                NextDay = new DateTime(2020, 5, 2),
+                InitialQuantity = 200,
+                Used = 60,
+                Remain = 140
+
+            };
+            var another = new
+            {
+                LotNo = InitialOrderLotNumbers[1],
+                Arrival = new DateTime(2020, 5, 1),
+                Today = new DateTime(2020, 5, 1),
+                NextDay = new DateTime(2020, 5, 2),
+                InitialQuantity = 200,
+                Used = 0,
+                Remain = 200
+            };
+
+            var actualRemain = Model.BouquetModel.UseBouquetPart(expectedPart, expected.Today, expected.Used);
+
+            Assert.AreEqual(expected.Remain + another.Remain, actualRemain);
+
+            // 引当てされた同一ロットに属する前日、当日、翌日の在庫アクションの数量/残数が意図通りに変化している
+            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expected.PreviousDay, expected.Arrival, ExpectedPartCode, expected.LotNo, 0, expected.InitialQuantity);
+            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expected.Today, expected.Arrival, ExpectedPartCode, expected.LotNo, expected.Used, expected.Remain);
+            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expected.NextDay, expected.Arrival, ExpectedPartCode, expected.LotNo, 0, expected.Remain);
+
+            // 引当てされたのとは別ロットに影響が出ていない
+            AssertStockAction(StockActionType.SCHEDULED_TO_USE, another.Today, another.Arrival, ExpectedPartCode, another.LotNo, 0, another.Remain);
+            AssertStockAction(StockActionType.SCHEDULED_TO_USE, another.NextDay, another.Arrival, ExpectedPartCode, another.LotNo, 0, another.Remain);
         }
 
         [TestMethod]

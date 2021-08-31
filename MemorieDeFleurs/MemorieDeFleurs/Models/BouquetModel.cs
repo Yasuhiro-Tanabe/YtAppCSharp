@@ -224,6 +224,7 @@ namespace MemorieDeFleurs.Models
             {
                 if(s.Remain >= quantity)
                 {
+                    // この在庫アクションで全量加工できない
                     s.Quantity += quantity;
                     s.Remain -= quantity;
 
@@ -248,9 +249,14 @@ namespace MemorieDeFleurs.Models
                         .Single();
                     discarding.Quantity -= quantity;
                     DbContext.StockActions.Update(discarding);
+
+                    // 在庫アクションの更新終了
+                    quantity = 0;
+                    break;
                 }
                 else // s.Remain < quantity
                 {
+                    // この在庫アクションだけでは全量を加工できない
                     var outOfStock = quantity - s.Remain;
                     s.Quantity += s.Remain;
                     s.Remain = 0;
