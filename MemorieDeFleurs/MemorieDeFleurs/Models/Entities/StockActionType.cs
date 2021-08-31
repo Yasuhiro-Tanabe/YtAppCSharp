@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MemorieDeFleurs.Models.Entities
+﻿namespace MemorieDeFleurs.Models.Entities
 {
     /// <summary>
     /// 在庫アクション

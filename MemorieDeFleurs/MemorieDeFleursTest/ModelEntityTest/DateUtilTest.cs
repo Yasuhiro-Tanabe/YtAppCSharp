@@ -2,7 +2,7 @@
 using MemorieDeFleurs;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Data.Sqlite;
+
 using System;
 
 namespace MemorieDeFleursTest.ModelEntityTest

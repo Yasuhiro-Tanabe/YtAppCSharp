@@ -1,6 +1,5 @@
 ﻿using MemorieDeFleurs;
 
-using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;

@@ -4,9 +4,7 @@ using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-using System;
 using System.Data.Common;
 
 namespace MemorieDeFleurs.Models

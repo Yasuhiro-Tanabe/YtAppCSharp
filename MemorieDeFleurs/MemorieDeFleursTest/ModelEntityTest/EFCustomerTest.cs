@@ -1,12 +1,9 @@
 ﻿using MemorieDeFleurs.Entities;
-using MemorieDeFleurs.Models;
 
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
-using System.Linq;
 
 namespace MemorieDeFleursTest.ModelEntityTest
 {
