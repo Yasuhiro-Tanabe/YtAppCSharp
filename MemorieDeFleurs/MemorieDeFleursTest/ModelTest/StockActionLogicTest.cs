@@ -18,15 +18,20 @@ namespace MemorieDeFleursTest.ModelTest
         private int ExpectedSupplerCode { get; set; }
         private string ExpectedPartCode { get; set; }
 
-        private DateTime April30th { get; } = new DateTime(2020, 4, 30);
-        private DateTime May1st { get; } = new DateTime(2020, 5, 1);
-        private DateTime May2nd { get; } = new DateTime(2020, 5, 2);
+        private static class Date
+        {
+            public static DateTime April30th { get; } = new DateTime(2020, 4, 30);
+            public static DateTime May1st { get; } = new DateTime(2020, 5, 1);
+            public static DateTime May2nd { get; } = new DateTime(2020, 5, 2);
 
-        private DateTime May3rd { get; } = new DateTime(2020, 5, 3);
+            public static DateTime May3rd { get; } = new DateTime(2020, 5, 3);
 
-        private DateTime May4th { get; } = new DateTime(2020, 5, 4);
-        private DateTime May5th { get; } = new DateTime(2020, 5, 5);
-        private DateTime May6th { get; } = new DateTime(2020, 5, 6);
+            public static DateTime May4th { get; } = new DateTime(2020, 5, 4);
+            public static DateTime May5th { get; } = new DateTime(2020, 5, 5);
+            public static DateTime May6th { get; } = new DateTime(2020, 5, 6);
+
+        }
+
 
 
         private IDictionary<DateTime, ISet<int>> ArrivedLotNumbers { get; } = new SortedDictionary<DateTime, ISet<int>>();
@@ -61,11 +66,11 @@ namespace MemorieDeFleursTest.ModelTest
                 Part = p,
                 OrderDate = new DateTime(2020, 4, 25),
                 OrderBody = new List<Tuple<DateTime, int>>() {
-                    Tuple.Create(April30th, 2),
-                    Tuple.Create(May1st, 2),
-                    Tuple.Create(May2nd, 3),
-                    Tuple.Create(May3rd, 2),
-                    Tuple.Create(May6th, 1)
+                    Tuple.Create(Date.April30th, 2),
+                    Tuple.Create(Date.May1st, 2),
+                    Tuple.Create(Date.May2nd, 3),
+                    Tuple.Create(Date.May3rd, 2),
+                    Tuple.Create(Date.May6th, 1)
                 }
             };
             foreach (var o in orders.OrderBody)
@@ -145,11 +150,11 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedSupplier = Model.SupplierModel.Find(ExpectedSupplerCode);
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
             var expected = new {
-                LotNo = ArrivedLotNumbers[April30th].First(),
-                Arrival = April30th,
-                PreviousDay = April30th,
-                Today = May1st,
-                NextDay = May2nd,
+                LotNo = ArrivedLotNumbers[Date.April30th].First(),
+                Arrival = Date.April30th,
+                PreviousDay = Date.April30th,
+                Today = Date.May1st,
+                NextDay = Date.May2nd,
                 InitialQuantity = 200,
                 Used = 60,
                 Remain = 140
@@ -157,10 +162,10 @@ namespace MemorieDeFleursTest.ModelTest
             };
             var another = new
             {
-                LotNo = ArrivedLotNumbers[May1st].First(),
-                Arrival = May1st,
-                Today = May1st,
-                NextDay = May2nd,
+                LotNo = ArrivedLotNumbers[Date.May1st].First(),
+                Arrival = Date.May1st,
+                Today = Date.May1st,
+                NextDay = Date.May2nd,
                 InitialQuantity = 200,
                 Used = 0,
                 Remain = 200
@@ -185,7 +190,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var expectedSupplier = Model.SupplierModel.Find(ExpectedSupplerCode);
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var orderCancelDate = May2nd;
+            var orderCancelDate = Date.May2nd;
             var expectedCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count() - 1;
             var expectedCountOfScheduledToUseStockActions = (expectedPart.ExpiryDate + 1) * expectedCountOfOrders;
 
@@ -214,7 +219,7 @@ namespace MemorieDeFleursTest.ModelTest
         public void CanRemoveUsedQuantityOfPartsFromStockAction()
         {
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var expectedUsedDate = April30th;
+            var expectedUsedDate = Date.April30th;
             var expectedArrivalDate = expectedUsedDate;
             var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
             var quantity = 20;
@@ -241,7 +246,7 @@ namespace MemorieDeFleursTest.ModelTest
         public void AllStocksInTheDayIsUsed()
         {
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var expectedUsedDate = April30th;
+            var expectedUsedDate = Date.April30th;
             var expectedArrivalDate = expectedUsedDate;
             var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
             var quantity = 200;
@@ -268,7 +273,7 @@ namespace MemorieDeFleursTest.ModelTest
         public void NotEnoughStocksInTheDay_andOutofStockRecordGenerated()
         {
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var expectedUsedDate = April30th;
+            var expectedUsedDate = Date.April30th;
             var expectedArrivalDate = expectedUsedDate;
             var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
             var quantity = 220;
@@ -303,40 +308,40 @@ namespace MemorieDeFleursTest.ModelTest
         public void CanRemoveFromTwoOrMoreStockActions()
         {
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var actionDate = May2nd;
+            var actionDate = Date.May2nd;
             var expected = new
             {
                 First = new
                 {
-                    LotNo = ArrivedLotNumbers[April30th].First(),
-                    Arrived = April30th,
+                    LotNo = ArrivedLotNumbers[Date.April30th].First(),
+                    Arrived = Date.April30th,
                     Previous = actionDate.AddDays(-1),
                     Today = actionDate,
                     Next = actionDate.AddDays(1),
-                    Discard = April30th.AddDays(expectedPart.ExpiryDate),
+                    Discard = Date.April30th.AddDays(expectedPart.ExpiryDate),
                     Initial = 200,
                     Used = 200,
                     Remain = 0
                 },
                 Second = new
                 {
-                    LotNo = ArrivedLotNumbers[May1st].First(),
-                    Arrived = May1st,
+                    LotNo = ArrivedLotNumbers[Date.May1st].First(),
+                    Arrived = Date.May1st,
                     Previous = actionDate.AddDays(-1),
                     Today = actionDate,
                     Next = actionDate.AddDays(1),
-                    Discard = May1st.AddDays(expectedPart.ExpiryDate),
+                    Discard = Date.May1st.AddDays(expectedPart.ExpiryDate),
                     Initial = 200,
                     Used = 80,
                     Remain = 120
                 },
                 Third = new
                 {
-                    LotNo = ArrivedLotNumbers[May2nd].First(),
-                    Arrived = May2nd,
+                    LotNo = ArrivedLotNumbers[Date.May2nd].First(),
+                    Arrived = Date.May2nd,
                     Today = actionDate,
                     Next = actionDate.AddDays(1),
-                    Discard = May2nd.AddDays(expectedPart.ExpiryDate),
+                    Discard = Date.May2nd.AddDays(expectedPart.ExpiryDate),
                     Initial = 300,
                     Used = 0,
                     Remain = 300
