@@ -211,30 +211,44 @@ namespace MemorieDeFleurs.Models
         /// <returns>取り去った後の在庫数量：当日分複数ロットの合計値</returns>
         public int UseBouquetPart(BouquetPart part, DateTime date, int quantity)
         {
-            var stock = DbContext.StockActions
-                .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
-                .Where(a => 0 == a.ActionDate.CompareTo(date))
-                .Where(a => a.Remain > 0)
-                .OrderBy(a => a.ArrivalDate)
-                .FirstOrDefault();
-
-            if(stock == null)
+            try
             {
-                throw new NotImplementedException($"該当ストックなし：基準日={date.ToString("yyyyMMdd")}, 花コード{part.Code}, 数量={quantity}");
+                var stock = DbContext.StockActions
+                    .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
+                    .Where(a => 0 == a.ActionDate.CompareTo(date))
+                    .Where(a => a.Remain > 0)
+                    .OrderBy(a => a.ArrivalDate)
+                    .FirstOrDefault();
+
+                if (stock == null)
+                {
+                    throw new NotImplementedException($"該当ストックなし：基準日={date.ToString("yyyyMMdd")}, 花コード{part.Code}, 数量={quantity}");
+                }
+                else
+                {
+                    UseBouquetPartFromTheStockAction(stock, quantity);
+                }
+
+                DbContext.SaveChanges();
+
+                var remain = DbContext.StockActions
+                    .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE || a.Action == StockActionType.OUT_OF_STOCK)
+                    .Where(a => 0 == a.ActionDate.CompareTo(date))
+                    .Sum(a => a.Remain);
+                LogUtil.Info($"UseBouQuetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) returns remain={remain}");
+                return remain;
             }
-            else
+            catch(NotImplementedException ei)
             {
-                UseBouquetPartFromTheStockAction(stock, quantity);
+                LogUtil.Fatal($"★未実装★ {ei.Message}");
+                throw;
             }
-
-            DbContext.SaveChanges();
-
-            var remain = DbContext.StockActions
-                .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE || a.Action == StockActionType.OUT_OF_STOCK)
-                .Where(a => 0 == a.ActionDate.CompareTo(date))
-                .Sum(a => a.Remain);
-            LogUtil.Info($"UseBouQuetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) returns remain={remain}");
-            return remain;
+            catch(Exception e)
+            {
+                LogUtil.Error($"UseBouquetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) failed. {e.GetType().Name}: {e.Message}");
+                LogUtil.Error(e.StackTrace);
+                throw;
+            }
         }
 
         private void UseBouquetPartFromTheStockAction(StockAction stock, int quantity)
@@ -311,6 +325,11 @@ namespace MemorieDeFleurs.Models
                 .ToList();
             foreach (var a in daysAfter)
             {
+                if(a.Remain < quantity)
+                {
+                    // [TODO] 残数が足りなかったら不足分を別ロットから削除する
+                    throw new NotImplementedException($"残数<必要数：ロット={stock.StockLotNo}, 基準日={stock.ActionDate.ToString("yyyyMMdd")}, 不足日={a.ActionDate.ToString("yyyyMMdd")},");
+                }
                 a.Remain -= quantity;
                 DbContext.StockActions.Update(a);
                 DbContext.SaveChanges();
