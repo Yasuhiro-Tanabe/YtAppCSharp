@@ -213,28 +213,48 @@ namespace MemorieDeFleurs.Models
         /// <returns>取り去った後の在庫数量：当日分複数ロットの合計値</returns>
         public int UseBouquetPart(BouquetPart part, DateTime date, int quantity)
         {
-            var stock = DbContext.StockActions
-                .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
-                .Where(a => 0 == a.ActionDate.CompareTo(date))
-                .Where(a => a.Remain > 0)
-                .OrderBy(a => a.ArrivalDate)
-                .FirstOrDefault();
-
-            if(stock == null)
+            var transaction = DbContext.Database.BeginTransaction();
+            try
             {
-                throw new NotImplementedException($"該当ストックなし：基準日={date.ToString("yyyyMMdd")}, 花コード{part.Code}, 数量={quantity}");
+                var stock = DbContext.StockActions
+                    .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
+                    .Where(a => 0 == a.ActionDate.CompareTo(date))
+                    .Where(a => a.Remain > 0)
+                    .OrderBy(a => a.ArrivalDate)
+                    .FirstOrDefault();
+
+                if (stock == null)
+                {
+                    throw new NotImplementedException($"該当ストックなし：基準日={date.ToString("yyyyMMdd")}, 花コード{part.Code}, 数量={quantity}");
+                }
+                else
+                {
+                    UseBouquetPartFromTheStockAction(stock, quantity);
+                }
+
+                DbContext.SaveChanges();
+
+                transaction.Commit();
+
+                var remain = DbContext.StockActions
+                    .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE || a.Action == StockActionType.OUT_OF_STOCK)
+                    .Where(a => 0 == a.ActionDate.CompareTo(date))
+                    .Sum(a => a.Remain);
+                LogUtil.Debug($"UseBouquetPart() Done. part={part.Code}, date={date.ToString("yyyyMMdd")} quantity={quantity}, remain={remain}");
+                return remain;
             }
-            else
+            catch(NotImplementedException en)
             {
-                UseBouquetPartFromTheStockAction(stock, quantity);
+                transaction.Rollback();
+                LogUtil.Error($"UseBouquetPart(part={part.Code}, date={date.ToString("yyyyMMdd")} quantity={quantity}) Not Imremented Yet! msg={en.Message}");
+                throw;
             }
-
-            DbContext.SaveChanges();
-
-            return DbContext.StockActions
-                .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE || a.Action == StockActionType.OUT_OF_STOCK)
-                .Where(a => 0 == a.ActionDate.CompareTo(date))
-                .Sum(a => a.Remain);
+            catch (Exception e)
+            {
+                transaction.Rollback();
+                LogUtil.Error($"UseBouquetPart(part={part.Code}, date={date.ToString("yyyyMMdd")} quantity={quantity}) throws {e.GetType().Name} : {e.Message}");
+                throw;
+            }
         }
 
         private void UseBouquetPartFromTheStockAction(StockAction stock, int quantity)

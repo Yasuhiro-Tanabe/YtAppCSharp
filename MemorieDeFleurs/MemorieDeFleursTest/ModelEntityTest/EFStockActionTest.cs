@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
