@@ -290,7 +290,8 @@ namespace MemorieDeFleurs.Models
 
         private void AddScheduledToUseStockAction(StockActionParameterToOrder param)
         {
-            foreach (var d in Enumerable.Range(0, param.DaysToExpire).Select(i => param.ArrivalDate.AddDays(i)))
+            // 品質維持可能日数＋1日分 (入荷日+0日目、入荷日+1日目、…、入荷日+品質維持可能日数日目)を生成
+            foreach (var d in Enumerable.Range(0, param.DaysToExpire + 1).Select(i => param.ArrivalDate.AddDays(i)))
             {
                 var toUse = new StockAction()
                 {

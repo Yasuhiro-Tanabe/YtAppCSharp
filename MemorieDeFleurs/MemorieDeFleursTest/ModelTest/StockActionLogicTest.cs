@@ -114,7 +114,7 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedSupplier = Model.SupplierModel.Find(ExpectedSupplerCode);
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
             var expectedCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count();
-            var expectedCountOfScheduledToUseStockActions = expectedPart.ExpiryDate * expectedCountOfOrders;
+            var expectedCountOfScheduledToUseStockActions = (expectedPart.ExpiryDate + 1) * expectedCountOfOrders;
             
             // 登録は TestInitialize で行っている処理で代用
 
@@ -176,7 +176,7 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
             var orderCancelDate = new DateTime(2020,5,2);
             var expectedCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count() - 1;
-            var expectedCountOfScheduledToUseStockActions = expectedPart.ExpiryDate * expectedCountOfOrders;
+            var expectedCountOfScheduledToUseStockActions = (expectedPart.ExpiryDate + 1) * expectedCountOfOrders;
 
             var expectedCanceledLotNumber = ArrivedLotNumbers[orderCancelDate].First(); 
 
@@ -284,6 +284,104 @@ namespace MemorieDeFleursTest.ModelTest
             AssertStockAction(StockActionType.OUT_OF_STOCK, expectedArrivalDate, expectedArrivalDate, ExpectedPartCode, expectedLotNumber, expectedOutOfStock, -expectedOutOfStock);
 
         }
+
+#if true
+        /// <summary>
+        /// 一つの在庫アクションの残数では使用数を賄えないとき、同一日付の別在庫アクションからも使用数不足分を引くことができる
+        /// </summary>
+        [TestMethod]
+        public void CanRemoveFromTwoOrMoreStockActions()
+        {
+            var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
+            var actionDate = new DateTime(2020, 5, 2);
+            var expected = new
+            {
+                First = new
+                {
+                    LotNo = ArrivedLotNumbers[new DateTime(2020, 4, 30)].First(),
+                    Arrived = new DateTime(2020, 4, 30),
+                    Previous = actionDate.AddDays(-1),
+                    Today = actionDate,
+                    Next = actionDate.AddDays(1),
+                    Discard = (new DateTime(2020, 4, 30)).AddDays(expectedPart.ExpiryDate),
+                    Initial = 200,
+                    Used = 200,
+                    Remain = 0
+                },
+                Second = new
+                {
+                    LotNo = ArrivedLotNumbers[new DateTime(2020, 5, 1)].First(),
+                    Arrived = new DateTime(2020, 5, 1),
+                    Previous = actionDate.AddDays(-1),
+                    Today = actionDate,
+                    Next = actionDate.AddDays(1),
+                    Discard = (new DateTime(2020, 5, 1)).AddDays(expectedPart.ExpiryDate),
+                    Initial = 200,
+                    Used = 80,
+                    Remain = 120
+                },
+                Third = new
+                {
+                    LotNo = ArrivedLotNumbers[new DateTime(2020, 5, 2)].First(),
+                    Arrived = new DateTime(2020, 5, 2),
+                    Today = actionDate,
+                    Next = actionDate.AddDays(1),
+                    Discard = (new DateTime(2020,5,2)).AddDays(expectedPart.ExpiryDate),
+                    Initial = 300,
+                    Used = 0,
+                    Remain = 300
+                }
+            };
+
+            var allUsed = expected.First.Used + expected.Second.Used;
+            var expectedRemain = expected.First.Remain + expected.Second.Remain + expected.Third.Initial;
+
+            var actualRemain = Model.BouquetModel.UseBouquetPart(expectedPart, actionDate, allUsed);
+
+            Assert.AreEqual(expectedRemain, actualRemain);
+
+            // 前々日(4/30)入荷分の在庫アクションについて、数量・残数、破棄数が正しく更新されているか
+            {
+                var lot = expected.First.LotNo;
+                var arrived = expected.First.Arrived;
+                var part = expectedPart.Code;
+                var first = expected.First;
+
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, first.Previous, arrived, part, lot, 0, first.Initial);
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, first.Today, arrived, part, lot, first.Used, first.Remain);
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, first.Next, arrived, part, lot, 0, first.Remain);
+                AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, first.Discard, arrived, part, lot, first.Remain, 0);
+            }
+
+            // 前日(5/1)入荷分の在庫アクションについて、数量・残数,破棄数が正しく更新されているか
+            {
+                var lot = expected.Second.LotNo;
+                var arrived = expected.Second.Arrived;
+                var part = expectedPart.Code;
+                var second = expected.Second;
+
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, second.Previous, arrived, part, lot, 0, second.Initial);
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, second.Today, arrived, part, lot, second.Used, second.Remain);
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, second.Next, arrived, part, lot, 0, second.Remain);
+                AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, second.Discard, arrived, part, lot, second.Remain, 0);
+            }
+
+            // 前日分までで使用数の確保が完了しているので当日(5/2)入荷分の在庫アクションに影響が出ていないか
+            {
+                var lot = expected.Third.LotNo;
+                var arrived = expected.Third.Arrived;
+                var part = expectedPart.Code;
+                var third = expected.Third;
+
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, third.Today, arrived, part, lot, 0, third.Initial);
+                AssertStockAction(StockActionType.SCHEDULED_TO_USE, third.Next, arrived, part, lot, 0, third.Remain);
+                AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, third.Discard, arrived, part, lot, third.Remain, 0);
+            }
+
+            // 一日の在庫はトータルすれば潤沢なので、残数不足の在庫アクションは生成されない
+            AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
+        }
+#endif
 
         #region 在庫アクションに関する検証用サポート関数
         /// <summary>

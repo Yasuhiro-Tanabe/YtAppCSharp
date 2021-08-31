@@ -231,20 +231,24 @@ namespace MemorieDeFleurs.Models
 
             DbContext.SaveChanges();
 
-            return DbContext.StockActions
+            var remain = DbContext.StockActions
                 .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE || a.Action == StockActionType.OUT_OF_STOCK)
                 .Where(a => 0 == a.ActionDate.CompareTo(date))
                 .Sum(a => a.Remain);
+            LogUtil.Info($"UseBouQuetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) returns remain={remain}");
+            return remain;
         }
 
         private void UseBouquetPartFromTheStockAction(StockAction stock, int quantity)
         {
+            LogUtil.Debug($"CurrentStock: date={stock.ActionDate.ToString("yyyyMMdd")}, part={stock.PartsCode}, lot={stock.StockLotNo}, remain={stock.Remain}, used={quantity}");
             if (stock.Remain >= quantity)
             {
                 // この在庫アクションで全量加工できる
                 stock.Quantity += quantity;
                 stock.Remain -= quantity;
                 DbContext.StockActions.Update(stock);
+                DbContext.SaveChanges();
 
                 UpdateRemainAndDiscardQuantitiesOfThisStockLot(stock, quantity);
 
@@ -274,6 +278,7 @@ namespace MemorieDeFleurs.Models
 
                 if(nextStock == null)
                 {
+                    LogUtil.Debug($"NextStock is null: date={stock.ActionDate}, part={stock.PartsCode}");
                     // 在庫不足レコード追加
                     var outOfStockAction = new StockAction()
                     {
@@ -286,6 +291,8 @@ namespace MemorieDeFleurs.Models
                         Remain = -outOfStock
                     };
                     DbContext.StockActions.Add(outOfStockAction);
+                    DbContext.SaveChanges();
+                    LogUtil.Debug($"OutOfStockAction : date={outOfStockAction.ActionDate.ToString("yyyyMMdd")}, quantity");
                 }
                 else
                 {
@@ -308,6 +315,7 @@ namespace MemorieDeFleurs.Models
             {
                 a.Remain -= quantity;
                 DbContext.StockActions.Update(a);
+                DbContext.SaveChanges();
 
             }
 
@@ -318,6 +326,7 @@ namespace MemorieDeFleurs.Models
                 .Single();
             discarding.Quantity -= quantity;
             DbContext.StockActions.Update(discarding);
+            DbContext.SaveChanges();
         }
     }
 }
