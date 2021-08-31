@@ -285,7 +285,6 @@ namespace MemorieDeFleursTest.ModelTest
 
         }
 
-#if true
         /// <summary>
         /// 一つの在庫アクションの残数では使用数を賄えないとき、同一日付の別在庫アクションからも使用数不足分を引くことができる
         /// </summary>
@@ -381,7 +380,6 @@ namespace MemorieDeFleursTest.ModelTest
             // 一日の在庫はトータルすれば潤沢なので、残数不足の在庫アクションは生成されない
             AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
         }
-#endif
 
         #region 在庫アクションに関する検証用サポート関数
         /// <summary>
