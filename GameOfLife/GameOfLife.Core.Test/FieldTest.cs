@@ -5,9 +5,15 @@ using System.Linq;
 
 namespace GameOfLife.Core.Test
 {
+    /// <summary>
+    /// ライフゲームのフィールドのテスト
+    /// </summary>
     [TestClass]
     public class FieldTest
     {
+        /// <summary>
+        /// 指定された幅/高さでフィールドを作成することができる
+        /// </summary>
         [TestMethod]
         public void FieldIsCreatableWithFieldSize()
         {
@@ -19,6 +25,9 @@ namespace GameOfLife.Core.Test
             Assert.AreEqual(height, field.Height);
         }
 
+        /// <summary>
+        /// 幅＝0 のフィールドは作れない
+        /// </summary>
         [TestMethod,ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void FieldCannotCreateWhenWidthIsZero()
         {
@@ -27,6 +36,9 @@ namespace GameOfLife.Core.Test
             var field = new Field(width, height);
         }
 
+        /// <summary>
+        /// 高さ＝0のフィールドアは作れない
+        /// </summary>
         [TestMethod, ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void FieldCannotCreateWhenHeightIsZero()
         {
@@ -35,6 +47,9 @@ namespace GameOfLife.Core.Test
             var field = new Field(width, height);
         }
 
+        /// <summary>
+        /// 初期状態のフィールドは、全セルが死滅状態
+        /// </summary>
         [TestMethod]
         public void AllCellsAreDeadInInitialField()
         {
@@ -48,6 +63,10 @@ namespace GameOfLife.Core.Test
             Assert.IsTrue(allX.All(x => allY.All(y => !field[x,y])));
         }
 
+        /// <summary>
+        /// フィールドのセル単位で生存死滅を指定できる、
+        /// 1つのセルで生存指定した場合、それ以外のセルは状態が死滅のまま変わらない
+        /// </summary>
         [TestMethod]
         public void OneCellChangesAliveButOthersAreNotAlive()
         {
@@ -76,6 +95,9 @@ namespace GameOfLife.Core.Test
             }
         }
 
+        /// <summary>
+        /// フィールド生成時の幅より大きいX座標は指定できない (セルの状態変更)
+        /// </summary>
         [TestMethod,ExpectedException(typeof(IndexOutOfRangeException))]
         public void SetterThrowExceptionWhenXisMoreThanOrEqualsWith()
         {
@@ -88,6 +110,9 @@ namespace GameOfLife.Core.Test
             Assert.Fail("Setterが例外を吐くはず");
         }
 
+        /// <summary>
+        /// フィールド生成時の幅より大きいX座標は指定できない (セルの状態取得)
+        /// </summary>
         [TestMethod, ExpectedException(typeof(IndexOutOfRangeException))]
         public void GetterThrowExceptionWhenXisMoreThanOrEqualsWith()
         {
@@ -99,6 +124,9 @@ namespace GameOfLife.Core.Test
             if(field[width, y]) { Assert.Fail("Getterが例外を吐くはず"); }
         }
 
+        /// <summary>
+        /// フィールド生成時の高さより大きいY座標は指定できない(セルの状態変更)
+        /// </summary>
         [TestMethod,ExpectedException(typeof(IndexOutOfRangeException))]
         public void SetterThrowExceptionWhenYisMoreThanOrEqualsHeight()
         {
@@ -111,6 +139,9 @@ namespace GameOfLife.Core.Test
             Assert.Fail("Setterが例外を吐くはず");
         }
 
+        /// <summary>
+        /// フィールド生成時の高さより大きいY座標は指定できない(セルの状態取得)
+        /// </summary>
         [TestMethod, ExpectedException(typeof(IndexOutOfRangeException))]
         public void GetterThrowExceptionWhenYisMoreThanOrEqualsHeight()
         {
