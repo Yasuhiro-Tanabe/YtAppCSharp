@@ -18,25 +18,6 @@ namespace MemorieDeFleursTest.ModelTest
         private int ExpectedSupplerCode { get; set; }
         private string ExpectedPartCode { get; set; }
 
-        private static class Date
-        {
-            public static DateTime April30th { get; } = new DateTime(2020, 4, 30);
-            public static DateTime May1st { get; } = new DateTime(2020, 5, 1);
-            public static DateTime May2nd { get; } = new DateTime(2020, 5, 2);
-
-            public static DateTime May3rd { get; } = new DateTime(2020, 5, 3);
-
-            public static DateTime May4th { get; } = new DateTime(2020, 5, 4);
-            public static DateTime May5th { get; } = new DateTime(2020, 5, 5);
-            public static DateTime May6th { get; } = new DateTime(2020, 5, 6);
-            public static DateTime May7th { get; } = new DateTime(2020, 5, 7);
-            public static DateTime May8th { get; } = new DateTime(2020, 5, 8);
-            public static DateTime May9th { get; } = new DateTime(2020, 5, 9);
-
-        }
-
-
-
         private IDictionary<DateTime, ISet<int>> ArrivedLotNumbers { get; } = new SortedDictionary<DateTime, ISet<int>>();
 
         public StockActionLogicTest() : base()
@@ -69,11 +50,11 @@ namespace MemorieDeFleursTest.ModelTest
                 Part = p,
                 OrderDate = new DateTime(2020, 4, 25),
                 OrderBody = new List<Tuple<DateTime, int>>() {
-                    Tuple.Create(Date.April30th, 2),
-                    Tuple.Create(Date.May1st, 3),
-                    Tuple.Create(Date.May2nd, 2),
-                    Tuple.Create(Date.May3rd, 2),
-                    Tuple.Create(Date.May6th, 1)
+                    Tuple.Create(DateConst.April30th, 2),
+                    Tuple.Create(DateConst.May1st, 3),
+                    Tuple.Create(DateConst.May2nd, 2),
+                    Tuple.Create(DateConst.May3rd, 2),
+                    Tuple.Create(DateConst.May6th, 1)
                 }
             };
             foreach (var o in orders.OrderBody)
@@ -153,11 +134,11 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedSupplier = Model.SupplierModel.Find(ExpectedSupplerCode);
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
             var expected = new {
-                LotNo = ArrivedLotNumbers[Date.April30th].First(),
-                Arrival = Date.April30th,
-                PreviousDay = Date.April30th,
-                Today = Date.May1st,
-                NextDay = Date.May2nd,
+                LotNo = ArrivedLotNumbers[DateConst.April30th].First(),
+                Arrival = DateConst.April30th,
+                PreviousDay = DateConst.April30th,
+                Today = DateConst.May1st,
+                NextDay = DateConst.May2nd,
                 InitialQuantity = 200,
                 Used = 60,
                 Remain = 140
@@ -165,10 +146,10 @@ namespace MemorieDeFleursTest.ModelTest
             };
             var another = new
             {
-                LotNo = ArrivedLotNumbers[Date.May1st].First(),
-                Arrival = Date.May1st,
-                Today = Date.May1st,
-                NextDay = Date.May2nd,
+                LotNo = ArrivedLotNumbers[DateConst.May1st].First(),
+                Arrival = DateConst.May1st,
+                Today = DateConst.May1st,
+                NextDay = DateConst.May2nd,
                 InitialQuantity = 300,
                 Used = 0,
                 Remain = 300
@@ -193,7 +174,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var expectedSupplier = Model.SupplierModel.Find(ExpectedSupplerCode);
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var orderCancelDate = Date.May2nd;
+            var orderCancelDate = DateConst.May2nd;
             var expectedCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count() - 1;
             var expectedCountOfScheduledToUseStockActions = (expectedPart.ExpiryDate + 1) * expectedCountOfOrders;
 
@@ -222,7 +203,7 @@ namespace MemorieDeFleursTest.ModelTest
         public void CanRemoveUsedQuantityOfPartsFromStockAction()
         {
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var expectedUsedDate = Date.April30th;
+            var expectedUsedDate = DateConst.April30th;
             var expectedArrivalDate = expectedUsedDate;
             var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
             var quantity = 20;
@@ -249,7 +230,7 @@ namespace MemorieDeFleursTest.ModelTest
         public void AllStocksInTheDayIsUsed()
         {
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var expectedUsedDate = Date.April30th;
+            var expectedUsedDate = DateConst.April30th;
             var expectedArrivalDate = expectedUsedDate;
             var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
             var quantity = 200;
@@ -276,7 +257,7 @@ namespace MemorieDeFleursTest.ModelTest
         public void NotEnoughStocksInTheDay_andOutofStockRecordGenerated()
         {
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var expectedUsedDate = Date.April30th;
+            var expectedUsedDate = DateConst.April30th;
             var expectedArrivalDate = expectedUsedDate;
             var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
             var quantity = 220;
@@ -311,40 +292,40 @@ namespace MemorieDeFleursTest.ModelTest
         public void CanRemoveFromTwoOrMoreStockActions()
         {
             var expectedPart = Model.BouquetModel.Find(ExpectedPartCode);
-            var actionDate = Date.May2nd;
+            var actionDate = DateConst.May2nd;
             var expected = new
             {
                 First = new
                 {
-                    LotNo = ArrivedLotNumbers[Date.April30th].First(),
-                    Arrived = Date.April30th,
+                    LotNo = ArrivedLotNumbers[DateConst.April30th].First(),
+                    Arrived = DateConst.April30th,
                     Previous = actionDate.AddDays(-1),
                     Today = actionDate,
                     Next = actionDate.AddDays(1),
-                    Discard = Date.April30th.AddDays(expectedPart.ExpiryDate),
+                    Discard = DateConst.April30th.AddDays(expectedPart.ExpiryDate),
                     Initial = 200,
                     Used = 200,
                     Remain = 0
                 },
                 Second = new
                 {
-                    LotNo = ArrivedLotNumbers[Date.May1st].First(),
-                    Arrived = Date.May1st,
+                    LotNo = ArrivedLotNumbers[DateConst.May1st].First(),
+                    Arrived = DateConst.May1st,
                     Previous = actionDate.AddDays(-1),
                     Today = actionDate,
                     Next = actionDate.AddDays(1),
-                    Discard = Date.May1st.AddDays(expectedPart.ExpiryDate),
+                    Discard = DateConst.May1st.AddDays(expectedPart.ExpiryDate),
                     Initial = 300,
                     Used = 80,
                     Remain = 220
                 },
                 Third = new
                 {
-                    LotNo = ArrivedLotNumbers[Date.May2nd].First(),
-                    Arrived = Date.May2nd,
+                    LotNo = ArrivedLotNumbers[DateConst.May2nd].First(),
+                    Arrived = DateConst.May2nd,
                     Today = actionDate,
                     Next = actionDate.AddDays(1),
-                    Discard = Date.May2nd.AddDays(expectedPart.ExpiryDate),
+                    Discard = DateConst.May2nd.AddDays(expectedPart.ExpiryDate),
                     Initial = 200,
                     Used = 0,
                     Remain = 200
@@ -400,7 +381,7 @@ namespace MemorieDeFleursTest.ModelTest
             AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
         }
 
-        #region 複合テスト用サポートクラス
+#region 複合テスト用サポートクラス
         private class ExpectedStockAction
         {
             public StockActionType Type { get; private set; }
@@ -430,7 +411,7 @@ namespace MemorieDeFleursTest.ModelTest
             }
         }
 
-        #endregion // 複合テスト用サポートクラス
+#endregion // 複合テスト用サポートクラス
 
         [TestMethod]
         public void CompositeTestFromApril30ToMay7th()
@@ -439,69 +420,69 @@ namespace MemorieDeFleursTest.ModelTest
 
             var test = new Dictionary<DateTime, int>()
             {
-                { Date.April30th, 20 },
-                { Date.May1st, 50 },
-                { Date.May2nd, 80 },
-                { Date.May3rd, 20 },
-                { Date.May4th, 400 },
-                { Date.May5th, 170 },
-                { Date.May6th, 40 }
+                { DateConst.April30th, 20 },
+                { DateConst.May1st, 50 },
+                { DateConst.May2nd, 80 },
+                { DateConst.May3rd, 20 },
+                { DateConst.May4th, 400 },
+                { DateConst.May5th, 170 },
+                { DateConst.May6th, 40 }
             };
             var expected = new List<Tuple<DateTime, List<Tuple<DateTime, ExpectedStockAction>>>>() {
                 Tuple.Create(
-                    Date.April30th,
+                    DateConst.April30th,
                     new List<Tuple<DateTime,ExpectedStockAction>>()
                     {
-                        Tuple.Create(Date.April30th, ExpectedStockAction.CreateArrivedAction(200)),
-                        Tuple.Create(Date.April30th, ExpectedStockAction.CreateUsedAction(20, 180)),
-                        Tuple.Create(Date.May1st, ExpectedStockAction.CreateUsedAction(50, 130)),
-                        Tuple.Create(Date.May2nd, ExpectedStockAction.CreateUsedAction(80, 50)),
-                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateUsedAction(20, 30)),
-                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateDiscardAction(30))
+                        Tuple.Create(DateConst.April30th, ExpectedStockAction.CreateArrivedAction(200)),
+                        Tuple.Create(DateConst.April30th, ExpectedStockAction.CreateUsedAction(20, 180)),
+                        Tuple.Create(DateConst.May1st, ExpectedStockAction.CreateUsedAction(50, 130)),
+                        Tuple.Create(DateConst.May2nd, ExpectedStockAction.CreateUsedAction(80, 50)),
+                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateUsedAction(20, 30)),
+                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateDiscardAction(30))
                     }),
                 Tuple.Create(
-                    Date.May1st,
+                    DateConst.May1st,
                     new List<Tuple<DateTime,ExpectedStockAction>>()
                     {
-                        Tuple.Create(Date.May1st, ExpectedStockAction.CreateArrivedAction(300)),
-                        Tuple.Create(Date.May1st, ExpectedStockAction.CreateUsedAction(0, 300)),
-                        Tuple.Create(Date.May2nd, ExpectedStockAction.CreateUsedAction(0, 300)),
-                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateUsedAction(0, 300)),
-                        Tuple.Create(Date.May4th, ExpectedStockAction.CreateUsedAction(300, 0)),
-                        Tuple.Create(Date.May4th, ExpectedStockAction.CreateDiscardAction(0))
+                        Tuple.Create(DateConst.May1st, ExpectedStockAction.CreateArrivedAction(300)),
+                        Tuple.Create(DateConst.May1st, ExpectedStockAction.CreateUsedAction(0, 300)),
+                        Tuple.Create(DateConst.May2nd, ExpectedStockAction.CreateUsedAction(0, 300)),
+                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateUsedAction(0, 300)),
+                        Tuple.Create(DateConst.May4th, ExpectedStockAction.CreateUsedAction(300, 0)),
+                        Tuple.Create(DateConst.May4th, ExpectedStockAction.CreateDiscardAction(0))
                     }),
                 Tuple.Create(
-                    Date.May2nd,
+                    DateConst.May2nd,
                     new List<Tuple<DateTime,ExpectedStockAction>>()
                     {
-                        Tuple.Create(Date.May2nd, ExpectedStockAction.CreateArrivedAction(200)  ),
-                        Tuple.Create(Date.May2nd, ExpectedStockAction.CreateUsedAction(0, 200)  ),
-                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateUsedAction(0, 200)  ),
-                        Tuple.Create(Date.May4th, ExpectedStockAction.CreateUsedAction(100, 100)),
-                        Tuple.Create(Date.May5th, ExpectedStockAction.CreateUsedAction(100, 0)  ),
-                        Tuple.Create(Date.May5th, ExpectedStockAction.CreateDiscardAction(0)    )
+                        Tuple.Create(DateConst.May2nd, ExpectedStockAction.CreateArrivedAction(200)  ),
+                        Tuple.Create(DateConst.May2nd, ExpectedStockAction.CreateUsedAction(0, 200)  ),
+                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateUsedAction(0, 200)  ),
+                        Tuple.Create(DateConst.May4th, ExpectedStockAction.CreateUsedAction(100, 100)),
+                        Tuple.Create(DateConst.May5th, ExpectedStockAction.CreateUsedAction(100, 0)  ),
+                        Tuple.Create(DateConst.May5th, ExpectedStockAction.CreateDiscardAction(0)    )
                     }),
                 Tuple.Create(
-                    Date.May3rd,
+                    DateConst.May3rd,
                     new List<Tuple<DateTime,ExpectedStockAction>>()
                     {
-                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateArrivedAction(200) ),
-                        Tuple.Create(Date.May3rd, ExpectedStockAction.CreateUsedAction(0, 200) ),
-                        Tuple.Create(Date.May4th, ExpectedStockAction.CreateUsedAction(0, 200) ),
-                        Tuple.Create(Date.May5th, ExpectedStockAction.CreateUsedAction(70, 130)),
-                        Tuple.Create(Date.May6th, ExpectedStockAction.CreateUsedAction(40, 90) ),
-                        Tuple.Create(Date.May6th, ExpectedStockAction.CreateDiscardAction(90)  )
+                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateArrivedAction(200) ),
+                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateUsedAction(0, 200) ),
+                        Tuple.Create(DateConst.May4th, ExpectedStockAction.CreateUsedAction(0, 200) ),
+                        Tuple.Create(DateConst.May5th, ExpectedStockAction.CreateUsedAction(70, 130)),
+                        Tuple.Create(DateConst.May6th, ExpectedStockAction.CreateUsedAction(40, 90) ),
+                        Tuple.Create(DateConst.May6th, ExpectedStockAction.CreateDiscardAction(90)  )
                     }),
                 Tuple.Create(
-                    Date.May6th,
+                    DateConst.May6th,
                     new List<Tuple<DateTime,ExpectedStockAction>>()
                     {
-                        Tuple.Create(Date.May6th, ExpectedStockAction.CreateArrivedAction(100)),
-                        Tuple.Create(Date.May6th, ExpectedStockAction.CreateUsedAction(0, 100)),
-                        Tuple.Create(Date.May7th, ExpectedStockAction.CreateUsedAction(0, 100)),
-                        Tuple.Create(Date.May8th, ExpectedStockAction.CreateUsedAction(0, 100)),
-                        Tuple.Create(Date.May9th, ExpectedStockAction.CreateUsedAction(0, 100)),
-                        Tuple.Create(Date.May9th, ExpectedStockAction.CreateDiscardAction(100))
+                        Tuple.Create(DateConst.May6th, ExpectedStockAction.CreateArrivedAction(100)),
+                        Tuple.Create(DateConst.May6th, ExpectedStockAction.CreateUsedAction(0, 100)),
+                        Tuple.Create(DateConst.May7th, ExpectedStockAction.CreateUsedAction(0, 100)),
+                        Tuple.Create(DateConst.May8th, ExpectedStockAction.CreateUsedAction(0, 100)),
+                        Tuple.Create(DateConst.May9th, ExpectedStockAction.CreateUsedAction(0, 100)),
+                        Tuple.Create(DateConst.May9th, ExpectedStockAction.CreateDiscardAction(100))
                     })
             };
 
@@ -530,7 +511,7 @@ namespace MemorieDeFleursTest.ModelTest
             AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
         }
 
-        #region 在庫アクションに関する検証用サポート関数
+#region 在庫アクションに関する検証用サポート関数
         /// <summary>
         /// 特定の１在庫アクションが、数量や残数も含めすべて意図通り登録されているかどうかを検証する
         /// </summary>
@@ -600,6 +581,6 @@ namespace MemorieDeFleursTest.ModelTest
         {
             Assert.AreEqual(0, TestDBContext.StockActions.Count(a => a.Action == type && a.StockLotNo == lotNo));
         }
-        #endregion // 在庫アクションに関する検証用サポート関数
+#endregion // 在庫アクションに関する検証用サポート関数
     }
 }
