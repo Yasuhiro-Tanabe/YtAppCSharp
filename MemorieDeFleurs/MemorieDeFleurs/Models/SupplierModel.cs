@@ -2,7 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace MemorieDeFleurs.Models
 {
@@ -266,21 +269,59 @@ namespace MemorieDeFleurs.Models
         /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
         public int Order(DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
+            LogUtil.Debug($"Order(ordered={orderDate.ToString("yyyyMMdd")}, part={part.Code}, numLot={quantityOfLot} (quantity={quantityOfLot * part.QuantitiesPerLot}), arrival={arrivalDate.ToString("yyyyMMdd")}) [Begin]");
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
             var lotNo = Sequences.SEQ_STOCK_LOT_NUMBER.Next;
+            var quantity = quantityOfLot * part.QuantitiesPerLot;
 
             var param = new StockActionParameterToOrder(arrivalDate, part, lotNo, quantityOfLot);
 
+            // 追加発注分の在庫アクションを登録する
             AddScheduledToArriveStockAction(param);
-
             AddScheduledToDiscardStockAction(param);
-
             AddScheduledToUseStockAction(param);
-
             DbContext.SaveChanges();
 
-            return lotNo;
+            // arrivalDate 以降の既存納品予定から払い出していた加工分を今回発注分に振替する
+            foreach (var d in Enumerable.Range(0, part.ExpiryDate + 1).Select(i => arrivalDate.AddDays(i)))
+            {
+                var stocks = DbContext.StockActions
+                    .Where(act => act.PartsCode == part.Code)
+                    .Where(act => act.ActionDate == d)
+                    .Where(act => act.ArrivalDate > arrivalDate)
+                    .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
+                    .Where(act => act.Quantity > 0);
+                
+                if(stocks.Count() == 0) { continue; }
 
+                var sum = stocks.Sum(act => act.Quantity);
+                if (sum <= quantity)
+                {
+                    // 今回発注分ですべて賄える
+                    AddQuantityToStockLot(part, lotNo, d, sum);
+                    foreach (var stock in stocks)
+                    {
+                        // 加工分を在庫に戻す
+                        var back = stock.Quantity;
+                        AddQuantityToStockLot(part, stock.StockLotNo, d, -back);
+                    }
+                }
+                else
+                {
+                    throw new NotImplementedException(new StringBuilder()
+                        .Append("今回発注分では賄えない： ")
+                        .AppendFormat("発注日={0:yyyyMMdd", orderDate)
+                        .AppendFormat(", 到着予定日={0:yyyyMMdd}", arrivalDate)
+                        .AppendFormat(", 在庫不足発生日={0:yyyyMMDD}", d)
+                        .Append(", 数量=").Append(quantity)
+                        .Append(", 当日分残数合計=").Append(sum)
+                        .ToString());
+                }
+            }
+
+
+            LogUtil.Debug($"Order(ordered={orderDate.ToString("yyyyMMdd")}, part={part.Code}, numLot={quantityOfLot}, arrival={arrivalDate.ToString("yyyyMMdd")}) [End]");
+            return lotNo;
         }
 
         private void AddScheduledToUseStockAction(StockActionParameterToOrder param)
@@ -299,7 +340,7 @@ namespace MemorieDeFleurs.Models
                     Remain = param.Quantity
                 };
                 DbContext.StockActions.Add(toUse);
-
+                DEBUG_LOGStockActionCreated(toUse);
             }
         }
 
@@ -316,6 +357,7 @@ namespace MemorieDeFleurs.Models
                 Remain = 0
             };
             DbContext.StockActions.Add(discard);
+            DEBUG_LOGStockActionCreated(discard);
         }
 
         private void AddScheduledToArriveStockAction(StockActionParameterToOrder param)
@@ -331,6 +373,7 @@ namespace MemorieDeFleurs.Models
                 Remain = param.Quantity
             };
             DbContext.StockActions.Add(arrive);
+            DEBUG_LOGStockActionCreated(arrive);
         }
         #endregion // 発注
 
@@ -344,5 +387,163 @@ namespace MemorieDeFleurs.Models
 
         }
         #endregion // 発注取消
+
+#region 払い出し予定の振替
+        private void AddQuantityToStockLot(BouquetPart part, int lotNo, DateTime actionDate, int quantity)
+        {
+            var stockTheDay = DbContext.StockActions
+                .Where(act => act.PartsCode == part.Code)
+                .Where(act => act.StockLotNo == lotNo)
+                .Where(act => act.ActionDate == actionDate)
+                .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
+                .Single();
+            if(stockTheDay.Remain < quantity)
+            {
+                throw new NotImplementedException(new StringBuilder()
+                    .Append("在庫払い出しできない：当日残数が要求された使用量より小さい. ")
+                    .AppendFormat("基準日={0:yyyyMMdd}", actionDate)
+                    .Append("花コード=").Append(part.Code)
+                    .Append("ロット番号").Append(stockTheDay.StockLotNo)
+                    .AppendFormat("納品日={0:yyyyMMdd}", stockTheDay.ArrivalDate)
+                    .Append("要求数量=").Append(quantity)
+                    .Append("在庫数量=").Append(stockTheDay.Remain)
+                    .ToString());
+            }
+            DEBUG_LogStockActionQuantityChanged(stockTheDay, quantity, -quantity);
+            stockTheDay.Quantity += quantity;
+            stockTheDay.Remain -= quantity;
+            DbContext.StockActions.Update(stockTheDay);
+
+            var discardStockTheDay = DbContext.StockActions
+                .Where(act => act.PartsCode == part.Code)
+                .Where(act => act.StockLotNo == lotNo)
+                .Where(act => act.ActionDate == actionDate)
+                .Where(act => act.Action == StockActionType.SCHEDULED_TO_DISCARD)
+                .SingleOrDefault();
+            if (discardStockTheDay != null)
+            {
+                DEBUG_LogStockActionQuantityChanged(discardStockTheDay, -quantity, 0);
+                discardStockTheDay.Quantity -= quantity;
+                DbContext.StockActions.Update(discardStockTheDay);
+                DbContext.SaveChanges();
+
+                return; // この日が使用期限。次の日以降の在庫アクションは存在しないので後続処理不要。
+            }
+
+
+            // 基準日翌日以降の加工予定と破棄予定を更新する
+            var stocksTheNextDayAndAfter = DbContext.StockActions
+                .Where(act => act.PartsCode == part.Code)
+                .Where(act => act.StockLotNo == lotNo)
+                .Where(act => act.ActionDate > actionDate);
+            foreach (var act in stocksTheNextDayAndAfter)
+            {
+                if(act.Remain < quantity)
+                {
+                    throw new NotImplementedException(new StringBuilder()
+                        .Append("在庫払い出しできない：基準日以降の在庫が足りない. ")
+                        .AppendFormat("基準日={0:yyyyMMdd}", actionDate)
+                        .Append("花コード=").Append(part.Code)
+                        .Append("ロット番号").Append(act.StockLotNo)
+                        .AppendFormat("納品日={0:yyyyMMdd}", act.ArrivalDate)
+                        .AppendFormat("在庫不足日={0:yyyyMMdd}", act.ActionDate)
+                        .Append("要求数量=").Append(quantity)
+                        .Append("不足日の在庫数量=").Append(act.Remain)
+                        .ToString());
+                }
+                switch(act.Action)
+                {
+                    case StockActionType.SCHEDULED_TO_USE:
+                        DEBUG_LogStockActionQuantityChanged(act, 0, -quantity);
+                        act.Remain -= quantity;
+                        DbContext.StockActions.Update(act);
+                        break;
+                    case StockActionType.SCHEDULED_TO_DISCARD:
+                        DEBUG_LogStockActionQuantityChanged(act, -quantity, 0);
+                        act.Quantity -= quantity;
+                        DbContext.StockActions.Update(act);
+                        break;
+                    default:
+                        throw new NotImplementedException(new StringBuilder()
+                            .Append("想定外の在庫払い出し：アクションタイプ=").Append(act.Action)
+                            .AppendFormat("基準日={0:yyyyMMdd}", actionDate)
+                            .Append("花コード=").Append(part.Code)
+                            .Append("ロット番号").Append(act.StockLotNo)
+                            .AppendFormat("納品日={0:yyyyMMdd}", act.ArrivalDate)
+                            .ToString());
+                }
+            }
+
+            DbContext.SaveChanges();
+        }
+
+
+        #region デバッグ用: Debugターゲットの時のみ実行されるメソッド等
+        /// <summary>
+        /// 生成/登録された在庫アクションをデバッグログ出力する
+        /// </summary>
+        /// <param name="action">出力対象在庫アクション</param>
+        /// <param name="calledFrom">このメソッドの呼び出し元：通常は指定不要。直接の呼び出し元ではなく、さらにその呼び出し元をログに残したいとき指定する</param>
+        /// <param name="line">このメソッドの呼び出し位置：ソースファイル中の行番号。calledFrom と同様通常は指定不要、呼び出し元の呼び出し元をログに残したいときのみ指定する</param>
+        [Conditional("DEBUG")]
+        private void DEBUG_LOGStockActionCreated(StockAction action, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
+        {
+            LogUtil.Debug(new StringBuilder()
+                .Append("  Created: ").Append(action.Action)
+                .AppendFormat("[ day={0:yyyyMMdd}", action.ActionDate)
+                .Append(", part=").Append(action.PartsCode)
+                .AppendFormat(", arrived={0:yyyyMMdd}", action.ArrivalDate)
+                .Append(", quantity=").Append(action.Quantity)
+                .Append(", remain=").Append(action.Remain)
+                .ToString());
+        }
+
+        /// <summary>
+        /// 在庫アクションの数量変更をデバッグログ出力する
+        /// </summary>
+        /// <param name="action">出力対象在庫アクション</param>
+        /// <param name="diffOfQuantity">数量の変更量：変更後の数量が変更前＋αのとき＋α、変更前－αのとき－αを指定する</param>
+        /// <param name="diffOfRemain">残数の変更量：変更後の残数が変更前＋αのとき＋α、変更前－αのとき－αを指定する</param>
+        /// <param name="calledFrom">このメソッドの呼び出し元：通常は指定不要。直接の呼び出し元ではなく、さらにその呼び出し元をログに残したいとき指定する</param>
+        /// <param name="line">このメソッドの呼び出し位置：ソースファイル中の行番号。calledFrom と同様通常は指定不要、呼び出し元の呼び出し元をログに残したいときのみ指定する</param>
+        [Conditional("DEBUG")]
+        private void DEBUG_LogStockActionQuantityChanged(StockAction action, int diffOfQuantity, int diffOfRemain, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
+        {
+            var builder = new StringBuilder()
+                .Append("  ").Append(action.PartsCode).Append(".").Append(action.Action)
+                .Append("[lot=").Append(action.StockLotNo)
+                .AppendFormat(", day={0:yyyyMMdd}", action.ActionDate);
+
+            if(diffOfQuantity == 0)
+            {
+                builder.AppendFormat(", quantity={0} (same)", action.Quantity);
+            }
+            else
+            {
+                builder.AppendFormat(", quantity={0}->{1}", action.Quantity, action.Quantity + diffOfQuantity);
+            }
+            
+            if(diffOfRemain == 0)
+            {
+                builder.AppendFormat(", remain={0} (same)", action.Remain);
+            }
+            else
+            {
+                builder.AppendFormat(", remain={0}->{1}", action.Remain, action.Remain + diffOfRemain);
+            }
+            
+            if(string.IsNullOrWhiteSpace(calledFrom))
+            {
+                builder.Append(" ]");
+            }
+            else
+            {
+                builder.AppendFormat(" ] ({0}:{1})", calledFrom, line);
+            }
+
+            LogUtil.Debug(builder.ToString());
+        }
+        #endregion // デバッグ用
+        #endregion // 払い出し予定の振替
     }
 }

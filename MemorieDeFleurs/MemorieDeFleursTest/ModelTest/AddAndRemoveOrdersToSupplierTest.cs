@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models;
+﻿using MemorieDeFleurs;
+using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -226,11 +227,11 @@ namespace MemorieDeFleursTest.ModelTest
             public void AssertExists(MemorieDeFleursDbContext context, DateTime actionDate, string part, int lot, DateTime arrivedDate)
             {
                 var key = new StringBuilder()
-                    .Append("基準日=").AppendFormat("yyyyMMdd", actionDate)
+                    .AppendFormat("基準日={0:yyyyMMdd}", actionDate)
                     .Append(", アクション=").Append(Type)
                     .Append(", 花コード=").Append(part)
                     .Append(", 在庫ロット番号=").Append(lot)
-                    .Append(", 入荷日=").AppendFormat("yyyyMMdd", arrivedDate)
+                    .AppendFormat(", 入荷日={0:yyyyMMdd}", arrivedDate)
                     .ToString();
 
                 var candidate = context.StockActions
@@ -424,6 +425,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void NewOrderWhichArrivedAt20200504()
         {
+            LogUtil.Debug("=====NewOrderWhichArrivedAt20200504 [Begin]=====");
             var newLotNo = Model.SupplierModel.Order(Date.April30th, ExpectedPart, 1, Date.May4th);
             var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
@@ -448,7 +450,45 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(Date.May6th).Used(0, 100)
                     .At(Date.May7th).Used(0, 100).Discarded(100)
                 .AssertAll(TestDBContext);
+            LogUtil.Debug("=====NewOrderWhichArrivedAt20200504 [End]=====");
         }
 
+        /// <summary>
+        /// 5/2納品予定分の追加発注により、5/3納品予定分から払い出していた5/5加工分70本が、
+        /// 今回追加発注分からの払い出しに置き換わること
+        /// </summary>
+        [TestMethod]
+        public void NewOrderWhichArrivedAt20200502()
+        {
+            LogUtil.Debug("=====NewOrderWhichArrivedAt20200502 [Begin]=====");
+            var newLotNo = Model.SupplierModel.Order(Date.April30th, ExpectedPart, 1, Date.May2nd);
+            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
+
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart)
+                .Lot(Date.April30th, findLotNo)
+                    .At(Date.May2nd).Used(80, 50)
+                    .At(Date.May3rd).Used(20, 30).Discarded(30)
+                .Lot(Date.May1st, findLotNo)
+                    .At(Date.May2nd).Used(0, 300)
+                    .At(Date.May3rd).Used(0, 300)
+                    .At(Date.May4th).Used(300, 0).Discarded(0)
+                .Lot(Date.May2nd, findLotNo)
+                    .At(Date.May2nd).Arrived(200).Used(0, 200)
+                    .At(Date.May3rd).Used(0, 200)
+                    .At(Date.May4th).Used(100, 100)
+                    .At(Date.May5th).Used(100, 0).Discarded(0)
+                .Lot(Date.May2nd, newLotNo)
+                    .At(Date.May2nd).Arrived(100).Used(0, 100)
+                    .At(Date.May3rd).Used(0, 100)
+                    .At(Date.May4th).Used(0, 100)
+                    .At(Date.May5th).Used(70, 30).Discarded(30) // 0本→70本使用
+                .Lot(Date.May3rd, findLotNo)
+                    .At(Date.May3rd).Arrived(200).Used(0, 200)
+                    .At(Date.May4th).Used(0, 200)
+                    .At(Date.May5th).Used(0, 200)  // 70本使用→0本
+                    .At(Date.May6th).Used(40, 160).Discarded(160)
+                .AssertAll(TestDBContext);
+            LogUtil.Debug("=====NewOrderWhichArrivedAt20200502 [End]=====");
+        }
     }
 }

@@ -279,6 +279,7 @@ namespace MemorieDeFleurs.Models
 
                 UpdateRemainAndDiscardQuantitiesOfThisStockLot(stock, useFromThisLot);
 
+                LogUtil.Debug($"OutOfStock:   date={stock.ActionDate.ToString("yyyyMMdd")}, part={stock.PartsCode}, lot={stock.StockLotNo}, remain={-outOfStock}, used={useFromThisLot}");
                 // outOfStock 分を同日分で入荷予定日が一番若い在庫アクションから引く
                 var nextStock = DbContext.StockActions
                     .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
