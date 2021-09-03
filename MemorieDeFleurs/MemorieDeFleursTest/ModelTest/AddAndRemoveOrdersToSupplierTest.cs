@@ -123,7 +123,7 @@ namespace MemorieDeFleursTest.ModelTest
         }
         #endregion // TesetCleanup
 
-#region テストデータ生成参照用のサポートクラス
+        #region テストデータ生成参照用のサポートクラス
         private class OrderInfo
         {
             public OrderInfo(int lotNo, int initial)
@@ -177,7 +177,13 @@ namespace MemorieDeFleursTest.ModelTest
         {
             return InitialOrders[arrived][index].LotNo;
         }
-#endregion // 検証用サポートメソッド
+
+        private void AssertNoStockLot(int lotNo)
+        {
+            // 該当ロットの在庫アクションがすべて破棄されている
+            Assert.AreEqual(0, TestDBContext.StockActions.Count(act => act.StockLotNo == lotNo));
+        }
+        #endregion // 検証用サポートメソッド
 
 
         /// <summary>
@@ -250,6 +256,26 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May6th).Used(40, 160).Discarded(160)
                 .AssertAll(TestDBContext);
             LogUtil.Debug("=====NewOrderWhichArrivedAt20200502 [End]=====");
+        }
+
+        /// <summary>
+        /// 未使用の在庫ロットを破棄しても他の在庫ロットに影響が出ない
+        /// </summary>
+        [TestMethod]
+        public void RemoveOrderArrivedAt20200506()
+        {
+            var lot = InitialOrders[DateConst.May6th][0].LotNo;
+            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
+
+            Model.SupplierModel.CancelOrder(lot);
+
+            AssertNoStockLot(lot);
+
+            // 他在庫ロットの在庫アクションで、破棄した在庫ロットの入荷日以降の在庫アクションに変化がない
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart)
+                .Lot(DateConst.May3rd, findLotNo)
+                    .At(DateConst.May6th).Used(40, 90).Discarded(90)
+                .AssertAll(TestDBContext);
         }
     }
 }
