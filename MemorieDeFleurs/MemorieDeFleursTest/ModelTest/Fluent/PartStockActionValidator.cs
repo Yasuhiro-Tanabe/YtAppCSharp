@@ -14,7 +14,9 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <summary>
         /// この検証器の呼び出し元
         /// </summary>
-        public StockActionsValidator Parent { get; private set; }
+        private StockActionsValidator Parent { get; set; }
+
+        private LotStockActionValidator CurrentChild { get; set; } = null;
 
         /// <summary>
         /// 検証器を作成する
@@ -26,12 +28,12 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         }
 
         /// <summary>
-        /// ロットの在庫アクション検証器を生成し制御を移す
+        /// ロットの在庫アクション検証器を生成する：生成するだけで制御は移さない。
         /// </summary>
         /// <param name="arrivedDate">入荷予定日</param>
         /// <param name="lotNo">ロット番号</param>
-        /// <returns>ロットの在庫アクション検証器</returns>
-        public LotStockActionValidator Lot(DateTime arrivedDate, int lotNo)
+        /// <returns>自分自身</returns>
+        public PartStockActionValidator Lot(DateTime arrivedDate, int lotNo)
         {
             LotStockActionValidator validator;
             var key = Tuple.Create(arrivedDate, lotNo);
@@ -41,28 +43,41 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
                 Add(key, validator);
             }
 
-            return validator;
+            CurrentChild = validator;
+            return this;
         }
 
         /// <summary>
-        /// ロットの在庫アクション検証器を生成し制御を移す
+        /// ロットの在庫アクション検証器を生成する：生成するだけで制御は移さない。
         /// </summary>
         /// <param name="arrivalDate">入荷予定日</param>
         /// <param name="findLotNumber">入荷予定日からロット番号を特定するためのメソッドまたはデレゲート</param>
-        /// <returns>ロットの在庫アクション検証器</returns>
-        public LotStockActionValidator Lot(DateTime arrivalDate, Func<DateTime, int> findLotNumber)
+        /// <returns>自分自身</returns>
+        public PartStockActionValidator Lot(DateTime arrivalDate, Func<DateTime, int> findLotNumber)
         {
             return Lot(arrivalDate, findLotNumber(arrivalDate));
         }
 
         /// <summary>
-        /// データベース上の在庫アクションのうちこの検証器に登録されている各ロットの在庫アクションが、
-        /// 期待値通りに登録されているかどうかを検証する
+        /// ロットの在庫アクション検証器に制御を移す
         /// </summary>
-        /// <param name="context">検証対象データベース</param>
-        public void AssertAll(MemorieDeFleursDbContext context)
+        /// <returns>ロットの在庫アクション検証器</returns>
+        public LotStockActionValidator Begin()
         {
-            Parent.AssertAll(context);
+            if (CurrentChild == null)
+            {
+                throw new InvalidOperationException($"Call {nameof(Lot)}() before calling {nameof(Begin)}().");
+            }
+            return CurrentChild;
+        }
+
+        /// <summary>
+        /// 呼び出し元の在庫アクション検証器に制御を戻す
+        /// </summary>
+        /// <returns>在庫アクション検証器</returns>
+        public StockActionsValidator End()
+        {
+            return Parent;
         }
 
         /// <summary>

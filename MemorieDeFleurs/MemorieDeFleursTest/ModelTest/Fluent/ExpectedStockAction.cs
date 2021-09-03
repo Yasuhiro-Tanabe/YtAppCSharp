@@ -73,6 +73,11 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             return new ExpectedStockAction(StockActionType.SCHEDULED_TO_DISCARD, discarded, 0);
         }
 
+        public static ExpectedStockAction CreateOutOfStockAction(int lacked)
+        {
+            return new ExpectedStockAction(StockActionType.OUT_OF_STOCK, lacked, -lacked);
+        }
+
         /// <summary>
         /// 特定の１在庫アクションが、数量や残数も含めすべて意図通り登録されているかどうかを検証する
         /// </summary>

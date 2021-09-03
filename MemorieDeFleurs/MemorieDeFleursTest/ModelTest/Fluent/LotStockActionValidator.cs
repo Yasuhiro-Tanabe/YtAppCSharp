@@ -14,7 +14,9 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <summary>
         /// この検証器の呼び出し元
         /// </summary>
-        public PartStockActionValidator Parent { get; private set; }
+        private PartStockActionValidator Parent { get; set; } = null;
+
+        private ActionDateStockActionValidator CurrentChild { get; set; } = null;
 
         /// <summary>
         /// 検証器を作成する
@@ -28,7 +30,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <summary>
         /// 現在登録しようとしている日別在庫アクションの基準日
         /// </summary>
-        public DateTime CurrentActionDate { get; private set; }
+        private DateTime CurrentActionDate { get; set; }
 
         /// <summary>
         /// 日別在庫アクション検証器を生成し制御を移す
@@ -45,39 +47,17 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             }
 
             CurrentActionDate = actionDate;
-            return validator;
+            CurrentChild = validator;
+            return CurrentChild;
         }
 
         /// <summary>
-        /// ロットの在庫アクション検証器を生成し制御を移す
+        /// 呼び出し元の単品在庫アクション検証器に制御を戻す
         /// </summary>
-        /// <param name="arrivedDate">入荷予定日</param>
-        /// <param name="lotNo">ロット番号</param>
-        /// <returns>ロットの在庫アクション検証器</returns>
-        public LotStockActionValidator Lot(DateTime arrivedDate, int lotNo)
+        /// <returns>単品在庫アクション検証器</returns>
+        public PartStockActionValidator End()
         {
-            return Parent.Lot(arrivedDate, lotNo);
-        }
-
-        /// <summary>
-        /// ロットの在庫アクション検証器を生成し制御を移す
-        /// </summary>
-        /// <param name="arrivalDate">入荷予定日</param>
-        /// <param name="findLotNumber">入荷予定日からロット番号を特定するためのメソッドまたはデレゲート</param>
-        /// <returns>ロットの在庫アクション検証器</returns>
-        public LotStockActionValidator Lot(DateTime arrivedDate, Func<DateTime, int> findLotNumber)
-        {
-            return Parent.Lot(arrivedDate, findLotNumber);
-        }
-
-        /// <summary>
-        /// データベース上の在庫アクションのうちこの検証器に登録されている各基準日の在庫アクションが、
-        /// 期待値通りに登録されているかどうかを検証する
-        /// </summary>
-        /// <param name="context">検証対象データベース</param>
-        public void AssertAll(MemorieDeFleursDbContext context)
-        {
-            Parent.AssertAll(context);
+            return Parent;
         }
 
         /// <summary>

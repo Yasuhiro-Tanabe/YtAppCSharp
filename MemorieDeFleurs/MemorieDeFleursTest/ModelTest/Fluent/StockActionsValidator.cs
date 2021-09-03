@@ -1,6 +1,7 @@
 ﻿using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,14 +23,16 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             return new StockActionsValidator();
         }
 
-        public BouquetPart CurrentPart { get; private set; }
+        private BouquetPart CurrentPart { get; set; } = null;
+
+        private PartStockActionValidator CurrentChild { get; set; } = null;
 
         /// <summary>
-        /// 単品在庫アクション検証器を生成し制御を移す
+        /// 単品在庫アクション検証器を生成する：生成するだけで制御はこの検証器のまま。
         /// </summary>
         /// <param name="part">単品</param>
         /// <returns>単品在庫アクション検証器</returns>
-        public PartStockActionValidator BouquetPart(BouquetPart part)
+        public StockActionsValidator BouquetPart(BouquetPart part)
         {
             PartStockActionValidator validator;
             if (!TryGetValue(part.Code, out validator))
@@ -38,8 +41,21 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
                 Add(part.Code, validator);
             }
             CurrentPart = part;
-            return validator;
+            CurrentChild = validator;
+            return this;
+        }
 
+        /// <summary>
+        /// 単品在庫アクション検証器に制御を移す
+        /// </summary>
+        /// <returns>単品在庫アクション検証器</returns>
+        public PartStockActionValidator Begin()
+        {
+            if(null == CurrentChild)
+            {
+                throw new InvalidOperationException($"Call {nameof(BouquetPart)}() before calling {nameof(Begin)}().");
+            }
+            return CurrentChild;
         }
 
         /// <summary>
