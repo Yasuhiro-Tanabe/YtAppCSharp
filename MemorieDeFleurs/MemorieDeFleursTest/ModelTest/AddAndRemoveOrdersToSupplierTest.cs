@@ -333,11 +333,13 @@ namespace MemorieDeFleursTest.ModelTest
 
         /// <summary>
         /// 発注取消により生じた在庫不足が、追加発注により解消される
+        /// 
+        /// 未来入荷分からの振替も、すべて追加発注分で加工される
         /// </summary>
         [TestMethod]
-        public void ChangeOrders_RemoveFrom20200502_And_Add2LotTo202005005()
+        public void ChangeOrders_RemoveFrom20200502_And_AddTwoLotTo202005005()
         {
-            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 [Begin]=====");
+            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 2 Lot (200)) [Begin]=====");
             var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
             var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
@@ -362,7 +364,41 @@ namespace MemorieDeFleursTest.ModelTest
                 .End()
                 .AssertAll(TestDBContext);
             
-            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 [End]=====");
+            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 2 Lot (200)) [End]=====");
+        }
+
+        /// <summary>
+        /// 在庫不足は解消されるが、未来入荷予定分への振替はゼロにならない
+        /// </summary>
+        [TestMethod]
+        public void ChangeOrders_RemoveFrom20200502_And_AddOneLotTo202005005()
+        {
+            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 1 Lot (100)) [Begin]=====");
+            var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
+            var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
+            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
+
+            Model.SupplierModel.CancelOrder(lot0502);
+            var lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 1, DateConst.May5th);
+
+            AssertNoStockLot(lot0502);
+            AssertStockActionCount(StockActionType.OUT_OF_STOCK, 0);
+
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May5th, lot0505).Begin()
+                    .At(DateConst.May5th).Used(70, 30)
+                    .At(DateConst.May6th).Used(30, 0)
+                    .At(DateConst.May7th).Used(0, 0)
+                    .At(DateConst.May8th).Used(0, 0).Discarded(0).End()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(10, 90)
+                    .At(DateConst.May7th).Used(0, 90)
+                    .At(DateConst.May8th).Used(0, 90)
+                    .At(DateConst.May9th).Used(0, 90).Discarded(90).End()
+                .End()
+                .AssertAll(TestDBContext);
+
+            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 1 Lot (100)) [End]=====");
         }
     }
 }

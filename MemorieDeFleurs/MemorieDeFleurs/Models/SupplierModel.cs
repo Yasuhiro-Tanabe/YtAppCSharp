@@ -322,7 +322,7 @@ namespace MemorieDeFleurs.Models
                             .Append(", 当日残=").Append(currentOrder.Remain)
                             .ToString());
                     }
-                    LogUtil.Info("Out of Stock was resolved.");
+                    LogUtil.Info($"Out of Stock was resolved. Date={outOfStock.ActionDate.ToString("yyyyMMdd")}, lot={outOfStock.StockLotNo}, lacked={outOfStock.Quantity}");
                 }
 
                 // 納品予定が翌日以降の在庫ロットからの振り替え
@@ -334,7 +334,7 @@ namespace MemorieDeFleurs.Models
                         .Where(act => act.Quantity > 0)
                         .OrderBy(act => act.ArrivalDate))
                 {
-                    DEBUGLOG_ComparationOfStockRemainAndQuantity(currentOrder, usedFromOthers.Remain);
+                    DEBUGLOG_ComparationOfStockRemainAndQuantity(currentOrder, usedFromOthers.Quantity);
                     if(currentOrder.Remain >= usedFromOthers.Quantity)
                     {
                         // 全量をこの在庫ロットから払い出す
@@ -343,16 +343,27 @@ namespace MemorieDeFleurs.Models
                     }
                     else
                     {
-                        throw new NotImplementedException(new StringBuilder()
-                            .Append("在庫不足：発注量では既存在庫ロットを全量振替できない:")
-                            .Append(" 品目=").Append(part.Code)
-                            .Append(", 発注ロット：").Append(lotNo)
-                            .AppendFormat(", 発注日={0:yyyyMMdd}", orderDate)
-                            .AppendFormat(", 不足日={0:yyyyMMdd", currentOrder.ActionDate)
-                            .Append("振替対象ロット").Append(usedFromOthers.StockLotNo)
-                            .Append(", 振替数=").Append(usedFromOthers.Quantity)
-                            .Append(", 当日残=").Append(currentOrder.Remain)
-                            .ToString());
+                        var outOfStock = usedFromOthers.Quantity - currentOrder.Remain;
+
+                        // 再振替のため、振替元の加工数を一旦ゼロに戻す
+                        AddQuantityToStockLot(part, usedFromOthers.StockLotNo, usedFromOthers.ActionDate, -usedFromOthers.Quantity);
+
+                        // 振替元で加工していた分をこのロット＋他ロットで再度振替なおす
+                        AddQuantityToStockLot(part, lotNo, usedFromOthers.ActionDate, currentOrder.Remain);
+                        var outOfStockAction = TransferToOtherLot(part, currentOrder.ActionDate, usedFromOthers.ArrivalDate, outOfStock);
+
+                        if(outOfStockAction.Quantity > 0)
+                        {
+                            throw new NotImplementedException(new StringBuilder()
+                                .Append("在庫不足：発注量では既存在庫ロットを全量振替できない:")
+                                .Append(" 品目=").Append(part.Code)
+                                .Append(", 発注ロット：").Append(lotNo)
+                                .AppendFormat(", 発注日={0:yyyyMMdd}", orderDate)
+                                .AppendFormat(", 不足日={0:yyyyMMdd}", currentOrder.ActionDate)
+                                .Append("最終振替対象ロット").Append(outOfStockAction.StockLotNo)
+                                .Append(", 振替残数=").Append(outOfStock)
+                                .ToString());
+                        }
                     }
 
                 }
