@@ -86,14 +86,15 @@ namespace MemorieDeFleursTest.ModelTest
 
             var expectedLotNumber = Model.SupplierModel.Order(orderDate, ExpectedPart, numLot, arrivalDate);
 
-            //入荷予定と破棄予定の各在庫アクションが正しい日付、登録数、破棄数で登録されている
-            AssertStockAction(StockActionType.SCHEDULED_TO_ARRIVE, arrivalDate, arrivalDate, ExpectedPart.Code, expectedLotNumber, expectedQuantity, expectedQuantity);
-            AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, discardDate, arrivalDate, ExpectedPart.Code, expectedLotNumber, expectedQuantity, 0);
-            foreach(var d in Enumerable.Range(0, ExpectedPart.ExpiryDate).Select(i => arrivalDate.AddDays(i)))
-            {
-                // 入荷予定日当日～破棄予定日当日 の間の使用予定在庫アクションが登録されている
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, d, arrivalDate, ExpectedPart.Code, expectedLotNumber, 0, expectedQuantity);
-            }
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(arrivalDate, expectedLotNumber).Begin()
+                    .At(arrivalDate).Arrived(expectedQuantity).Used(0, expectedQuantity)
+                    .At(arrivalDate.AddDays(1)).Used(0, expectedQuantity)
+                    .At(arrivalDate.AddDays(2)).Used(0, expectedQuantity)
+                    .At(arrivalDate.AddDays(3)).Used(0, expectedQuantity).Discarded(expectedQuantity)
+                    .End()
+                .End()
+                .AssertAll(TestDBContext);
         }
 
         /// <summary>
@@ -120,40 +121,24 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void WillBeUsedEarliestArrivedStockLotWhenTwoOrMoreLotHasEnoughQuantity()
         {
-            var expected = new {
-                LotNo = InitialOrders[DateConst.April30th][0].LotNo,
-                Arrival = DateConst.April30th,
-                PreviousDay = DateConst.April30th,
-                Today = DateConst.May1st,
-                NextDay = DateConst.May2nd,
-                InitialQuantity = InitialOrders[DateConst.April30th][0].InitialQuantity,
-                Used = 60,
-                Remain = InitialOrders[DateConst.April30th][0].InitialQuantity - 60
+            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May1st, 60);
+            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            };
-            var another = new
-            {
-                LotNo = InitialOrders[DateConst.May1st][0].LotNo,
-                Arrival = DateConst.May1st,
-                Today = DateConst.May1st,
-                NextDay = DateConst.May2nd,
-                InitialQuantity = InitialOrders[DateConst.May1st][0].InitialQuantity,
-                Used = 0,
-                Remain = InitialOrders[DateConst.May1st][0].InitialQuantity
-            };
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                // 引当てされた同一ロットに属する前日、当日、翌日の在庫アクションの数量/残数が意図通りに変化している
+                .Lot(DateConst.April30th, findLotNo).Begin()
+                    .At(DateConst.April30th).Used(0, 200)
+                    .At(DateConst.May1st).Used(60, 140)
+                    .At(DateConst.May2nd).Used(0, 140)
+                    .End()
+                // 引当てされたのとは別ロットに影響が出ていない
+                .Lot(DateConst.May1st, findLotNo).Begin()
+                    .At(DateConst.May1st).Used(0, 300)
+                    .At(DateConst.May2nd).Used(0, 300)
+                    .End()
+                .End()
+                .AssertAll(TestDBContext);
 
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, expected.Today, expected.Used);
-
-            Assert.AreEqual(expected.Remain + another.Remain, actualRemain);
-
-            // 引当てされた同一ロットに属する前日、当日、翌日の在庫アクションの数量/残数が意図通りに変化している
-            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expected.PreviousDay, expected.Arrival, ExpectedPart.Code, expected.LotNo, 0, expected.InitialQuantity);
-            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expected.Today, expected.Arrival, ExpectedPart.Code, expected.LotNo, expected.Used, expected.Remain);
-            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expected.NextDay, expected.Arrival, ExpectedPart.Code, expected.LotNo, 0, expected.Remain);
-
-            // 引当てされたのとは別ロットに影響が出ていない
-            AssertStockAction(StockActionType.SCHEDULED_TO_USE, another.Today, another.Arrival, ExpectedPart.Code, another.LotNo, 0, another.Remain);
-            AssertStockAction(StockActionType.SCHEDULED_TO_USE, another.NextDay, another.Arrival, ExpectedPart.Code, another.LotNo, 0, another.Remain);
         }
 
         [TestMethod]
@@ -187,84 +172,56 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void CanRemoveUsedQuantityOfPartsFromStockAction()
         {
-            var expectedUsedDate = DateConst.April30th;
-            var expectedArrivalDate = expectedUsedDate;
-            var expectedLotNumber = InitialOrders[expectedArrivalDate][0].LotNo;
-            var quantity = 20;
-            var expectedRemain = 180;
+            var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, expectedUsedDate, quantity);
+            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 20);
 
-            // 加工当日分残数は正しいか
-            Assert.AreEqual(expectedRemain, actualRemain);
-            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expectedUsedDate, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, quantity, expectedRemain);
-
-            // 翌日から破棄予定日までの残数に反映されているか (翌日からなので列挙の要素数は「品質維持可能日数-1」個)
-            foreach(var day in Enumerable.Range(1, ExpectedPart.ExpiryDate-1).Select(i => expectedArrivalDate.AddDays(i)))
-            {
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, day, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, 0, expectedRemain);
-            }
-
-            // 破棄された数はあっているか
-            var discardDate = expectedArrivalDate.AddDays(ExpectedPart.ExpiryDate);
-            AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, discardDate, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, expectedRemain, 0);
+            Assert.AreEqual(180, actualRemain);
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.April30th, lotNo).Begin()
+                    .At(DateConst.April30th).Used(20, 180)
+                    .At(DateConst.May1st).Used(0, 180)
+                    .At(DateConst.May2nd).Used(0, 180)
+                    .At(DateConst.May3rd).Used(0, 180).Discarded(180)
+                    .End()
+                .End()
+                .AssertAll(TestDBContext);
         }
 
         [TestMethod]
         public void AllStocksInTheDayIsUsed()
         {
-            var expectedUsedDate = DateConst.April30th;
-            var expectedArrivalDate = expectedUsedDate;
-            var expectedLotNumber = InitialOrders[expectedArrivalDate][0].LotNo;
-            var quantity = 200;
-            var expectedRemain = 0;
+            var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, expectedUsedDate, quantity);
+            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 200);
 
-            // 加工当日分残数は正しいか
-            Assert.AreEqual(expectedRemain, actualRemain);
-            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expectedUsedDate, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, quantity, expectedRemain);
-
-            // 翌日から破棄予定日までの残数に反映されているか (翌日からなので列挙の要素数は「品質維持可能日数-1」個)
-            foreach (var day in Enumerable.Range(1, ExpectedPart.ExpiryDate - 1).Select(i => expectedArrivalDate.AddDays(i)))
-            {
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, day, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, 0, expectedRemain);
-            }
-
-            // 破棄された数はあっているか
-            var discardDate = expectedArrivalDate.AddDays(ExpectedPart.ExpiryDate);
-            AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, discardDate, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, expectedRemain, 0);
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.April30th, lotNo).Begin()
+                    .At(DateConst.April30th).Used(200, 0)
+                    .At(DateConst.May1st).Used(0, 0)
+                    .At(DateConst.May2nd).Used(0, 0)
+                    .At(DateConst.May3rd).Used(0, 0).Discarded(0)
+                    .End()
+                .End()
+                .AssertAll(TestDBContext);
         }
 
         [TestMethod]
         public void NotEnoughStocksInTheDay_andOutofStockRecordGenerated()
         {
-            var expectedUsedDate = DateConst.April30th;
-            var expectedArrivalDate = expectedUsedDate;
-            var expectedLotNumber = InitialOrders[expectedArrivalDate][0].LotNo;
-            var quantity = 220;
-            var expectedUsedQuantity = 200;
-            var expectedOutOfStock = 20;
+            var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, expectedUsedDate, quantity);
+            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 220);
 
-            // 加工当日分残数は正しいか
-            Assert.AreEqual(-expectedOutOfStock, actualRemain);
-            AssertStockAction(StockActionType.SCHEDULED_TO_USE, expectedUsedDate, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, expectedUsedQuantity, 0);
-
-            // 翌日から破棄予定日までの残数に反映されているか (翌日からなので列挙の要素数は「品質維持可能日数-1」個)
-            foreach (var day in Enumerable.Range(1, ExpectedPart.ExpiryDate - 1).Select(i => expectedArrivalDate.AddDays(i)))
-            {
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, day, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, 0, 0);
-            }
-
-            // 破棄された数はあっているか
-            var discardDate = expectedArrivalDate.AddDays(ExpectedPart.ExpiryDate);
-            AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, discardDate, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, 0, 0);
-
-            // 在庫不足の在庫アクションが登録されているか
-            AssertStockAction(StockActionType.OUT_OF_STOCK, expectedArrivalDate, expectedArrivalDate, ExpectedPart.Code, expectedLotNumber, expectedOutOfStock, -expectedOutOfStock);
-
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.April30th, lotNo).Begin()
+                    .At(DateConst.April30th).Used(200, 0).OutOfStock(20)
+                    .At(DateConst.May1st).Used(0, 0)
+                    .At(DateConst.May2nd).Used(0, 0)
+                    .At(DateConst.May3rd).Used(0, 0).Discarded(0)
+                    .End()
+                .End()
+                .AssertAll(TestDBContext);
         }
 
         /// <summary>
@@ -273,133 +230,46 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void CanRemoveFromTwoOrMoreStockActions()
         {
-            var actionDate = DateConst.May2nd;
-            var expected = new
+            var lotNo = new int[]
             {
-                First = new
-                {
-                    LotNo = InitialOrders[DateConst.April30th][0].LotNo,
-                    Arrived = DateConst.April30th,
-                    Previous = actionDate.AddDays(-1),
-                    Today = actionDate,
-                    Next = actionDate.AddDays(1),
-                    Discard = DateConst.April30th.AddDays(ExpectedPart.ExpiryDate),
-                    Initial = 200,
-                    Used = 200,
-                    Remain = 0
-                },
-                Second = new
-                {
-                    LotNo = InitialOrders[DateConst.May1st][0].LotNo,
-                    Arrived = DateConst.May1st,
-                    Previous = actionDate.AddDays(-1),
-                    Today = actionDate,
-                    Next = actionDate.AddDays(1),
-                    Discard = DateConst.May1st.AddDays(ExpectedPart.ExpiryDate),
-                    Initial = 300,
-                    Used = 80,
-                    Remain = 220
-                },
-                Third = new
-                {
-                    LotNo = InitialOrders[DateConst.May2nd][0].LotNo,
-                    Arrived = DateConst.May2nd,
-                    Today = actionDate,
-                    Next = actionDate.AddDays(1),
-                    Discard = DateConst.May2nd.AddDays(ExpectedPart.ExpiryDate),
-                    Initial = 200,
-                    Used = 0,
-                    Remain = 200
-                }
+                InitialOrders[DateConst.April30th][0].LotNo,
+                InitialOrders[DateConst.May1st][0].LotNo,
+                InitialOrders[DateConst.May2nd][0].LotNo,
             };
 
-            var allUsed = expected.First.Used + expected.Second.Used;
-            var expectedRemain = expected.First.Remain + expected.Second.Remain + expected.Third.Initial;
+            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May2nd, 500);
 
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, actionDate, allUsed);
-
-            Assert.AreEqual(expectedRemain, actualRemain);
-
-            // 前々日(4/30)入荷分の在庫アクションについて、数量・残数、破棄数が正しく更新されているか
-            {
-                var lot = expected.First.LotNo;
-                var arrived = expected.First.Arrived;
-                var part = ExpectedPart.Code;
-                var first = expected.First;
-
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, first.Previous, arrived, part, lot, 0, first.Initial);
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, first.Today, arrived, part, lot, first.Used, first.Remain);
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, first.Next, arrived, part, lot, 0, first.Remain);
-                AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, first.Discard, arrived, part, lot, first.Remain, 0);
-            }
-
-            // 前日(5/1)入荷分の在庫アクションについて、数量・残数,破棄数が正しく更新されているか
-            {
-                var lot = expected.Second.LotNo;
-                var arrived = expected.Second.Arrived;
-                var part = ExpectedPart.Code;
-                var second = expected.Second;
-
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, second.Previous, arrived, part, lot, 0, second.Initial);
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, second.Today, arrived, part, lot, second.Used, second.Remain);
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, second.Next, arrived, part, lot, 0, second.Remain);
-                AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, second.Discard, arrived, part, lot, second.Remain, 0);
-            }
-
-            // 前日分までで使用数の確保が完了しているので当日(5/2)入荷分の在庫アクションに影響が出ていないか
-            {
-                var lot = expected.Third.LotNo;
-                var arrived = expected.Third.Arrived;
-                var part = ExpectedPart.Code;
-                var third = expected.Third;
-
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, third.Today, arrived, part, lot, 0, third.Initial);
-                AssertStockAction(StockActionType.SCHEDULED_TO_USE, third.Next, arrived, part, lot, 0, third.Remain);
-                AssertStockAction(StockActionType.SCHEDULED_TO_DISCARD, third.Discard, arrived, part, lot, third.Remain, 0);
-            }
+            // 2ロット分の全量を消費し、ただし3ロット目は消費しない
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.April30th, lotNo[0]).Begin()
+                    .At(DateConst.May1st).Used(0, 200)
+                    .At(DateConst.May2nd).Used(200, 0)
+                    .At(DateConst.May3rd).Used(0, 0).Discarded(0)
+                    .End()
+                .Lot(DateConst.May1st, lotNo[1]).Begin()
+                    .At(DateConst.May1st).Used(0, 300)
+                    .At(DateConst.May2nd).Used(300, 0)
+                    .At(DateConst.May3rd).Used(0, 0)
+                    .At(DateConst.May4th).Used(0, 0).Discarded(0)
+                    .End()
+                .Lot(DateConst.May2nd, lotNo[2]).Begin()
+                    .At(DateConst.May2nd).Used(0, 200)
+                    .At(DateConst.May3rd).Used(0, 200)
+                    .At(DateConst.May5th).Discarded(200)
+                    .End()
+                .End()
+                .AssertAll(TestDBContext);
 
             // 一日の在庫はトータルすれば潤沢なので、残数不足の在庫アクションは生成されない
             AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
         }
 
-#region 複合テスト用サポートクラス
-        private class ExpectedStockAction
-        {
-            public StockActionType Type { get; private set; }
-
-            private ExpectedStockAction(StockActionType t, int q, int r)
-            {
-                Type = t;
-                Quantity = q;
-                Remain = r;
-            }
-
-            public int Quantity { get; private set; }
-            public int Remain { get; private set; }
-
-            public static ExpectedStockAction CreateArrivedAction(int arrived)
-            {
-                return new ExpectedStockAction(StockActionType.SCHEDULED_TO_ARRIVE, arrived, arrived);
-            }
-
-            public static ExpectedStockAction CreateUsedAction(int used, int remain)
-            {
-                return new ExpectedStockAction(StockActionType.SCHEDULED_TO_USE, used, remain);
-            }
-            public static ExpectedStockAction CreateDiscardAction(int discarded)
-            {
-                return new ExpectedStockAction(StockActionType.SCHEDULED_TO_DISCARD, discarded, 0);
-            }
-        }
-
-#endregion // 複合テスト用サポートクラス
-
         [TestMethod]
         public void CompositeTestFromApril30ToMay7th()
         {
-            var expectedPart = Model.BouquetModel.Find(ExpectedPart.Code);
+            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            var test = new Dictionary<DateTime, int>()
+            var input = new Dictionary<DateTime, int>()
             {
                 { DateConst.April30th, 20 },
                 { DateConst.May1st, 50 },
@@ -409,121 +279,52 @@ namespace MemorieDeFleursTest.ModelTest
                 { DateConst.May5th, 170 },
                 { DateConst.May6th, 40 }
             };
-            var expected = new List<Tuple<DateTime, List<Tuple<DateTime, ExpectedStockAction>>>>() {
-                Tuple.Create(
-                    DateConst.April30th,
-                    new List<Tuple<DateTime,ExpectedStockAction>>()
-                    {
-                        Tuple.Create(DateConst.April30th, ExpectedStockAction.CreateArrivedAction(200)),
-                        Tuple.Create(DateConst.April30th, ExpectedStockAction.CreateUsedAction(20, 180)),
-                        Tuple.Create(DateConst.May1st, ExpectedStockAction.CreateUsedAction(50, 130)),
-                        Tuple.Create(DateConst.May2nd, ExpectedStockAction.CreateUsedAction(80, 50)),
-                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateUsedAction(20, 30)),
-                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateDiscardAction(30))
-                    }),
-                Tuple.Create(
-                    DateConst.May1st,
-                    new List<Tuple<DateTime,ExpectedStockAction>>()
-                    {
-                        Tuple.Create(DateConst.May1st, ExpectedStockAction.CreateArrivedAction(300)),
-                        Tuple.Create(DateConst.May1st, ExpectedStockAction.CreateUsedAction(0, 300)),
-                        Tuple.Create(DateConst.May2nd, ExpectedStockAction.CreateUsedAction(0, 300)),
-                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateUsedAction(0, 300)),
-                        Tuple.Create(DateConst.May4th, ExpectedStockAction.CreateUsedAction(300, 0)),
-                        Tuple.Create(DateConst.May4th, ExpectedStockAction.CreateDiscardAction(0))
-                    }),
-                Tuple.Create(
-                    DateConst.May2nd,
-                    new List<Tuple<DateTime,ExpectedStockAction>>()
-                    {
-                        Tuple.Create(DateConst.May2nd, ExpectedStockAction.CreateArrivedAction(200)  ),
-                        Tuple.Create(DateConst.May2nd, ExpectedStockAction.CreateUsedAction(0, 200)  ),
-                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateUsedAction(0, 200)  ),
-                        Tuple.Create(DateConst.May4th, ExpectedStockAction.CreateUsedAction(100, 100)),
-                        Tuple.Create(DateConst.May5th, ExpectedStockAction.CreateUsedAction(100, 0)  ),
-                        Tuple.Create(DateConst.May5th, ExpectedStockAction.CreateDiscardAction(0)    )
-                    }),
-                Tuple.Create(
-                    DateConst.May3rd,
-                    new List<Tuple<DateTime,ExpectedStockAction>>()
-                    {
-                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateArrivedAction(200) ),
-                        Tuple.Create(DateConst.May3rd, ExpectedStockAction.CreateUsedAction(0, 200) ),
-                        Tuple.Create(DateConst.May4th, ExpectedStockAction.CreateUsedAction(0, 200) ),
-                        Tuple.Create(DateConst.May5th, ExpectedStockAction.CreateUsedAction(70, 130)),
-                        Tuple.Create(DateConst.May6th, ExpectedStockAction.CreateUsedAction(40, 90) ),
-                        Tuple.Create(DateConst.May6th, ExpectedStockAction.CreateDiscardAction(90)  )
-                    }),
-                Tuple.Create(
-                    DateConst.May6th,
-                    new List<Tuple<DateTime,ExpectedStockAction>>()
-                    {
-                        Tuple.Create(DateConst.May6th, ExpectedStockAction.CreateArrivedAction(100)),
-                        Tuple.Create(DateConst.May6th, ExpectedStockAction.CreateUsedAction(0, 100)),
-                        Tuple.Create(DateConst.May7th, ExpectedStockAction.CreateUsedAction(0, 100)),
-                        Tuple.Create(DateConst.May8th, ExpectedStockAction.CreateUsedAction(0, 100)),
-                        Tuple.Create(DateConst.May9th, ExpectedStockAction.CreateUsedAction(0, 100)),
-                        Tuple.Create(DateConst.May9th, ExpectedStockAction.CreateDiscardAction(100))
-                    })
-            };
+            
+            var actualRemain = input.Select(u => Model.BouquetModel.UseBouquetPart(ExpectedPart, u.Key, u.Value));
 
-            // テスト：全加工予定の登録
-            foreach(var u in test)
-            {
-                Model.BouquetModel.UseBouquetPart(expectedPart, u.Key, u.Value);
-            }
+            // 検証1：注文反映中に在庫不足が発生していないこと
+            Assert.IsTrue(actualRemain.All(r => r > 0));
 
-            // 検証1：全在庫アクションが意図通り変更されていること
-            foreach(var e in expected)
-            {
-                var arrived = e.Item1;
-                var lotNo = InitialOrders[arrived][0].LotNo;
-                foreach(var a in e.Item2)
-                {
-                    var date = a.Item1;
-                    var type = a.Item2.Type;
-                    var quantity = a.Item2.Quantity;
-                    var remain = a.Item2.Remain;
-                    AssertStockAction(type, date, arrived, ExpectedPart.Code, lotNo, quantity, remain);
-                }
-            }
+            // 検証2 全在庫アクションが意図通り登録されていること
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.April30th, findLotNo).Begin()
+                    .At(DateConst.April30th).Arrived(200).Used(20, 180)
+                    .At(DateConst.May1st).Used(50, 130)
+                    .At(DateConst.May2nd).Used(80, 50)
+                    .At(DateConst.May3rd).Used(20, 30).Discarded(30)
+                    .End()
+                .Lot(DateConst.May1st, findLotNo).Begin()
+                    .At(DateConst.May1st).Arrived(300).Used(0, 300)
+                    .At(DateConst.May2nd).Used(0, 300)
+                    .At(DateConst.May3rd).Used(0, 300)
+                    .At(DateConst.May4th).Used(300, 0).Discarded(0)
+                    .End()
+                .Lot(DateConst.May2nd, findLotNo).Begin()
+                    .At(DateConst.May2nd).Arrived(200).Used(0, 200)
+                    .At(DateConst.May3rd).Used(0, 200)
+                    .At(DateConst.May4th).Used(100, 100)
+                    .At(DateConst.May5th).Used(100, 0).Discarded(0)
+                    .End()
+                .Lot(DateConst.May3rd, findLotNo).Begin()
+                    .At(DateConst.May3rd).Arrived(200).Used(0, 200)
+                    .At(DateConst.May4th).Used(0, 200)
+                    .At(DateConst.May5th).Used(70, 130)
+                    .At(DateConst.May6th).Used(40, 90).Discarded(90)
+                    .End()
+                .Lot(DateConst.May6th, findLotNo).Begin()
+                    .At(DateConst.May6th).Arrived(100).Used(0, 100)
+                    .At(DateConst.May7th).Used(0, 100)
+                    .At(DateConst.May8th).Used(0, 100)
+                    .At(DateConst.May9th).Used(0, 100).Discarded(100)
+                    .End()
+                .End()
+                .AssertAll(TestDBContext);
 
-            // 検証2：在庫不足が発生していないこと
+            // 検証3：在庫不足アクションが登録されていないこと
             AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
         }
 
-#region 在庫アクションに関する検証用サポート関数
-        /// <summary>
-        /// 特定の１在庫アクションが、数量や残数も含めすべて意図通り登録されているかどうかを検証する
-        /// </summary>
-        /// <param name="type">在庫アクション</param>
-        /// <param name="targetDate">基準日</param>
-        /// <param name="arrivalDate">入荷(予定)日</param>
-        /// <param name="partCode">花コード</param>
-        /// <param name="lotno">在庫ロット番号</param>
-        /// <param name="quantity">数量</param>
-        /// <param name="remain">残数</param>
-        private void AssertStockAction(StockActionType type, DateTime targetDate, DateTime arrivalDate, string partCode, int lotno, int quantity, int remain)
-        {
-            var key = $"基準日={targetDate.ToString("yyyyMMdd")}, アクション={type.ToString()}, 花コード={partCode}, 在庫ロット番号={lotno}, 入荷日={arrivalDate.ToString("yyyyMMdd")}";
-
-            var candidate = TestDBContext.StockActions
-                .Where(a => a.Action == type)
-                .Where(a => a.ActionDate == targetDate)
-                .Where(a => a.PartsCode == partCode)
-                .Where(a => a.StockLotNo == lotno)
-                .Where(a => a.ArrivalDate == arrivalDate);
-
-            Assert.IsNotNull(candidate, "抽出結果が null：" + key);
-            Assert.AreNotEqual(0, candidate.Count(), "該当するアクションが0件：" + key);
-            Assert.AreEqual(1, candidate.Count(), $"該当するアクションが {candidate.Count()} 個ある：" + key);
-
-            var action = candidate.SingleOrDefault();
-
-            Assert.AreEqual(quantity, action.Quantity, "数量不一致：" + key);
-            Assert.AreEqual(remain, action.Remain, "残数不一致：" + key);
-        }
-
+        #region 在庫アクションに関する検証用サポート関数
         /// <summary>
         /// 特定のアクションタイプを持つ在庫アクションが指定個数登録されているかどうかを検証する
         /// </summary>
