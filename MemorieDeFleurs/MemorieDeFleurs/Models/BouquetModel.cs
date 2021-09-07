@@ -27,7 +27,6 @@ namespace MemorieDeFleurs.Models
         {
             Parent = parent;
             DbContext = parent.DbContext;
-            Sequence = new SequenceUtil(DbContext.Database.GetDbConnection() as SqliteConnection);
         }
 
         #region BouquetPartBuilder
