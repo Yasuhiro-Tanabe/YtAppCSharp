@@ -335,7 +335,7 @@ namespace MemorieDeFleursTest.ModelTest
         /// 発注取消により生じた在庫不足が、追加発注により解消される
         /// </summary>
         [TestMethod]
-        public void ChangeOrders_RemoveFrom20200502_And_AddTo202005005()
+        public void ChangeOrders_RemoveFrom20200502_And_Add2LotTo202005005()
         {
             LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 [Begin]=====");
             var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
