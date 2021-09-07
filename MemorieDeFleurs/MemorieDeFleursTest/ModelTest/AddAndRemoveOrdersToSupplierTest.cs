@@ -125,55 +125,6 @@ namespace MemorieDeFleursTest.ModelTest
         }
         #endregion // TesetCleanup
 
-        #region テストデータ生成参照用のサポートクラス
-        private class OrderInfo
-        {
-            public OrderInfo(int lotNo, int initial)
-            {
-                LotNo = lotNo;
-                InitialQuantity = initial;
-            }
-
-            public int LotNo { get; private set; }
-            public int InitialQuantity { get; private set; }
-
-            public static OrderInfo Create(int lotNo, int initial)
-            {
-                return new OrderInfo(lotNo, initial);
-            }
-
-        }
-        private class TestOrder : SortedDictionary<DateTime, IList<OrderInfo>>
-        {
-            public void Append(DateTime date, int lotNo, int initial)
-            {
-                IList<OrderInfo> list;
-                if (!TryGetValue(date, out list))
-                {
-                    list = new List<OrderInfo>();
-                    Add(date, list);
-                }
-
-                var item = OrderInfo.Create(lotNo, initial);
-                list.Add(item);
-            }
-
-            public void Remove(int lotNo)
-            {
-                foreach (var i in Values)
-                {
-                    var found = i.SingleOrDefault(j => j.LotNo == lotNo);
-                    if (found != null)
-                    {
-                        i.Remove(found);
-                        return;
-                    }
-                }
-            }
-        }
-
-#endregion // テストデータ生成参照用のサポートクラス
-
         #region 検証用サポートメソッド
         private int FindLotNumber(DateTime arrived, int index = 0)
         {

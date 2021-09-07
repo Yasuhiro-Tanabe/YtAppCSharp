@@ -1,6 +1,8 @@
 ﻿using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
+using MemorieDeFleursTest.ModelTest.Fluent;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
@@ -17,7 +19,6 @@ namespace MemorieDeFleursTest.ModelTest
     {
         private Supplier ExpectedSupplier { get; set; }
         private BouquetPart ExpectedPart { get; set; }
-        private IDictionary<DateTime, ISet<int>> ArrivedLotNumbers { get; } = new SortedDictionary<DateTime, ISet<int>>();
 
         public StockActionLogicTest() : base()
         {
@@ -26,6 +27,8 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         private MemorieDeFleursModel Model { get; set; }
+
+        private TestOrder InitialOrders { get; } = new TestOrder();
 
         private void PrepareModel(object sender, EventArgs unused)
         {
@@ -56,16 +59,11 @@ namespace MemorieDeFleursTest.ModelTest
                     Tuple.Create(DateConst.May6th, 1)
                 }
             };
-            foreach (var o in orders.OrderBody)
-            {
-                ISet<int> lotNumbers;
-                if(!ArrivedLotNumbers.TryGetValue(o.Item1, out lotNumbers))
-                {
-                    lotNumbers = new SortedSet<int>();
-                    ArrivedLotNumbers.Add(o.Item1, lotNumbers);
-                }
 
-                lotNumbers.Add(Model.SupplierModel.Order(orders.OrderDate, orders.Part, o.Item2, o.Item1));
+            foreach(var o in orders.OrderBody)
+            {
+                var lotNo = Model.SupplierModel.Order(orders.OrderDate, orders.Part, o.Item2, o.Item1);
+                InitialOrders.Append(o.Item1, lotNo, o.Item2 * orders.Part.QuantitiesPerLot);
             }
         }
 
@@ -104,7 +102,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void CanAddManyOrdersToSingleSupplier()
         {
-            var expectedCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count();
+            var expectedCountOfOrders = InitialOrders.SelectMany(i => i.Value).Count();
             var expectedCountOfScheduledToUseStockActions = (ExpectedPart.ExpiryDate + 1) * expectedCountOfOrders;
             
             // 登録は TestInitialize で行っている処理で代用
@@ -123,25 +121,25 @@ namespace MemorieDeFleursTest.ModelTest
         public void WillBeUsedEarliestArrivedStockLotWhenTwoOrMoreLotHasEnoughQuantity()
         {
             var expected = new {
-                LotNo = ArrivedLotNumbers[DateConst.April30th].First(),
+                LotNo = InitialOrders[DateConst.April30th][0].LotNo,
                 Arrival = DateConst.April30th,
                 PreviousDay = DateConst.April30th,
                 Today = DateConst.May1st,
                 NextDay = DateConst.May2nd,
-                InitialQuantity = 200,
+                InitialQuantity = InitialOrders[DateConst.April30th][0].InitialQuantity,
                 Used = 60,
-                Remain = 140
+                Remain = InitialOrders[DateConst.April30th][0].InitialQuantity - 60
 
             };
             var another = new
             {
-                LotNo = ArrivedLotNumbers[DateConst.May1st].First(),
+                LotNo = InitialOrders[DateConst.May1st][0].LotNo,
                 Arrival = DateConst.May1st,
                 Today = DateConst.May1st,
                 NextDay = DateConst.May2nd,
-                InitialQuantity = 300,
+                InitialQuantity = InitialOrders[DateConst.May1st][0].InitialQuantity,
                 Used = 0,
-                Remain = 300
+                Remain = InitialOrders[DateConst.May1st][0].InitialQuantity
             };
 
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, expected.Today, expected.Used);
@@ -162,16 +160,16 @@ namespace MemorieDeFleursTest.ModelTest
         public void CanRemoveOneOrdersOfSingleSupplier()
         {
             var orderCancelDate = DateConst.May2nd;
-            var expectedCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count() - 1;
+            var expectedCountOfOrders = InitialOrders.SelectMany(i => i.Value).Count() - 1;
             var expectedCountOfScheduledToUseStockActions = (ExpectedPart.ExpiryDate + 1) * expectedCountOfOrders;
 
-            var expectedCanceledLotNumber = ArrivedLotNumbers[orderCancelDate].First(); 
+            var expectedCanceledLotNumber = InitialOrders[orderCancelDate][0].LotNo; 
 
             Model.SupplierModel.CancelOrder(expectedCanceledLotNumber);
-            ArrivedLotNumbers[orderCancelDate].Remove(expectedCanceledLotNumber);
+            InitialOrders.Remove(expectedCanceledLotNumber);
 
 
-            var actualCountOfOrders = ArrivedLotNumbers.SelectMany(i => i.Value).Count();
+            var actualCountOfOrders = InitialOrders.SelectMany(i => i.Value).Count();
             Assert.AreEqual(expectedCountOfOrders, actualCountOfOrders, $"注文数と発注ロット数の不一致：仕入先={ExpectedSupplier.Name}, 花コード={ExpectedPart.Name}");
 
             // 対象在庫ロットに関する在庫アクションが消えていること
@@ -191,7 +189,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var expectedUsedDate = DateConst.April30th;
             var expectedArrivalDate = expectedUsedDate;
-            var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
+            var expectedLotNumber = InitialOrders[expectedArrivalDate][0].LotNo;
             var quantity = 20;
             var expectedRemain = 180;
 
@@ -217,7 +215,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var expectedUsedDate = DateConst.April30th;
             var expectedArrivalDate = expectedUsedDate;
-            var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
+            var expectedLotNumber = InitialOrders[expectedArrivalDate][0].LotNo;
             var quantity = 200;
             var expectedRemain = 0;
 
@@ -243,7 +241,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var expectedUsedDate = DateConst.April30th;
             var expectedArrivalDate = expectedUsedDate;
-            var expectedLotNumber = ArrivedLotNumbers[expectedArrivalDate].First();
+            var expectedLotNumber = InitialOrders[expectedArrivalDate][0].LotNo;
             var quantity = 220;
             var expectedUsedQuantity = 200;
             var expectedOutOfStock = 20;
@@ -280,7 +278,7 @@ namespace MemorieDeFleursTest.ModelTest
             {
                 First = new
                 {
-                    LotNo = ArrivedLotNumbers[DateConst.April30th].First(),
+                    LotNo = InitialOrders[DateConst.April30th][0].LotNo,
                     Arrived = DateConst.April30th,
                     Previous = actionDate.AddDays(-1),
                     Today = actionDate,
@@ -292,7 +290,7 @@ namespace MemorieDeFleursTest.ModelTest
                 },
                 Second = new
                 {
-                    LotNo = ArrivedLotNumbers[DateConst.May1st].First(),
+                    LotNo = InitialOrders[DateConst.May1st][0].LotNo,
                     Arrived = DateConst.May1st,
                     Previous = actionDate.AddDays(-1),
                     Today = actionDate,
@@ -304,7 +302,7 @@ namespace MemorieDeFleursTest.ModelTest
                 },
                 Third = new
                 {
-                    LotNo = ArrivedLotNumbers[DateConst.May2nd].First(),
+                    LotNo = InitialOrders[DateConst.May2nd][0].LotNo,
                     Arrived = DateConst.May2nd,
                     Today = actionDate,
                     Next = actionDate.AddDays(1),
@@ -479,7 +477,7 @@ namespace MemorieDeFleursTest.ModelTest
             foreach(var e in expected)
             {
                 var arrived = e.Item1;
-                var lotNo = ArrivedLotNumbers[arrived].First();
+                var lotNo = InitialOrders[arrived][0].LotNo;
                 foreach(var a in e.Item2)
                 {
                     var date = a.Item1;
@@ -544,12 +542,12 @@ namespace MemorieDeFleursTest.ModelTest
         {
             // Linqで全ロット番号を一つの IEnumerable に変形する手段もあるが、それだとアサーション発生したロットの入荷日がわからないので
             // 愚直に二重ループを回す
-            foreach(var i in ArrivedLotNumbers)
+            foreach(var i in InitialOrders)
             {
                 foreach(var j in i.Value)
                 {
-                    var actual = TestDBContext.StockActions.Count(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == j);
-                    var days = TestDBContext.StockActions.Where(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == j).Select(a => a.ArrivalDate);
+                    var actual = TestDBContext.StockActions.Count(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == j.LotNo);
+                    var days = TestDBContext.StockActions.Where(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == j.LotNo).Select(a => a.ArrivalDate);
                     Assert.AreEqual(1, actual, $"ロット番号={j}, 入荷日=[{string.Join(", ", days)}]");
                 }
             }
