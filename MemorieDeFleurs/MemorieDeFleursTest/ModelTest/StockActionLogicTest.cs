@@ -159,14 +159,12 @@ namespace MemorieDeFleursTest.ModelTest
             var actualCountOfOrders = InitialOrders.SelectMany(i => i.Value).Count();
             Assert.AreEqual(expectedCountOfOrders, actualCountOfOrders, $"注文数と発注ロット数の不一致：仕入先={ExpectedSupplier.Name}, 花コード={ExpectedPart.Name}");
 
-            // 対象在庫ロットに関する在庫アクションが消えていること
-            AssertNoStockActions(StockActionType.SCHEDULED_TO_ARRIVE, expectedCanceledLotNumber);
-            AssertNoStockActions(StockActionType.SCHEDULED_TO_USE, expectedCanceledLotNumber);
-            AssertNoStockActions(StockActionType.SCHEDULED_TO_DISCARD, expectedCanceledLotNumber);
-
-            // ほかの在庫ロットアクションが消えていないこと
             AssertAllLotNumbersAreUnique();
-            StockActionsValidator.NewInstance()
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                // 対象在庫ロットに関する在庫アクションが消えていること
+                .Lot(DateConst.May2nd, expectedCanceledLotNumber).HasNoStockActions()
+                .End()
+                // ほかの在庫ロットアクションが消えていないこと
                 .StockActionCountShallBe(StockActionType.SCHEDULED_TO_ARRIVE, expectedCountOfOrders)
                 .StockActionCountShallBe(StockActionType.SCHEDULED_TO_USE, expectedCountOfScheduledToUseStockActions)
                 .StockActionCountShallBe(StockActionType.SCHEDULED_TO_DISCARD, expectedCountOfOrders)
@@ -341,16 +339,6 @@ namespace MemorieDeFleursTest.ModelTest
                     Assert.AreEqual(1, actual, $"ロット番号={j}, 入荷日=[{string.Join(", ", days)}]");
                 }
             }
-        }
-
-        /// <summary>
-        /// 指定ロット番号の、指定された在庫アクションが登録されて*いない*ことを検証する
-        /// </summary>
-        /// <param name="type">在庫アクションタイプ</param>
-        /// <param name="lotNo">在庫ロット番号</param>
-        private void AssertNoStockActions(StockActionType type, int lotNo)
-        {
-            Assert.AreEqual(0, TestDBContext.StockActions.Count(a => a.Action == type && a.StockLotNo == lotNo));
         }
 #endregion // 在庫アクションに関する検証用サポート関数
     }

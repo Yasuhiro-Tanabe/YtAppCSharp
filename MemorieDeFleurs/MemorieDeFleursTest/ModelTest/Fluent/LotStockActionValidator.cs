@@ -1,5 +1,7 @@
 ﻿using MemorieDeFleurs.Models;
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +19,8 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         private PartStockActionValidator Parent { get; set; } = null;
 
         private ActionDateStockActionValidator CurrentChild { get; set; } = null;
+
+        internal bool HasNoStockActions { get; set; } = false;
 
         /// <summary>
         /// 検証器を作成する
@@ -70,7 +74,15 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="lotNo">対象ロットのロット番号</param>
         public void AssertAll(MemorieDeFleursDbContext context, string partsCode, DateTime arrivedDate, int lotNo)
         {
-            this.All(kv => { kv.Value.AssertAll(context, partsCode, arrivedDate, lotNo, kv.Key); return true; });
+            if(HasNoStockActions)
+            {
+                Assert.AreEqual(0, context.StockActions.Where(act => act.PartsCode == partsCode).Count(act => act.StockLotNo == lotNo),
+                    $"LotNo={lotNo} (part={partsCode}, arrived={arrivedDate}");
+            }
+            else
+            {
+                this.All(kv => { kv.Value.AssertAll(context, partsCode, arrivedDate, lotNo, kv.Key); return true; });
+            }
         }
 
     }

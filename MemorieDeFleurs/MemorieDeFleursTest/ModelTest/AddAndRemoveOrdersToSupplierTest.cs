@@ -125,19 +125,6 @@ namespace MemorieDeFleursTest.ModelTest
         }
         #endregion // TesetCleanup
 
-        #region 検証用サポートメソッド
-        private int FindLotNumber(DateTime arrived, int index = 0)
-        {
-            return InitialOrders[arrived][index].LotNo;
-        }
-
-        private void AssertNoStockLot(int lotNo)
-        {
-            // 該当ロットの在庫アクションがすべて破棄されている
-            Assert.AreEqual(0, TestDBContext.StockActions.Count(act => act.StockLotNo == lotNo), $"LotNo={lotNo}");
-        }
-        #endregion // 検証用サポートメソッド
-
 
         /// <summary>
         /// 5/4納品予定分追加発注の検証：当日以降の加工予定と入荷予定に影響を与えないこと
@@ -234,10 +221,9 @@ namespace MemorieDeFleursTest.ModelTest
 
             Model.SupplierModel.CancelOrder(lot);
 
-            AssertNoStockLot(lot);
-
             // 他在庫ロットの在庫アクションで、破棄した在庫ロットの入荷日以降の在庫アクションに変化がない
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May6th, lot).HasNoStockActions()
                 .Lot(DateConst.May3rd, findLotNo).Begin()
                     .At(DateConst.May6th).Used(40, 90).Discarded(90)
                     .End()
@@ -257,9 +243,8 @@ namespace MemorieDeFleursTest.ModelTest
 
             Model.SupplierModel.CancelOrder(lot);
 
-            AssertNoStockLot(lot);
-
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May2nd, lot).HasNoStockActions()
                 .Lot(DateConst.May3rd, findLotNo).Begin()
                     .At(DateConst.May4th).Used(100, 100)
                     .At(DateConst.May5th).Used(100, 0).OutOfStock(70)
@@ -293,9 +278,8 @@ namespace MemorieDeFleursTest.ModelTest
             Model.SupplierModel.CancelOrder(lot0502);
             var lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 2, DateConst.May5th);
 
-            AssertNoStockLot(lot0502);
-
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
                 .Lot(DateConst.May5th, lot0505).Begin()
                     .At(DateConst.May5th).Used(70, 130)
                     .At(DateConst.May6th).Used(40, 90)
@@ -327,9 +311,8 @@ namespace MemorieDeFleursTest.ModelTest
             Model.SupplierModel.CancelOrder(lot0502);
             var lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 1, DateConst.May5th);
 
-            AssertNoStockLot(lot0502);
-
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
                 .Lot(DateConst.May5th, lot0505).Begin()
                     .At(DateConst.May5th).Used(70, 30)
                     .At(DateConst.May6th).Used(30, 0)

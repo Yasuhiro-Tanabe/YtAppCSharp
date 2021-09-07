@@ -59,6 +59,20 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         }
 
         /// <summary>
+        /// 現在選択中のロットが在庫アクションを持たないことを明示する。
+        /// 
+        /// このメソッドを呼び出したときは Begin() を呼び出せない。
+        /// Lot() で別のロットを割り当てること。
+        /// </summary>
+        /// <returns></returns>
+        public PartStockActionValidator HasNoStockActions()
+        {
+            CurrentChild.HasNoStockActions = true;
+            CurrentChild = null;
+            return this;
+        }
+
+        /// <summary>
         /// ロットの在庫アクション検証器に制御を移す
         /// </summary>
         /// <returns>ロットの在庫アクション検証器</returns>
