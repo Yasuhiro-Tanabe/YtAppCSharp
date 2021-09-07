@@ -32,13 +32,13 @@ namespace MemorieDeFleurs.Models
             Sequence = new SequenceUtil(DbContext.Database.GetDbConnection() as SqliteConnection);
         }
 
-        #region BouquetPart の生成/更新/削除
+        #region BouquetPartBuilder
         /// <summary>
         /// 単品オブジェクト生成器
         /// 
         /// 単品の各プロパティはフルーエントインタフェース形式で入力する。
         /// </summary>
-        public class BouquetPartProcessor
+        public class BouquetPartBuilder
         {
             private BouquetModel _model;
 
@@ -48,12 +48,12 @@ namespace MemorieDeFleurs.Models
             private int _parLot;
             private int _expire;
 
-            internal static BouquetPartProcessor GetInstance(BouquetModel parent)
+            internal static BouquetPartBuilder GetInstance(BouquetModel parent)
             {
-                return new BouquetPartProcessor(parent);
+                return new BouquetPartBuilder(parent);
             }
 
-            private BouquetPartProcessor(BouquetModel model)
+            private BouquetPartBuilder(BouquetModel model)
             {
                 _model = model;
             }
@@ -63,7 +63,7 @@ namespace MemorieDeFleurs.Models
             /// </summary>
             /// <param name="code">花コード</param>
             /// <returns>花コード変更後の単品オブジェクト生成器(自分自身)</returns>
-            public BouquetPartProcessor PartCodeIs(string code)
+            public BouquetPartBuilder PartCodeIs(string code)
             {
                 _code = code;
                 return this;
@@ -74,7 +74,7 @@ namespace MemorieDeFleurs.Models
             /// </summary>
             /// <param name="name">単品名称</param>
             /// <returns>単品名称変更後の単品オブジェクト生成器(自分自身)</returns>
-            public BouquetPartProcessor PartNameIs(string name)
+            public BouquetPartBuilder PartNameIs(string name)
             {
                 _name = name;
                 return this;
@@ -85,7 +85,7 @@ namespace MemorieDeFleurs.Models
             /// </summary>
             /// <param name="days">発注リードタイム、単位は日</param>
             /// <returns>発注リードタイム変更後の単品オブジェクト生成器(自分自身)</returns>
-            public BouquetPartProcessor LeadTimeIs(int days)
+            public BouquetPartBuilder LeadTimeIs(int days)
             {
                 _leadTime = days;
                 return this;
@@ -96,7 +96,7 @@ namespace MemorieDeFleurs.Models
             /// </summary>
             /// <param name="quantity">購入単位数：1発注ロットあたりの単品数、単位は本</param>
             /// <returns>購入単位数更新後の単品オブジェクト生成器(自分自身)</returns>
-            public BouquetPartProcessor QauntityParLotIs(int quantity)
+            public BouquetPartBuilder QauntityParLotIs(int quantity)
             {
                 _parLot = quantity;
                 return this;
@@ -106,7 +106,7 @@ namespace MemorieDeFleurs.Models
             /// </summary>
             /// <param name="days">品質維持可能日数、単位は日</param>
             /// <returns>品質維持可能日数変更後の単品オブジェクト生成器(自分自身)</returns>
-            public BouquetPartProcessor ExpiryDateIs(int days)
+            public BouquetPartBuilder ExpiryDateIs(int days)
             {
                 _expire = days;
                 return this;
@@ -133,17 +133,17 @@ namespace MemorieDeFleurs.Models
                 return p;
             }
         }
-        #endregion // BouquetPart の生成/更新/削除
 
         /// <summary>
         /// DB登録オブジェクト生成器を取得する
         /// </summary>
         /// <typeparam name="BouquetPart">DB登録オブジェクト生成器が生成するオブジェクト：単品</typeparam>
         /// <returns>単品オブジェクト生成器</returns>
-        public BouquetPartProcessor Entity<BouquetPart>()
+        public BouquetPartBuilder Entity<BouquetPart>()
         {
-            return BouquetPartProcessor.GetInstance(this);
+            return BouquetPartBuilder.GetInstance(this);
         }
+        #endregion // BouquetPartBuilder
 
         /// <summary>
         /// 条件を満たす仕入先オブジェクトを取得する

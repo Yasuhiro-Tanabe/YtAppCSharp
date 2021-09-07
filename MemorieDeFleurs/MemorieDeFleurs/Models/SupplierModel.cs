@@ -31,13 +31,14 @@ namespace MemorieDeFleurs.Models
             DbContext = parent.DbContext;
         }
 
+        #region SupplierBuilder
         /// <summary>
         /// 仕入先オブジェクトの生成器
         /// 
         /// 仕入先の各プロパティは、フルーエントインタフェース形式で入力する。
         /// 必要なプロパティを入力後、Create() を実行することでオブジェクトが生成されDBに登録される。
         /// </summary>
-        public class SupplierProcesser
+        public class SupplierBuilder
         {
             private SupplierModel _model;
             private string _name;
@@ -47,12 +48,12 @@ namespace MemorieDeFleurs.Models
             private string _fax;
             private string _email;
 
-            internal static SupplierProcesser GetInstance(SupplierModel parent)
+            internal static SupplierBuilder GetInstance(SupplierModel parent)
             {
-                return new SupplierProcesser(parent);
+                return new SupplierBuilder(parent);
             }
 
-            private SupplierProcesser(SupplierModel model)
+            private SupplierBuilder(SupplierModel model)
             {
                 _model = model;
             }
@@ -62,7 +63,7 @@ namespace MemorieDeFleurs.Models
             /// </summary>
             /// <param name="name">仕入先名称</param>
             /// <returns>仕入先名称変更後の仕入先オブジェクト生成器(自分自身)</returns>
-            public SupplierProcesser NameIs(string name)
+            public SupplierBuilder NameIs(string name)
             {
                 _name = name;
                 return this;
@@ -76,7 +77,7 @@ namespace MemorieDeFleurs.Models
             /// <param name="address1">住所1</param>
             /// <param name="address2">住所2、省略可。省略したときは null が指定されたものと見なす。</param>
             /// <returns>住所変更後の仕入先オブジェクト生成器(自分自身)</returns>
-            public SupplierProcesser AddressIs(string address1, string address2 = null)
+            public SupplierBuilder AddressIs(string address1, string address2 = null)
             {
                 _address1 = address1;
                 _address2 = address2;
@@ -88,7 +89,7 @@ namespace MemorieDeFleurs.Models
             /// </summary>
             /// <param name="tel">電話番号</param>
             /// <returns>電話番号変更後の仕入先オブジェクト生成器(自分自身)</returns>
-            public SupplierProcesser PhoneNumberIs(string tel)
+            public SupplierBuilder PhoneNumberIs(string tel)
             {
                 _tel = tel;
                 return this;
@@ -99,7 +100,7 @@ namespace MemorieDeFleurs.Models
             /// </summary>
             /// <param name="fax">FAX番号</param>
             /// <returns>FAX番号変更後の仕入先オブジェクト生成器(自分自身)</returns>
-            public SupplierProcesser FaxNumberIs(string fax)
+            public SupplierBuilder FaxNumberIs(string fax)
             {
                 _fax = fax;
                 return this;
@@ -110,7 +111,7 @@ namespace MemorieDeFleurs.Models
             /// </summary>
             /// <param name="email">e-メールアドレス</param>
             /// <returns>e-メールアドレス変更後の仕入先オブジェクト生成器(自分自身)</returns>
-            public SupplierProcesser EmailIs(string email)
+            public SupplierBuilder EmailIs(string email)
             {
                 _email = email;
                 return this;
@@ -152,10 +153,11 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <typeparam name="Sypplier">DB登録オブジェクト生成器が生成するオブジェクト：仕入先</typeparam>
         /// <returns>仕入先オブジェクト生成器</returns>
-        public SupplierProcesser Entity<Sypplier>()
+        public SupplierBuilder Entity<Sypplier>()
         {
-            return SupplierProcesser.GetInstance(this);
+            return SupplierBuilder.GetInstance(this);
         }
+        #endregion // SupplierBuilder
 
         #region Supplier の生成・更新・削除
         /// <summary>
