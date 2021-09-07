@@ -17,8 +17,6 @@ namespace MemorieDeFleurs.Models
         private MemorieDeFleursDbContext DbContext { get; set; }
         private MemorieDeFleursModel Parent { get; set; }
 
-        private SequenceUtil Sequence { get; set; }
-
         /// <summary>
         /// (パッケージ内限定)コンストラクタ
         /// 

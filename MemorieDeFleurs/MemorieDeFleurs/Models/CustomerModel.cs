@@ -5,8 +5,6 @@
         private MemorieDeFleursDbContext DbContext { get; set; }
         private MemorieDeFleursModel Parent { get; set; }
 
-        private SequenceUtil Sequences { get { return Parent.Sequences; } }
-
         /// <summary>
         /// (パッケージ内限定)コンストラクタ
         /// 

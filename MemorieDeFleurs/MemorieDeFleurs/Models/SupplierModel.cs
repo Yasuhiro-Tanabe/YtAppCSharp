@@ -17,7 +17,10 @@ namespace MemorieDeFleurs.Models
         private MemorieDeFleursDbContext DbContext { get; set; }
         private MemorieDeFleursModel Parent { get; set; }
 
-        private SequenceUtil Sequences { get { return Parent.Sequences; } }
+        /// <summary>
+        /// 次の未使用仕入先コード
+        /// </summary>
+        internal int NextSequenceCode { get { return Parent.Sequences.SEQ_SUPPLIERS.Next; } }
 
         /// <summary>
         /// (パッケージ内限定)コンストラクタ
@@ -143,12 +146,6 @@ namespace MemorieDeFleurs.Models
         }
 
         /// <summary>
-        /// 仕入先コードの採番：次の未使用コードを返す。
-        /// </summary>
-        internal int NextSequenceCode { get { return Sequences.SEQ_SUPPLIERS.Next; } }
-
-
-        /// <summary>
         /// DB登録オブジェクト生成器を取得する
         /// </summary>
         /// <typeparam name="Sypplier">DB登録オブジェクト生成器が生成するオブジェクト：仕入先</typeparam>
@@ -220,7 +217,6 @@ namespace MemorieDeFleurs.Models
         #endregion // Supplier の生成・更新・削除
 
         #region 発注
-
         /// <summary>
         /// 発注時に登録する在庫アクションの共通パラメータ
         /// </summary>
@@ -279,7 +275,7 @@ namespace MemorieDeFleurs.Models
                 .ToString());
 
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
-            var lotNo = Sequences.SEQ_STOCK_LOT_NUMBER.Next;
+            var lotNo = NextSequenceCode;
             var quantity = quantityOfLot * part.QuantitiesPerLot;
 
             var param = new StockActionParameterToOrder(arrivalDate, part, lotNo, quantityOfLot);
