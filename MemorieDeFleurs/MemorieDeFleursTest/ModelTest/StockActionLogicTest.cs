@@ -110,9 +110,11 @@ namespace MemorieDeFleursTest.ModelTest
 
             Assert.AreEqual(expectedCountOfOrders, expectedCountOfOrders, $"注文数と発注ロット数の不一致：仕入先={ExpectedSupplier.Name}, 花コード={ExpectedPart.Name}");
             AssertAllLotNumbersAreUnique();
-            AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_ARRIVE);
-            AssertStockActionCount(expectedCountOfScheduledToUseStockActions, StockActionType.SCHEDULED_TO_USE);
-            AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_DISCARD);
+
+            StockActionsValidator.NewInstance()
+                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_ARRIVE, expectedCountOfOrders)
+                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_USE, expectedCountOfScheduledToUseStockActions)
+                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_DISCARD, expectedCountOfOrders);
         }
 
         /// <summary>
@@ -164,9 +166,11 @@ namespace MemorieDeFleursTest.ModelTest
 
             // ほかの在庫ロットアクションが消えていないこと
             AssertAllLotNumbersAreUnique();
-            AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_ARRIVE);
-            AssertStockActionCount(expectedCountOfScheduledToUseStockActions, StockActionType.SCHEDULED_TO_USE);
-            AssertStockActionCount(expectedCountOfOrders, StockActionType.SCHEDULED_TO_DISCARD);
+            StockActionsValidator.NewInstance()
+                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_ARRIVE, expectedCountOfOrders)
+                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_USE, expectedCountOfScheduledToUseStockActions)
+                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_DISCARD, expectedCountOfOrders)
+                .AssertAll(TestDBContext);
         }
 
         [TestMethod]
@@ -258,10 +262,8 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May5th).Discarded(200)
                     .End()
                 .End()
+                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
                 .AssertAll(TestDBContext);
-
-            // 一日の在庫はトータルすれば潤沢なので、残数不足の在庫アクションは生成されない
-            AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
         }
 
         [TestMethod]
@@ -318,24 +320,11 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May9th).Used(0, 100).Discarded(100)
                     .End()
                 .End()
+                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
                 .AssertAll(TestDBContext);
-
-            // 検証3：在庫不足アクションが登録されていないこと
-            AssertStockActionCount(0, StockActionType.OUT_OF_STOCK);
         }
 
         #region 在庫アクションに関する検証用サポート関数
-        /// <summary>
-        /// 特定のアクションタイプを持つ在庫アクションが指定個数登録されているかどうかを検証する
-        /// </summary>
-        /// <param name="expected">在庫アクション数の期待値</param>
-        /// <param name="type">検証対象の在庫アクションタイプ</param>
-        private void AssertStockActionCount(int expected, StockActionType type)
-        {
-            int actual = TestDBContext.StockActions.Count(a => a.Action == type);
-            Assert.AreEqual(expected, actual, $"登録されるべき在庫アクション数の不一致：アクション={type.ToString()}");
-        }
-
         /// <summary>
         /// 各ロット毎の入荷予定在庫アクションを数え、指定ロット番号の在庫アクションが登録されているか、ロット番号に重複がないかどうかを検証する
         /// </summary>

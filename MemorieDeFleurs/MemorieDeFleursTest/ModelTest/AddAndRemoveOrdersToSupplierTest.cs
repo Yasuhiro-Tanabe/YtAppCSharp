@@ -136,11 +136,6 @@ namespace MemorieDeFleursTest.ModelTest
             // 該当ロットの在庫アクションがすべて破棄されている
             Assert.AreEqual(0, TestDBContext.StockActions.Count(act => act.StockLotNo == lotNo), $"LotNo={lotNo}");
         }
-
-        private void AssertStockActionCount(StockActionType type, int expected)
-        {
-            Assert.AreEqual(expected, TestDBContext.StockActions.Count(act => act.Action == type), $"StockActionType={type}");
-        }
         #endregion // 検証用サポートメソッド
 
 
@@ -299,7 +294,6 @@ namespace MemorieDeFleursTest.ModelTest
             var lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 2, DateConst.May5th);
 
             AssertNoStockLot(lot0502);
-            AssertStockActionCount(StockActionType.OUT_OF_STOCK, 0);
 
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May5th, lot0505).Begin()
@@ -313,6 +307,7 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May8th).Used(0, 100)
                     .At(DateConst.May9th).Used(0, 100).Discarded(100).End()
                 .End()
+                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
                 .AssertAll(TestDBContext);
             
             LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 2 Lot (200)) [End]=====");
@@ -333,7 +328,6 @@ namespace MemorieDeFleursTest.ModelTest
             var lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 1, DateConst.May5th);
 
             AssertNoStockLot(lot0502);
-            AssertStockActionCount(StockActionType.OUT_OF_STOCK, 0);
 
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May5th, lot0505).Begin()
@@ -347,6 +341,7 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May8th).Used(0, 90)
                     .At(DateConst.May9th).Used(0, 90).Discarded(90).End()
                 .End()
+                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
                 .AssertAll(TestDBContext);
 
             LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 1 Lot (100)) [End]=====");

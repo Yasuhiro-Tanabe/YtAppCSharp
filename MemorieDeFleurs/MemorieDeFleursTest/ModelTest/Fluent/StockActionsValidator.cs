@@ -1,6 +1,8 @@
 ﻿using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +28,8 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         private BouquetPart CurrentPart { get; set; } = null;
 
         private PartStockActionValidator CurrentChild { get; set; } = null;
+
+        private IDictionary<StockActionType, int> ExpectedStockActionCount { get; } = new Dictionary<StockActionType, int>();
 
         /// <summary>
         /// 単品在庫アクション検証器を生成する：生成するだけで制御はこの検証器のまま。
@@ -59,12 +63,30 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         }
 
         /// <summary>
+        /// 特定の在庫アクションタイプが期待個数データベースに登録されていることを確認する
+        /// </summary>
+        /// <param name="type">在庫アクションタイプ</param>
+        /// <param name="expected">期待値(個数)</param>
+        /// <returns>自分自身</returns>
+        public StockActionsValidator StockActionCountShallBe(StockActionType type, int expected)
+        {
+            ExpectedStockActionCount[type] = expected;
+            return this;
+        }
+
+        /// <summary>
         /// データベース上の在庫アクションが自分自身に登録されているすべての期待値と一致するかどうかを検証する
         /// </summary>
         /// <param name="context">検証対象データベース</param>
         public void AssertAll(MemorieDeFleursDbContext context)
         {
             this.All(kv => { kv.Value.AssertAll(context, kv.Key); return true; });
+
+            foreach(var expected in ExpectedStockActionCount)
+            {
+                Assert.AreEqual(expected.Value, context.StockActions.Count(act => act.Action == expected.Key), $"Type: {expected.Key}");
+
+            }
         }
     }
 }
