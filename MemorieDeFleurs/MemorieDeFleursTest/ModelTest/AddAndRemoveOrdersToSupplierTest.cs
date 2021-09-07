@@ -39,7 +39,9 @@ namespace MemorieDeFleursTest.ModelTest
         /// </summary>
         private TestOrder InitialOrders { get; } = new TestOrder();
 
-
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public AddAndRemoveOrdersToSupplierTest() : base()
         {
             AfterTestBaseInitializing += PrepareModel;
@@ -172,7 +174,7 @@ namespace MemorieDeFleursTest.ModelTest
 
 #endregion // テストデータ生成参照用のサポートクラス
 
-#region 検証用サポートメソッド
+        #region 検証用サポートメソッド
         private int FindLotNumber(DateTime arrived, int index = 0)
         {
             return InitialOrders[arrived][index].LotNo;
@@ -182,6 +184,11 @@ namespace MemorieDeFleursTest.ModelTest
         {
             // 該当ロットの在庫アクションがすべて破棄されている
             Assert.AreEqual(0, TestDBContext.StockActions.Count(act => act.StockLotNo == lotNo), $"LotNo={lotNo}");
+        }
+
+        private void AssertStockActionCount(StockActionType type, int expected)
+        {
+            Assert.AreEqual(expected, TestDBContext.StockActions.Count(act => act.Action == type), $"StockActionType={type}");
         }
         #endregion // 検証用サポートメソッド
 
@@ -322,6 +329,40 @@ namespace MemorieDeFleursTest.ModelTest
                 .AssertAll(TestDBContext);
 
             LogUtil.Debug("===== RemoveOrderArrivedAt20200502 [End]=====");
+        }
+
+        /// <summary>
+        /// 発注取消により生じた在庫不足が、追加発注により解消される
+        /// </summary>
+        [TestMethod]
+        public void ChangeOrders_RemoveFrom20200502_And_AddTo202005005()
+        {
+            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 [Begin]=====");
+            var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
+            var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
+            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
+
+            Model.SupplierModel.CancelOrder(lot0502);
+            var lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 2, DateConst.May5th);
+
+            AssertNoStockLot(lot0502);
+            AssertStockActionCount(StockActionType.OUT_OF_STOCK, 0);
+
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May5th, lot0505).Begin()
+                    .At(DateConst.May5th).Used(70, 130)
+                    .At(DateConst.May6th).Used(40, 90)
+                    .At(DateConst.May7th).Used(0, 90)
+                    .At(DateConst.May8th).Used(0, 90).Discarded(90).End()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(0, 100)
+                    .At(DateConst.May7th).Used(0, 100)
+                    .At(DateConst.May8th).Used(0, 100)
+                    .At(DateConst.May9th).Used(0, 100).Discarded(100).End()
+                .End()
+                .AssertAll(TestDBContext);
+            
+            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 [End]=====");
         }
     }
 }

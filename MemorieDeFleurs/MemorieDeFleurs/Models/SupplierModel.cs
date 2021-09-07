@@ -288,6 +288,43 @@ namespace MemorieDeFleurs.Models
             AddScheduledToUseStockAction(param);
             DbContext.SaveChanges();
 
+            // 解消できる在庫不足アクションを解消する：
+            // 見つけた StockAction を削除しながら進めるので、ループを回す用のリストは DbContext 抽出内容のコピーを使う
+            foreach(var outOfStock in DbContext.StockActions
+                .Where(act => act.Action == StockActionType.OUT_OF_STOCK)
+                .Where(act => act.ActionDate >= arrivalDate)
+                .Where(act => act.ActionDate <= arrivalDate.AddDays(part.ExpiryDate))
+                .OrderBy(act => act.ActionDate)
+                .ToList())
+            {
+                var action = DbContext.StockActions
+                    .Where(act => act.StockLotNo == lotNo)
+                    .Where(act => act.ActionDate == outOfStock.ActionDate)
+                    .Single(act => act.Action == StockActionType.SCHEDULED_TO_USE);
+
+                DEBUGLOG_ComparationOfStockRemainAndQuantity(action, outOfStock.Quantity);
+                if(action.Remain >= outOfStock.Quantity)
+                {
+                    // 不足分全量をこの在庫ロットから払い出す
+                    AddQuantityToStockLot(part, lotNo, outOfStock.ActionDate, outOfStock.Quantity);
+                }
+                else
+                {
+                    throw new NotImplementedException(new StringBuilder()
+                        .Append("在庫不足：発注量では在庫不足を賄えない:")
+                        .Append(" 品目=").Append(part.Code)
+                        .Append(", 発注ロット：").Append(lotNo)
+                        .AppendFormat(", 発注日={0:yyyyMMdd}", orderDate)
+                        .AppendFormat(", 不足日={0:yyyyMMdd", action.ActionDate)
+                        .Append(", 不足数=").Append(outOfStock.Quantity)
+                        .Append(", 当日残=").Append(action.Remain)
+                        .ToString());
+                }
+
+                DbContext.StockActions.Remove(outOfStock);
+            }
+            DbContext.SaveChanges();
+
             // arrivalDate 以降の既存納品予定から払い出していた加工分を今回発注分に振替する
             foreach (var d in Enumerable.Range(0, part.ExpiryDate + 1).Select(i => arrivalDate.AddDays(i)))
             {
