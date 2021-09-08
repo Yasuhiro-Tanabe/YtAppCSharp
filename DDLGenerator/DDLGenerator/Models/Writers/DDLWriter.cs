@@ -5,12 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace DDLGenerator.Models
+namespace DDLGenerator.Models.Writers
 {
     /// <summary>
     /// データ定義スクリプトへの書き込み器
     /// </summary>
-    class DDLWriter
+    class DDLWriter : IDataDefinitionTableWriter
     {
         public string OutputFileName { get; set; }
         public DDLWriter(string file)
