@@ -45,12 +45,9 @@ namespace DDLGenerator.Models
 
                     if(parser.IsFoundTableDefinitions())
                     {
-                        using(var file = File.OpenWrite(output))
-                        using (var writer = new DDLWriter(file))
-                        {
-                            writer.WriteTables(parser.TableDefinitions);
-                            LogUtil.Info($"スクリプト '{Path.GetFileName(output)}' の出力完了");
-                        }
+                        var writer = new DDLWriter(output);
+                        writer.WriteTables(parser.TableDefinitions);
+                        LogUtil.Info($"スクリプト '{Path.GetFileName(output)}' の出力完了");
                     }
                 }
             }

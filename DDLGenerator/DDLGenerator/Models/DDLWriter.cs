@@ -10,12 +10,24 @@ namespace DDLGenerator.Models
     /// <summary>
     /// データ定義スクリプトへの書き込み器
     /// </summary>
-    class DDLWriter : StreamWriter
+    class DDLWriter
     {
-        public DDLWriter(Stream stream) : this(stream, Encoding.UTF8) { }
-        public DDLWriter(Stream stream, Encoding encoding) : base(stream, encoding) { }
+        public string OutputFileName { get; set; }
+        public DDLWriter(string file)
+        {
+            OutputFileName = file;
+        }
 
         public void WriteTables(IList<TableDefinition> tables)
+        {
+            using (var file = File.OpenWrite(OutputFileName))
+            using (var writer = new StreamWriter(file))
+            {
+                WriteTables(writer, tables);
+            }
+        }
+
+        private void WriteTables(StreamWriter writer, IList<TableDefinition> tables)
         {
             StringBuilder builder = new StringBuilder();
             foreach (var tbl in tables)
@@ -28,7 +40,7 @@ namespace DDLGenerator.Models
                 builder.Clear();
                 builder.AppendLine($"-- テーブル：{tbl.TableName} ({tbl.TableComment})")
                     .AppendLine($"DROP TABLE IF EXISTS {tbl.TableName};")
-                    .AppendLine($"CREATE TABLE {tbl.TableName} ("); 
+                    .AppendLine($"CREATE TABLE {tbl.TableName} (");
 
                 var numCols = 0;
                 foreach (var row in tbl.Rows)
@@ -85,10 +97,10 @@ namespace DDLGenerator.Models
 
                 var str = builder.ToString();
                 LogUtil.Debug($"=== Created SQL ====\n{str}");
-                WriteLine(str);
-                WriteLine();
+                writer.WriteLine(str);
+                writer.WriteLine();
 
-                Flush();
+                writer.Flush();
             }
         }
     }
