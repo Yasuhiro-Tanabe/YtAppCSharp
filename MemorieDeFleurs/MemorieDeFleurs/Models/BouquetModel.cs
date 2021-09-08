@@ -153,6 +153,7 @@ namespace MemorieDeFleurs.Models
             private string _code;
             private string _name;
             private string _image;
+            private IDictionary<string, int> _partsList = new Dictionary<string, int>();
 
             public static BouquetBuilder GetInstance(BouquetModel parent)
             {
@@ -212,9 +213,42 @@ namespace MemorieDeFleurs.Models
                     Status = 0
                 };
 
+                foreach (var p in _partsList)
+                {
+                    var item = new BouquetPartsList() { BouquetCode = _code, PartsCode = p.Key, Quantity = p.Value };
+                    ret.PartsList.Add(item);
+                }
                 _model.DbContext.Bouquets.Add(ret);
+
                 _model.DbContext.SaveChanges();
                 return ret;
+            }
+
+            /// <summary>
+            /// 商品構成を追加する(単品コード指定版)
+            /// 
+            /// 既存単品が登録済みで単品コードがわかっているとき用
+            /// </summary>
+            /// <param name="partCode">単品コード</param>
+            /// <param name="quantity">数量</param>
+            /// <returns>商品構成追加後の商品オブジェクト生成器（自分自身)</returns>
+            public BouquetBuilder Uses(string partCode, int quantity)
+            {
+                _partsList.Add(partCode, quantity);
+                return this;
+            }
+
+            /// <summary>
+            /// 商品構成を追加する(単品指定版)
+            /// 
+            /// 単品作成と同時に商品構成に追加するとき用
+            /// </summary>
+            /// <param name="part">単品</param>
+            /// <param name="quantity">数量</param>
+            /// <returns>商品構成追加後の商品オブジェクト生成器（自分自身)</returns>
+            public BouquetBuilder Uses(BouquetPart part, int quantity)
+            {
+                return Uses(part.Code, quantity);
             }
         }
 
@@ -295,6 +329,7 @@ namespace MemorieDeFleurs.Models
             Remove(FindBouquetPart(partCode));
         }
 
+        #region UseBouquetPart
         /// <summary>
         /// 在庫から使用した単品を指定個数取り去る
         /// </summary>
@@ -439,6 +474,7 @@ namespace MemorieDeFleurs.Models
             DbContext.StockActions.Update(discarding);
             DbContext.SaveChanges();
         }
+        #endregion // UseBouquetPart
 
         public void CreatePartsList(string bouquet, string part, int quantity)
         {
