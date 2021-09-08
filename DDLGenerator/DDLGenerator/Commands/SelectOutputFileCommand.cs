@@ -19,9 +19,9 @@ namespace DDLGenerator.Commands
         /// <summary>
         /// コマンドが割り当てられたビューモデル
         /// </summary>
-        private MainWindowViewModel _vm;
+        private SQLiteDDLViewModel _vm;
 
-        public SelectOutputFileCommand(MainWindowViewModel vm)
+        public SelectOutputFileCommand(SQLiteDDLViewModel vm)
         {
             _vm = vm;
         }

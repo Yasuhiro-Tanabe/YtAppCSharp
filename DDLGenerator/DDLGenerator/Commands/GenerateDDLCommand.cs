@@ -2,9 +2,6 @@
 using DDLGenerator.ViewModels;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -18,9 +15,9 @@ namespace DDLGenerator.Commands
         /// <summary>
         /// コマンドが割り当てられたビューモデル
         /// </summary>
-        private MainWindowViewModel _vm;
+        private SQLiteDDLViewModel _vm;
 
-        public GenerateDDLCommand(MainWindowViewModel vm)
+        public GenerateDDLCommand(SQLiteDDLViewModel vm)
         {
             _vm = vm;
         }

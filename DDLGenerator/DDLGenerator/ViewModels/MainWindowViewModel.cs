@@ -38,57 +38,15 @@ namespace DDLGenerator.ViewModels
             set { SetProperty(ref _title, value); }
         }
 
-        private string _tableDefinitionFile;
-        /// <summary>
-        /// テーブル定義書ファイル名 (パスを含む)
-        /// </summary>
-        public string TableDefinitionFilePath
-        {
-            get { return _tableDefinitionFile; }
-            set { SetProperty(ref _tableDefinitionFile, value); }
-        }
-
-        private string _outputFIle;
-        /// <summary>
-        /// 生成するデータ定義スクリプトファイル名 (パスを含む)
-        /// </summary>
-        public string OutputDdlFilePath
-        {
-            get { return _outputFIle; }
-            set { SetProperty(ref _outputFIle, value); }
-        }
 
         /// <summary>
         /// 画面出力するログ文言
         /// </summary>
         public string Log { get { return LogUtil.Appender?.Notification; } }
 
-        /// <summary>
-        /// アプリケーション終了コマンド
-        /// </summary>
-        public ICommand QuitApplication { get; private set; } = new QuitCommand();
-        /// <summary>
-        /// DDL生成コマンド
-        /// </summary>
-        public ICommand GenerateDDL { get; private set; }
-
-        /// <summary>
-        /// 入力となるテーブル定義書ファイル選択ダイアログを開くコマンド
-        /// </summary>
-        public ICommand SelectInputFile { get; private set; }
-
-        /// <summary>
-        /// 出力となるテーブル定義スクリプト選択ダイアログを開くコマンド
-        /// </summary>
-        public ICommand SelectOutputFile { get; private set; }
-
         public MainWindowViewModel()
         {
             LogUtil.Appender.PropertyChanged += OnLogRefreshed;
-
-            SelectInputFile = new SelectTableDefinitionFileCommand(this);
-            SelectOutputFile = new SelectOutputFileCommand(this);
-            GenerateDDL = new GenerateDDLCommand(this);
 
             LogUtil.Debug($"MainWindowViewModel Generated.");
         }

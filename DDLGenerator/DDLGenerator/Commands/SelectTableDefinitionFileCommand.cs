@@ -4,11 +4,6 @@ using DDLGenerator.ViewModels;
 using Microsoft.Win32;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace DDLGenerator.Commands
@@ -20,9 +15,9 @@ namespace DDLGenerator.Commands
         /// <summary>
         /// コマンドが割り当てられたビューモデル
         /// </summary>
-        private MainWindowViewModel _vm;
+        private SQLiteDDLViewModel _vm;
 
-        public SelectTableDefinitionFileCommand(MainWindowViewModel vm)
+        public SelectTableDefinitionFileCommand(SQLiteDDLViewModel vm)
         {
             _vm = vm;
         }
