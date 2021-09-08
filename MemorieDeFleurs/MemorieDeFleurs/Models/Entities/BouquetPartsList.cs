@@ -25,5 +25,17 @@ namespace MemorieDeFleurs.Models.Entities
         /// </summary>
         [Column("QUANTITY")]
         public int Quantity { get; set; }
+
+        /// <summary>
+        /// 花束コードに該当する商品
+        /// </summary>
+        [ForeignKey("BouquetCode")]
+        public Bouquet Bouquet { get; set; }
+
+        /// <summary>
+        /// 花コードに該当する単品
+        /// </summary>
+        [ForeignKey("PartsCode")]
+        public BouquetPart Part { get; set; }
     }
 }

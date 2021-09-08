@@ -439,5 +439,12 @@ namespace MemorieDeFleurs.Models
             DbContext.StockActions.Update(discarding);
             DbContext.SaveChanges();
         }
+
+        public void CreatePartsList(string bouquet, string part, int quantity)
+        {
+            var item = new BouquetPartsList() { BouquetCode = bouquet, PartsCode = part, Quantity = quantity };
+            DbContext.PartsList.Add(item);
+            DbContext.SaveChanges();
+        }
     }
 }

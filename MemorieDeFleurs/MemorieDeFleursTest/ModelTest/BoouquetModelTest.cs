@@ -53,5 +53,31 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(expected.Code, actual.Code);
             Assert.AreEqual(expected.Name, actual.Name);
         }
+
+        [TestMethod]
+        public void CanAddBouquetPartsToBouquetViaModel()
+        {
+            var expectedBouquet = Model.BouquetModel.GetBouquetBuilder()
+                .CodeIs("HT001")
+                .NameIs("花束-Aセット")
+                .Create();
+
+            var expectedPart = Model.BouquetModel.GetBouquetPartBuilder()
+                .PartCodeIs("BA001")
+                .PartNameIs("薔薇(赤)")
+                .LeadTimeIs(1)
+                .QauntityParLotIs(100)
+                .ExpiryDateIs(3)
+                .Create();
+
+            Model.BouquetModel.CreatePartsList(expectedBouquet.Code, expectedPart.Code, 4);
+
+            var actualBouquet = Model.BouquetModel.FindBouquet(expectedBouquet.Code);
+
+            Assert.AreEqual(1, actualBouquet.PartsList.Count());
+            Assert.AreEqual(expectedPart.Code, actualBouquet.PartsList[0].Part.Code);
+            Assert.AreEqual(expectedBouquet.Code, actualBouquet.PartsList[0].Bouquet.Code);
+            Assert.AreEqual(4, actualBouquet.PartsList[0].Quantity);
+        }
     }
 }

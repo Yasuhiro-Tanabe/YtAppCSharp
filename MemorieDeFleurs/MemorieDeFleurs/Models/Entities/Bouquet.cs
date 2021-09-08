@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MemorieDeFleurs.Models.Entities
@@ -38,5 +39,10 @@ namespace MemorieDeFleurs.Models.Entities
         /// </summary>
         [Column("STATUS")]
         public int Status { get; set; }
+
+        /// <summary>
+        /// この商品の商品構成
+        /// </summary>
+        public IList<BouquetPartsList> PartsList { get; set; } = new List<BouquetPartsList>();
     }
 }
