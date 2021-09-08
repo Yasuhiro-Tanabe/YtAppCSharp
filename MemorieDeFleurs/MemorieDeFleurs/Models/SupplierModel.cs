@@ -443,7 +443,7 @@ namespace MemorieDeFleurs.Models
             DbContext.SaveChanges();
 
             var partCode = theLot.First().PartsCode;
-            var part = Parent.BouquetModel.Find(partCode);
+            var part = Parent.BouquetModel.FindBouquetPart(partCode);
             if(part == null)
             {
                 throw new NotImplementedException($"単品 {partCode} が見つからない： Lot No. {lotNo}");

@@ -244,7 +244,7 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <param name="partCode">花コード</param>
         /// <returns>単品オブジェクト。花コードに該当する単品がないときはnull。</returns>
-        public BouquetPart Find(string partCode)
+        public BouquetPart FindBouquetPart(string partCode)
         {
             return DbContext.BouquetParts.SingleOrDefault(p => p.Code == partCode);
         }
@@ -288,11 +288,11 @@ namespace MemorieDeFleurs.Models
         /// 該当する単品が見つからないときは何もしない。
         /// </summary>
         /// <param name="partCode">花コード</param>
-        /// <remarks>内部で <see cref="Find(string)"/> を呼び出し、
+        /// <remarks>内部で <see cref="FindBouquetPart(string)"/> を呼び出し、
         /// 見つかった単品オブジェクトを <see cref="Remove(BouquetPart)"/> で破棄する。</remarks>
         public void Remove(string partCode)
         {
-            Remove(Find(partCode));
+            Remove(FindBouquetPart(partCode));
         }
 
         /// <summary>
