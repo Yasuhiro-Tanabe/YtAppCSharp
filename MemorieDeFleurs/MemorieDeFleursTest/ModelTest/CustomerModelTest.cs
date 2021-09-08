@@ -41,7 +41,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var model = new MemorieDeFleursModel(TestDBContext);
 
-            var expected = model.CustomerModel.Entity<Customer>()
+            var expected = model.CustomerModel.GetCustomerBuilder()
                 .NameIs("蘇我幸恵")
                 .PasswordIs("sogayukie12345")
                 .EmailAddressIs("ysoga@localdomain")

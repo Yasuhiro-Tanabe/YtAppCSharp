@@ -116,7 +116,7 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        public CustomerBuilder Entity<Customer>()
+        public CustomerBuilder GetCustomerBuilder()
         {
             return CustomerBuilder.GetInstance(this);
         }

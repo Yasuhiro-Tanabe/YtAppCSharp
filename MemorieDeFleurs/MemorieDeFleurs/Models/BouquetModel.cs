@@ -136,7 +136,7 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <typeparam name="BouquetPart">DB登録オブジェクト生成器が生成するオブジェクト：単品</typeparam>
         /// <returns>単品オブジェクト生成器</returns>
-        public BouquetPartBuilder Entity<BouquetPart>()
+        public BouquetPartBuilder GetBouquetPartBuilder()
         {
             return BouquetPartBuilder.GetInstance(this);
         }

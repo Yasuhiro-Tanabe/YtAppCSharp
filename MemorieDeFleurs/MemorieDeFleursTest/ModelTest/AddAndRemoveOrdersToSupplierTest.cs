@@ -62,7 +62,7 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareSuppliers()
         {
-            ExpectedSupplier = Model.SupplierModel.Entity<Supplier>()
+            ExpectedSupplier = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs("新橋園芸")
                 .AddressIs("東京都中央区銀座", "銀座六丁目園芸団地21-8")
                 .Create();
@@ -70,7 +70,7 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareBouquetParts()
         {
-            ExpectedPart = Model.BouquetModel.Entity<BouquetModel>()
+            ExpectedPart = Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("BA001")
                 .PartNameIs("薔薇(赤)")
                 .LeadTimeIs(1)

@@ -150,7 +150,7 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <typeparam name="Sypplier">DB登録オブジェクト生成器が生成するオブジェクト：仕入先</typeparam>
         /// <returns>仕入先オブジェクト生成器</returns>
-        public SupplierBuilder Entity<Sypplier>()
+        public SupplierBuilder GetSupplierBuilder()
         {
             return SupplierBuilder.GetInstance(this);
         }

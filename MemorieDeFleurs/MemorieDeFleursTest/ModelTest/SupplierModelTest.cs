@@ -28,7 +28,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void CanRegisterNewSupplier()
         {
-            var created = Model.SupplierModel.Entity<Supplier>()
+            var created = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs(expectedName)
                 .AddressIs(expectedAddress)
                 .Create();
@@ -51,7 +51,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var expectedEmailAddress = "foo@localdomain";
 
-            var created = Model.SupplierModel.Entity<Supplier>()
+            var created = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs(expectedName)
                 .AddressIs(expectedAddress)
                 .Create();
@@ -66,7 +66,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void UpdatingNullObjectHasNoEffectsForSuppliers()
         {
-            var created = Model.SupplierModel.Entity<Supplier>()
+            var created = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs(expectedName)
                 .AddressIs(expectedAddress)
                 .Create();
@@ -80,7 +80,7 @@ namespace MemorieDeFleursTest.ModelTest
 
         public void CanRemoveExistingSupplier()
         {
-            var created = Model.SupplierModel.Entity<Supplier>()
+            var created = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs(expectedName)
                 .AddressIs(expectedAddress)
                 .Create();

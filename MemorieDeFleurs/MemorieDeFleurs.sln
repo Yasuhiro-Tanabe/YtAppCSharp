@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31613.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemorieDeFleurs", "MemorieDeFleurs\MemorieDeFleurs.csproj", "{7425C08E-93FA-4C65-9BCB-76B899CBA149}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleurs", "MemorieDeFleurs\MemorieDeFleurs.csproj", "{7425C08E-93FA-4C65-9BCB-76B899CBA149}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemorieDeFleursTest", "MemorieDeFleursTest\MemorieDeFleursTest.csproj", "{46F987CC-8705-4609-9860-856142492FE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleursTest", "MemorieDeFleursTest\MemorieDeFleursTest.csproj", "{46F987CC-8705-4609-9860-856142492FE8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
