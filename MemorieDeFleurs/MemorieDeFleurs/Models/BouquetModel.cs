@@ -132,15 +132,101 @@ namespace MemorieDeFleurs.Models
         }
 
         /// <summary>
-        /// DB登録オブジェクト生成器を取得する
+        /// 単品オブジェクト生成器を取得する
         /// </summary>
-        /// <typeparam name="BouquetPart">DB登録オブジェクト生成器が生成するオブジェクト：単品</typeparam>
+        /// <typeparam name="BouquetPart">単品オブジェクト生成器が生成するオブジェクト：単品</typeparam>
         /// <returns>単品オブジェクト生成器</returns>
         public BouquetPartBuilder GetBouquetPartBuilder()
         {
             return BouquetPartBuilder.GetInstance(this);
         }
         #endregion // BouquetPartBuilder
+
+        #region BouquetBuilder
+        /// <summary>
+        /// 商品オブジェクト生成期
+        /// </summary>
+        public class BouquetBuilder
+        {
+            private BouquetModel _model;
+
+            private string _code;
+            private string _name;
+            private string _image;
+
+            public static BouquetBuilder GetInstance(BouquetModel parent)
+            {
+                return new BouquetBuilder(parent);
+            }
+
+            private BouquetBuilder(BouquetModel model)
+            {
+                _model = model;
+            }
+
+            /// <summary>
+            /// 花束コードを登録/変更する
+            /// </summary>
+            /// <param name="code">花束コード</param>
+            /// <returns>花束コード変更後の商品オブジェクト生成器（自分自身）</returns>
+            public BouquetBuilder CodeIs(string code)
+            {
+                _code = code;
+                return this;
+            }
+
+            /// <summary>
+            /// 名称を登録/変更する
+            /// </summary>
+            /// <param name="name">名称</param>
+            /// <returns>名称変更後の商品オブジェクト生成器（自分自身）</returns>
+            public BouquetBuilder NameIs(string name)
+            {
+                _name = name;
+                return this;
+            }
+
+            /// <summary>
+            /// イメージファイルへのパスを登録/変更する
+            /// </summary>
+            /// <param name="image">イメージファイルへのパス</param>
+            /// <returns>イメージファイルへのパス変更後の商品オブジェクト生成器（自分自身）</returns>
+            public BouquetBuilder ImageIs(string image)
+            {
+                _image = image;
+                return this;
+            }
+
+            /// <summary>
+            /// 現在の内容で商品オブジェクトを生成、データベースに登録する
+            /// </summary>
+            /// <returns>データベースに登録された商品オブジェクト</returns>
+            public Bouquet Create()
+            {
+                var ret = new Bouquet()
+                {
+                    Code = _code,
+                    Name = _name,
+                    Image = _image,
+                    LeadTime = 0,
+                    Status = 0
+                };
+
+                _model.DbContext.Bouquets.Add(ret);
+                _model.DbContext.SaveChanges();
+                return ret;
+            }
+        }
+
+        /// <summary>
+        /// 商品オブジェクト生成器を取得する
+        /// </summary>
+        /// <returns>商品オブジェクト生成器</returns>
+        public BouquetBuilder GetBouquetBuilder()
+        {
+            return BouquetBuilder.GetInstance(this);
+        }
+        #endregion // BouquetBuilder
 
         /// <summary>
         /// 条件を満たす仕入先オブジェクトを取得する
@@ -152,7 +238,7 @@ namespace MemorieDeFleurs.Models
         {
             return DbContext.BouquetParts.Where(condition);
         }
-
+        
         /// <summary>
         /// 花コードをキーに単品オブジェクトを取得する
         /// </summary>
@@ -161,6 +247,16 @@ namespace MemorieDeFleurs.Models
         public BouquetPart Find(string partCode)
         {
             return DbContext.BouquetParts.SingleOrDefault(p => p.Code == partCode);
+        }
+
+        /// <summary>
+        /// 花束コードをキーに商品オブジェクトを取得する
+        /// </summary>
+        /// <param name="bouquetCode">花束コード</param>
+        /// <returns>商品オブジェクト。花束コードに該当する単品がないときは null。</returns>
+        public Bouquet FindBouquet(string bouquetCode)
+        {
+            return DbContext.Bouquets.SingleOrDefault(b => b.Code == bouquetCode);
         }
 
         /// <summary>

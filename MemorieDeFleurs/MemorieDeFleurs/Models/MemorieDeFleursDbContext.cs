@@ -78,6 +78,10 @@ namespace MemorieDeFleurs.Models
                 .Entity<StockAction>()
                 .Property(a => a.ArrivalDate)
                 .HasConversion(converter);
+
+            modelBuilder
+                .Entity<BouquetPartsList>()
+                .HasKey(nameof(BouquetPartsList.BouquetCode), nameof(BouquetPartsList.PartsCode));
         }
 
         /// <summary>
@@ -99,5 +103,15 @@ namespace MemorieDeFleurs.Models
         /// 単品
         /// </summary>
         public DbSet<BouquetPart> BouquetParts { get; set; }
+
+        /// <summary>
+        /// 商品
+        /// </summary>
+        public DbSet<Bouquet> Bouquets { get; set; }
+
+        /// <summary>
+        /// 商品構成
+        /// </summary>
+        public DbSet<BouquetPartsList> PartsList { get; set; }
     }
 }
