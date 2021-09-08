@@ -82,6 +82,11 @@ namespace MemorieDeFleurs.Models
             modelBuilder
                 .Entity<BouquetPartsList>()
                 .HasKey(nameof(BouquetPartsList.BouquetCode), nameof(BouquetPartsList.PartsCode));
+
+            modelBuilder
+                .Entity<ShippingAddress>()
+                .Property(a => a.LatestOrderDate)
+                .HasConversion(converter);
         }
 
         /// <summary>
@@ -113,5 +118,10 @@ namespace MemorieDeFleurs.Models
         /// 商品構成
         /// </summary>
         public DbSet<BouquetPartsList> PartsList { get; set; }
+
+        /// <summary>
+        /// お届け先
+        /// </summary>
+        public DbSet<ShippingAddress> ShippingAddresses { get; set; }
     }
 }
