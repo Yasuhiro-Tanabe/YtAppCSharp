@@ -10,10 +10,10 @@ namespace DDLGenerator.Models.Writers
     /// <summary>
     /// データ定義スクリプトへの書き込み器
     /// </summary>
-    class DDLWriter : IDataDefinitionTableWriter
+    class SQLiteDDLWriter : IDataDefinitionTableWriter
     {
         public string OutputFileName { get; set; }
-        public DDLWriter(string file)
+        public SQLiteDDLWriter(string file)
         {
             OutputFileName = file;
         }

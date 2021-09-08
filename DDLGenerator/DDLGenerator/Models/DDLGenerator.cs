@@ -46,7 +46,7 @@ namespace DDLGenerator.Models
 
                     if(parser.IsFoundTableDefinitions())
                     {
-                        var writer = new DDLWriter(output);
+                        var writer = new SQLiteDDLWriter(output);
                         writer.WriteTables(parser.TableDefinitions);
                         LogUtil.Info($"スクリプト '{Path.GetFileName(output)}' の出力完了");
                     }
