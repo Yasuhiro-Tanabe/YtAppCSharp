@@ -103,5 +103,13 @@ namespace DDLGenerator.Models.Writers
                 writer.Flush();
             }
         }
+
+        public void Validate()
+        {
+            if(string.IsNullOrWhiteSpace(OutputFileName))
+            {
+                throw new FileNotFoundException("Output file name is empty or white space.");
+            }
+        }
     }
 }

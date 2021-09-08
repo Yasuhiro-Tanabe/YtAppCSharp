@@ -46,9 +46,8 @@ namespace DDLGenerator.Models
 
                     if(parser.IsFoundTableDefinitions())
                     {
-                        var writer = new SQLiteDDLWriter(output);
-                        writer.WriteTables(parser.TableDefinitions);
-                        LogUtil.Info($"スクリプト '{Path.GetFileName(output)}' の出力完了");
+                        WriteSqliteDDLWriter(output, parser);
+                        WriteEFCoreEntities(Path.GetDirectoryName(output), parser);
                     }
                 }
             }
@@ -58,5 +57,18 @@ namespace DDLGenerator.Models
             }
         }
 
+        private void WriteSqliteDDLWriter(string output, TableDefinitionWorksheetParser parser)
+        {
+            var writer = new SQLiteDDLWriter(output);
+            writer.WriteTables(parser.TableDefinitions);
+            LogUtil.Info($"スクリプト '{Path.GetFileName(output)}' の出力完了");
+        }
+
+        private void WriteEFCoreEntities(string folder, TableDefinitionWorksheetParser parser)
+        {
+            var writer = new EFCoreCsEntityWriter(folder);
+            writer.WriteTables(parser.TableDefinitions);
+            LogUtil.Info($"エンティティクラスファイルのフォルダ '{folder}' への出力完了");
+        }
     }
 }

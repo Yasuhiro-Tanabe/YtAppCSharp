@@ -9,5 +9,7 @@ namespace DDLGenerator.Models
     interface IDataDefinitionTableWriter
     {
         public void WriteTables(IList<TableDefinition> tables);
+
+        public void Validate();
     }
 }
