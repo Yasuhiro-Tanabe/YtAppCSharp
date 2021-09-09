@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.Entities;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 
 using System;
 using System.Linq;

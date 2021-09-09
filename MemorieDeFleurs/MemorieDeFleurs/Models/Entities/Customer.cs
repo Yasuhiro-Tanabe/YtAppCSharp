@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MemorieDeFleurs.Entities
+namespace MemorieDeFleurs.Models.Entities
 {
     /// <summary>
     /// 得意先
