@@ -70,7 +70,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .Create();
 
             // 正しく登録されていると確認できればよい
-            var actual = TestDBContext.ShippingAddresses.First();
+            var actual = TestDBContext.ShippingAddresses.Single();
 
             Assert.AreEqual(expected.Name, actual.Name);
             Assert.IsNotNull(actual.From);
