@@ -49,5 +49,11 @@ namespace MemorieDeFleurs.Models.Entities
         /// </summary>
         [Column("LATEST_ORDER")]
         public DateTime LatestOrderDate { get; set; }
+
+        /// <summary>
+        /// 贈り主
+        /// </summary>
+        [ForeignKey("CustomerID")]
+        public Customer From { get; set; }
     }
 }

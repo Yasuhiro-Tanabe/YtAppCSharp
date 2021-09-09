@@ -3,6 +3,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
+using System.Linq;
 
 namespace MemorieDeFleursTest.ModelTest
 {
@@ -49,6 +50,31 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(expected.Name, actual.Name);
             Assert.AreEqual(expected.EmailAddress, actual.EmailAddress);
             Assert.AreEqual(expected.Password, actual.Password);
+        }
+
+        public void CanAddShippingAddressFromCustomerViaBuilder()
+        {
+            var model = new MemorieDeFleursModel(TestDBContext);
+
+            var customer = model.CustomerModel.GetCustomerBuilder()
+                .NameIs("蘇我幸恵")
+                .PasswordIs("sogayukie12345")
+                .EmailAddressIs("ysoga@localdomain")
+                .CardNoIs("9876543210123210")
+                .Create();
+
+            var expected = Model.CustomerModel.GetShippingAddressBuilder()
+                .From(customer)
+                .To("ピアノ生徒1")
+                .AddressIs("東京都中央区京橋1-10-7", "KPP八重洲ビル10階")
+                .Create();
+
+            // 正しく登録されていると確認できればよい
+            var actual = TestDBContext.ShippingAddresses.First();
+
+            Assert.AreEqual(expected.Name, actual.Name);
+            Assert.IsNotNull(actual.From);
+            Assert.AreEqual(customer.ID, actual.From.ID);
         }
     }
 }
