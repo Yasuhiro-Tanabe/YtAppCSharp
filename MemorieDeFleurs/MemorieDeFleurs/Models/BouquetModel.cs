@@ -363,7 +363,7 @@ namespace MemorieDeFleurs.Models
                     .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE || a.Action == StockActionType.OUT_OF_STOCK)
                     .Where(a => 0 == a.ActionDate.CompareTo(date))
                     .Sum(a => a.Remain);
-                LogUtil.Info($"UseBouQuetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) returns remain={remain}");
+                LogUtil.Info($"UseBouquetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) Total remain={remain}");
                 return remain;
             }
             catch(NotImplementedException ei)
