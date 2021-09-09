@@ -61,7 +61,7 @@ namespace DDLGenerator.ViewModels
         /// <summary>
         /// 入力となるテーブル定義書ファイル選択ダイアログを開くコマンド
         /// </summary>
-        public ICommand SelectInputFile { get; private set; }
+        public ICommand SelectInputFile { get; private set; } = new SelectTableDefinitionFileCommand();
 
         /// <summary>
         /// 出力となるテーブル定義スクリプト選択ダイアログを開くコマンド
@@ -70,7 +70,6 @@ namespace DDLGenerator.ViewModels
 
         public SQLiteDDLViewModel()
         {
-            SelectInputFile = new SelectTableDefinitionFileCommand(this);
             SelectOutputFile = new SelectOutputFileCommand(this);
             GenerateDDL = new GenerateDDLCommand(this);
 

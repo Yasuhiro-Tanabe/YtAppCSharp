@@ -1,10 +1,13 @@
-﻿using System;
+﻿using DDLGenerator.Commands;
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace DDLGenerator.ViewModels
 {
@@ -25,5 +28,24 @@ namespace DDLGenerator.ViewModels
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(caller));
         }
 
+        private string _tableDefinitionFile;
+        /// <summary>
+        /// テーブル定義書ファイル名 (パスを含む)
+        /// </summary>
+        public string TableDefinitionFilePath
+        {
+            get { return _tableDefinitionFile; }
+            set { SetProperty(ref _tableDefinitionFile, value); }
+        }
+
+        /// <summary>
+        /// アプリケーション終了コマンド
+        /// </summary>
+        public ICommand QuitApplication { get; private set; } = new QuitCommand();
+
+        /// <summary>
+        /// 入力となるテーブル定義書ファイル選択ダイアログを開くコマンド
+        /// </summary>
+        public ICommand SelectInputFile { get; private set; } = new SelectTableDefinitionFileCommand();
     }
 }

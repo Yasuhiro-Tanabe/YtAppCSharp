@@ -10,6 +10,44 @@
         <vm:EFCoreEntityViewModel/>
     </UserControl.DataContext>
     <Grid>
-            
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="80"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 1段目：データベース定義書 -->
+        <TextBlock Grid.Row="0" Grid.Column="0"
+                   Margin="10,0,0,0"
+                   VerticalAlignment="Center" HorizontalAlignment="Left"
+                   Text="データベース定義書："/>
+        <TextBox Grid.Row="0" Grid.Column="1" x:Name="TableDefinitionFile"
+                 Margin="10" Padding="10,0,0,0"
+                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                 VerticalContentAlignment="Center" HorizontalContentAlignment="Left"
+                 Text="{Binding TableDefinitionFilePath}"/>
+        <Button Grid.Row="0" Grid.Column="2"
+                Margin="20,10"
+                VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                Content="..." Command="{Binding SelectInputFile}" CommandParameter="{Binding}"/>
+
+        <!-- 3段目：操作コマンド -->
+        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
+              Margin="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="2"
+                    Margin="20,10,20,10"
+                    VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                    Content="終了" Command="{Binding QuitApplication}"/>
+        </Grid>
     </Grid>
 </UserControl>

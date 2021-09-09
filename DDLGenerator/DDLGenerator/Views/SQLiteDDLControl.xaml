@@ -35,7 +35,7 @@
         <Button Grid.Row="0" Grid.Column="2"
                 Margin="20,10"
                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                Content="..." Command="{Binding SelectInputFile}"/>
+                Content="..." Command="{Binding SelectInputFile}" CommandParameter="{Binding}"/>
 
         <!-- 2段目：データ定義スクリプト -->
         <TextBlock Grid.Row="1" Grid.Column="0"
