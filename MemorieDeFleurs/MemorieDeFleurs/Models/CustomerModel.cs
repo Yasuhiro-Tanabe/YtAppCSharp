@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using System.Text;
 
 namespace MemorieDeFleurs.Models
 {
@@ -231,6 +232,41 @@ namespace MemorieDeFleurs.Models
         #endregion // 仕入先の登録改廃
 
         #region 注文
+        /// <summary>
+        /// 花束を注文する
+        /// </summary>
+        /// <param name="orderDate">注文日</param>
+        /// <param name="bouquet">注文対象の花束</param>
+        /// <param name="sendTo">花束の送り先：贈り主はここから参照して取得する</param>
+        /// <param name="arrivalDate">お届け日：花束の作成は前日なので、在庫は arrivalDate - 1 日の分が消費される</param>
+        /// <param name="message"></param>
+        public void Order(DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "" )
+        {
+            // 在庫アクションの登録改訂に関する検証用、暫定実装
+            var usedDate = arrivalDate.AddDays(-1);
+            foreach (var item in bouquet.PartsList)
+            {
+                var remain = Parent.BouquetModel.UseBouquetPart(item.Part, usedDate, item.Quantity);
+                if(remain < 0)
+                {
+                    throw new NotImplementedException(new StringBuilder()
+                        .Append("注文不可：単品在庫なし、")
+                        .AppendFormat(" お届け日={0:yyyyMMdd}", arrivalDate)
+                        .Append(", 商品=").Append(bouquet.Code)
+                        .Append(", 単品=").Append(item.PartsCode)
+                        .Append(", 要求数=").Append(item.Quantity)
+                        .Append(", 不足数=").Append(-remain) // 符号を＋に変えて表示
+                        .ToString());
+                }
+            }
+
+            LogUtil.Info(new StringBuilder()
+                .Append("Ordered: ").Append(bouquet.Code)
+                .AppendFormat(", from '{0}'", sendTo.From.Name)
+                .AppendFormat(" to '{0}'", sendTo.Name)
+                .AppendFormat(" at {0:yyyyMMdd}", arrivalDate)
+                .ToString());
+        }
         #endregion // 注文
 
         #region 注文取消
