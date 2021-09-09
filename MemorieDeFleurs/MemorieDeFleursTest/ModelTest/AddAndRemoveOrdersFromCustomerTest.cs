@@ -247,7 +247,7 @@ namespace MemorieDeFleursTest.ModelTest
             ExpectedBigBouquet = Model.BouquetModel.GetBouquetBuilder()
                 .CodeIs("HUGE0")
                 .NameIs("検証用の巨大ブーケ")
-                .Uses(ExpectedPart, 100)
+                .Uses(ExpectedPart, 150)
                 .Create();
         }
         #endregion // TestInitialize
@@ -280,8 +280,8 @@ namespace MemorieDeFleursTest.ModelTest
                 .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0);
 
 
-            // お届け日 5/3 なので、発送する ５／２ の在庫が減る。
-            Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May3rd);
+            // お届け日は在庫消費日の翌日
+            Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
 
             varidator.AssertAll(TestDBContext);
             LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [End] =====");
