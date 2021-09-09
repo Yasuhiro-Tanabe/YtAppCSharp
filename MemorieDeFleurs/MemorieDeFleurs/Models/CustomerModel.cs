@@ -1,5 +1,7 @@
 ﻿using MemorieDeFleurs.Entities;
+using MemorieDeFleurs.Models.Entities;
 
+using System;
 using System.Linq;
 
 namespace MemorieDeFleurs.Models
@@ -12,6 +14,11 @@ namespace MemorieDeFleurs.Models
         private int NextCustomerID
         {
             get { return Parent.Sequences.SEQ_CUSTOMERS.Next; }
+        }
+
+        private int NextShippingAddressID
+        {
+            get { return Parent.Sequences.SEQ_SHIPPING.Next; }
         }
 
         /// <summary>
@@ -121,6 +128,101 @@ namespace MemorieDeFleurs.Models
             return CustomerBuilder.GetInstance(this);
         }
         #endregion // CustomerBuilder
+
+        #region ShippingAddressBuilder
+        /// <summary>
+        /// お届け先オブジェクト生成器
+        /// </summary>
+        public class ShippingAddressBuilder
+        {
+            private CustomerModel _model;
+
+            private string _address1;
+            private string _address2;
+            private string _name;
+
+            private Customer _sendFrom;
+            
+            private MemorieDeFleursDbContext DbContext { get { return _model.DbContext; } }
+
+            public static ShippingAddressBuilder GetInstance(CustomerModel parent)
+            {
+                return new ShippingAddressBuilder(parent);
+            }
+
+            private ShippingAddressBuilder(CustomerModel model)
+            {
+                _model = model;
+            }
+
+            /// <summary>
+            /// 贈り主を登録/変更する
+            /// </summary>
+            /// <param name="customer">贈り主である得意先</param>
+            /// <returns>贈り主を変更したお届け先オブジェクト生成器(自分自身)</returns>
+            public ShippingAddressBuilder From(Customer customer)
+            {
+                _sendFrom = customer;
+                return this;
+            }
+
+            /// <summary>
+            /// お届け先名称を登録/変更する
+            /// </summary>
+            /// <param name="name">お届け先名称</param>
+            /// <returns>お届け先名称を変更したお届け先オブジェクト生成器(自分自身)</returns>
+            public ShippingAddressBuilder To(string name)
+            {
+                _name = name;
+                return this;
+            }
+
+            /// <summary>
+            /// お届け先住所を登録/変更する
+            /// </summary>
+            /// <param name="address1">お届け先住所1 (入力必須)</param>
+            /// <param name="address2">お届け先住所2</param>
+            /// <returns>お届け先住所を変更したお届け先オブジェクト生成器(自分自身)</returns>
+            public ShippingAddressBuilder AddressIs(string address1, string address2="")
+            {
+                _address1 = address1;
+                _address2 = address2;
+                return this;
+            }
+
+            /// <summary>
+            /// お届け先オブジェクトを生成する
+            /// </summary>
+            /// <returns></returns>
+            public ShippingAddress Create()
+            {
+                if(_sendFrom == null)
+                {
+                    throw new ApplicationException($"贈り主は入力必須、登録済みの得意先であること：お届け先名={_name}");
+                }
+
+                var shipping = new ShippingAddress()
+                {
+                    ID = _model.NextShippingAddressID,
+                    CustomerID = _sendFrom.ID,
+                    Name = _name,
+                    Address1 = _address1,
+                    Address2 = _address2,
+                    LatestOrderDate = DateTime.Now
+                };
+
+                DbContext.ShippingAddresses.Add(shipping);
+                DbContext.SaveChanges();
+
+                return shipping;
+            }
+        }
+
+        public ShippingAddressBuilder GetShippingAddressBuilder()
+        {
+            return ShippingAddressBuilder.GetInstance(this);
+        }
+        #endregion // ShippingAddressBuilder
 
         #region 仕入先の登録改廃
         public Customer Find(int id)
