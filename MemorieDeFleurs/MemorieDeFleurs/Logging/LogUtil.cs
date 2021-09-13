@@ -1,11 +1,18 @@
 ﻿using log4net;
 using log4net.Config;
 
-namespace MemorieDeFleurs
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Text;
+
+namespace MemorieDeFleurs.Logging
+
 {
     public static class LogUtil
     {
         private static ILog _logger;
+
+        public static IndentString Indent { get; set; } = new IndentString();
 
         static LogUtil()
         {
@@ -13,7 +20,7 @@ namespace MemorieDeFleurs
             _logger = LogManager.GetLogger(typeof(LogUtil).Name);
         }
 
-        #region ログ出力メソッド
+        #region 基本のログ出力メソッド
         public static void Debug(string msg) => _logger.Debug(msg);
         public static void DebugFormat(string fmt, params object[] args) => _logger.DebugFormat(fmt, args);
         public static void Info(string msg) => _logger.Info(msg);
@@ -26,5 +33,6 @@ namespace MemorieDeFleurs
         public static void FatalFormat(string fmt, params object[] args) => _logger.FatalFormat(fmt, args);
 
         #endregion
+
     }
 }

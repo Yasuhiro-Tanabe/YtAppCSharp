@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs;
+using MemorieDeFleurs.Logging;
 
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
