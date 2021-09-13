@@ -355,7 +355,8 @@ namespace MemorieDeFleurs.Models
                 }
                 else
                 {
-                    UseBouquetPartFromTheStockAction(stock, quantity);
+                    var usedLot = new Stack<int>();
+                    UseFromThisLot(DbContext, stock, quantity, usedLot);
                 }
 
                 DbContext.SaveChanges();
@@ -380,101 +381,139 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        private void UseBouquetPartFromTheStockAction(StockAction stock, int quantity)
+        private void UseFromThisLot(MemorieDeFleursDbContext context, StockAction today, int quantity, Stack<int> usedLot)
         {
-            LogUtil.Debug($"CurrentStock: date={stock.ActionDate.ToString("yyyyMMdd")}, part={stock.PartsCode}, lot={stock.StockLotNo}, remain={stock.Remain}, used={quantity}");
-            if (stock.Remain >= quantity)
+            LogUtil.DEBUGLOG_BeginMethod($"today={today.ToString("s")}, quantity={quantity}, usedLot={string.Join(",", usedLot)}");
+
+            var theLot = context.StockActions
+                .Where(act => act.PartsCode == today.PartsCode)
+                .Where(act => act.StockLotNo == today.StockLotNo)
+                .Where(act => act.ActionDate >= today.ActionDate)
+                .ToList();
+
+            var outOfStockAction = theLot.FirstOrDefault(act => act.Action == StockActionType.OUT_OF_STOCK);
+            if (outOfStockAction != null)
             {
-                // この在庫アクションで全量加工できる
-                stock.Quantity += quantity;
-                stock.Remain -= quantity;
-                DbContext.StockActions.Update(stock);
-                DbContext.SaveChanges();
-
-                UpdateRemainAndDiscardQuantitiesOfThisStockLot(stock, quantity);
-
-                // 在庫アクションの更新終了
-                quantity = 0;
+                // 在庫不足があるロットの対応は未考慮
+                throw new NotImplementedException($"在庫不足がある：{outOfStockAction.ToString("L")}");
             }
-            else // s.Remain < quantity
+
+            if (today.Remain >= quantity)
             {
-                // この在庫アクションだけでは全量を加工できない
-                var outOfStock = quantity - stock.Remain;
-                var useFromThisLot = stock.Remain;
+                // 全量引き出せる
+                today.Quantity += quantity;
+                today.Remain -= quantity;
+                context.StockActions.Update(today);
 
-                stock.Quantity += useFromThisLot;
-                stock.Remain = 0;
-                DbContext.StockActions.Update(stock);
+            }
+            else
+            {
+                // 残数分はこのロットから、それ以外は他のロットから引き出す
+                var useFromThisLot = today.Remain;
+                var useFromOtherLot = quantity - today.Remain;
+                today.Quantity += useFromThisLot;
+                today.Remain -= useFromThisLot;
+                context.StockActions.Update(today);
 
-                UpdateRemainAndDiscardQuantitiesOfThisStockLot(stock, useFromThisLot);
+                usedLot.Push(today.StockLotNo);
+                UseFromOtherLot(context, today, useFromOtherLot, usedLot);
+                usedLot.Pop();
+            }
 
-                LogUtil.Debug($"OutOfStock:   date={stock.ActionDate.ToString("yyyyMMdd")}, part={stock.PartsCode}, lot={stock.StockLotNo}, remain={-outOfStock}, used={useFromThisLot}");
-                // outOfStock 分を同日分で入荷予定日が一番若い在庫アクションから引く
-                var nextStock = DbContext.StockActions
-                    .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
-                    .Where(a => 0 == a.ActionDate.CompareTo(stock.ActionDate))
-                    .Where(a => a.Remain > 0)
-                    .Where(a => a.StockLotNo != stock.StockLotNo)
-                    .OrderBy(a => a.ArrivalDate)
-                    .FirstOrDefault();
-
-                if(nextStock == null)
+            var previousRemain = today.Remain;
+            foreach (var action in theLot
+                .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
+                .Where(act => act.ActionDate > today.ActionDate)
+                .OrderBy(act => act.ActionDate))
+            {
+                if(previousRemain >= action.Quantity)
                 {
-                    LogUtil.Debug($"NextStock is null: date={stock.ActionDate}, part={stock.PartsCode}");
-                    // 在庫不足レコード追加
-                    var outOfStockAction = new StockAction()
-                    {
-                        Action = StockActionType.OUT_OF_STOCK,
-                        ActionDate = stock.ActionDate,
-                        ArrivalDate = stock.ArrivalDate,
-                        PartsCode = stock.PartsCode,
-                        StockLotNo = stock.StockLotNo,
-                        Quantity = outOfStock,
-                        Remain = -outOfStock
-                    };
-                    DbContext.StockActions.Add(outOfStockAction);
-                    DbContext.SaveChanges();
-                    LogUtil.Debug($"OutOfStockAction : date={outOfStockAction.ActionDate.ToString("yyyyMMdd")}, quantity");
+                    // 全量引き出せる
+                    action.Remain = previousRemain - action.Quantity;
+                    context.StockActions.Update(action);
+
+                    previousRemain -= action.Quantity;
                 }
                 else
                 {
-                    // nextStock を対象に自分自身を再帰呼び出し
-                    UseBouquetPartFromTheStockAction(nextStock, outOfStock);
+                    // 前日残の分はこのロットから、それ以外は他のロットから引き出す
+                    var usedFromThisLot = previousRemain;
+                    var useFromOtherLot = action.Quantity - previousRemain;
+
+                    action.Quantity = usedFromThisLot;
+                    action.Remain = 0;
+                    context.StockActions.Update(action);
+
+                    usedLot.Push(action.StockLotNo);
+                    UseFromOtherLot(context, action, useFromOtherLot, usedLot);
+                    previousRemain = 0;
                 }
             }
+
+            var discard = theLot.Single(act => act.Action == StockActionType.SCHEDULED_TO_DISCARD);
+            discard.Quantity = previousRemain;
+            context.StockActions.Update(discard);
+
+            LogUtil.DEBUGLOG_EndMethod();
         }
 
-        private void UpdateRemainAndDiscardQuantitiesOfThisStockLot(StockAction stock, int quantity)
+        private void UseFromOtherLot(MemorieDeFleursDbContext context, StockAction stock, int quantity, Stack<int> usedLot)
         {
-            // 同一ロットの翌日以降の残数更新
-            var daysAfter = DbContext.StockActions
-                .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
-                .Where(a => a.StockLotNo == stock.StockLotNo)
-                .Where(a => a.ActionDate > stock.ActionDate)
-                .OrderBy(a => a.ActionDate)
-                .ToList();
-            foreach (var a in daysAfter)
-            {
-                if(a.Remain < quantity)
-                {
-                    // [TODO] 残数が足りなかったら不足分を別ロットから削除する
-                    throw new NotImplementedException($"残数<必要数：ロット={stock.StockLotNo}, 基準日={stock.ActionDate.ToString("yyyyMMdd")}, 不足日={a.ActionDate.ToString("yyyyMMdd")},");
-                }
-                a.Remain -= quantity;
-                DbContext.StockActions.Update(a);
-                DbContext.SaveChanges();
+            LogUtil.DEBUGLOG_BeginMethod($"stock={stock.ToString("s")}, quantity={quantity}, usedLot={string.Join(",", usedLot)}");
 
+            var usableLots = context.StockActions
+                .Where(act => act.PartsCode == stock.PartsCode)
+                .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
+                .Where(act => act.ActionDate == stock.ActionDate)
+                //.Where(act => !usedLot.Contains(act.StockLotNo)) // Linq式の中で Stack<>.Contains() などのメソッド呼び出しはできない
+                .Where(act => act.Remain > 0)
+                .ToList();
+
+            var useToThisLot = quantity;
+            var previousLot = stock;
+
+            foreach(var action in usableLots.OrderBy(act => act.ArrivalDate))
+            {
+                // すでに引当対象としたロットは除外：Linq式で usableLots を生成するタイミングでは除外できなかったため。
+                if(usedLot.Contains(action.StockLotNo)) { continue; }
+
+                if(action.Remain >= useToThisLot)
+                {
+                    // このロットから全量引き出す
+                    UseFromThisLot(context, action, quantity, usedLot);
+                    return;
+                }
+                else
+                {
+                    // 残数分はこのロットから、引き出せなかった分は次のロットから引き出す
+                    useToThisLot = action.Remain;
+                    UseFromThisLot(context, action, action.Remain, usedLot);
+                    previousLot = action;
+                }
             }
 
-            // 同一ロットの破棄数更新
-            var discarding = DbContext.StockActions
-                .Where(a => a.Action == StockActionType.SCHEDULED_TO_DISCARD)
-                .Where(a => a.StockLotNo == stock.StockLotNo)
-                .Single();
-            discarding.Quantity -= quantity;
-            DbContext.StockActions.Update(discarding);
-            DbContext.SaveChanges();
+            if(useToThisLot > 0)
+            {
+                LogUtil.Debug($"NextStock is null: date={stock.ActionDate}, part={stock.PartsCode}");
+                // 在庫不足レコード追加
+                var outOfStockAction = new StockAction()
+                {
+                    Action = StockActionType.OUT_OF_STOCK,
+                    ActionDate = stock.ActionDate,
+                    ArrivalDate = stock.ArrivalDate,
+                    PartsCode = stock.PartsCode,
+                    StockLotNo = stock.StockLotNo,
+                    Quantity = useToThisLot,
+                    Remain = -useToThisLot
+                };
+                DbContext.StockActions.Add(outOfStockAction);
+                DbContext.SaveChanges();
+                LogUtil.Debug($"OutOfStockAction : date={outOfStockAction.ActionDate.ToString("yyyyMMdd")}, quantity");
+            }
+
+            LogUtil.DEBUGLOG_EndMethod();
         }
+
         #endregion // UseBouquetPart
 
         public void CreatePartsList(string bouquet, string part, int quantity)
