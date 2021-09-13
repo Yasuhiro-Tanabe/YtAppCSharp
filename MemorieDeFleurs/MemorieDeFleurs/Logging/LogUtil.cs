@@ -1,6 +1,8 @@
 ﻿using log4net;
 using log4net.Config;
 
+using MemorieDeFleurs.Models.Entities;
+
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -34,5 +36,67 @@ namespace MemorieDeFleurs.Logging
 
         #endregion
 
+        #region デバッグ用の拡張ログ出力
+        [Conditional("DEBUG")]
+        public static void DEBUGLOG_BeginMethod(string args = "", string msg = "", [CallerMemberName] string caller = "")
+        {
+            var b = new StringBuilder().Append($"{Indent}[BEGIN] ").Append(caller)
+                .Append(string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )");
+
+            if (!string.IsNullOrWhiteSpace(msg))
+            {
+                b.Append(' ').Append(msg);
+            }
+
+            LogUtil.Debug(b.ToString());
+            Indent++;
+        }
+
+        [Conditional("DEBUG")]
+        public static void DEBUGLOG_EndMethod(string args = "", string msg = "", [CallerMemberName] string caller = "")
+        {
+            var b = new StringBuilder().Append($"{Indent}[END] ").Append(caller)
+                .Append(string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )");
+
+            if (!string.IsNullOrWhiteSpace(msg))
+            {
+                b.Append(' ').Append(msg);
+            }
+
+            Indent--;
+            LogUtil.Debug(b.ToString());
+        }
+
+        [Conditional("DEBUG")]
+        public static void DEBUGLOG_StockActionQuantityChanged(StockAction oldAction, int newQuantity, int newRemain, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
+        {
+            var builder = new StringBuilder()
+                .Append(LogUtil.Indent).Append(oldAction.PartsCode).Append('.').Append(oldAction.Action)
+                .Append("[lot=").Append(oldAction.StockLotNo)
+                .AppendFormat(", day={0:yyyyMMdd}", oldAction.ActionDate);
+
+            if (newQuantity == oldAction.Quantity)
+            {
+                builder.AppendFormat(", quantity={0} (same)", oldAction.Quantity);
+            }
+            else
+            {
+                builder.AppendFormat(", quantity={0}->{1}", oldAction.Quantity, newQuantity);
+            }
+
+            if (newRemain == oldAction.Remain)
+            {
+                builder.AppendFormat(", remain={0} (same)", oldAction.Remain);
+            }
+            else
+            {
+                builder.AppendFormat(", remain={0}->{1}", oldAction.Remain, newRemain);
+            }
+
+            builder.AppendFormat(" ] ({0}:{1})", calledFrom, line);
+
+            LogUtil.Debug(builder.ToString());
+        }
+        #endregion
     }
 }

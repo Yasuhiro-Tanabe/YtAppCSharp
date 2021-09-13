@@ -268,7 +268,7 @@ namespace MemorieDeFleurs.Models
         /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
         public int Order(DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
-            DEBUGLOG_BeginMethod(new StringBuilder()
+            LogUtil.DEBUGLOG_BeginMethod(new StringBuilder()
                 .AppendFormat("order={0:yyyyMMdd}", orderDate)
                 .Append(", part=").Append(part.Code)
                 .AppendFormat(", quantity={0}[lot(s)]({1}[parts])", quantityOfLot, quantityOfLot * part.QuantitiesPerLot)
@@ -369,7 +369,7 @@ namespace MemorieDeFleurs.Models
             }
 
             LogUtil.Info($"{orderDate.ToString("yyyyMMdd")}: {part.Code} x {quantityOfLot}[Lot(s)] ordered. arrive at {arrivalDate.ToString("yyyyMMdd")}, OrderLot#={lotNo}.");
-            DEBUGLOG_EndMethod($"{part.Code}, {arrivalDate.ToString("yyyyMMdd")}", $"Lot#={lotNo}");
+            LogUtil.DEBUGLOG_EndMethod($"{part.Code}, {arrivalDate.ToString("yyyyMMdd")}", $"Lot#={lotNo}");
             return lotNo;
         }
 
@@ -429,7 +429,7 @@ namespace MemorieDeFleurs.Models
 #region 発注取消
         public void CancelOrder(int lotNo)
         {
-            DEBUGLOG_BeginMethod($"lotNo={lotNo}");
+            LogUtil.DEBUGLOG_BeginMethod($"lotNo={lotNo}");
 
             var lot = DbContext.StockActions.Where(a => a.StockLotNo == lotNo);
             if (lot.Count() == 0)
@@ -482,7 +482,7 @@ namespace MemorieDeFleurs.Models
             }
 
             LogUtil.Info($"Lot {lotNo} removed.");
-            DEBUGLOG_EndMethod($"lotNo={lotNo}");
+            LogUtil.DEBUGLOG_EndMethod($"lotNo={lotNo}");
         }
 #endregion // 発注取消
 
@@ -502,7 +502,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="quantity">振替数量</param>
         private OutOfStock TransferToOtherLot(BouquetPart part, DateTime actionDate, DateTime arrivalDate, int quantity)
         {
-            DEBUGLOG_BeginMethod(string.Format("part={0}, date={1:yyyyMMdd}, arrived={2:yyyyMMdd}, quantity={3}", part.Code, actionDate, arrivalDate, quantity));
+            LogUtil.DEBUGLOG_BeginMethod(string.Format("part={0}, date={1:yyyyMMdd}, arrived={2:yyyyMMdd}, quantity={3}", part.Code, actionDate, arrivalDate, quantity));
 
             var outOfStock = new OutOfStock() { StockLotNo = 0, Quantity = quantity };
 
@@ -532,11 +532,11 @@ namespace MemorieDeFleurs.Models
                     outOfStock.Quantity -= usedFromThisStock;
                     outOfStock.StockLotNo = action.StockLotNo;
 
-                    LogUtil.Debug($"{Indent}outOfStock: {outOfStock.Quantity + usedFromThisStock}->{outOfStock.Quantity}");
+                    LogUtil.Debug($"{LogUtil.Indent}outOfStock: {outOfStock.Quantity + usedFromThisStock}->{outOfStock.Quantity}");
                 }
             }
 
-            DEBUGLOG_EndMethod(msg: $"lacked={outOfStock}, at {actionDate.ToString("yyyyMMdd")}");
+            LogUtil.DEBUGLOG_EndMethod(msg: $"lacked={outOfStock}, at {actionDate.ToString("yyyyMMdd")}");
             return outOfStock;
         }
 
@@ -549,7 +549,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="quantity">払出数量</param>
         private void AddQuantityToStockLot(BouquetPart part, int lotNo, DateTime actionDate, int quantity)
         {
-            DEBUGLOG_BeginMethod(args: $"part={part.Code}, lot={lotNo}, date={actionDate.ToString("yyyyMMdd")}, quantity={quantity}");
+            LogUtil.DEBUGLOG_BeginMethod(args: $"part={part.Code}, lot={lotNo}, date={actionDate.ToString("yyyyMMdd")}, quantity={quantity}");
 
             // ロット lotNo の、actionDate 以降の加工予定アクションから quantity 本の単品を払い出す
             var theLotStocks = DbContext.StockActions
@@ -566,7 +566,7 @@ namespace MemorieDeFleurs.Models
             if (toUse.Remain >= usedFromTheLot)
             {
                 // 全量払出する
-                DEBUGLOG_StockActionQuantityChanged(toUse, usedFromTheLot, -usedFromTheLot);
+                LogUtil.DEBUGLOG_StockActionQuantityChanged(toUse, toUse.Quantity + usedFromTheLot, toUse.Quantity - usedFromTheLot);
                 toUse.Quantity += usedFromTheLot;
                 toUse.Remain -= usedFromTheLot;
                 DbContext.StockActions.Update(toUse);
@@ -597,7 +597,7 @@ namespace MemorieDeFleurs.Models
                 if(action.Quantity <= previousRemain)
                 {
                     // このロットから全量払い出せる
-                    DEBUGLOG_StockActionQuantityChangedDirectly(action, action.Quantity, previousRemain - action.Quantity);
+                    LogUtil.DEBUGLOG_StockActionQuantityChanged(action, action.Quantity, previousRemain - action.Quantity);
                     action.Remain = previousRemain - action.Quantity;
                     DbContext.StockActions.Update(action);
 
@@ -606,7 +606,7 @@ namespace MemorieDeFleurs.Models
                 else
                 {
                     // このロットだけでは払い出せない：前日残分はこのロットから、残りは別のロットから払い出す
-                    DEBUGLOG_StockActionQuantityChangedDirectly(action, previousRemain, 0);
+                    LogUtil.DEBUGLOG_StockActionQuantityChanged(action, previousRemain, 0);
                     var outOfStockQuantity = action.Quantity - previousRemain;
                     action.Quantity = previousRemain;
                     action.Remain = 0;
@@ -632,77 +632,18 @@ namespace MemorieDeFleurs.Models
 
             // 破棄アクションの更新
             var toDiscard = theLotStocks.Single(act => act.Action == StockActionType.SCHEDULED_TO_DISCARD);
-            DEBUGLOG_StockActionQuantityChangedDirectly(toDiscard, previousRemain, 0);
+            LogUtil.DEBUGLOG_StockActionQuantityChanged(toDiscard, previousRemain, 0);
             toDiscard.Quantity = previousRemain;
             DbContext.StockActions.Update(toDiscard);
 
             DbContext.SaveChanges();
-            DEBUGLOG_EndMethod();
+            LogUtil.DEBUGLOG_EndMethod();
         }
 #endregion // 払い出し予定の振替
 
 
 #if DEBUG
 #region デバッグ用
-
-        private class IndentString
-        {
-            private int Depth { get; set; }
-            public IndentString(int depth = 0)
-            {
-                Depth = depth;
-            }
-
-            public static IndentString operator++(IndentString i)
-            {
-                i.Depth++;
-                return i;
-            }
-
-            public static IndentString operator--(IndentString i)
-            {
-                i.Depth--;
-                return i;
-            }
-
-            public override string ToString()
-            {
-                return string.Join("", Enumerable.Range(0, Depth).Select(i => "  "));
-            }
-        }
-
-        private IndentString Indent { get; set; } = new IndentString();
-
-
-        [Conditional("DEBUG")]
-        private void DEBUGLOG_BeginMethod(string args = "", string msg = "", [CallerMemberName] string caller = "")
-        {
-            var b = new StringBuilder().Append($"{Indent}[BEGIN] ").Append(caller)
-                .Append(string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )");
-
-            if(!string.IsNullOrWhiteSpace(msg))
-            {
-                b.Append(' ').Append(msg);
-            }
-
-            LogUtil.Debug(b.ToString());
-            Indent++;
-        }
-
-        [Conditional("DEBUG")]
-        private void DEBUGLOG_EndMethod(string args = "", string msg = "", [CallerMemberName] string caller = "")
-        {
-            var b = new StringBuilder().Append($"{Indent}[END] ").Append(caller)
-                .Append(string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )");
-
-            if (!string.IsNullOrWhiteSpace(msg))
-            {
-                b.Append(' ').Append(msg);
-            }
-
-            Indent--;
-            LogUtil.Debug(b.ToString());
-        }
 
         /// <summary>
         /// 生成/登録された在庫アクションをデバッグログ出力する
@@ -714,7 +655,7 @@ namespace MemorieDeFleurs.Models
         private void DEBUGLOG_StockActionCreated(StockAction action, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
         {
             LogUtil.Debug(new StringBuilder()
-                .Append(Indent).Append("Created: ").Append(action.Action)
+                .Append(LogUtil.Indent).Append("Created: ").Append(action.Action)
                 .AppendFormat("[ day={0:yyyyMMdd}", action.ActionDate)
                 .Append(", part=").Append(action.PartsCode)
                 .AppendFormat(", arrived={0:yyyyMMdd}", action.ArrivalDate)
@@ -725,6 +666,7 @@ namespace MemorieDeFleurs.Models
                 .ToString()); ;
         }
 
+#if false
         /// <summary>
         /// 在庫アクションの数量変更をデバッグログ出力する
         /// </summary>
@@ -737,7 +679,7 @@ namespace MemorieDeFleurs.Models
         private void DEBUGLOG_StockActionQuantityChanged(StockAction action, int diffOfQuantity, int diffOfRemain, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
         {
             var builder = new StringBuilder()
-                .Append(Indent).Append(action.PartsCode).Append(".").Append(action.Action)
+                .Append(LogUtil.Indent).Append(action.PartsCode).Append(".").Append(action.Action)
                 .Append("[lot=").Append(action.StockLotNo)
                 .AppendFormat(", day={0:yyyyMMdd}", action.ActionDate);
 
@@ -770,45 +712,7 @@ namespace MemorieDeFleurs.Models
 
             LogUtil.Debug(builder.ToString());
         }
-
-        /// <summary>
-        /// 在庫アクションの数量変更をデバッグログ出力する
-        /// </summary>
-        /// <param name="action">出力対象在庫アクション</param>
-        /// <param name="newQuantity">変更後の数量</param>
-        /// <param name="newRemain">変更後の単品</param>
-        /// <param name="calledFrom">このメソッドの呼び出し元：通常は指定不要。直接の呼び出し元ではなく、さらにその呼び出し元をログに残したいとき指定する</param>
-        /// <param name="line">このメソッドの呼び出し位置：ソースファイル中の行番号。calledFrom と同様通常は指定不要、呼び出し元の呼び出し元をログに残したいときのみ指定する</param>
-        [Conditional("DEBUG")]
-        private void DEBUGLOG_StockActionQuantityChangedDirectly(StockAction action, int newQuantity, int newRemain, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
-        {
-            var builder = new StringBuilder()
-                .Append(Indent).Append(action.PartsCode).Append('.').Append(action.Action)
-                .Append("[lot=").Append(action.StockLotNo)
-                .AppendFormat(", day={0:yyyyMMdd}", action.ActionDate);
-
-            if (newQuantity == action.Quantity)
-            {
-                builder.AppendFormat(", quantity={0} (same)", action.Quantity);
-            }
-            else
-            {
-                builder.AppendFormat(", quantity={0}->{1}", action.Quantity, newQuantity);
-            }
-
-            if (newRemain == action.Remain)
-            {
-                builder.AppendFormat(", remain={0} (same)", action.Remain);
-            }
-            else
-            {
-                builder.AppendFormat(", remain={0}->{1}", action.Remain, newRemain);
-            }
-
-            builder.AppendFormat(" ] ({0}:{1})", calledFrom, line);
-
-            LogUtil.Debug(builder.ToString());
-        }
+#endif
 
         [Conditional("DEBUG")]
         private void DEBUGLOG_ComparationOfStockRemainAndQuantity(StockAction action, int quantity, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
@@ -816,12 +720,12 @@ namespace MemorieDeFleurs.Models
             if(action.Remain >= quantity)
             {
                 LogUtil.DebugFormat("{0}Lot{1}.Remain({2:yyyyMMdd}) = {3} >= {4} ({5}:{6})",
-                    Indent, action.StockLotNo, action.ActionDate, action.Remain, quantity, calledFrom, line);
+                    LogUtil.Indent, action.StockLotNo, action.ActionDate, action.Remain, quantity, calledFrom, line);
             }
             else
             {
                 LogUtil.DebugFormat("{0}Lot{1}.Remain({2:yyyyMMdd}) = {3} < {4} ({5}:{6})",
-                    Indent, action.StockLotNo, action.ActionDate, action.Remain, quantity, calledFrom, line);
+                    LogUtil.Indent, action.StockLotNo, action.ActionDate, action.Remain, quantity, calledFrom, line);
             }
 
         }
@@ -830,7 +734,7 @@ namespace MemorieDeFleurs.Models
         private void DEBUGLOG_ComparisonOfStockQuantityAndPreviousRemain(StockAction action, int remain, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
         {
             LogUtil.Debug(new StringBuilder()
-                .Append(Indent).Append(action.Action).Append(": ")
+                .Append(LogUtil.Indent).Append(action.Action).Append(": ")
                 .AppendFormat("Lot{0}.Quantity({1:yyyyMMdd}) = {2}", action.StockLotNo, action.ActionDate, action.Quantity)
                 .Append(action.Quantity <= remain ? " <= " : " > ")
                 .AppendFormat("PreviousRemain({0})", remain)
