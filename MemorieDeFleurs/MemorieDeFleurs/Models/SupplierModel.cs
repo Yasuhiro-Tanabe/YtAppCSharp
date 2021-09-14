@@ -165,7 +165,11 @@ namespace MemorieDeFleurs.Models
         /// <returns>仕入先オブジェクト、仕入先コードに該当する仕入先が存在しないときはnull。</returns>
         public Supplier Find(int supplierCode)
         {
-            return DbContext.Suppliers.SingleOrDefault(s => s.Code == supplierCode);
+            return Find(DbContext, supplierCode);
+        }
+        private Supplier Find(MemorieDeFleursDbContext context, int supplierCode)
+        {
+            return context.Suppliers.SingleOrDefault(s => s.Code == supplierCode);
         }
         #endregion // Supplier の生成・更新・削除
 
@@ -220,6 +224,11 @@ namespace MemorieDeFleurs.Models
         /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
         public int Order(DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
+            return Order(DbContext, orderDate, part, quantityOfLot, arrivalDate);
+        }
+
+        private int Order(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
+        {
             LogUtil.DEBUGLOG_BeginMethod(new StringBuilder()
                 .AppendFormat("order={0:yyyyMMdd}", orderDate)
                 .Append(", part=").Append(part.Code)
@@ -240,13 +249,13 @@ namespace MemorieDeFleurs.Models
             DbContext.SaveChanges();
 
             // 当日以降の入荷予定分と在庫不足分をこのロットに振り替える
-            foreach(var currentOrder in DbContext.StockActions
+            foreach (var currentOrder in DbContext.StockActions
                 .Where(act => act.StockLotNo == lotNo)
                 .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
                 .OrderBy(act => act.ActionDate))
             {
                 // 在庫不足の解消: ループイテレータを都度 DBContext から削除するので、ループ対象のコピーを取る。
-                foreach(var outOfStock in DbContext.StockActions
+                foreach (var outOfStock in DbContext.StockActions
                     .Where(act => act.PartsCode == currentOrder.PartsCode)
                     .Where(act => act.Action == StockActionType.OUT_OF_STOCK)
                     .Where(act => act.ActionDate == currentOrder.ActionDate)
@@ -277,7 +286,7 @@ namespace MemorieDeFleurs.Models
                 }
 
                 // 納品予定が翌日以降の在庫ロットからの振り替え
-                foreach(var usedFromOthers in DbContext.StockActions
+                foreach (var usedFromOthers in DbContext.StockActions
                         .Where(act => act.PartsCode == currentOrder.PartsCode)
                         .Where(act => act.ActionDate == currentOrder.ActionDate)
                         .Where(act => act.ArrivalDate > currentOrder.ArrivalDate)
@@ -286,7 +295,7 @@ namespace MemorieDeFleurs.Models
                         .OrderBy(act => act.ArrivalDate))
                 {
                     DEBUGLOG_ComparationOfStockRemainAndQuantity(currentOrder, usedFromOthers.Quantity);
-                    if(currentOrder.Remain >= usedFromOthers.Quantity)
+                    if (currentOrder.Remain >= usedFromOthers.Quantity)
                     {
                         // 全量をこの在庫ロットから払い出す
                         AddQuantityToStockLot(part, lotNo, usedFromOthers.ActionDate, usedFromOthers.Quantity);
@@ -303,7 +312,7 @@ namespace MemorieDeFleurs.Models
                         AddQuantityToStockLot(part, lotNo, usedFromOthers.ActionDate, currentOrder.Remain);
                         var outOfStockAction = TransferToOtherLot(part, currentOrder.ActionDate, usedFromOthers.ArrivalDate, outOfStock);
 
-                        if(outOfStockAction.Quantity > 0)
+                        if (outOfStockAction.Quantity > 0)
                         {
                             throw new NotImplementedException(new StringBuilder()
                                 .Append("在庫不足：発注量では既存在庫ロットを全量振替できない:")
@@ -381,8 +390,12 @@ namespace MemorieDeFleurs.Models
 #region 発注取消
         public void CancelOrder(int lotNo)
         {
-            LogUtil.DEBUGLOG_BeginMethod($"lotNo={lotNo}");
+            CancelOrder(DbContext, lotNo);
+        }
 
+        private void CancelOrder(MemorieDeFleursDbContext context, int lotNo)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"lotNo={lotNo}");
             var lot = DbContext.StockActions.Where(a => a.StockLotNo == lotNo);
             if (lot.Count() == 0)
             {
@@ -397,19 +410,19 @@ namespace MemorieDeFleurs.Models
 
             var partCode = theLot.First().PartsCode;
             var part = Parent.BouquetModel.FindBouquetPart(partCode);
-            if(part == null)
+            if (part == null)
             {
                 throw new NotImplementedException($"単品 {partCode} が見つからない： Lot No. {lotNo}");
             }
 
-            foreach(var action in theLot
+            foreach (var action in theLot
                 .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
                 .Where(act => act.Quantity > 0)
                 .OrderBy(act => act.ActionDate))
             {
                 // このロットで払い出されている加工数量を他のロットに移動する
                 var outOfStock = TransferToOtherLot(part, action.ActionDate, action.ArrivalDate, action.Quantity);
-                if(outOfStock.Quantity > 0)
+                if (outOfStock.Quantity > 0)
                 {
                     LogUtil.Warn($"Out of stock : {part.Code}, {action.ActionDate.ToString("yyyyMMdd")}, Lacked={outOfStock} at lot {action.StockLotNo}");
                     var outOfStockLot = DbContext.StockActions
@@ -436,9 +449,9 @@ namespace MemorieDeFleurs.Models
             LogUtil.Info($"Lot {lotNo} removed.");
             LogUtil.DEBUGLOG_EndMethod($"lotNo={lotNo}");
         }
-#endregion // 発注取消
+        #endregion // 発注取消
 
-#region 払い出し予定の振替
+        #region 払い出し予定の振替
         private class OutOfStock
         {
             public int StockLotNo { get; set; }
