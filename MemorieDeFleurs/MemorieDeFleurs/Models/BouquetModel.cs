@@ -300,7 +300,7 @@ namespace MemorieDeFleurs.Models
             return UseBouquetPart(DbContext, part, date, quantity);
         }
 
-        private int UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
+        internal int UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
         {
             try
             {

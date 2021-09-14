@@ -268,7 +268,7 @@ namespace MemorieDeFleurs.Models
                     if (currentOrder.Remain >= outOfStock.Quantity)
                     {
                         // 不足分全量をこの在庫ロットから払い出す
-                        AddQuantityToStockLot(part, lotNo, outOfStock.ActionDate, outOfStock.Quantity);
+                        AddQuantityToStockLot(context, part, lotNo, outOfStock.ActionDate, outOfStock.Quantity);
                     }
                     else
                     {
@@ -298,19 +298,19 @@ namespace MemorieDeFleurs.Models
                     if (currentOrder.Remain >= usedFromOthers.Quantity)
                     {
                         // 全量をこの在庫ロットから払い出す
-                        AddQuantityToStockLot(part, lotNo, usedFromOthers.ActionDate, usedFromOthers.Quantity);
-                        AddQuantityToStockLot(part, usedFromOthers.StockLotNo, usedFromOthers.ActionDate, -usedFromOthers.Quantity);
+                        AddQuantityToStockLot(context, part, lotNo, usedFromOthers.ActionDate, usedFromOthers.Quantity);
+                        AddQuantityToStockLot(context, part, usedFromOthers.StockLotNo, usedFromOthers.ActionDate, -usedFromOthers.Quantity);
                     }
                     else
                     {
                         var outOfStock = usedFromOthers.Quantity - currentOrder.Remain;
 
                         // 再振替のため、振替元の加工数を一旦ゼロに戻す
-                        AddQuantityToStockLot(part, usedFromOthers.StockLotNo, usedFromOthers.ActionDate, -usedFromOthers.Quantity);
+                        AddQuantityToStockLot(context, part, usedFromOthers.StockLotNo, usedFromOthers.ActionDate, -usedFromOthers.Quantity);
 
                         // 振替元で加工していた分をこのロット＋他ロットで再度振替なおす
-                        AddQuantityToStockLot(part, lotNo, usedFromOthers.ActionDate, currentOrder.Remain);
-                        var outOfStockAction = TransferToOtherLot(part, currentOrder.ActionDate, usedFromOthers.ArrivalDate, outOfStock);
+                        AddQuantityToStockLot(context, part, lotNo, usedFromOthers.ActionDate, currentOrder.Remain);
+                        var outOfStockAction = TransferToOtherLot(context, part, currentOrder.ActionDate, usedFromOthers.ArrivalDate, outOfStock);
 
                         if (outOfStockAction.Quantity > 0)
                         {
@@ -421,7 +421,7 @@ namespace MemorieDeFleurs.Models
                 .OrderBy(act => act.ActionDate))
             {
                 // このロットで払い出されている加工数量を他のロットに移動する
-                var outOfStock = TransferToOtherLot(part, action.ActionDate, action.ArrivalDate, action.Quantity);
+                var outOfStock = TransferToOtherLot(context, part, action.ActionDate, action.ArrivalDate, action.Quantity);
                 if (outOfStock.Quantity > 0)
                 {
                     LogUtil.Warn($"Out of stock : {part.Code}, {action.ActionDate.ToString("yyyyMMdd")}, Lacked={outOfStock} at lot {action.StockLotNo}");
@@ -465,14 +465,14 @@ namespace MemorieDeFleurs.Models
         /// <param name="actionDate">基準日</param>
         /// <param name="arrivalDate">入荷日</param>
         /// <param name="quantity">振替数量</param>
-        private OutOfStock TransferToOtherLot(BouquetPart part, DateTime actionDate, DateTime arrivalDate, int quantity)
+        private OutOfStock TransferToOtherLot(MemorieDeFleursDbContext context, BouquetPart part, DateTime actionDate, DateTime arrivalDate, int quantity)
         {
             LogUtil.DEBUGLOG_BeginMethod(string.Format("part={0}, date={1:yyyyMMdd}, arrived={2:yyyyMMdd}, quantity={3}", part.Code, actionDate, arrivalDate, quantity));
 
             var outOfStock = new OutOfStock() { StockLotNo = 0, Quantity = quantity };
 
             // 基準日が等しい加工予定在庫アクションのうち、残数＞0のロットの加工予定在庫アクションに振り替える
-            foreach (var action in DbContext.StockActions
+            foreach (var action in context.StockActions
                 .Where(a => a.PartsCode == part.Code)
                 .Where(a => a.ActionDate == actionDate)
                 .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
@@ -484,7 +484,7 @@ namespace MemorieDeFleurs.Models
                 if(action.Remain >= outOfStock.Quantity)
                 {
                     // 全量をこの在庫アクションから払い出す
-                    AddQuantityToStockLot(part, action.StockLotNo, action.ActionDate, outOfStock.Quantity);
+                    AddQuantityToStockLot(context, part, action.StockLotNo, action.ActionDate, outOfStock.Quantity);
                     outOfStock.Quantity = 0;
                     break;
                 }
@@ -492,7 +492,7 @@ namespace MemorieDeFleurs.Models
                 {
                     // 払い出せる分だけこの在庫アクションから払い出す
                     var usedFromThisStock = action.Remain;
-                    AddQuantityToStockLot(part, action.StockLotNo, action.ActionDate, usedFromThisStock);
+                    AddQuantityToStockLot(context, part, action.StockLotNo, action.ActionDate, usedFromThisStock);
 
                     outOfStock.Quantity -= usedFromThisStock;
                     outOfStock.StockLotNo = action.StockLotNo;
@@ -512,12 +512,12 @@ namespace MemorieDeFleurs.Models
         /// <param name="lotNo">払出を行うロット番号</param>
         /// <param name="actionDate">基準日</param>
         /// <param name="quantity">払出数量</param>
-        private void AddQuantityToStockLot(BouquetPart part, int lotNo, DateTime actionDate, int quantity)
+        private void AddQuantityToStockLot(MemorieDeFleursDbContext context, BouquetPart part, int lotNo, DateTime actionDate, int quantity)
         {
             LogUtil.DEBUGLOG_BeginMethod(args: $"part={part.Code}, lot={lotNo}, date={actionDate.ToString("yyyyMMdd")}, quantity={quantity}");
 
             // ロット lotNo の、actionDate 以降の加工予定アクションから quantity 本の単品を払い出す
-            var theLotStocks = DbContext.StockActions
+            var theLotStocks = context.StockActions
                 .Where(act => act.PartsCode == part.Code)
                 .Where(act => act.StockLotNo == lotNo);
             var usedFromTheLot = quantity;
@@ -534,7 +534,7 @@ namespace MemorieDeFleurs.Models
                 LogUtil.DEBUGLOG_StockActionQuantityChanged(toUse, toUse.Quantity + usedFromTheLot, toUse.Quantity - usedFromTheLot);
                 toUse.Quantity += usedFromTheLot;
                 toUse.Remain -= usedFromTheLot;
-                DbContext.StockActions.Update(toUse);
+                context.StockActions.Update(toUse);
             }
             else
             {
@@ -564,7 +564,7 @@ namespace MemorieDeFleurs.Models
                     // このロットから全量払い出せる
                     LogUtil.DEBUGLOG_StockActionQuantityChanged(action, action.Quantity, previousRemain - action.Quantity);
                     action.Remain = previousRemain - action.Quantity;
-                    DbContext.StockActions.Update(action);
+                    context.StockActions.Update(action);
 
                     previousRemain -= action.Quantity;
                 }
@@ -575,9 +575,9 @@ namespace MemorieDeFleurs.Models
                     var outOfStockQuantity = action.Quantity - previousRemain;
                     action.Quantity = previousRemain;
                     action.Remain = 0;
-                    DbContext.StockActions.Update(action);
+                    context.StockActions.Update(action);
 
-                    var outOfStock = TransferToOtherLot(part, action.ActionDate, action.ArrivalDate, outOfStockQuantity);
+                    var outOfStock = TransferToOtherLot(context, part, action.ActionDate, action.ArrivalDate, outOfStockQuantity);
                     if(outOfStock.Quantity > 0)
                     {
                         throw new NotImplementedException(new StringBuilder()
@@ -599,9 +599,9 @@ namespace MemorieDeFleurs.Models
             var toDiscard = theLotStocks.Single(act => act.Action == StockActionType.SCHEDULED_TO_DISCARD);
             LogUtil.DEBUGLOG_StockActionQuantityChanged(toDiscard, previousRemain, 0);
             toDiscard.Quantity = previousRemain;
-            DbContext.StockActions.Update(toDiscard);
+            context.StockActions.Update(toDiscard);
 
-            DbContext.SaveChanges();
+            context.SaveChanges();
             LogUtil.DEBUGLOG_EndMethod();
         }
 #endregion // 払い出し予定の振替

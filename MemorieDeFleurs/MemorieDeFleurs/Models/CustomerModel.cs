@@ -252,7 +252,7 @@ namespace MemorieDeFleurs.Models
             var usedDate = arrivalDate.AddDays(-1);
             foreach (var item in bouquet.PartsList)
             {
-                var remain = Parent.BouquetModel.UseBouquetPart(item.Part, usedDate, item.Quantity);
+                var remain = Parent.BouquetModel.UseBouquetPart(context, item.Part, usedDate, item.Quantity);
                 if (remain < 0)
                 {
                     throw new NotImplementedException(new StringBuilder()
