@@ -159,17 +159,6 @@ namespace MemorieDeFleurs.Models
 
         #region Supplier の生成・更新・削除
         /// <summary>
-        /// 条件を満たす仕入先オブジェクトを取得する
-        /// </summary>
-        /// <param name="condition">取得条件</param>
-        /// <returns>仕入先オブジェクトの列挙(<see cref="IEnumerable{Supplier}()"/>)。
-        /// 条件を満たす仕入先が1つしかない場合でも列挙として返すので注意。</returns>
-        public IEnumerable<Supplier> Find(Func<Supplier,bool> condition)
-        {
-            return DbContext.Suppliers.Where(condition);
-        }
-
-        /// <summary>
         /// 仕入先コードをキーに仕入先オブジェクトを取得する
         /// </summary>
         /// <param name="supplierCode">仕入先コード</param>
@@ -177,43 +166,6 @@ namespace MemorieDeFleurs.Models
         public Supplier Find(int supplierCode)
         {
             return DbContext.Suppliers.SingleOrDefault(s => s.Code == supplierCode);
-        }
-
-        /// <summary>
-        /// 更新した仕入先オブジェクトでデータベースを更新する
-        /// </summary>
-        /// <param name="s">仕入先オブジェクト。nullの場合は更新処理を行わずに処理を抜ける。</param>
-        /// <remarks>呼び出し前に仕入先コードを書き換えないこと。意図しない仕入先の内容が変更されることがある。</remarks>
-        public void Replace(Supplier s)
-        {
-            if(s == null) { return; }
-            DbContext.Suppliers.Update(s);
-            DbContext.SaveChanges();
-        }
-
-        /// <summary>
-        /// 仕入先オブジェクトをデータベースから削除する
-        /// </summary>
-        /// <param name="s">仕入先オブジェクト。nullの場合は削除処理を行わずに処理を抜ける。</param>
-        /// <remarks>呼び出し前に仕入先コードを書き換えないこと。意図しない仕入先が削除されることがある。</remarks>
-        public void Remove(Supplier s)
-        {
-            if(s == null) { return; }
-            DbContext.Suppliers.Remove(s);
-            DbContext.SaveChanges();
-        }
-
-        /// <summary>
-        /// 仕入先コード指定で仕入先をデータベースから削除する。
-        /// 該当する仕入先が見つからないときは何もしない。
-        /// </summary>
-        /// <param name="supplierCode">仕入先コード</param>
-        /// <remarks>内部で <see cref="Find(int)"/> を呼び出し、
-        /// 見つかった仕入先オブジェクトを <see cref="Remove(Supplier)"/> で破棄する。</remarks>
-        public void Remove(int supplierCode)
-        {
-            var found = DbContext.Suppliers.SingleOrDefault(s => s.Code == supplierCode);
-            Remove(found);
         }
         #endregion // Supplier の生成・更新・削除
 

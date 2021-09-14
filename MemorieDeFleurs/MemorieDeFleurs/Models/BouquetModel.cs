@@ -263,17 +263,7 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // BouquetBuilder
 
-        /// <summary>
-        /// 条件を満たす仕入先オブジェクトを取得する
-        /// </summary>
-        /// <param name="condition">取得条件</param>
-        /// <returns>単品オブエクとの列挙(<see cref="IEnumerable{BouquetPart}"/>)。
-        /// 条件を満たす仕入先が1つしかない場合でも列挙として返すので注意</returns>
-        public IEnumerable<BouquetPart> Find(Func<BouquetPart,bool> condition)
-        {
-            return DbContext.BouquetParts.Where(condition);
-        }
-        
+        #region 単品の登録改廃
         /// <summary>
         /// 花コードをキーに単品オブジェクトを取得する
         /// </summary>
@@ -283,7 +273,9 @@ namespace MemorieDeFleurs.Models
         {
             return DbContext.BouquetParts.SingleOrDefault(p => p.Code == partCode);
         }
+        #endregion // 単品の登録改廃
 
+        #region 商品の登録改廃
         /// <summary>
         /// 花束コードをキーに商品オブジェクトを取得する
         /// </summary>
@@ -293,42 +285,7 @@ namespace MemorieDeFleurs.Models
         {
             return DbContext.Bouquets.SingleOrDefault(b => b.Code == bouquetCode);
         }
-
-        /// <summary>
-        /// 更新した単品オブジェクトでデータベースを更新する
-        /// </summary>
-        /// <param name="p">単品オブジェクト。nullの場合は更新処理を行わずに処理を抜ける。</param>
-        /// <remarks>呼び出し前に花コードを書き換えないこと。意図しない単品の内容が変更されることがある。</remarks>
-        public void Replace(BouquetPart p)
-        {
-            if(p == null) { return; }
-            DbContext.BouquetParts.Update(p);
-            DbContext.SaveChanges();
-        }
-
-        /// <summary>
-        /// 単品オブジェクトをデータベースから削除する
-        /// </summary>
-        /// <param name="p">単品オブジェクト。nullの場合は削除処理を行わずに処理を抜ける。</param>
-        /// <remarks>呼び出し前に花コードを書き換えないこと。意図しない単品が削除されることがある。</remarks>
-        public void Remove(BouquetPart p)
-        {
-            if (p == null) { return; }
-            DbContext.BouquetParts.Remove(p);
-            DbContext.SaveChanges();
-        }
-
-        /// <summary>
-        /// 単品コード指定で単品をデータベースから削除する。
-        /// 該当する単品が見つからないときは何もしない。
-        /// </summary>
-        /// <param name="partCode">花コード</param>
-        /// <remarks>内部で <see cref="FindBouquetPart(string)"/> を呼び出し、
-        /// 見つかった単品オブジェクトを <see cref="Remove(BouquetPart)"/> で破棄する。</remarks>
-        public void Remove(string partCode)
-        {
-            Remove(FindBouquetPart(partCode));
-        }
+        #endregion // 商品の登録改廃
 
         #region UseBouquetPart
         /// <summary>

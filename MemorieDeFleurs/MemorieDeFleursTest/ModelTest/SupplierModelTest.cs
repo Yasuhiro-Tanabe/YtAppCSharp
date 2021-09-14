@@ -45,48 +45,5 @@ namespace MemorieDeFleursTest.ModelTest
             // キーに負数は入れない仕様なので、負数のキーは常に見つからないはず。
             Assert.IsNull(Model.SupplierModel.Find(-1));
         }
-
-        [TestMethod]
-        public void SupplierIsChangable()
-        {
-            var expectedEmailAddress = "foo@localdomain";
-
-            var created = Model.SupplierModel.GetSupplierBuilder()
-                .NameIs(expectedName)
-                .AddressIs(expectedAddress)
-                .Create();
-
-            created.EmailAddress = expectedEmailAddress;
-            Model.SupplierModel.Replace(created);
-
-            var found = Model.SupplierModel.Find(created.Code);
-            Assert.AreEqual(expectedEmailAddress, found.EmailAddress);
-        }
-
-        [TestMethod]
-        public void UpdatingNullObjectHasNoEffectsForSuppliers()
-        {
-            var created = Model.SupplierModel.GetSupplierBuilder()
-                .NameIs(expectedName)
-                .AddressIs(expectedAddress)
-                .Create();
-
-            Model.SupplierModel.Replace(null);
-
-            Assert.IsNotNull(Model.SupplierModel.Find(created.Code));
-        }
-
-        [TestMethod]
-
-        public void CanRemoveExistingSupplier()
-        {
-            var created = Model.SupplierModel.GetSupplierBuilder()
-                .NameIs(expectedName)
-                .AddressIs(expectedAddress)
-                .Create();
-
-            Model.SupplierModel.Remove(created);
-            Assert.IsNull(Model.SupplierModel.Find(created.Code));
-        }
     }
 }
