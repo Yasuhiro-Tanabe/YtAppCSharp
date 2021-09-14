@@ -243,12 +243,17 @@ namespace MemorieDeFleurs.Models
         /// <param name="message"></param>
         public void Order(DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "" )
         {
+            Order(DbContext, orderDate, bouquet, sendTo, arrivalDate, message);
+        }
+
+        private void Order(MemorieDeFleursDbContext context, DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "")
+        {
             // 在庫アクションの登録改訂に関する検証用、暫定実装
             var usedDate = arrivalDate.AddDays(-1);
             foreach (var item in bouquet.PartsList)
             {
                 var remain = Parent.BouquetModel.UseBouquetPart(item.Part, usedDate, item.Quantity);
-                if(remain < 0)
+                if (remain < 0)
                 {
                     throw new NotImplementedException(new StringBuilder()
                         .Append("注文不可：単品在庫なし、")
