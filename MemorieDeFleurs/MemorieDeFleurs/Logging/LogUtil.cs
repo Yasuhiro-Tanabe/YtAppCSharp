@@ -44,66 +44,58 @@ namespace MemorieDeFleurs.Logging
         #endregion
 
         #region デバッグ用の拡張ログ出力
+        /// <summary>
+        /// メソッド開始ログを出力する
+        /// </summary>
+        /// <param name="args">【省略可】メソッドの引数をログ出力したい場合、その文字列を適宜整形したもの</param>
+        /// <param name="msg">【省略可】メソッド引数ではない追加文言をログ出力したい場合、その文字列</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
         [Conditional("DEBUG")]
         public static void DEBUGLOG_BeginMethod(string args = "", string msg = "", [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
-            var b = new StringBuilder().Append($"{Indent}[BEGIN] ").Append(caller)
-                .Append(string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )");
+            var argument = string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )";
+            var message = string.IsNullOrWhiteSpace(msg) ? "" : $" {msg}";
 
-            if (!string.IsNullOrWhiteSpace(msg))
-            {
-                b.Append(' ').Append(msg);
-            }
-
-            LogUtil.Debug(b.ToString(), caller, path, line);
+            LogUtil.Debug($"{Indent}[BEGIN] {caller}{argument}{message}", caller, path, line);
             Indent++;
         }
 
+        /// <summary>
+        /// メソッド終了ログを出力する
+        /// </summary>
+        /// <param name="args">【省略可】メソッドの引数をログ出力したい場合、その文字列を適宜整形したもの</param>
+        /// <param name="msg">【省略可】メソッド引数ではない追加文言をログ出力したい場合、その文字列</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
         [Conditional("DEBUG")]
         public static void DEBUGLOG_EndMethod(string args = "", string msg = "", [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
+            var argument = string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )";
+            var message = string.IsNullOrWhiteSpace(msg) ? string.Empty : $" {msg}";
+
             Indent--;
-
-            var b = new StringBuilder().Append($"{Indent}[END] ").Append(caller)
-                .Append(string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )");
-
-            if (!string.IsNullOrWhiteSpace(msg))
-            {
-                b.Append(' ').Append(msg);
-            }
-
-            LogUtil.Debug(b.ToString(), caller, path, line);
+            LogUtil.Debug($"{Indent}[END] {caller}{argument}{message}", caller, path, line);
         }
 
+        /// <summary>
+        /// 在庫アクションの変更ログを出力する
+        /// </summary>
+        /// <param name="oldAction">変更前の在庫アクションオブジェクト</param>
+        /// <param name="newQuantity">変更後の数量</param>
+        /// <param name="newRemain">変更後の残数</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_StockActionQuantityChanged(StockAction oldAction, int newQuantity, int newRemain, [CallerMemberName] string calledFrom = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        public static void DEBUGLOG_StockActionQuantityChanged(StockAction oldAction, int newQuantity, int newRemain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
-            var builder = new StringBuilder()
-                .Append(LogUtil.Indent).Append(oldAction.PartsCode).Append('.').Append(oldAction.Action)
-                .Append("[lot=").Append(oldAction.StockLotNo)
-                .AppendFormat(", day={0:yyyyMMdd}", oldAction.ActionDate);
+            var qnew = newQuantity == oldAction.Quantity ? "(same)" : $"-> {newQuantity}";
+            var rnew = newRemain == oldAction.Remain ? $"(same)" : $"-> {newRemain}";
 
-            if (newQuantity == oldAction.Quantity)
-            {
-                builder.AppendFormat(", quantity={0} (same)", oldAction.Quantity);
-            }
-            else
-            {
-                builder.AppendFormat(", quantity={0}->{1}", oldAction.Quantity, newQuantity);
-            }
-
-            if (newRemain == oldAction.Remain)
-            {
-                builder.AppendFormat(", remain={0} (same)", oldAction.Remain);
-            }
-            else
-            {
-                builder.AppendFormat(", remain={0}->{1}", oldAction.Remain, newRemain);
-            }
-
-            builder.Append(" ]");
-
-            LogUtil.Debug(builder.ToString(), calledFrom, path, line);
+            LogUtil.Debug($"Update: {oldAction.ToString("h")}=[quantity={oldAction.Quantity}{qnew}, remain={oldAction.Remain}{rnew}]", caller, path, line);
         }
         #endregion
     }

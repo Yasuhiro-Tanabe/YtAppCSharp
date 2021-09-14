@@ -36,6 +36,10 @@ namespace MemorieDeFleurs.Logging
                     .AppendFormat(", Remain={0}", action.Remain)
                     .ToString();
             }
+            else if(format == "h")
+            {
+                return $"Lot{action.StockLotNo}[{action.ActionDate.ToString("yyyyMMdd")}]";
+            }
             else
             {
                 return action.ToString();

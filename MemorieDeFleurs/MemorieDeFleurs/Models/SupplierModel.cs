@@ -619,44 +619,24 @@ namespace MemorieDeFleurs.Models
         [Conditional("DEBUG")]
         private void DEBUGLOG_StockActionCreated(StockAction action, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
         {
-            LogUtil.Debug(new StringBuilder()
-                .Append(LogUtil.Indent).Append("Created: ").Append(action.Action)
-                .AppendFormat("[ day={0:yyyyMMdd}", action.ActionDate)
-                .Append(", part=").Append(action.PartsCode)
-                .AppendFormat(", arrived={0:yyyyMMdd}", action.ArrivalDate)
-                .Append(", quantity=").Append(action.Quantity)
-                .Append(", remain=").Append(action.Remain)
-                .Append(" ]")
-                .AppendFormat(" ({0}:{1})", calledFrom, line)
-                .ToString()); ;
+            LogUtil.Debug($"{LogUtil.Indent}Created: {action.ToString("L")}");
         }
 
         [Conditional("DEBUG")]
         private void DEBUGLOG_ComparationOfStockRemainAndQuantity(StockAction action, int quantity, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
         {
-            if(action.Remain >= quantity)
-            {
-                LogUtil.DebugFormat("{0}Lot{1}.Remain({2:yyyyMMdd}) = {3} >= {4} ({5}:{6})",
-                    LogUtil.Indent, action.StockLotNo, action.ActionDate, action.Remain, quantity, calledFrom, line);
-            }
-            else
-            {
-                LogUtil.DebugFormat("{0}Lot{1}.Remain({2:yyyyMMdd}) = {3} < {4} ({5}:{6})",
-                    LogUtil.Indent, action.StockLotNo, action.ActionDate, action.Remain, quantity, calledFrom, line);
-            }
+            var operatorString = action.Remain >= quantity ? ">=" : "<";
+
+            LogUtil.Debug($"{LogUtil.Indent}Compare: {action.ToString("h")}.Remain({action.Remain} {operatorString} {quantity}");
 
         }
 
         [Conditional("DEBUG")]
         private void DEBUGLOG_ComparisonOfStockQuantityAndPreviousRemain(StockAction action, int remain, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
         {
-            LogUtil.Debug(new StringBuilder()
-                .Append(LogUtil.Indent).Append(action.Action).Append(": ")
-                .AppendFormat("Lot{0}.Quantity({1:yyyyMMdd}) = {2}", action.StockLotNo, action.ActionDate, action.Quantity)
-                .Append(action.Quantity <= remain ? " <= " : " > ")
-                .AppendFormat("PreviousRemain({0})", remain)
-                .AppendFormat(" ({0}:{1}", calledFrom, line)
-                .ToString());
+            var operatorString = action.Quantity <= remain ? "<=" : ">";
+
+            LogUtil.Debug($"{LogUtil.Indent}Compare: {action.ToString("h")}.Quantity({action.Quantity} {operatorString} {remain}");
         }
 #endregion // デバッグ用
 #endif
