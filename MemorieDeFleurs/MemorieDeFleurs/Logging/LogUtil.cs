@@ -26,10 +26,7 @@ namespace MemorieDeFleurs.Logging
         #region 基本のログ出力メソッド
         public static void Debug(string msg, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
-            if(_logger.IsDebugEnabled)
-            {
-                _logger.Debug($"{msg} ({caller},{Path.GetFileName(path)}:{line}");
-            }
+            _logger.DebugFormat("{0} ({1},{2}:{3})", msg, caller, Path.GetFileName(path), line);
         }
         public static void DebugFormat(string fmt, params object[] args) => _logger.DebugFormat(fmt, args);
         public static void Info(string msg) => _logger.Info(msg);
@@ -95,7 +92,7 @@ namespace MemorieDeFleurs.Logging
             var qnew = newQuantity == oldAction.Quantity ? "(same)" : $"-> {newQuantity}";
             var rnew = newRemain == oldAction.Remain ? $"(same)" : $"-> {newRemain}";
 
-            LogUtil.Debug($"Update: {oldAction.ToString("h")}=[quantity={oldAction.Quantity}{qnew}, remain={oldAction.Remain}{rnew}]", caller, path, line);
+            LogUtil.Debug($"{Indent}Update: {oldAction.ToString("h")}=[quantity={oldAction.Quantity}{qnew}, remain={oldAction.Remain}{rnew}]", caller, path, line);
         }
         #endregion
     }

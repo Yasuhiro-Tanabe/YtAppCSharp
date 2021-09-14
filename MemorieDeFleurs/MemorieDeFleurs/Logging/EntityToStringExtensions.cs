@@ -38,7 +38,7 @@ namespace MemorieDeFleurs.Logging
             }
             else if(format == "h")
             {
-                return $"Lot{action.StockLotNo}[{action.ActionDate.ToString("yyyyMMdd")}]";
+                return $"{action.PartsCode}.Lot{action.StockLotNo}[{action.ActionDate.ToString("yyyyMMdd")}]";
             }
             else
             {

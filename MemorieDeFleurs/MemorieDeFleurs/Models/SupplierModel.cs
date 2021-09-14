@@ -614,29 +614,29 @@ namespace MemorieDeFleurs.Models
         /// 生成/登録された在庫アクションをデバッグログ出力する
         /// </summary>
         /// <param name="action">出力対象在庫アクション</param>
-        /// <param name="calledFrom">このメソッドの呼び出し元：通常は指定不要。直接の呼び出し元ではなく、さらにその呼び出し元をログに残したいとき指定する</param>
+        /// <param name="caller">このメソッドの呼び出し元：通常は指定不要。直接の呼び出し元ではなく、さらにその呼び出し元をログに残したいとき指定する</param>
         /// <param name="line">このメソッドの呼び出し位置：ソースファイル中の行番号。calledFrom と同様通常は指定不要、呼び出し元の呼び出し元をログに残したいときのみ指定する</param>
         [Conditional("DEBUG")]
-        private void DEBUGLOG_StockActionCreated(StockAction action, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
+        private void DEBUGLOG_StockActionCreated(StockAction action, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
-            LogUtil.Debug($"{LogUtil.Indent}Created: {action.ToString("L")}");
+            LogUtil.Debug($"{LogUtil.Indent}Created: {action.ToString("L")}", caller, path, line);
         }
 
         [Conditional("DEBUG")]
-        private void DEBUGLOG_ComparationOfStockRemainAndQuantity(StockAction action, int quantity, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
+        private void DEBUGLOG_ComparationOfStockRemainAndQuantity(StockAction action, int quantity, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var operatorString = action.Remain >= quantity ? ">=" : "<";
 
-            LogUtil.Debug($"{LogUtil.Indent}Compare: {action.ToString("h")}.Remain({action.Remain} {operatorString} {quantity}");
+            LogUtil.Debug($"{LogUtil.Indent}Compare: {action.ToString("h")}.Remain({action.Remain}) {operatorString} {quantity}", caller, path, line);
 
         }
 
         [Conditional("DEBUG")]
-        private void DEBUGLOG_ComparisonOfStockQuantityAndPreviousRemain(StockAction action, int remain, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
+        private void DEBUGLOG_ComparisonOfStockQuantityAndPreviousRemain(StockAction action, int remain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var operatorString = action.Quantity <= remain ? "<=" : ">";
 
-            LogUtil.Debug($"{LogUtil.Indent}Compare: {action.ToString("h")}.Quantity({action.Quantity} {operatorString} {remain}");
+            LogUtil.Debug($"{LogUtil.Indent}Compare: {action.ToString("h")}.Quantity({action.Quantity}) {operatorString} {remain}", caller, path, line);
         }
 #endregion // デバッグ用
 #endif
