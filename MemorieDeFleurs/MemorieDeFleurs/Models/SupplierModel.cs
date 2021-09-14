@@ -631,54 +631,6 @@ namespace MemorieDeFleurs.Models
                 .ToString()); ;
         }
 
-#if false
-        /// <summary>
-        /// 在庫アクションの数量変更をデバッグログ出力する
-        /// </summary>
-        /// <param name="action">出力対象在庫アクション</param>
-        /// <param name="diffOfQuantity">数量の変更量：変更後の数量が変更前＋αのとき＋α、変更前－αのとき－αを指定する</param>
-        /// <param name="diffOfRemain">残数の変更量：変更後の残数が変更前＋αのとき＋α、変更前－αのとき－αを指定する</param>
-        /// <param name="calledFrom">このメソッドの呼び出し元：通常は指定不要。直接の呼び出し元ではなく、さらにその呼び出し元をログに残したいとき指定する</param>
-        /// <param name="line">このメソッドの呼び出し位置：ソースファイル中の行番号。calledFrom と同様通常は指定不要、呼び出し元の呼び出し元をログに残したいときのみ指定する</param>
-        [Conditional("DEBUG")]
-        private void DEBUGLOG_StockActionQuantityChanged(StockAction action, int diffOfQuantity, int diffOfRemain, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
-        {
-            var builder = new StringBuilder()
-                .Append(LogUtil.Indent).Append(action.PartsCode).Append(".").Append(action.Action)
-                .Append("[lot=").Append(action.StockLotNo)
-                .AppendFormat(", day={0:yyyyMMdd}", action.ActionDate);
-
-            if(diffOfQuantity == 0)
-            {
-                builder.AppendFormat(", quantity={0} (same)", action.Quantity);
-            }
-            else
-            {
-                builder.AppendFormat(", quantity={0}->{1}", action.Quantity, action.Quantity + diffOfQuantity);
-            }
-            
-            if(diffOfRemain == 0)
-            {
-                builder.AppendFormat(", remain={0} (same)", action.Remain);
-            }
-            else
-            {
-                builder.AppendFormat(", remain={0}->{1}", action.Remain, action.Remain + diffOfRemain);
-            }
-            
-            if(string.IsNullOrWhiteSpace(calledFrom))
-            {
-                builder.Append(" ]");
-            }
-            else
-            {
-                builder.AppendFormat(" ] ({0}:{1})", calledFrom, line);
-            }
-
-            LogUtil.Debug(builder.ToString());
-        }
-#endif
-
         [Conditional("DEBUG")]
         private void DEBUGLOG_ComparationOfStockRemainAndQuantity(StockAction action, int quantity, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
         {
