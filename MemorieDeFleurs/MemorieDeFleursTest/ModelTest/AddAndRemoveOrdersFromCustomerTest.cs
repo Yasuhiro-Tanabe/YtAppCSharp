@@ -15,7 +15,7 @@ using System.Text;
 namespace MemorieDeFleursTest.ModelTest
 {
     [TestClass]
-    public class AddAndRemoveOrdersFromCustomerTest : MemorieDeFleursDbContextTestBase
+    public class AddAndRemoveOrdersFromCustomerTest : MemorieDeFleursTestBase
     {
         /// <summary>
         /// テストで使用する商品
@@ -56,14 +56,6 @@ namespace MemorieDeFleursTest.ModelTest
         /// 在庫一覧：日々の在庫数に関する、テスト前の初期値。受注による在庫増減の期待値を計算するために使用
         /// </summary>
         private IDictionary<DateTime, int> InitialStocks { get; } = new Dictionary<DateTime, int>();
-
-        /// <summary>
-        /// 指定された日付の現在庫
-        /// 
-        /// 日付(と在庫ロット番号)が指定される都度、DBContext から使用予定在庫アクションの残数を取得・集計する。
-        /// </summary>
-        private StockCalcurator CurrentStock { get; set; }
-
 
         #region CurrentStock
         private class StockCalcurator
@@ -155,14 +147,13 @@ namespace MemorieDeFleursTest.ModelTest
         #region TestInitialize
         private void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDBContext);
+            Model = new MemorieDeFleursModel(TestDB);
 
             PrepareBouquet();
             PrepeareCustomer();
             PrepareInitialOrders();
             PrepareInitialUsed();
 
-            CurrentStock = new StockCalcurator(TestDBContext, ExpectedPart);
         }
 
 
@@ -188,7 +179,9 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareInitialUsed()
         {
-            var used = new List<Tuple<DateTime, int>>()
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var used = new List<Tuple<DateTime, int>>()
             {
                 Tuple.Create(DateConst.April30th, 20),
                 Tuple.Create(DateConst.May1st, 50),
@@ -198,18 +191,19 @@ namespace MemorieDeFleursTest.ModelTest
                 Tuple.Create(DateConst.May5th, 170),
                 Tuple.Create(DateConst.May6th, 40)
             };
-            foreach (var u in used)
-            {
-                Model.BouquetModel.UseBouquetPart(ExpectedPart, u.Item1, u.Item2);
-            }
+                foreach (var u in used)
+                {
+                    Model.BouquetModel.UseBouquetPart(context, ExpectedPart, u.Item1, u.Item2);
+                }
 
-            foreach(var d in Enumerable.Range(0, 10).Select(i => DateConst.April30th.AddDays(i)))
-            {
-                InitialStocks.Add(d, TestDBContext.StockActions
-                    .Where(act => act.PartsCode == ExpectedPart.Code)
-                    .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
-                    .Where(act => act.ActionDate == d)
-                    .Sum(act => act.Remain));
+                foreach (var d in Enumerable.Range(0, 10).Select(i => DateConst.April30th.AddDays(i)))
+                {
+                    InitialStocks.Add(d, context.StockActions
+                        .Where(act => act.PartsCode == ExpectedPart.Code)
+                        .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
+                        .Where(act => act.ActionDate == d)
+                        .Sum(act => act.Remain));
+                }
             }
         }
 
@@ -267,24 +261,30 @@ namespace MemorieDeFleursTest.ModelTest
         public void OneOrderUpdatesCurrentStock()
         {
             LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [Begin] =====");
-            var lot = InitialOrders[DateConst.April30th][0].LotNo;
 
-            // Order() 後に CurrentStock の値が変わるので期待値計算要素をあらかじめ保持する
-            var May2nd = DateConst.May2nd;
-            var used = ExpectedBouquet.PartsList.Single(p => p.PartsCode == ExpectedPart.Code).Quantity;
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var CurrentStock = new StockCalcurator(context, ExpectedPart);
+                var lot = InitialOrders[DateConst.April30th][0].LotNo;
 
-            var varidator = StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.April30th, lot).Begin()
-                    .At(May2nd).Used(CurrentStock.Quantity[May2nd, lot] + used, CurrentStock.Remain[May2nd, lot] - used)
+                // Order() 後に CurrentStock の値が変わるので期待値計算要素をあらかじめ保持する
+                var May2nd = DateConst.May2nd;
+                var used = ExpectedBouquet.PartsList.Single(p => p.PartsCode == ExpectedPart.Code).Quantity;
+
+                var varidator = StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.April30th, lot).Begin()
+                        .At(May2nd).Used(CurrentStock.Quantity[May2nd, lot] + used, CurrentStock.Remain[May2nd, lot] - used)
+                        .End()
                     .End()
-                .End()
-                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0);
+                    .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0);
 
 
-            // お届け日は在庫消費日の翌日
-            Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
+                // お届け日は在庫消費日の翌日
+                Model.CustomerModel.Order(context, DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
 
-            varidator.AssertAll(TestDBContext);
+                varidator.AssertAll(context);
+            }
+
             LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [End] =====");
         }
     }

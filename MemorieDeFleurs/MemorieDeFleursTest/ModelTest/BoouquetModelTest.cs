@@ -10,7 +10,7 @@ using System.Linq;
 namespace MemorieDeFleursTest.ModelTest
 {
     [TestClass]
-    public class BoouquetModelTest : MemorieDeFleursDbContextTestBase
+    public class BoouquetModelTest : MemorieDeFleursTestBase
     {
         private MemorieDeFleursModel Model { get; set; }
 
@@ -26,7 +26,7 @@ namespace MemorieDeFleursTest.ModelTest
         #region TestInitialize
         public  void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDBContext);
+            Model = new MemorieDeFleursModel(TestDB);
         }
         #endregion // TestInitialize
 

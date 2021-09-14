@@ -18,7 +18,7 @@ namespace MemorieDeFleursTest.ModelTest
     /// 追加発注および発注取消に関するテスト
     /// </summary>
     [TestClass]
-    public class AddAndRemoveOrdersToSupplierTest : MemorieDeFleursDbContextTestBase
+    public class AddAndRemoveOrdersToSupplierTest : MemorieDeFleursTestBase
     {
         /// <summary>
         /// テストで使用する仕入先
@@ -53,7 +53,7 @@ namespace MemorieDeFleursTest.ModelTest
         #region TestInitialize
         private void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDBContext);
+            Model = new MemorieDeFleursModel(TestDB);
 
             PrepareSuppliers();
             PrepareBouquetParts();
@@ -134,36 +134,41 @@ namespace MemorieDeFleursTest.ModelTest
         public void NewOrderWhichArrivedAt20200504()
         {
             LogUtil.Debug("=====NewOrderWhichArrivedAt20200504 [Begin]=====");
-            var newLotNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedPart, 1, DateConst.May4th);
-            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May1st, findLotNo).Begin()
-                    .At(DateConst.May4th).Used(300, 0).Discarded(0)
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var newLotNo = Model.SupplierModel.Order(context, DateConst.April30th, ExpectedPart, 1, DateConst.May4th);
+                var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
+
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.May1st, findLotNo).Begin()
+                        .At(DateConst.May4th).Used(300, 0).Discarded(0)
+                        .End()
+                    .Lot(DateConst.May2nd, findLotNo).Begin()
+                        .At(DateConst.May4th).Used(100, 100)
+                        .At(DateConst.May5th).Used(100, 0).Discarded(0)
+                        .End()
+                    .Lot(DateConst.May3rd, findLotNo).Begin()
+                        .At(DateConst.May4th).Used(0, 200)
+                        .At(DateConst.May5th).Used(70, 130)
+                        .At(DateConst.May6th).Used(40, 90).Discarded(90)
+                        .End()
+                    .Lot(DateConst.May6th, findLotNo).Begin()
+                        .At(DateConst.May6th).Arrived(100).Used(0, 100)
+                        .At(DateConst.May7th).Used(0, 100)
+                        .At(DateConst.May8th).Used(0, 100)
+                        .At(DateConst.May9th).Used(0, 100).Discarded(100)
+                        .End()
+                    .Lot(DateConst.May4th, newLotNo).Begin()
+                        .At(DateConst.May4th).Arrived(100).Used(0, 100)
+                        .At(DateConst.May5th).Used(0, 100)
+                        .At(DateConst.May6th).Used(0, 100)
+                        .At(DateConst.May7th).Used(0, 100).Discarded(100)
+                        .End()
                     .End()
-                .Lot(DateConst.May2nd, findLotNo).Begin()
-                    .At(DateConst.May4th).Used(100, 100)
-                    .At(DateConst.May5th).Used(100, 0).Discarded(0)
-                    .End()
-                .Lot(DateConst.May3rd, findLotNo).Begin()
-                    .At(DateConst.May4th).Used(0, 200)
-                    .At(DateConst.May5th).Used(70, 130)
-                    .At(DateConst.May6th).Used(40, 90).Discarded(90)
-                    .End()
-                .Lot(DateConst.May6th, findLotNo).Begin()
-                    .At(DateConst.May6th).Arrived(100).Used(0, 100)
-                    .At(DateConst.May7th).Used(0, 100)
-                    .At(DateConst.May8th).Used(0, 100)
-                    .At(DateConst.May9th).Used(0, 100).Discarded(100)
-                    .End()
-                .Lot(DateConst.May4th, newLotNo).Begin()
-                    .At(DateConst.May4th).Arrived(100).Used(0, 100)
-                    .At(DateConst.May5th).Used(0, 100)
-                    .At(DateConst.May6th).Used(0, 100)
-                    .At(DateConst.May7th).Used(0, 100).Discarded(100)
-                    .End()
-                .End()
-                .AssertAll(TestDBContext);
+                    .AssertAll(context);
+            }
+
             LogUtil.Debug("=====NewOrderWhichArrivedAt20200504 [End]=====");
         }
 
@@ -175,39 +180,44 @@ namespace MemorieDeFleursTest.ModelTest
         public void NewOrderWhichArrivedAt20200502()
         {
             LogUtil.Debug("=====NewOrderWhichArrivedAt20200502 [Begin]=====");
-            var newLotNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedPart, 1, DateConst.May2nd);
-            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.April30th, findLotNo).Begin()
-                    .At(DateConst.May2nd).Used(80, 50)
-                    .At(DateConst.May3rd).Used(20, 30).Discarded(30)
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var newLotNo = Model.SupplierModel.Order(context, DateConst.April30th, ExpectedPart, 1, DateConst.May2nd);
+                var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
+
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.April30th, findLotNo).Begin()
+                        .At(DateConst.May2nd).Used(80, 50)
+                        .At(DateConst.May3rd).Used(20, 30).Discarded(30)
+                        .End()
+                    .Lot(DateConst.May1st, findLotNo).Begin()
+                        .At(DateConst.May2nd).Used(0, 300)
+                        .At(DateConst.May3rd).Used(0, 300)
+                        .At(DateConst.May4th).Used(300, 0).Discarded(0)
+                        .End()
+                    .Lot(DateConst.May2nd, findLotNo).Begin()
+                        .At(DateConst.May2nd).Arrived(200).Used(0, 200)
+                        .At(DateConst.May3rd).Used(0, 200)
+                        .At(DateConst.May4th).Used(100, 100)
+                        .At(DateConst.May5th).Used(100, 0).Discarded(0)
+                        .End()
+                    .Lot(DateConst.May2nd, newLotNo).Begin()
+                        .At(DateConst.May2nd).Arrived(100).Used(0, 100)
+                        .At(DateConst.May3rd).Used(0, 100)
+                        .At(DateConst.May4th).Used(0, 100)
+                        .At(DateConst.May5th).Used(70, 30).Discarded(30) // 0本→70本使用
+                        .End()
+                    .Lot(DateConst.May3rd, findLotNo).Begin()
+                        .At(DateConst.May3rd).Arrived(200).Used(0, 200)
+                        .At(DateConst.May4th).Used(0, 200)
+                        .At(DateConst.May5th).Used(0, 200)  // 70本使用→0本
+                        .At(DateConst.May6th).Used(40, 160).Discarded(160)
+                        .End()
                     .End()
-                .Lot(DateConst.May1st, findLotNo).Begin()
-                    .At(DateConst.May2nd).Used(0, 300)
-                    .At(DateConst.May3rd).Used(0, 300)
-                    .At(DateConst.May4th).Used(300, 0).Discarded(0)
-                    .End()
-                .Lot(DateConst.May2nd, findLotNo).Begin()
-                    .At(DateConst.May2nd).Arrived(200).Used(0, 200)
-                    .At(DateConst.May3rd).Used(0, 200)
-                    .At(DateConst.May4th).Used(100, 100)
-                    .At(DateConst.May5th).Used(100, 0).Discarded(0)
-                    .End()
-                .Lot(DateConst.May2nd, newLotNo).Begin()
-                    .At(DateConst.May2nd).Arrived(100).Used(0, 100)
-                    .At(DateConst.May3rd).Used(0, 100)
-                    .At(DateConst.May4th).Used(0, 100)
-                    .At(DateConst.May5th).Used(70, 30).Discarded(30) // 0本→70本使用
-                    .End()
-                .Lot(DateConst.May3rd, findLotNo).Begin()
-                    .At(DateConst.May3rd).Arrived(200).Used(0, 200)
-                    .At(DateConst.May4th).Used(0, 200)
-                    .At(DateConst.May5th).Used(0, 200)  // 70本使用→0本
-                    .At(DateConst.May6th).Used(40, 160).Discarded(160)
-                    .End()
-                .End()
-                .AssertAll(TestDBContext);
+                    .AssertAll(context);
+            }
+
             LogUtil.Debug("=====NewOrderWhichArrivedAt20200502 [End]=====");
         }
 
@@ -217,19 +227,22 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void RemoveOrderArrivedAt20200506()
         {
-            var lot = InitialOrders[DateConst.May6th][0].LotNo;
-            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var lot = InitialOrders[DateConst.May6th][0].LotNo;
+                var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            Model.SupplierModel.CancelOrder(lot);
+                Model.SupplierModel.CancelOrder(context, lot);
 
-            // 他在庫ロットの在庫アクションで、破棄した在庫ロットの入荷日以降の在庫アクションに変化がない
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May6th, lot).HasNoStockActions()
-                .Lot(DateConst.May3rd, findLotNo).Begin()
-                    .At(DateConst.May6th).Used(40, 90).Discarded(90)
+                // 他在庫ロットの在庫アクションで、破棄した在庫ロットの入荷日以降の在庫アクションに変化がない
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.May6th, lot).HasNoStockActions()
+                    .Lot(DateConst.May3rd, findLotNo).Begin()
+                        .At(DateConst.May6th).Used(40, 90).Discarded(90)
+                        .End()
                     .End()
-                .End()
-                .AssertAll(TestDBContext);
+                    .AssertAll(context);
+            }
         }
 
         /// <summary>
@@ -239,26 +252,30 @@ namespace MemorieDeFleursTest.ModelTest
         public void RemoveOrderArrivedAt20200502()
         {
             LogUtil.Debug("===== RemoveOrderArrivedAt20200502 [Begin]=====");
-            var lot = InitialOrders[DateConst.May2nd][0].LotNo;
-            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            Model.SupplierModel.CancelOrder(lot);
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var lot = InitialOrders[DateConst.May2nd][0].LotNo;
+                var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May2nd, lot).HasNoStockActions()
-                .Lot(DateConst.May3rd, findLotNo).Begin()
-                    .At(DateConst.May4th).Used(100, 100)
-                    .At(DateConst.May5th).Used(100, 0).OutOfStock(70)
-                    .At(DateConst.May6th).Used(0, 0).Discarded(0)
+                Model.SupplierModel.CancelOrder(context, lot);
+
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.May2nd, lot).HasNoStockActions()
+                    .Lot(DateConst.May3rd, findLotNo).Begin()
+                        .At(DateConst.May4th).Used(100, 100)
+                        .At(DateConst.May5th).Used(100, 0).OutOfStock(70)
+                        .At(DateConst.May6th).Used(0, 0).Discarded(0)
+                        .End()
+                    .Lot(DateConst.May6th, findLotNo).Begin()
+                        .At(DateConst.May6th).Used(40, 60)
+                        .At(DateConst.May7th).Used(0, 60)
+                        .At(DateConst.May8th).Used(0, 60)
+                        .At(DateConst.May9th).Used(0, 60).Discarded(60)
+                        .End()
                     .End()
-                .Lot(DateConst.May6th, findLotNo).Begin()
-                    .At(DateConst.May6th).Used(40, 60)
-                    .At(DateConst.May7th).Used(0, 60)
-                    .At(DateConst.May8th).Used(0, 60)
-                    .At(DateConst.May9th).Used(0, 60).Discarded(60)
-                    .End()
-                .End()
-                .AssertAll(TestDBContext);
+                    .AssertAll(context);
+            }
 
             LogUtil.Debug("===== RemoveOrderArrivedAt20200502 [End]=====");
         }
@@ -272,29 +289,51 @@ namespace MemorieDeFleursTest.ModelTest
         public void ChangeOrders_RemoveFrom20200502_And_AddTwoLotTo202005005()
         {
             LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 2 Lot (200)) [Begin]=====");
-            var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
-            var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
-            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            Model.SupplierModel.CancelOrder(lot0502);
-            var lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 2, DateConst.May5th);
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
+                var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
+                var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
-                .Lot(DateConst.May5th, lot0505).Begin()
-                    .At(DateConst.May5th).Used(70, 130)
-                    .At(DateConst.May6th).Used(40, 90)
-                    .At(DateConst.May7th).Used(0, 90)
-                    .At(DateConst.May8th).Used(0, 90).Discarded(90).End()
-                .Lot(DateConst.May6th, lot0506).Begin()
-                    .At(DateConst.May6th).Used(0, 100)
-                    .At(DateConst.May7th).Used(0, 100)
-                    .At(DateConst.May8th).Used(0, 100)
-                    .At(DateConst.May9th).Used(0, 100).Discarded(100).End()
-                .End()
-                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
-                .AssertAll(TestDBContext);
-            
+                LogUtil.Debug($"+++ CancelOrder({lot0502})");
+                Model.SupplierModel.CancelOrder(context, lot0502);
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
+                    .Lot(DateConst.May3rd, findLotNo).Begin()
+                        .At(DateConst.May4th).Used(100, 100)
+                        .At(DateConst.May5th).Used(100, 0).OutOfStock(70)
+                        .At(DateConst.May6th).Used(0, 0).Discarded(0)
+                        .End()
+                    .Lot(DateConst.May6th, findLotNo).Begin()
+                        .At(DateConst.May6th).Used(40, 60)
+                        .At(DateConst.May7th).Used(0, 60)
+                        .At(DateConst.May8th).Used(0, 60)
+                        .At(DateConst.May9th).Used(0, 60).Discarded(60)
+                        .End()
+                    .End()
+                    .AssertAll(context);
+
+                LogUtil.Debug($"+++ Order({DateConst.May5th.ToString("yyyyMMdd")})");
+                var lot0505 = Model.SupplierModel.Order(context, DateConst.May1st, ExpectedPart, 2, DateConst.May5th);
+
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
+                    .Lot(DateConst.May5th, lot0505).Begin()
+                        .At(DateConst.May5th).Used(70, 130)
+                        .At(DateConst.May6th).Used(40, 90)
+                        .At(DateConst.May7th).Used(0, 90)
+                        .At(DateConst.May8th).Used(0, 90).Discarded(90).End()
+                    .Lot(DateConst.May6th, lot0506).Begin()
+                        .At(DateConst.May6th).Used(0, 100)
+                        .At(DateConst.May7th).Used(0, 100)
+                        .At(DateConst.May8th).Used(0, 100)
+                        .At(DateConst.May9th).Used(0, 100).Discarded(100).End()
+                    .End()
+                    .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
+                    .AssertAll(context);
+            }
+
             LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 2 Lot (200)) [End]=====");
         }
 
@@ -305,28 +344,32 @@ namespace MemorieDeFleursTest.ModelTest
         public void ChangeOrders_RemoveFrom20200502_And_AddOneLotTo202005005()
         {
             LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 1 Lot (100)) [Begin]=====");
-            var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
-            var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
-            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            Model.SupplierModel.CancelOrder(lot0502);
-            var lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 1, DateConst.May5th);
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
+                var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
+                var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
-                .Lot(DateConst.May5th, lot0505).Begin()
-                    .At(DateConst.May5th).Used(70, 30)
-                    .At(DateConst.May6th).Used(30, 0)
-                    .At(DateConst.May7th).Used(0, 0)
-                    .At(DateConst.May8th).Used(0, 0).Discarded(0).End()
-                .Lot(DateConst.May6th, lot0506).Begin()
-                    .At(DateConst.May6th).Used(10, 90)
-                    .At(DateConst.May7th).Used(0, 90)
-                    .At(DateConst.May8th).Used(0, 90)
-                    .At(DateConst.May9th).Used(0, 90).Discarded(90).End()
-                .End()
-                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
-                .AssertAll(TestDBContext);
+                Model.SupplierModel.CancelOrder(context, lot0502);
+                var lot0505 = Model.SupplierModel.Order(context, DateConst.May1st, ExpectedPart, 1, DateConst.May5th);
+
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
+                    .Lot(DateConst.May5th, lot0505).Begin()
+                        .At(DateConst.May5th).Used(70, 30)
+                        .At(DateConst.May6th).Used(30, 0)
+                        .At(DateConst.May7th).Used(0, 0)
+                        .At(DateConst.May8th).Used(0, 0).Discarded(0).End()
+                    .Lot(DateConst.May6th, lot0506).Begin()
+                        .At(DateConst.May6th).Used(10, 90)
+                        .At(DateConst.May7th).Used(0, 90)
+                        .At(DateConst.May8th).Used(0, 90)
+                        .At(DateConst.May9th).Used(0, 90).Discarded(90).End()
+                    .End()
+                    .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
+                    .AssertAll(context);
+            }
 
             LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 1 Lot (100)) [End]=====");
         }

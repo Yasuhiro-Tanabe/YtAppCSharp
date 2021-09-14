@@ -246,7 +246,7 @@ namespace MemorieDeFleurs.Models
             Order(DbContext, orderDate, bouquet, sendTo, arrivalDate, message);
         }
 
-        private void Order(MemorieDeFleursDbContext context, DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "")
+        public void Order(MemorieDeFleursDbContext context, DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "")
         {
             // 在庫アクションの登録改訂に関する検証用、暫定実装
             var usedDate = arrivalDate.AddDays(-1);

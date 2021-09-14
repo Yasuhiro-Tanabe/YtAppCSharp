@@ -1,17 +1,18 @@
-﻿using MemorieDeFleurs;
-using MemorieDeFleurs.Logging;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
+using System.Data.Common;
 using System.Linq;
 
 namespace MemorieDeFleursTest.ModelEntityTest
 {
     [TestClass]
-    public class EFStockActionTest : MemorieDeFleursDbContextTestBase
+    public class EFStockActionTest : MemorieDeFleursTestBase
     {
         private static string PartCodeKey = "@part";
         private static string SupplierCodeKey = "@supplier";
@@ -52,14 +53,17 @@ namespace MemorieDeFleursTest.ModelEntityTest
 
         private void AppendSuppliers()
         {
-            var supplier = new Supplier()
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Code = ExpectedSupplierCode,
-                Name = ExpectedSupplierName,
-                Address1 = ExpectedSupplierAddress,
-            };
-            TestDBContext.Suppliers.Add(supplier);
-            TestDBContext.SaveChanges();
+                var supplier = new Supplier()
+                {
+                    Code = ExpectedSupplierCode,
+                    Name = ExpectedSupplierName,
+                    Address1 = ExpectedSupplierAddress,
+                };
+                context.Suppliers.Add(supplier);
+                context.SaveChanges();
+            }
         }
 
         private void AppendPartSuppliers()
@@ -80,36 +84,48 @@ namespace MemorieDeFleursTest.ModelEntityTest
             // テーブル全削除はORマッピングフレームワークが持つ「DBを隠蔽する」意図にそぐわないため
             // DbContext.Customers.Clear() のような操作は用意されていない。
             // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
-            TestDBContext.Database.ExecuteSqlRaw("delete from STOCK_ACTIONS");
-            TestDBContext.Database.ExecuteSqlRaw("delete from BOUQUET_SUPPLIERS");
-            TestDBContext.Database.ExecuteSqlRaw("delete from BOUQUET_PARTS");
-            TestDBContext.Database.ExecuteSqlRaw("delete from SUPPLIERS");
+            CleanupTable(TestDB, "STOCK_ACTIONS");
+            CleanupTable(TestDB, "BOUQUET_SUPPLIERS");
+            CleanupTable(TestDB, "BOUQUET_PARTS");
+            CleanupTable(TestDB, "SUPPLIERS");
+        }
+
+        private void CleanupTable(DbConnection connection, string table)
+        {
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = $"delete from {table}";
+                cmd.ExecuteNonQuery();
+            }
         }
 
         [TestMethod]
         public void CanAddStockAction()
         {
-            var code = ExpectedPartCode;
-
-            StockAction action = new StockAction()
+            using (var context =new  MemorieDeFleursDbContext(TestDB))
             {
-                ActionDate = new DateTime(2004,03,30),
-                Action = StockActionType.SCHEDULED_TO_ARRIVE,
-                PartsCode = ExpectedPartCode,
-                ArrivalDate = new DateTime(2004,03,30),
-                StockLotNo = 1,
-                Quantity = 200,
-                Remain = 200
-            };
+                var code = ExpectedPartCode;
 
-            TestDBContext.StockActions.Add(action);
-            TestDBContext.SaveChanges();
+                StockAction action = new StockAction()
+                {
+                    ActionDate = new DateTime(2004, 03, 30),
+                    Action = StockActionType.SCHEDULED_TO_ARRIVE,
+                    PartsCode = ExpectedPartCode,
+                    ArrivalDate = new DateTime(2004, 03, 30),
+                    StockLotNo = 1,
+                    Quantity = 200,
+                    Remain = 200
+                };
 
-            Assert.AreEqual(1, TestDBContext.StockActions
-                .Count(x => x.PartsCode == ExpectedPartCode));
-            Assert.IsTrue(TestDBContext.StockActions
-                .Where(x => x.PartsCode == ExpectedPartCode)
-                .All(x => x.BouquetPart.Name == ExpectedPartName));
+                context.StockActions.Add(action);
+                context.SaveChanges();
+
+                Assert.AreEqual(1, context.StockActions
+                    .Count(x => x.PartsCode == ExpectedPartCode));
+                Assert.IsTrue(context.StockActions
+                    .Where(x => x.PartsCode == ExpectedPartCode)
+                    .All(x => x.BouquetPart.Name == ExpectedPartName));
+            }
         }
 
     }

@@ -8,7 +8,7 @@ using System;
 namespace MemorieDeFleursTest.ModelTest
 {
     [TestClass]
-    public class SupplierModelTest : MemorieDeFleursDbContextTestBase
+    public class SupplierModelTest : MemorieDeFleursTestBase
     {
         private const string expectedName = "農園1";
         private const string expectedAddress = "住所1";
@@ -22,7 +22,7 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDBContext);
+            Model = new MemorieDeFleursModel(TestDB);
         }
 
         [TestMethod]

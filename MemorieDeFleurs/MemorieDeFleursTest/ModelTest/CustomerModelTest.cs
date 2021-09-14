@@ -8,7 +8,7 @@ using System.Linq;
 namespace MemorieDeFleursTest.ModelTest
 {
     [TestClass]
-    public class CustomerModelTest : MemorieDeFleursDbContextTestBase
+    public class CustomerModelTest : MemorieDeFleursTestBase
     {
         private MemorieDeFleursModel Model { get; set; }
 
@@ -21,7 +21,7 @@ namespace MemorieDeFleursTest.ModelTest
         #region TestInitialize
         public void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDBContext);
+            Model = new MemorieDeFleursModel(TestDB);
         }
         #endregion // TestInitialize
 
@@ -35,7 +35,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void CanAddCustomerViaModel()
         {
-            var model = new MemorieDeFleursModel(TestDBContext);
+            var model = new MemorieDeFleursModel(TestDB);
 
             var expected = model.CustomerModel.GetCustomerBuilder()
                 .NameIs("蘇我幸恵")
@@ -54,7 +54,7 @@ namespace MemorieDeFleursTest.ModelTest
 
         public void CanAddShippingAddressFromCustomerViaBuilder()
         {
-            var model = new MemorieDeFleursModel(TestDBContext);
+            var model = new MemorieDeFleursModel(TestDB);
 
             var customer = model.CustomerModel.GetCustomerBuilder()
                 .NameIs("蘇我幸恵")
@@ -70,11 +70,14 @@ namespace MemorieDeFleursTest.ModelTest
                 .Create();
 
             // 正しく登録されていると確認できればよい
-            var actual = TestDBContext.ShippingAddresses.Single();
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var actual = context.ShippingAddresses.Single();
 
-            Assert.AreEqual(expected.Name, actual.Name);
-            Assert.IsNotNull(actual.From);
-            Assert.AreEqual(customer.ID, actual.From.ID);
+                Assert.AreEqual(expected.Name, actual.Name);
+                Assert.IsNotNull(actual.From);
+                Assert.AreEqual(customer.ID, actual.From.ID);
+            }
         }
     }
 }

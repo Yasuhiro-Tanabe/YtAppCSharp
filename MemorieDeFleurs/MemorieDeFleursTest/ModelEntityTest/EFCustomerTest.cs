@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models;
+using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,7 +13,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
     /// DbContext を直接使って CUSTOMERS テーブルを操作するテスト
     /// </summary>
     [TestClass]
-    public class EFCustomerTest : MemorieDeFleursDbContextTestBase
+    public class EFCustomerTest : MemorieDeFleursTestBase
     {
         public EFCustomerTest() : base()
         {
@@ -21,104 +22,119 @@ namespace MemorieDeFleursTest.ModelEntityTest
 
         private void CleanupDatabase(object sender, EventArgs unused)
         {
-            // テーブル全削除はORマッピングフレームワークが持つ「DBを隠蔽する」意図にそぐわないため
-            // DbContext.Customers.Clear() のような操作は用意されていない。
-            // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
-            TestDBContext.Database.ExecuteSqlRaw("delete from CUSTOMERS");
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                // テーブル全削除はORマッピングフレームワークが持つ「DBを隠蔽する」意図にそぐわないため
+                // DbContext.Customers.Clear() のような操作は用意されていない。
+                // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
+                context.Database.ExecuteSqlRaw("delete from CUSTOMERS");
+            }
         }
 
         [TestMethod]
         public void CanAddCustomer()
         {
-            var customer = new Customer()
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                ID = 1,
-                Name = "Test User",
-                EmailAddress = "foo@localdomain",
-                CardNo = "0000111122223333",
-                Status = 0
-            };
+                var customer = new Customer()
+                {
+                    ID = 1,
+                    Name = "Test User",
+                    EmailAddress = "foo@localdomain",
+                    CardNo = "0000111122223333",
+                    Status = 0
+                };
 
-            // Add/Remove したら SaveChanges を忘れないこと
-            TestDBContext.Customers.Add(customer);
-            TestDBContext.SaveChanges();
+                // Add/Remove したら SaveChanges を忘れないこと
+                context.Customers.Add(customer);
+                context.SaveChanges();
+            }
         }
 
         [TestMethod, ExpectedException(typeof(DbUpdateException))]
         public void CannotAddNoNamedCustomer()
         {
-            var customer = new Customer()
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                ID = 1,
-                Name = null,
-                EmailAddress = "foo@localdomain",
-                CardNo = "0000111122223333",
-                Status = 0
-            };
+                var customer = new Customer()
+                {
+                    ID = 1,
+                    Name = null,
+                    EmailAddress = "foo@localdomain",
+                    CardNo = "0000111122223333",
+                    Status = 0
+                };
 
-            // NOT NULL や PRIMARY KEY などの制約違反が発生するのは
-            // Add ではなく SaveChanges のタイミング
-            TestDBContext.Customers.Add(customer);
-            TestDBContext.SaveChanges();
+                // NOT NULL や PRIMARY KEY などの制約違反が発生するのは
+                // Add ではなく SaveChanges のタイミング
+                context.Customers.Add(customer);
+                context.SaveChanges();
+            }
         }
 
         [TestMethod]
         public void CanAddTwoOrMoreCustomersByDifferentID()
         {
-            var customer1 = new Customer()
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                ID = 1,
-                Name = "Test User",
-                EmailAddress = "foo@localdomain",
-                CardNo = "0000111122223333",
-                Status = 0
-            };
-            var customer2 = new Customer()
-            {
-                ID = 2,
-                Name = "Test User2",
-                EmailAddress = "bar@localdomain",
-                CardNo = "1234567890123456",
-                Status = 0
-            };
-            var customer3 = new Customer()
-            {
-                ID = 3,
-                Name = "Test User3",
-                EmailAddress = "hoge@localdomain",
-                CardNo = "1122334455667788",
-                Status = 0
-            };
+                var customer1 = new Customer()
+                {
+                    ID = 1,
+                    Name = "Test User",
+                    EmailAddress = "foo@localdomain",
+                    CardNo = "0000111122223333",
+                    Status = 0
+                };
+                var customer2 = new Customer()
+                {
+                    ID = 2,
+                    Name = "Test User2",
+                    EmailAddress = "bar@localdomain",
+                    CardNo = "1234567890123456",
+                    Status = 0
+                };
+                var customer3 = new Customer()
+                {
+                    ID = 3,
+                    Name = "Test User3",
+                    EmailAddress = "hoge@localdomain",
+                    CardNo = "1122334455667788",
+                    Status = 0
+                };
 
-            TestDBContext.Customers.Add(customer1);
-            TestDBContext.Customers.Add(customer2);
-            TestDBContext.Customers.Add(customer3);
-            TestDBContext.SaveChanges();
+                context.Customers.Add(customer1);
+                context.Customers.Add(customer2);
+                context.Customers.Add(customer3);
+                context.SaveChanges();
+            }
         }
 
         [TestMethod,ExpectedException(typeof(InvalidOperationException))]
         public void CannotAddCustomersWithSameID()
         {
-            var customer1 = new Customer()
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                ID = 1,
-                Name = "Test User",
-                EmailAddress = "foo@localdomain",
-                CardNo = "0000111122223333",
-                Status = 0
-            };
-            var customer2 = new Customer()
-            {
-                ID = 1,
-                Name = "Test User2",
-                EmailAddress = "bar@localdomain",
-                CardNo = "1234567890123456",
-                Status = 0
-            };
+                var customer1 = new Customer()
+                {
+                    ID = 1,
+                    Name = "Test User",
+                    EmailAddress = "foo@localdomain",
+                    CardNo = "0000111122223333",
+                    Status = 0
+                };
+                var customer2 = new Customer()
+                {
+                    ID = 1,
+                    Name = "Test User2",
+                    EmailAddress = "bar@localdomain",
+                    CardNo = "1234567890123456",
+                    Status = 0
+                };
 
-            TestDBContext.Customers.Add(customer1);
-            TestDBContext.Customers.Add(customer2);
-            TestDBContext.SaveChanges();
+                context.Customers.Add(customer1);
+                context.Customers.Add(customer2);
+                context.SaveChanges();
+            }
         }
     }
 }

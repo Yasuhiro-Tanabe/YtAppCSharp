@@ -55,6 +55,8 @@ namespace MemorieDeFleurs.Logging
         [Conditional("DEBUG")]
         public static void DEBUGLOG_EndMethod(string args = "", string msg = "", [CallerMemberName] string caller = "")
         {
+            Indent--;
+
             var b = new StringBuilder().Append($"{Indent}[END] ").Append(caller)
                 .Append(string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )");
 
@@ -63,7 +65,6 @@ namespace MemorieDeFleurs.Logging
                 b.Append(' ').Append(msg);
             }
 
-            Indent--;
             LogUtil.Debug(b.ToString());
         }
 

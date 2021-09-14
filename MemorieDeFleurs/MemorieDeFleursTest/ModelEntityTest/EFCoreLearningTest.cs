@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace MemorieDeFleursTest.ModelEntityTest
 {
     [TestClass]
-    public class EFCoreLearningTest : MemorieDeFleursDbContextTestBase
+    public class EFCoreLearningTest : MemorieDeFleursTestBase
     {
         /// <summary>
         /// テストで使用する単品
@@ -35,7 +35,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
         #region TestInitialize
         private void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDBContext);
+            Model = new MemorieDeFleursModel(TestDB);
 
             ExpectedPart = Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("BA001")
@@ -57,38 +57,44 @@ namespace MemorieDeFleursTest.ModelEntityTest
         [TestMethod]
         public void Transaction_CanCommit()
         {
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Assert.AreEqual(0, TestDBContext.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
-                CreateStockAction(1);
-                Assert.AreEqual(1, TestDBContext.StockActions.Count(), "登録されている在庫アクション数は１つのはず");
-                transaction.Commit();
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    Assert.AreEqual(0, context.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
+                    CreateStockAction(context, 1);
+                    Assert.AreEqual(1, context.StockActions.Count(), "登録されている在庫アクション数は１つのはず");
+                    transaction.Commit();
 
+                }
+                Assert.AreEqual(1, context.StockActions.Count(), "コミットにより在庫アクションが保存されるはず");
             }
-            Assert.AreEqual(1, TestDBContext.StockActions.Count(), "コミットにより在庫アクションが保存されるはず");
         }
 
         [TestMethod]
         public void Transaction_CanRollback()
         {
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Assert.AreEqual(0, TestDBContext.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
-                CreateStockAction(1);
-                Assert.AreEqual(1, TestDBContext.StockActions.Count(), "登録されている在庫アクション数は１つのはず");
-                transaction.Rollback();
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    Assert.AreEqual(0, context.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
+                    CreateStockAction(context, 1);
+                    Assert.AreEqual(1, context.StockActions.Count(), "登録されている在庫アクション数は１つのはず");
+                    transaction.Rollback();
+                }
+                Assert.AreEqual(0, context.StockActions.Count(), "ロールバック後も在庫アクションが残っている");
             }
-            Assert.AreEqual(0, TestDBContext.StockActions.Count(), "ロールバック後も在庫アクションが残っている");
         }
 
-        private StockAction CreateStockAction(int lotNo)
+        private StockAction CreateStockAction(MemorieDeFleursDbContext context, int lotNo)
         {
-            StockAction action = CreateStockActionWithoutCallingSaveChanges(lotNo);
-            TestDBContext.SaveChanges();
+            StockAction action = CreateStockActionWithoutCallingSaveChanges(context, lotNo);
+            context.SaveChanges();
             return action;
         }
 
-        private StockAction CreateStockActionWithoutCallingSaveChanges(int lotNo)
+        private StockAction CreateStockActionWithoutCallingSaveChanges(MemorieDeFleursDbContext context, int lotNo)
         {
             StockAction action = new StockAction()
             {
@@ -101,16 +107,17 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 Remain = 200
             };
 
-            TestDBContext.StockActions.Add(action);
+            context.StockActions.Add(action);
             return action;
         }
 
         [TestMethod]
         public void LearnEFCoreTransaction_CannotUseMultipeTransactionsInSingleDbContext()
         {
-            using (var tansaction1 = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var tansaction1 = context.Database.BeginTransaction())
             {
-                Assert.ThrowsException<InvalidOperationException>(() => TestDBContext.Database.BeginTransaction());
+                Assert.ThrowsException<InvalidOperationException>(() => context.Database.BeginTransaction());
             }
         }
 
@@ -119,95 +126,112 @@ namespace MemorieDeFleursTest.ModelEntityTest
         [TestMethod]
         public void SaveChangesInTransaction_CallForEachCreatedEntity_LinqSelect_Commit()
         {
-            // TestDBContext は各テストメソッド実行前に生成している (PrepareMdel 内で Model を作るとき)。
-            // そのため問題は出ていないが、
-            //
-            // お作法としてはトランザクションと同じタイミングで作るのが正しいらしい：
-            //     using (var context = MemorieDeFleursDbContext(TestDB))
+            // お作法として、DBとDBContextおよびトランザクションとは同じタイミングで作るのが正しいらしい：
+            //     using (var db = ...)
+            //     using (var context = new MemorieDeFleursDbContext(TestDB))
             //     using(var transaction = context.DataBase.BeginTransaction() { ... }
 
-            int numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Enumerable.Range(1, numActions).Select(i => CreateStockAction(i));
-                transaction.Commit();
+                int numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    Enumerable.Range(1, numActions).Select(i => CreateStockAction(context, i));
+                    transaction.Commit();
+                }
+
+                // ??? Linq の IEnumerable<T1>.Select<T1,T2>() 内で呼び出すと、Commit() してもトランザクションに反映されない？
+                Assert.AreEqual(0, context.StockActions.Count());
             }
 
-            // Linq の IEnumerable<T1>.Select<T1,T2>() 内で呼び出すと、Commit() してもトランザクションに反映されない？
-            Assert.AreEqual(0, TestDBContext.StockActions.Count());
         }
 
         [TestMethod]
         public void SaveChangesInTransaction_CallForEachCreatedEntity_ListForEach_Commit()
         {
-            int numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                var list = Enumerable.Range(1, numActions).ToList();
-                list.ForEach(i => CreateStockAction(i));
-                transaction.Commit();
+                int numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    var list = Enumerable.Range(1, numActions).ToList();
+                    list.ForEach(i => CreateStockAction(context, i));
+                    transaction.Commit();
+                }
+                Assert.AreEqual(numActions, context.StockActions.Count());
             }
-            Assert.AreEqual(numActions, TestDBContext.StockActions.Count());
         }
 
         [TestMethod]
         public void SaveChangesInTransaction_CallForEachCreatedEntity_ForEachStatment_Commit()
         {
-            int numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                var list = Enumerable.Range(1, numActions);
-                foreach(var i in list)
+                int numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    CreateStockAction(i);
+                    var list = Enumerable.Range(1, numActions);
+                    foreach (var i in list)
+                    {
+                        CreateStockAction(context, i);
+                    }
+                    transaction.Commit();
                 }
-                transaction.Commit();
+                Assert.AreEqual(numActions, context.StockActions.Count());
             }
-            Assert.AreEqual(numActions, TestDBContext.StockActions.Count());
         }
 
         [TestMethod]
         public void SaveChangesInTransaction_CallForEachCreatedEntity_LinqSelect_Rollback()
         {
-            int numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Enumerable.Range(1, numActions).Select(i => CreateStockAction(i));
-                transaction.Rollback();
-            }
+                int numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    Enumerable.Range(1, numActions).Select(i => CreateStockAction(context, i));
+                    transaction.Rollback();
+                }
 
-            // Commit しても反映されていないので、現時点ではテストが無意味。
-            // SaveChangesInTransaction_CallForEachCreatedEntity_LinqSelect_Commit() 参照。
-            Assert.AreEqual(0, TestDBContext.StockActions.Count());
+                // Commit しても反映されていないので、現時点ではテストが無意味。
+                // SaveChangesInTransaction_CallForEachCreatedEntity_LinqSelect_Commit() 参照。
+                Assert.AreEqual(0, context.StockActions.Count());
+            }
         }
 
         [TestMethod]
         public void SaveChangesInTransaction_CallForEachCreatedEntity_ListForEach_Rollback()
         {
-            int numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                var list = Enumerable.Range(1, numActions).ToList();
-                list.ForEach(i => CreateStockAction(i));
-                transaction.Rollback();
+                int numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    var list = Enumerable.Range(1, numActions).ToList();
+                    list.ForEach(i => CreateStockAction(context, i));
+                    transaction.Rollback();
+                }
+                Assert.AreEqual(0, context.StockActions.Count());
             }
-            Assert.AreEqual(0, TestDBContext.StockActions.Count());
         }
 
         [TestMethod]
         public void SaveChangesInTransaction_CallForEachCreatedEntity_ForEachStatment_Rollback()
         {
-            int numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                var list = Enumerable.Range(1, numActions);
-                foreach (var i in list)
+                int numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    CreateStockAction(i);
+                    var list = Enumerable.Range(1, numActions);
+                    foreach (var i in list)
+                    {
+                        CreateStockAction(context, i);
+                    }
+                    transaction.Rollback();
                 }
-                transaction.Rollback();
+                Assert.AreEqual(0, context.StockActions.Count());
             }
-            Assert.AreEqual(0, TestDBContext.StockActions.Count());
         }
         #endregion // コレクションの操作方法により DB 登録できたりできなかったりする
         #endregion // SaveChanges をエンティティ登録の都度呼び出す
@@ -217,37 +241,43 @@ namespace MemorieDeFleursTest.ModelEntityTest
         [TestMethod]
         public void SaveChangesInTransaction_CallOnceOnlyAfterAllEntityAdded_Commit()
         {
-            var numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                // 一番確実な、 foreach ループによる方法で登録する
-                var list = Enumerable.Range(1, numActions);
-                foreach(var i in list)
+                var numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    CreateStockActionWithoutCallingSaveChanges(i);
+                    // 一番確実な、 foreach ループによる方法で登録する
+                    var list = Enumerable.Range(1, numActions);
+                    foreach (var i in list)
+                    {
+                        CreateStockActionWithoutCallingSaveChanges(context, i);
+                    }
+                    context.SaveChanges();
+                    transaction.Commit();
                 }
-                TestDBContext.SaveChanges();
-                transaction.Commit();
+                Assert.AreEqual(numActions, context.StockActions.Count());
             }
-            Assert.AreEqual(numActions, TestDBContext.StockActions.Count());
         }
 
         [TestMethod]
         public void SaveChangesInTransaction_CallOnceOnlyAfterAllEntityAdded_Rollback()
         {
-            var numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                // 一番確実な、 foreach ループによる方法で登録する
-                var list = Enumerable.Range(1, numActions);
-                foreach (var i in list)
+                var numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    CreateStockActionWithoutCallingSaveChanges(i);
+                    // 一番確実な、 foreach ループによる方法で登録する
+                    var list = Enumerable.Range(1, numActions);
+                    foreach (var i in list)
+                    {
+                        CreateStockActionWithoutCallingSaveChanges(context, i);
+                    }
+                    context.SaveChanges();
+                    transaction.Rollback();
                 }
-                TestDBContext.SaveChanges();
-                transaction.Rollback();
+                Assert.AreEqual(0, context.StockActions.Count());
             }
-            Assert.AreEqual(0, TestDBContext.StockActions.Count());
         }
         #endregion // 基本型
 
@@ -255,45 +285,51 @@ namespace MemorieDeFleursTest.ModelEntityTest
         [TestMethod]
         public void SaveChangesInTransaction_CallOnce_InsideAction_Commit()
         {
-            var numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Action action = () =>
+                var numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    var list = Enumerable.Range(1, numActions);
-                    foreach (var i in list)
+                    Action action = () =>
                     {
-                        CreateStockActionWithoutCallingSaveChanges(i);
-                        TestDBContext.SaveChanges();
-                    }
-                };
+                        var list = Enumerable.Range(1, numActions);
+                        foreach (var i in list)
+                        {
+                            CreateStockActionWithoutCallingSaveChanges(context, i);
+                            context.SaveChanges();
+                        }
+                    };
 
-                action();
-                transaction.Commit();
+                    action();
+                    transaction.Commit();
+                }
+                Assert.AreEqual(numActions, context.StockActions.Count());
             }
-            Assert.AreEqual(numActions, TestDBContext.StockActions.Count());
         }
 
         [TestMethod]
         public void SaveChangesInTransaction_CallOnce_InsideAction_Rollback()
         {
-            var numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Action action = () =>
+                var numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    var list = Enumerable.Range(1, numActions);
-                    foreach (var i in list)
+                    Action action = () =>
                     {
-                        CreateStockActionWithoutCallingSaveChanges(i);
-                    }
-                    TestDBContext.SaveChanges();
-                };
+                        var list = Enumerable.Range(1, numActions);
+                        foreach (var i in list)
+                        {
+                            CreateStockActionWithoutCallingSaveChanges(context, i);
+                        }
+                        context.SaveChanges();
+                    };
 
-                action();
-                transaction.Rollback();
+                    action();
+                    transaction.Rollback();
+                }
+                Assert.AreEqual(0, context.StockActions.Count());
             }
-            Assert.AreEqual(0, TestDBContext.StockActions.Count());
         }
         #endregion // Action 内、同期呼出
 
@@ -301,45 +337,51 @@ namespace MemorieDeFleursTest.ModelEntityTest
         [TestMethod]
         public void SaveChangesInTransaction_CallOnce_InsideTask_CommitInsideTask()
         {
-            var numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                var task = Task.Run(() =>
+                var numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    var list = Enumerable.Range(1, numActions);
-                    foreach (var i in list)
+                    var task = Task.Run(() =>
                     {
-                        CreateStockActionWithoutCallingSaveChanges(i);
-                    }
-                    TestDBContext.SaveChanges();
-                    transaction.Commit();
-                });
+                        var list = Enumerable.Range(1, numActions);
+                        foreach (var i in list)
+                        {
+                            CreateStockActionWithoutCallingSaveChanges(context, i);
+                        }
+                        context.SaveChanges();
+                        transaction.Commit();
+                    });
 
-                task.Wait();
+                    task.Wait();
+                }
+                Assert.AreEqual(numActions, context.StockActions.Count());
             }
-            Assert.AreEqual(numActions, TestDBContext.StockActions.Count());
         }
 
         [TestMethod]
         public void SaveChangesInTransaction_CallOnce_InsideTask_RollbackInsideTask()
         {
-            var numActions = 10;
-            using (var transaction = TestDBContext.Database.BeginTransaction())
+            using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                var task = Task.Run(() =>
+                var numActions = 10;
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    var list = Enumerable.Range(1, numActions);
-                    foreach (var i in list)
+                    var task = Task.Run(() =>
                     {
-                        CreateStockActionWithoutCallingSaveChanges(i);
-                    }
-                    TestDBContext.SaveChanges();
-                    transaction.Rollback();
-                });
+                        var list = Enumerable.Range(1, numActions);
+                        foreach (var i in list)
+                        {
+                            CreateStockActionWithoutCallingSaveChanges(context, i);
+                        }
+                        context.SaveChanges();
+                        transaction.Rollback();
+                    });
 
-                task.Wait();
+                    task.Wait();
+                }
+                Assert.AreEqual(0, context.StockActions.Count());
             }
-            Assert.AreEqual(0, TestDBContext.StockActions.Count());
         }
         #endregion // 別タスク
         #endregion // SaveChanges を全エンティティ登録後に呼び出す

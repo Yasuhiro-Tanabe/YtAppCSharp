@@ -300,7 +300,7 @@ namespace MemorieDeFleurs.Models
             return UseBouquetPart(DbContext, part, date, quantity);
         }
 
-        internal int UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
+        public int UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
         {
             try
             {
@@ -318,12 +318,12 @@ namespace MemorieDeFleurs.Models
                 else
                 {
                     var usedLot = new Stack<int>();
-                    UseFromThisLot(DbContext, stock, quantity, usedLot);
+                    UseFromThisLot(context, stock, quantity, usedLot);
                 }
 
                 context.SaveChanges();
 
-                var remain = DbContext.StockActions
+                var remain = context.StockActions
                     .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE || a.Action == StockActionType.OUT_OF_STOCK)
                     .Where(a => 0 == a.ActionDate.CompareTo(date))
                     .Sum(a => a.Remain);
@@ -443,6 +443,7 @@ namespace MemorieDeFleurs.Models
                 {
                     // このロットから全量引き出す
                     UseFromThisLot(context, action, quantity, usedLot);
+                    LogUtil.DEBUGLOG_EndMethod(msg: $"resolved");
                     return;
                 }
                 else
@@ -468,8 +469,8 @@ namespace MemorieDeFleurs.Models
                     Quantity = useToThisLot,
                     Remain = -useToThisLot
                 };
-                DbContext.StockActions.Add(outOfStockAction);
-                DbContext.SaveChanges();
+                context.StockActions.Add(outOfStockAction);
+                context.SaveChanges();
                 LogUtil.Debug($"OutOfStockAction : date={outOfStockAction.ActionDate.ToString("yyyyMMdd")}, quantity");
             }
 
@@ -480,9 +481,14 @@ namespace MemorieDeFleurs.Models
 
         public void CreatePartsList(string bouquet, string part, int quantity)
         {
+            CreatePartsList(DbContext, bouquet, part, quantity);
+        }
+
+        public void CreatePartsList(MemorieDeFleursDbContext context, string bouquet, string part, int quantity)
+        {
             var item = new BouquetPartsList() { BouquetCode = bouquet, PartsCode = part, Quantity = quantity };
-            DbContext.PartsList.Add(item);
-            DbContext.SaveChanges();
+            context.PartsList.Add(item);
+            context.SaveChanges();
         }
     }
 }

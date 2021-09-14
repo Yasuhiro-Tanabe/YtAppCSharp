@@ -43,5 +43,25 @@ namespace MemorieDeFleurs.Models
             Sequences = new SequenceUtil(DbConnection);
 
         }
+
+        /// <summary>
+        /// データモデルを生成する。
+        /// 
+        /// テスト・デバッグの利便性を考慮し、操作するデータベースを
+        /// 外部から指定できるようにしている。
+        /// </summary>
+        /// <param name="db"></param>
+        public MemorieDeFleursModel(SqliteConnection connection)
+        {
+            DbConnection = connection;
+            DbContext = new MemorieDeFleursDbContext(DbConnection);
+
+            SupplierModel = new SupplierModel(this);
+            BouquetModel = new BouquetModel(this);
+            CustomerModel = new CustomerModel(this);
+
+            DateMaster = new DateUtil(DbConnection);
+            Sequences = new SequenceUtil(DbConnection);
+        }
     }
 }
