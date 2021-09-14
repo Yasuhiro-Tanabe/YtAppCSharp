@@ -4,6 +4,7 @@ using log4net.Config;
 using MemorieDeFleurs.Models.Entities;
 
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -23,7 +24,13 @@ namespace MemorieDeFleurs.Logging
         }
 
         #region 基本のログ出力メソッド
-        public static void Debug(string msg) => _logger.Debug(msg);
+        public static void Debug(string msg, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        {
+            if(_logger.IsDebugEnabled)
+            {
+                _logger.Debug($"{msg} ({caller},{Path.GetFileName(path)}:{line}");
+            }
+        }
         public static void DebugFormat(string fmt, params object[] args) => _logger.DebugFormat(fmt, args);
         public static void Info(string msg) => _logger.Info(msg);
         public static void InfoFormat(string fmt, params object[] args) => _logger.InfoFormat(fmt, args);
@@ -38,7 +45,7 @@ namespace MemorieDeFleurs.Logging
 
         #region デバッグ用の拡張ログ出力
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_BeginMethod(string args = "", string msg = "", [CallerMemberName] string caller = "")
+        public static void DEBUGLOG_BeginMethod(string args = "", string msg = "", [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var b = new StringBuilder().Append($"{Indent}[BEGIN] ").Append(caller)
                 .Append(string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )");
@@ -48,12 +55,12 @@ namespace MemorieDeFleurs.Logging
                 b.Append(' ').Append(msg);
             }
 
-            LogUtil.Debug(b.ToString());
+            LogUtil.Debug(b.ToString(), caller, path, line);
             Indent++;
         }
 
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_EndMethod(string args = "", string msg = "", [CallerMemberName] string caller = "")
+        public static void DEBUGLOG_EndMethod(string args = "", string msg = "", [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             Indent--;
 
@@ -65,11 +72,11 @@ namespace MemorieDeFleurs.Logging
                 b.Append(' ').Append(msg);
             }
 
-            LogUtil.Debug(b.ToString());
+            LogUtil.Debug(b.ToString(), caller, path, line);
         }
 
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_StockActionQuantityChanged(StockAction oldAction, int newQuantity, int newRemain, [CallerMemberName] string calledFrom = "", [CallerLineNumber] int line = 0)
+        public static void DEBUGLOG_StockActionQuantityChanged(StockAction oldAction, int newQuantity, int newRemain, [CallerMemberName] string calledFrom = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var builder = new StringBuilder()
                 .Append(LogUtil.Indent).Append(oldAction.PartsCode).Append('.').Append(oldAction.Action)
@@ -94,9 +101,9 @@ namespace MemorieDeFleurs.Logging
                 builder.AppendFormat(", remain={0}->{1}", oldAction.Remain, newRemain);
             }
 
-            builder.AppendFormat(" ] ({0}:{1})", calledFrom, line);
+            builder.Append(" ]");
 
-            LogUtil.Debug(builder.ToString());
+            LogUtil.Debug(builder.ToString(), calledFrom, path, line);
         }
         #endregion
     }
