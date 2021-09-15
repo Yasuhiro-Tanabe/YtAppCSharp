@@ -124,6 +124,26 @@ namespace MemorieDeFleursTest.ModelEntityTest
             }
 
         }
+
+        [TestMethod]
+        public void CurrentTransactionIDOfDbContextAlwaysUnique()
+        {
+            var num = 10;
+            var ids = new SortedSet<Guid>();
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                foreach(var i in Enumerable.Range(0, num))
+                {
+                    using (var transaction = context.Database.BeginTransaction())
+                    {
+                        ids.Add(context.Database.CurrentTransaction.TransactionId);
+                        transaction.Commit();
+                    }
+                }
+            }
+
+            Assert.AreEqual(num, ids.Count());
+        }
         #endregion // CUrrentTransaction の確認
 
         [TestMethod]
