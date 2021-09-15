@@ -122,5 +122,10 @@ namespace MemorieDeFleurs.Models
         /// お届け先
         /// </summary>
         public DbSet<ShippingAddress> ShippingAddresses { get; set; }
+
+        /// <summary>
+        /// 連番管理
+        /// </summary>
+        public DbSet<SequenceValue> Sequences { get; set; }
     }
 }
