@@ -287,5 +287,33 @@ namespace MemorieDeFleursTest.ModelTest
 
             LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [End] =====");
         }
+
+        #region 【懸案】トランザクションロールバックのテスト：現在は RED になるためテスト対象外
+        /* [TestMethod] */
+        public void CanRollbackCurrentOrder()
+        {
+            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using(var transaction = context.Database.BeginTransaction())
+            {
+                var currentStock = new StockCalcurator(context, ExpectedPart);
+                var lot = InitialOrders[DateConst.May6th][0].LotNo;
+                var expectedRemain = currentStock.Remain[DateConst.May8th]; // お届け日前日(=発送日)の当日残：注文がロールバックされるので当日残に増減はないはず
+
+                Model.CustomerModel.Order(context, DateConst.April30th, ExpectedBigBouquet, ExpectedShippingAddress, DateConst.May9th);
+
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.May6th, lot).Begin()
+                        .At(DateConst.May8th).Used(0, expectedRemain)
+                        .At(DateConst.May9th).Used(0, expectedRemain).Discarded(expectedRemain)
+                        .End()
+                    .End()
+                    .AssertAll(context);
+            }
+
+            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+        }
+        #endregion // トランザクションロールバックのテスト
     }
 }
