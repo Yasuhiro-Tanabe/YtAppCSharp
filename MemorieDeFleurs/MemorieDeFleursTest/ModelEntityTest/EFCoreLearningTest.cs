@@ -54,6 +54,42 @@ namespace MemorieDeFleursTest.ModelEntityTest
         }
         #endregion
 
+        #region DbContext.Database.CurrentTransaction の確認
+        /// <summary>
+        /// DbContext.Database.CurrentTransaction が BeginTransaction() の際にセットされ
+        /// Commit() により null クリアされることの確認
+        /// </summary>
+        [TestMethod]
+        public void CommitResetsCurrentTransactionInDbContext()
+        {
+            using(var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    Assert.IsNotNull(context.Database.CurrentTransaction);
+                    transaction.Commit();
+                }
+                Assert.IsNull(context.Database.CurrentTransaction);
+            }    
+        }
+        /// <summary>
+        /// DbContext.Database.CurrentTransaction が BeginTransaction() の際にセットされ
+        /// Rollback() により null クリアされることの確認
+        /// </summary>
+        public void RollbackResetsCurrentTransactionInDbCotenxt()
+        {
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    Assert.IsNotNull(context.Database.CurrentTransaction);
+                    transaction.Rollback();
+                }
+                Assert.IsNull(context.Database.CurrentTransaction);
+            }
+        }
+        #endregion // CUrrentTransaction の確認
+
         [TestMethod]
         public void Transaction_CanCommit()
         {
@@ -87,6 +123,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
             }
         }
 
+        #region 在庫アクションの登録
         private StockAction CreateStockAction(MemorieDeFleursDbContext context, int lotNo)
         {
             StockAction action = CreateStockActionWithoutCallingSaveChanges(context, lotNo);
@@ -110,6 +147,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
             context.StockActions.Add(action);
             return action;
         }
+        #endregion // 在庫アクションの登録
 
         [TestMethod]
         public void LearnEFCoreTransaction_CannotUseMultipeTransactionsInSingleDbContext()
