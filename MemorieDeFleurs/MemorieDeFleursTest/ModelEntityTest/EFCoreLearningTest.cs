@@ -2,6 +2,7 @@
 using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
@@ -88,6 +89,41 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 Assert.IsNull(context.Database.CurrentTransaction);
             }
         }
+
+        /// <summary>
+        /// (SQLiteでは) 入れ子のトランザクションは作れない
+        /// </summary>
+        [TestMethod]
+        public void LearnEFCoreTransaction_CannotUseMultipeTransactionsInSingleDbContext()
+        {
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var tansaction1 = context.Database.BeginTransaction())
+            {
+                Assert.ThrowsException<InvalidOperationException>(() => context.Database.BeginTransaction());
+            }
+        }
+
+        /// <summary>
+        /// 同一 DbConnection から生成した DbContext だが、外側の DbContext の状態を継承するわけではない
+        /// 
+        /// また内側の DbContext では BeginTransaction() を呼び出せない
+        /// </summary>
+        [TestMethod]
+        public void InnerAndOuterDbContextUsesSameDbConnection_ButNotInSameTransaction()
+        {
+            using(var outerContext = new MemorieDeFleursDbContext(TestDB))
+            using (var outerTransaction = outerContext.Database.BeginTransaction())
+            {
+                Assert.IsNotNull(outerContext.Database.CurrentTransaction);
+                Assert.AreEqual(outerTransaction.TransactionId, outerContext.Database.CurrentTransaction.TransactionId);
+                using (var innerContext = new MemorieDeFleursDbContext(TestDB))
+                {
+                    Assert.IsNull(innerContext.Database.CurrentTransaction);
+                    Assert.ThrowsException<InvalidOperationException>(() => innerContext.Database.BeginTransaction());
+                }
+            }
+
+        }
         #endregion // CUrrentTransaction の確認
 
         [TestMethod]
@@ -148,16 +184,6 @@ namespace MemorieDeFleursTest.ModelEntityTest
             return action;
         }
         #endregion // 在庫アクションの登録
-
-        [TestMethod]
-        public void LearnEFCoreTransaction_CannotUseMultipeTransactionsInSingleDbContext()
-        {
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            using (var tansaction1 = context.Database.BeginTransaction())
-            {
-                Assert.ThrowsException<InvalidOperationException>(() => context.Database.BeginTransaction());
-            }
-        }
 
         #region SaveChanges をエンティティ登録の都度呼び出す
         #region Linq コレクションの操作方法により DB 登録できたりできなかったりする
