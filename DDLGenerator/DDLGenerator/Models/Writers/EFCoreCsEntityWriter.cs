@@ -12,7 +12,7 @@ namespace DDLGenerator.Models.Writers
     /// <summary>
     /// Entity Framework Core 用のエンティティクラスを出力するライター
     /// </summary>
-    class EFCoreCsEntityWriter : IDataDefinitionTableWriter
+    public class EFCoreCsEntityWriter : IDDLWriter
     {
         /// <summary>
         /// 出力先フォルダ
@@ -23,18 +23,13 @@ namespace DDLGenerator.Models.Writers
         {
             ForceOverwrite,
             ValidateBeforeStart,
-            AbortBeforeWritingThFile,
+            AbortBeforeWritingTheFile,
             SkipTheFile
         }
 
         public string NameSpace { get; set; } = "Sample.EFCore.Entities";
 
         public ActionIfClassFileExists WriterActionMode { get; set; } = ActionIfClassFileExists.ForceOverwrite;
-
-        public EFCoreCsEntityWriter(string outpath)
-        {
-            OutputPath = outpath;
-        }
 
         public void WriteTables(IList<TableDefinition> tables)
         {
@@ -151,7 +146,11 @@ namespace DDLGenerator.Models.Writers
         {
             if(string.IsNullOrWhiteSpace(OutputPath))
             {
-                throw new FileNotFoundException("Output folder name is empty or white space.");
+                throw new ApplicationException("Output folder name is empty or white space.");
+            }
+            if(string.IsNullOrWhiteSpace(NameSpace))
+            {
+                throw new ApplicationException("Namespace of entity classes is not found.");
             }
         }
 

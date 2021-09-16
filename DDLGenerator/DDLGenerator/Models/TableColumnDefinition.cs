@@ -3,7 +3,7 @@
     /// <summary>
     /// データベーステーブルの各カラム
     /// </summary>
-    class TableColumnDefinition
+    public class TableColumnDefinition
     {
         /// <summary>
         /// 列名

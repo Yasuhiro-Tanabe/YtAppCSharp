@@ -16,20 +16,9 @@ namespace DDLGenerator.Commands
     {
         public event EventHandler CanExecuteChanged;
 
-        /// <summary>
-        /// コマンドが割り当てられたビューモデル
-        /// </summary>
-        private SQLiteDDLViewModel _vm;
-
-        public SelectOutputFileCommand(SQLiteDDLViewModel vm)
-        {
-            _vm = vm;
-        }
-
         public bool CanExecute(object parameter)
         {
-            LogUtil.Debug($"{this.GetType().Name}#CanExecute() called. parameter={parameter?.GetType().Name}");
-            return true;
+            return IsExecutable;
         }
 
         public void Execute(object parameter)
@@ -45,12 +34,35 @@ namespace DDLGenerator.Commands
             dialog.FileName = "TableDefinitions.sql";
 
             var result = dialog.ShowDialog();
-            if(result.HasValue && result.Value)
+            if (result.HasValue && result.Value)
             {
-                _vm.OutputDdlFilePath = dialog.FileName;
-                LogUtil.Info("出力ファイル:"+dialog.FileName);
+                if (parameter is SQLiteDDLViewModel)
+                {
+                    var vm = parameter as SQLiteDDLViewModel;
+                    vm.OutputDdlFilePath = dialog.FileName;
+
+                }
+                LogUtil.Info("出力ファイル:" + dialog.FileName);
+            }
+            else
+            {
+                LogUtil.Warn($"Unexpected View: {parameter.GetType().Name}");
             }
 
+        }
+
+        private bool IsExecutable { get; set; } = true;
+
+        public void OnGenerationStarted(object sender, EventArgs unused)
+        {
+            IsExecutable = false;
+            CanExecuteChanged?.Invoke(this, null);
+        }
+
+        public void OnGenerationFinished(object sender, EventArgs unused)
+        {
+            IsExecutable = true;
+            CanExecuteChanged?.Invoke(this, null);
         }
     }
 }

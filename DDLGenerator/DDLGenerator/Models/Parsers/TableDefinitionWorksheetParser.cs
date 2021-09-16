@@ -4,24 +4,18 @@ using SpreadsheetLight;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 
-namespace DDLGenerator.Models
+namespace DDLGenerator.Models.Parsers
 {
     /// <summary>
     /// SpreadsheetLight クラスライブラリを使ったテーブル定義書 (Excel) の解析器
     /// </summary>
-    class TableDefinitionWorksheetParser
+    public class TableDefinitionWorksheetParser : IDDLParser
     {
         private SLDocument Document { get; set; }
 
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        /// <param name="doc"></param>
-        public TableDefinitionWorksheetParser(SLDocument doc)
-        {
-            Document = doc;
-        }
+        public string DataDefinitionFileName { get; set; }
 
         /// <summary>
         /// データベース定義書から読み取ったテーブル定義の一覧
@@ -33,46 +27,52 @@ namespace DDLGenerator.Models
         /// </summary>
         public void Parse()
         {
-            foreach (var sheet in Document.GetWorksheetNames())
+            using(Document = new SLDocument(DataDefinitionFileName))
             {
-                Document.SelectWorksheet(sheet);
-                LogUtil.Debug($"Processing WorkSheet {sheet}...");
-
-                if (!IsTableDefinitionWorksheet()) { continue; }
-
-                var table = new TableDefinition()
+                foreach (var sheet in Document.GetWorksheetNames())
                 {
-                    TableName = GetCellValueStringOrEmpty("B2"),
-                    TableComment = GetCellValueStringOrEmpty("B1")
-                };
-                LogUtil.Info($"テーブル定義読み込み中： '{table.TableName}' ({table.TableComment})...");
+                    Document.SelectWorksheet(sheet);
+                    LogUtil.Debug($"Processing WorkSheet {sheet}...");
 
-                int i = GetFirstColumDefinitionPosition();
+                    if (!IsTableDefinitionWorksheet()) { continue; }
 
-                // テーブル定義の取得
-                while (Document.HasCellValue($"A{i}"))
-                {
-                    TableColumnDefinition row = new TableColumnDefinition()
+                    var table = new TableDefinition()
                     {
-                        RowName = GetCellValueStringOrEmpty($"B{i}"),
-                        RowComment = GetCellValueStringOrEmpty($"A{i}"),
-                        DataType = GetCellValueStringOrEmpty($"D{i}"),
-                        DataLength = GetCellValueIntegerOrZero($"E{i}"),
-                        IsNotNull = Document.HasCellValue($"F{i}"),
-                        IsPrimaryKey = Document.HasCellValue($"G{i}"),
-                        ForeignKeyTableName = GetCellValueStringOrEmpty($"H{i}"),
-                        ForeignKeyColumnName = GetCellValueStringOrEmpty($"I{i}")
+                        TableName = GetCellValueStringOrEmpty("B2"),
+                        TableComment = GetCellValueStringOrEmpty("B1")
                     };
+                    LogUtil.Info($"テーブル定義読み込み中： '{table.TableName}' ({table.TableComment})...");
 
-                    table.Rows.Add(row);
-                    LogUtil.Debug($"Row '{row.RowName}' ({row.RowComment}, type={row.DataType}) found.");
+                    int i = GetFirstColumDefinitionPosition();
 
-                    i++;
+                    // テーブル定義の取得
+                    while (Document.HasCellValue($"A{i}"))
+                    {
+                        TableColumnDefinition row = new TableColumnDefinition()
+                        {
+                            RowName = GetCellValueStringOrEmpty($"B{i}"),
+                            RowComment = GetCellValueStringOrEmpty($"A{i}"),
+                            DataType = GetCellValueStringOrEmpty($"D{i}"),
+                            DataLength = GetCellValueIntegerOrZero($"E{i}"),
+                            IsNotNull = Document.HasCellValue($"F{i}"),
+                            IsPrimaryKey = Document.HasCellValue($"G{i}"),
+                            ForeignKeyTableName = GetCellValueStringOrEmpty($"H{i}"),
+                            ForeignKeyColumnName = GetCellValueStringOrEmpty($"I{i}")
+                        };
+
+                        table.Rows.Add(row);
+                        LogUtil.Debug($"Row '{row.RowName}' ({row.RowComment}, type={row.DataType}) found.");
+
+                        i++;
+                    }
+
+                    TableDefinitions.Add(table);
+                    LogUtil.Debug($"Table '{table.TableName}' added to tables.");
                 }
-
-                TableDefinitions.Add(table);
-                LogUtil.Debug($"Table '{table.TableName}' added to tables.");
             }
+            LogUtil.Info($"テーブル定義書 '{Path.GetFileName(DataDefinitionFileName)}' の解析完了");
+
+            Document = null;
         }
 
         public bool IsFoundTableDefinitions()
@@ -138,6 +138,18 @@ namespace DDLGenerator.Models
             else
             {
                 return 0;
+            }
+        }
+
+        public void Validate()
+        {
+            if (string.IsNullOrWhiteSpace(DataDefinitionFileName))
+            {
+                throw new FileNotFoundException("Input file name is empty or white space.");
+            }
+            if (!File.Exists(DataDefinitionFileName))
+            {
+                throw new FileNotFoundException(DataDefinitionFileName);
             }
         }
     }

@@ -5,7 +5,7 @@ namespace DDLGenerator.Models
     /// <summary>
     /// データベースのテーブル定義
     /// </summary>
-    class TableDefinition
+    public class TableDefinition
     {
         /// <summary>
         /// テーブル名
