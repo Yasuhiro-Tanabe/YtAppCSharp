@@ -15,14 +15,14 @@ namespace DDLGenerator.Commands
         public bool CanExecute(object parameter)
         {
             LogUtil.Debug($"{this.GetType().Name}#CanExecute() called. parameter={parameter?.GetType().Name}");
-            return true;
+            return IsExecutable;
         }
 
         public void Execute(object parameter)
         {
             LogUtil.Debug($"{this.GetType().Name}#Execute() called. parameter={parameter?.GetType().Name}");
 
-
+            // CommonOpenFileDialog だと開くファイルの拡張子が指定できないのでだめ。
             var dialog = new OpenFileDialog();
             dialog.Title = "データベース定義書の選択";
             dialog.Filter = "Excel ファイル (*.xlsx)|*.xlsx";
@@ -45,7 +45,25 @@ namespace DDLGenerator.Commands
                     LogUtil.Debug($"EFCoreEntityViewModel.TableDefinitionFilePath = '{dialog.FileName}'");
                     (parameter as EFCoreEntityViewModel).TableDefinitionFilePath = dialog.FileName;
                 }
+                else
+                {
+                    LogUtil.Warn($"Unexpected View: {parameter.GetType().Name}");
+                }
             }
+        }
+
+        private bool IsExecutable { get; set; } = true;
+
+        public void OnGenerationStarted(object sender, EventArgs unused)
+        {
+            IsExecutable = false;
+            CanExecuteChanged?.Invoke(this, null);
+        }
+
+        public void OnGenerationFinished(object sender, EventArgs unused)
+        {
+            IsExecutable = true;
+            CanExecuteChanged?.Invoke(this, null);
         }
     }
 }

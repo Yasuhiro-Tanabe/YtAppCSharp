@@ -31,6 +31,9 @@ namespace DDLGenerator.Commands
         /// <param name="parameter">コマンド送信元</param>
         public void Execute(object parameter)
         {
+            // 警告 CS0067 対策 (イベント 'QuitCommand.CanExecuteChanged' は使用されていません)
+            CanExecuteChanged?.Invoke(this, null);
+
             LogUtil.Debug($"{this.GetType().Name}#Execute() called. parameter={parameter?.GetType().Name}");
             Application.Current.Shutdown();
         }

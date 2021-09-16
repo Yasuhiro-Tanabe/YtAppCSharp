@@ -1,8 +1,10 @@
 ﻿using DDLGenerator.Models.Logging;
+using DDLGenerator.Models.Parsers;
 using DDLGenerator.Models.Writers;
 
 using SpreadsheetLight;
 
+using System;
 using System.IO;
 
 namespace DDLGenerator.Models
@@ -12,63 +14,53 @@ namespace DDLGenerator.Models
     /// </summary>
     public class DDLGenerator
     {
-        public static void Generate(string input, string output)
+        public IDDLParser Parser { get; set; }
+        public IDDLWriter Writer { get; set; }
+
+        public void GenerateDDL()
         {
-            var generator = new DDLGenerator();
-            generator.GenerateDDL(input, output);
+            LogUtil.Debug($"GenerateDDL() called. Parser={Parser.GetType().Name}, Writer={Writer.GetType().Name}");
 
-        }
-
-        public void GenerateDDL(string input, string output)
-        {
-            LogUtil.Debug($"GenerateDDL() called. input={input}, output={output}");
-            if(string.IsNullOrWhiteSpace(input))
+            if(Parser == null)
             {
-                throw new FileNotFoundException("Input file name is empty or white space.");
+                LogUtil.Error("システムエラー：Parserが指定されていない");
+                return;
             }
-            if (string.IsNullOrWhiteSpace(output))
+            if(Writer == null)
             {
-                throw new FileNotFoundException("Output file name is empty or white space.");
-            }
-
-            if (!File.Exists(input))
-            {
-                throw new FileNotFoundException(input);
+                LogUtil.Error("システムエラー：テーブル定義出力方法が指定されていない");
+                return;
             }
 
             try
             {
-                using (var doc = new SLDocument(input))
-                {
-                    var parser = new TableDefinitionWorksheetParser(doc);
-                    parser.Parse();
-                    LogUtil.Info($"テーブル定義書 '{Path.GetFileName(input)}' の解析完了");
+                Parser.Validate();
+                Writer.Validate();
 
-                    if(parser.IsFoundTableDefinitions())
-                    {
-                        WriteSqliteDDLWriter(output, parser);
-                        WriteEFCoreEntities(Path.GetDirectoryName(output), parser);
-                    }
+                Parser.Parse();
+
+                if (Parser.TableDefinitions.Count > 0)
+                {
+                    Writer.WriteTables(Parser.TableDefinitions);
                 }
             }
-            catch(IOException eio)
+            catch (FileNotFoundException ef)
+            {
+                // IOException のサブクラスなので先にチェックする
+                LogUtil.Warn("ファイルが見つかりません：" + ef.Message);
+            }
+            catch (IOException eio)
             {
                 LogUtil.Warn("テーブル定義スクリプトの作成に失敗しました：" + eio.Message);
             }
-        }
-
-        private void WriteSqliteDDLWriter(string output, TableDefinitionWorksheetParser parser)
-        {
-            var writer = new SQLiteDDLWriter(output);
-            writer.WriteTables(parser.TableDefinitions);
-            LogUtil.Info($"スクリプト '{Path.GetFileName(output)}' の出力完了");
-        }
-
-        private void WriteEFCoreEntities(string folder, TableDefinitionWorksheetParser parser)
-        {
-            var writer = new EFCoreCsEntityWriter(folder);
-            writer.WriteTables(parser.TableDefinitions);
-            LogUtil.Info($"エンティティクラスファイルのフォルダ '{folder}' への出力完了");
+            catch(ApplicationException eapp)
+            {
+                LogUtil.Warn("テーブル定義スクリプトの作成に失敗しました：" + eapp.Message);
+            }
+            catch(Exception e)
+            {
+                LogUtil.Error($"想定外のエラー {e.GetType().Name}: {e.Message}");
+            }
         }
     }
 }

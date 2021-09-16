@@ -50,7 +50,7 @@
         <Button Grid.Row="1" Grid.Column="2"
                 Margin="20,10"
                 VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                Content="..." Command="{Binding SelectOutputFile}"/>
+                Content="..." Command="{Binding SelectOutputFile}" CommandParameter="{Binding}"/>
 
         <!-- 3段目：操作コマンド -->
         <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
@@ -63,7 +63,7 @@
             <Button Grid.Column="0"
                     Margin="20,10,20,10"
                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                    Content="生成" Command="{Binding GenerateDDL}"/>
+                    Content="生成" Command="{Binding GenerateDDL}" CommandParameter="{Binding}"/>
             <Button Grid.Column="2"
                     Margin="20,10,20,10"
                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
