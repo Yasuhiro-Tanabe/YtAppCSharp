@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Logging;
+﻿using MemorieDeFleurs.Databese.SQLite;
+using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 
 using System;
@@ -14,12 +15,12 @@ namespace MemorieDeFleurs.Models
 
         private int NextCustomerID
         {
-            get { return Parent.Sequences.SEQ_CUSTOMERS.Next; }
+            get { return Parent.Sequences.SEQ_CUSTOMERS.Next(); }
         }
 
         private int NextShippingAddressID
         {
-            get { return Parent.Sequences.SEQ_SHIPPING.Next; }
+            get { return Parent.Sequences.SEQ_SHIPPING.Next(); }
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using MemorieDeFleurs.Databese.SQLite;
+
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace MemorieDeFleurs.Models
@@ -40,8 +42,7 @@ namespace MemorieDeFleurs.Models
             CustomerModel = new CustomerModel(this);
             
             DateMaster = new DateUtil(DbConnection);
-            Sequences = new SequenceUtil(DbConnection);
-
+            Sequences = new SequenceUtil(this);
         }
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace MemorieDeFleurs.Models
             CustomerModel = new CustomerModel(this);
 
             DateMaster = new DateUtil(DbConnection);
-            Sequences = new SequenceUtil(DbConnection);
+            Sequences = new SequenceUtil(this);
         }
     }
 }

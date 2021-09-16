@@ -1,8 +1,7 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models;
+﻿using MemorieDeFleurs.Databese.SQLite;
+using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;

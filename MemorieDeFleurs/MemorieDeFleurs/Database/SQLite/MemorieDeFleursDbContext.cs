@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 using System.Data.Common;
 
-namespace MemorieDeFleurs.Models
+namespace MemorieDeFleurs.Databese.SQLite
 {
     /// <summary>
     /// 花束問題の Entity Framework Core 用データベースコンテキスト

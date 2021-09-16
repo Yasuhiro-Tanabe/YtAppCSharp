@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 using MemorieDeFleursTest.ModelTest.Fluent;
 using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Databese.SQLite;
 
 namespace MemorieDeFleursTest.ModelTest
 {
@@ -373,5 +374,63 @@ namespace MemorieDeFleursTest.ModelTest
 
             LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 1 Lot (100)) [End]=====");
         }
+
+        [TestMethod]
+        public void OrderInTransaction_CommitAvailable()
+        {
+            LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var lot0509 = 0;
+                var numLot = 1;
+                var quantity = numLot * ExpectedPart.QuantitiesPerLot;
+
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    lot0509 = Model.SupplierModel.Order(context, DateConst.April30th, ExpectedPart, numLot, DateConst.May9th);
+                    transaction.Commit();
+                }
+
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.May9th, lot0509).Begin()
+                        .At(DateConst.May9th).Arrived(quantity).Used(0, quantity)
+                        .At(DateConst.May9th.AddDays(1)).Used(0, quantity)
+                        .At(DateConst.May9th.AddDays(2)).Used(0, quantity)
+                        .At(DateConst.May9th.AddDays(3)).Used(0, quantity).Discarded(quantity)
+                        .End()
+                    .End()
+                    .AssertAll(context);
+
+            }
+            LogUtil.DEBUGLOG_EndMethod(msg: "==========");
+        }
+
+
+        #region 【懸案】トランザクションロールバックのテスト：現在は RED になるためテスト対象外
+        //[TestMethod, TestCategory("【RED】")]
+        public void OrderInTransaction_RoolbackAvailable()
+        {
+
+            LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                var lot0509 = 0;
+                var numLot = 1;
+                var quantity = numLot * ExpectedPart.QuantitiesPerLot;
+
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    lot0509 = Model.SupplierModel.Order(context, DateConst.April30th, ExpectedPart, numLot, DateConst.May9th);
+                    transaction.Rollback();
+                }
+
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.May9th, lot0509).HasNoStockActions()
+                    .End()
+                    .AssertAll(context);
+                Assert.AreEqual(lot0509, Model.Sequences.SEQ_SUPPLIERS.Next(context), "発注がロールバックされているので、再採番したときはロールバック前に採番したロット番号が取得できるはず");
+            }
+        }
+        #endregion // 懸案
     }
 }

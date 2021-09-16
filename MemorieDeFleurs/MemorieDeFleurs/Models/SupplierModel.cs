@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Logging;
+﻿using MemorieDeFleurs.Databese.SQLite;
+using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 
 using System;
@@ -15,13 +16,12 @@ namespace MemorieDeFleurs.Models
     /// </summary>
     public class SupplierModel
     {
-        private MemorieDeFleursDbContext DbContext { get; set; }
         private MemorieDeFleursModel Parent { get; set; }
 
         /// <summary>
         /// 次の未使用仕入先コード
         /// </summary>
-        internal int NextSequenceCode { get { return Parent.Sequences.SEQ_SUPPLIERS.Next; } }
+        internal SequenceUtil.SequenceValueManager SEQ_SUPPLIERS { get { return Parent.Sequences.SEQ_SUPPLIERS; } }
 
         /// <summary>
         /// (パッケージ内限定)コンストラクタ
@@ -32,7 +32,6 @@ namespace MemorieDeFleurs.Models
         internal SupplierModel(MemorieDeFleursModel parent)
         {
             Parent = parent;
-            DbContext = parent.DbContext;
         }
 
         #region SupplierBuilder
@@ -129,20 +128,24 @@ namespace MemorieDeFleurs.Models
             /// <returns>登録された仕入先オブジェクト</returns>
             public Supplier Create()
             {
-                var s = new Supplier()
+                using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
                 {
-                    Code = _model.NextSequenceCode,
-                    Name = _name,
-                    Address1 = _address1,
-                    Address2 = _address2,
-                    Telephone = _tel,
-                    Fax = _fax,
-                    EmailAddress = _email
-                };
+                    var s = new Supplier()
+                    {
+                        Code = _model.SEQ_SUPPLIERS.Next(),
+                        Name = _name,
+                        Address1 = _address1,
+                        Address2 = _address2,
+                        Telephone = _tel,
+                        Fax = _fax,
+                        EmailAddress = _email
+                    };
 
-                _model.DbContext.Suppliers.Add(s);
-                _model.DbContext.SaveChanges();
-                return s;
+                    context.Suppliers.Add(s);
+                    context.SaveChanges();
+
+                    return s;
+                }
             }
         }
 
@@ -165,7 +168,10 @@ namespace MemorieDeFleurs.Models
         /// <returns>仕入先オブジェクト、仕入先コードに該当する仕入先が存在しないときはnull。</returns>
         public Supplier Find(int supplierCode)
         {
-            return Find(DbContext, supplierCode);
+            using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return Find(context, supplierCode);
+            }
         }
         private Supplier Find(MemorieDeFleursDbContext context, int supplierCode)
         {
@@ -224,7 +230,10 @@ namespace MemorieDeFleurs.Models
         /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
         public int Order(DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
-            return Order(DbContext, orderDate, part, quantityOfLot, arrivalDate);
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return Order(context, orderDate, part, quantityOfLot, arrivalDate);
+            }
         }
 
         public int Order(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
@@ -237,7 +246,7 @@ namespace MemorieDeFleurs.Models
                 .ToString());
 
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
-            var lotNo = NextSequenceCode;
+            var lotNo = SEQ_SUPPLIERS.Next(context);
             var quantity = quantityOfLot * part.QuantitiesPerLot;
 
             var param = new StockActionParameterToOrder(arrivalDate, part, lotNo, quantityOfLot);
@@ -387,10 +396,13 @@ namespace MemorieDeFleurs.Models
         }
 #endregion // 発注
 
-#region 発注取消
+        #region 発注取消
         public void CancelOrder(int lotNo)
         {
-            CancelOrder(DbContext, lotNo);
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                CancelOrder(context, lotNo);
+            }
         }
 
         public void CancelOrder(MemorieDeFleursDbContext context, int lotNo)

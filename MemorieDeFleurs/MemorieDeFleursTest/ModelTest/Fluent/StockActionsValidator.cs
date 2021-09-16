@@ -1,4 +1,4 @@
-﻿using MemorieDeFleurs.Models;
+﻿using MemorieDeFleurs.Databese.SQLite;
 using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -80,6 +80,11 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="context">検証対象データベース</param>
         public void AssertAll(MemorieDeFleursDbContext context)
         {
+            if (context is null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
             this.All(kv => { kv.Value.AssertAll(context, kv.Key); return true; });
 
             foreach(var expected in ExpectedStockActionCount)

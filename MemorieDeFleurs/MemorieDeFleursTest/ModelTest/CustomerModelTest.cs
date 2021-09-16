@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models;
+﻿using MemorieDeFleurs.Databese.SQLite;
+using MemorieDeFleurs.Models;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

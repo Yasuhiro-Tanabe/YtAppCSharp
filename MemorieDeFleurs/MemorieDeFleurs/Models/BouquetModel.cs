@@ -1,8 +1,6 @@
-﻿using MemorieDeFleurs.Logging;
+﻿using MemorieDeFleurs.Databese.SQLite;
+using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
-
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 
 using System;
 using System.Collections.Generic;

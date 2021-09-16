@@ -1,4 +1,4 @@
-﻿using MemorieDeFleurs;
+﻿using MemorieDeFleurs.Databese.SQLite;
 using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
@@ -10,7 +10,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace MemorieDeFleursTest.ModelTest
 {
@@ -289,7 +288,7 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         #region 【懸案】トランザクションロールバックのテスト：現在は RED になるためテスト対象外
-        /* [TestMethod] */
+        //[TestMethod, TestCategory("【RED】")]
         public void CanRollbackCurrentOrder()
         {
             LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
