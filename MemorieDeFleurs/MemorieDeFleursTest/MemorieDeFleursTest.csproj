@@ -29,6 +29,9 @@
     <None Update="testdata\db\MemorieDeFleursEmpty.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="testdata\db\TableDefinitions.sql">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
