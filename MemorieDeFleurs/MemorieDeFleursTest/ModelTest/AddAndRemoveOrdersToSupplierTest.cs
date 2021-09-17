@@ -406,24 +406,24 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
 
-        #region 【懸案】トランザクションロールバックのテスト：現在は RED になるためテスト対象外
-        //[TestMethod, TestCategory("【RED】")]
+        [TestMethod]
         public void OrderInTransaction_RoolbackAvailable()
         {
 
             LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
+            var lot0509 = 0;
+            var numLot = 1;
+            var quantity = numLot * ExpectedPart.QuantitiesPerLot;
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                lot0509 = Model.SupplierModel.Order(context, DateConst.April30th, ExpectedPart, numLot, DateConst.May9th);
+                transaction.Rollback();
+            }
+
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                var lot0509 = 0;
-                var numLot = 1;
-                var quantity = numLot * ExpectedPart.QuantitiesPerLot;
-
-                using (var transaction = context.Database.BeginTransaction())
-                {
-                    lot0509 = Model.SupplierModel.Order(context, DateConst.April30th, ExpectedPart, numLot, DateConst.May9th);
-                    transaction.Rollback();
-                }
-
                 StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                     .Lot(DateConst.May9th, lot0509).HasNoStockActions()
                     .End()
@@ -431,6 +431,5 @@ namespace MemorieDeFleursTest.ModelTest
                 Assert.AreEqual(lot0509, Model.Sequences.SEQ_SUPPLIERS.Next(context), "発注がロールバックされているので、再採番したときはロールバック前に採番したロット番号が取得できるはず");
             }
         }
-        #endregion // 懸案
     }
 }

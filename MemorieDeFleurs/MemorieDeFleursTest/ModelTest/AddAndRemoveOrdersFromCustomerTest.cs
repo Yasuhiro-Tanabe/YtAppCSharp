@@ -5,6 +5,7 @@ using MemorieDeFleurs.Models.Entities;
 
 using MemorieDeFleursTest.ModelTest.Fluent;
 
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
@@ -61,16 +62,42 @@ namespace MemorieDeFleursTest.ModelTest
         {
             public class Base
             {
+                protected SqliteConnection DbConnection { get; set; }
+
                 protected MemorieDeFleursDbContext DbContext { get; set; }
                 protected string PartCode { get; set; }
                 public Base(MemorieDeFleursDbContext context, BouquetPart part)
                 {
                     DbContext = context;
+                    DbConnection = null;
+                    PartCode = part.Code;
+                }
+                public Base(SqliteConnection connection, BouquetPart part)
+                {
+                    DbContext = null;
+                    DbConnection = connection;
                     PartCode = part.Code;
                 }
                 protected IQueryable<StockAction> FindStockActionByDate(DateTime d)
                 {
-                    return DbContext.StockActions
+                    if (DbContext == null)
+                    {
+                        using (var context = new MemorieDeFleursDbContext(DbConnection))
+                        {
+                            // 一回DBとの接続が切れるので、コピーを生成してから返す
+                            return FindStockActionByDate(context, d).ToList().AsQueryable();
+                        }
+                    }
+                    else
+                    {
+                        // 同一トランザクション内からの呼出を想定しておりDBとの接続は切れない。そのまま返す。
+                        return FindStockActionByDate(DbContext, d);
+                    }
+                }
+
+                private IQueryable<StockAction> FindStockActionByDate(MemorieDeFleursDbContext context, DateTime d)
+                {
+                    return context.StockActions
                         .Where(act => act.PartsCode == PartCode)
                         .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
                         .Where(act => act.ActionDate == d);
@@ -79,6 +106,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             public class QuantityCalculator : Base
             {
+                public QuantityCalculator(SqliteConnection connection, BouquetPart part) : base(connection, part) { }
                 public QuantityCalculator(MemorieDeFleursDbContext context, BouquetPart part) : base(context, part) { }
 
                 public int this[DateTime d] {
@@ -101,6 +129,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             public class RemainCalculator : Base
             {
+                public RemainCalculator(SqliteConnection connection, BouquetPart part) : base(connection, part) { }
                 public RemainCalculator(MemorieDeFleursDbContext context, BouquetPart part) : base(context, part) { }
 
                 public int this[DateTime d] 
@@ -125,6 +154,11 @@ namespace MemorieDeFleursTest.ModelTest
             public QuantityCalculator Quantity { get; private set; }
             public RemainCalculator Remain { get; private set; }
 
+            public StockCalcurator(SqliteConnection connection, BouquetPart part)
+            {
+                Quantity = new QuantityCalculator(connection, part);
+                Remain = new RemainCalculator(connection, part);
+            }
 
             public StockCalcurator(MemorieDeFleursDbContext context, BouquetPart part)
             {
@@ -260,48 +294,59 @@ namespace MemorieDeFleursTest.ModelTest
         public void OneOrderUpdatesCurrentStock()
         {
             LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [Begin] =====");
+            var CurrentStock = new StockCalcurator(TestDB, ExpectedPart);
+            var lot = InitialOrders[DateConst.April30th][0].LotNo;
+
+            // Order() 後に CurrentStock の値が変わるので期待値をあらかじめ計算する
+            var May2nd = DateConst.May2nd;
+            var used = ExpectedBouquet.PartsList.Single(p => p.PartsCode == ExpectedPart.Code).Quantity;
+            var expectedMay2Quantity = CurrentStock.Quantity[May2nd, lot] + used;
+            var expectedMay2Remain = CurrentStock.Remain[May2nd, lot] - used;
 
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                var CurrentStock = new StockCalcurator(context, ExpectedPart);
-                var lot = InitialOrders[DateConst.April30th][0].LotNo;
-
-                // Order() 後に CurrentStock の値が変わるので期待値計算要素をあらかじめ保持する
-                var May2nd = DateConst.May2nd;
-                var used = ExpectedBouquet.PartsList.Single(p => p.PartsCode == ExpectedPart.Code).Quantity;
-
-                var varidator = StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                    .Lot(DateConst.April30th, lot).Begin()
-                        .At(May2nd).Used(CurrentStock.Quantity[May2nd, lot] + used, CurrentStock.Remain[May2nd, lot] - used)
-                        .End()
-                    .End()
-                    .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0);
-
-
                 // お届け日は在庫消費日の翌日
                 Model.CustomerModel.Order(context, DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
+            }
 
-                varidator.AssertAll(context);
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                    .Lot(DateConst.April30th, lot).Begin()
+                        .At(May2nd).Used(expectedMay2Quantity, expectedMay2Remain)
+                        .End()
+                    .End()
+                    .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
+                    .AssertAll(context);
             }
 
             LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [End] =====");
         }
 
-        #region 【懸案】トランザクションロールバックのテスト：現在は RED になるためテスト対象外
-        //[TestMethod, TestCategory("【RED】")]
+        [TestMethod]
         public void CanRollbackCurrentOrder()
         {
             LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            var lot = InitialOrders[DateConst.May6th][0].LotNo;
+            var currentStock = new StockCalcurator(TestDB, ExpectedPart);
+            var expectedRemain = currentStock.Remain[DateConst.May8th, lot]; // お届け日前日(=発送日)の当日残：注文がロールバックされるので当日残に増減はないはず
 
             using (var context = new MemorieDeFleursDbContext(TestDB))
             using(var transaction = context.Database.BeginTransaction())
             {
-                var currentStock = new StockCalcurator(context, ExpectedPart);
-                var lot = InitialOrders[DateConst.May6th][0].LotNo;
-                var expectedRemain = currentStock.Remain[DateConst.May8th]; // お届け日前日(=発送日)の当日残：注文がロールバックされるので当日残に増減はないはず
+                try
+                {
+                    Model.CustomerModel.Order(context, DateConst.April30th, ExpectedBigBouquet, ExpectedShippingAddress, DateConst.May9th);
+                    transaction.Commit();
+                }
+                catch (NotImplementedException)
+                {
+                    transaction.Rollback();
+                }
+            }
 
-                Model.CustomerModel.Order(context, DateConst.April30th, ExpectedBigBouquet, ExpectedShippingAddress, DateConst.May9th);
-
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
                 StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                     .Lot(DateConst.May6th, lot).Begin()
                         .At(DateConst.May8th).Used(0, expectedRemain)
@@ -313,6 +358,5 @@ namespace MemorieDeFleursTest.ModelTest
 
             LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
         }
-        #endregion // トランザクションロールバックのテスト
     }
 }
