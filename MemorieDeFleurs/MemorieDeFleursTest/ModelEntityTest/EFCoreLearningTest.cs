@@ -149,14 +149,22 @@ namespace MemorieDeFleursTest.ModelEntityTest
         {
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
+                Assert.AreEqual(0, context.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
+            }
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
                 using (var transaction = context.Database.BeginTransaction())
                 {
-                    Assert.AreEqual(0, context.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
                     CreateStockAction(context, 1);
-                    Assert.AreEqual(1, context.StockActions.Count(), "登録されている在庫アクション数は１つのはず");
+                    Assert.AreEqual(1, context.StockActions.Count(), "登録されている在庫アクション数が１つあるはず");
                     transaction.Commit();
 
                 }
+            }
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
                 Assert.AreEqual(1, context.StockActions.Count(), "コミットにより在庫アクションが保存されるはず");
             }
         }
@@ -166,13 +174,21 @@ namespace MemorieDeFleursTest.ModelEntityTest
         {
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
+                Assert.AreEqual(0, context.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
+            }
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
                 using (var transaction = context.Database.BeginTransaction())
                 {
-                    Assert.AreEqual(0, context.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
                     CreateStockAction(context, 1);
-                    Assert.AreEqual(1, context.StockActions.Count(), "登録されている在庫アクション数は１つのはず");
+                    Assert.AreEqual(1, context.StockActions.Count(), "ロールバック前なので、登録された在庫アクションが残っているはず");
                     transaction.Rollback();
                 }
+            }
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
                 Assert.AreEqual(0, context.StockActions.Count(), "ロールバック後も在庫アクションが残っている");
             }
         }
