@@ -303,22 +303,17 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedMay2Quantity = CurrentStock.Quantity[May2nd, lot] + used;
             var expectedMay2Remain = CurrentStock.Remain[May2nd, lot] - used;
 
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            {
-                // お届け日は在庫消費日の翌日
-                Model.CustomerModel.Order(context, DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
-            }
+            // お届け日は在庫消費日の翌日
+            Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
 
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            {
-                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                    .Lot(DateConst.April30th, lot).Begin()
-                        .At(May2nd).Used(expectedMay2Quantity, expectedMay2Remain)
-                        .End()
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.April30th, lot).Begin()
+                    .At(May2nd).Used(expectedMay2Quantity, expectedMay2Remain)
                     .End()
-                    .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
-                    .AssertAll(context);
-            }
+                .End()
+                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
+                .TargetDBIs(TestDB)
+                .AssertAll();
 
             LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [End] =====");
         }
@@ -345,16 +340,14 @@ namespace MemorieDeFleursTest.ModelTest
                 }
             }
 
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            {
-                StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                    .Lot(DateConst.May6th, lot).Begin()
-                        .At(DateConst.May8th).Used(0, expectedRemain)
-                        .At(DateConst.May9th).Used(0, expectedRemain).Discarded(expectedRemain)
-                        .End()
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May6th, lot).Begin()
+                    .At(DateConst.May8th).Used(0, expectedRemain)
+                    .At(DateConst.May9th).Used(0, expectedRemain).Discarded(expectedRemain)
                     .End()
-                    .AssertAll(context);
-            }
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
 
             LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
         }

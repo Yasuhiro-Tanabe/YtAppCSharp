@@ -13,14 +13,14 @@ namespace MemorieDeFleurs.Models
         private MemorieDeFleursDbContext DbContext { get; set; }
         private MemorieDeFleursModel Parent { get; set; }
 
-        private int NextCustomerID
+        private SequenceUtil.SequenceValueManager SEQ_CUSTOMERS
         {
-            get { return Parent.Sequences.SEQ_CUSTOMERS.Next(); }
+            get { return Parent.Sequences.SEQ_CUSTOMERS; }
         }
 
-        private int NextShippingAddressID
+        private SequenceUtil.SequenceValueManager SEQ_SHIPPING
         {
-            get { return Parent.Sequences.SEQ_SHIPPING.Next(); }
+            get { return Parent.Sequences.SEQ_SHIPPING; }
         }
 
         /// <summary>
@@ -59,8 +59,6 @@ namespace MemorieDeFleurs.Models
             {
                 _model = model;
             }
-
-            private MemorieDeFleursDbContext DbContext { get { return _model.DbContext; } }
 
             /// <summary>
             /// 得意先名称を登録/変更する
@@ -108,9 +106,17 @@ namespace MemorieDeFleurs.Models
 
             public Customer Create()
             {
+                using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
+                {
+                    return Create(context);
+                }
+            }
+
+            private Customer Create(MemorieDeFleursDbContext context)
+            {
                 var c = new Customer()
                 {
-                    ID = _model.NextCustomerID,
+                    ID = _model.SEQ_CUSTOMERS.Next(context),
                     Name = _name,
                     EmailAddress = _emailAddress,
                     Password = _password,
@@ -118,8 +124,8 @@ namespace MemorieDeFleurs.Models
                     Status = 0
                 };
 
-                DbContext.Customers.Add(c);
-                DbContext.SaveChanges();
+                context.Customers.Add(c);
+                context.SaveChanges();
 
                 return c;
             }
@@ -145,8 +151,6 @@ namespace MemorieDeFleurs.Models
 
             private Customer _sendFrom;
             
-            private MemorieDeFleursDbContext DbContext { get { return _model.DbContext; } }
-
             public static ShippingAddressBuilder GetInstance(CustomerModel parent)
             {
                 return new ShippingAddressBuilder(parent);
@@ -198,14 +202,22 @@ namespace MemorieDeFleurs.Models
             /// <returns></returns>
             public ShippingAddress Create()
             {
-                if(_sendFrom == null)
+                using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
+                {
+                    return Create(context);
+                }
+            }
+
+            private ShippingAddress Create(MemorieDeFleursDbContext context)
+            {
+                if (_sendFrom == null)
                 {
                     throw new ApplicationException($"贈り主は入力必須、登録済みの得意先であること：お届け先名={_name}");
                 }
 
                 var shipping = new ShippingAddress()
                 {
-                    ID = _model.NextShippingAddressID,
+                    ID = _model.SEQ_SHIPPING.Next(context),
                     CustomerID = _sendFrom.ID,
                     Name = _name,
                     Address1 = _address1,
@@ -213,8 +225,8 @@ namespace MemorieDeFleurs.Models
                     LatestOrderDate = DateTime.Now
                 };
 
-                DbContext.ShippingAddresses.Add(shipping);
-                DbContext.SaveChanges();
+                context.ShippingAddresses.Add(shipping);
+                context.SaveChanges();
 
                 return shipping;
             }
@@ -253,7 +265,8 @@ namespace MemorieDeFleurs.Models
             var usedDate = arrivalDate.AddDays(-1);
             foreach (var item in bouquet.PartsList)
             {
-                var remain = Parent.BouquetModel.UseBouquetPart(context, item.Part, usedDate, item.Quantity);
+                var part = context.BouquetParts.Find(item.PartsCode);
+                var remain = Parent.BouquetModel.UseBouquetPart(context, part, usedDate, item.Quantity);
                 if (remain < 0)
                 {
                     throw new NotImplementedException(new StringBuilder()
@@ -269,8 +282,8 @@ namespace MemorieDeFleurs.Models
 
             LogUtil.Info(new StringBuilder()
                 .Append("Ordered: ").Append(bouquet.Code)
-                .AppendFormat(", from '{0}'", sendTo.From.Name)
-                .AppendFormat(" to '{0}'", sendTo.Name)
+                .AppendFormat(", from '{0}'", sendTo.CustomerID)
+                .AppendFormat(" to '{0}'", sendTo.ID)
                 .AppendFormat(" at {0:yyyyMMdd}", arrivalDate)
                 .ToString());
         }

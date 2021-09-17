@@ -1,6 +1,7 @@
 ﻿using MemorieDeFleurs.Databese.SQLite;
 using MemorieDeFleurs.Models.Entities;
 
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
@@ -30,6 +31,8 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         private PartStockActionValidator CurrentChild { get; set; } = null;
 
         private IDictionary<StockActionType, int> ExpectedStockActionCount { get; } = new Dictionary<StockActionType, int>();
+
+        private SqliteConnection CurrentConnection { get; set; }
 
         /// <summary>
         /// 単品在庫アクション検証器を生成する：生成するだけで制御はこの検証器のまま。
@@ -78,7 +81,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// データベース上の在庫アクションが自分自身に登録されているすべての期待値と一致するかどうかを検証する
         /// </summary>
         /// <param name="context">検証対象データベース</param>
-        public void AssertAll(MemorieDeFleursDbContext context)
+        private void AssertAll(MemorieDeFleursDbContext context)
         {
             if (context is null)
             {
@@ -92,6 +95,26 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
                 Assert.AreEqual(expected.Value, context.StockActions.Count(act => act.Action == expected.Key), $"Type: {expected.Key}");
 
             }
+        }
+
+        public StockActionsValidator TargetDBIs(SqliteConnection connection)
+        {
+            CurrentConnection = connection;
+            return this;
+        }
+
+        public void AssertAll()
+        {
+            if(CurrentConnection is null)
+            {
+                throw new InvalidOperationException("TargetDB is undefined. call TargetDbIs() before calling AssertAll()");
+            }
+
+            using (var context = new MemorieDeFleursDbContext(CurrentConnection))
+            {
+                AssertAll(context);
+            }
+
         }
     }
 }

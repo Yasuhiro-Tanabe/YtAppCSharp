@@ -53,6 +53,7 @@ namespace MemorieDeFleurs.Databese.SQLite
             if(Connection is SqliteConnection)
             {
                 builder.UseSqlite(Connection);
+                builder.EnableSensitiveDataLogging(true); // for Debug
             }
         }
 
@@ -86,6 +87,13 @@ namespace MemorieDeFleurs.Databese.SQLite
                 .Entity<ShippingAddress>()
                 .Property(a => a.LatestOrderDate)
                 .HasConversion(converter);
+
+            modelBuilder
+                .Entity<BouquetPartsList>()
+                .HasOne(p => p.Bouquet)
+                .WithMany(b => b.PartsList)
+                .HasForeignKey(p => p.BouquetCode);
+
         }
 
         /// <summary>

@@ -24,6 +24,13 @@ namespace MemorieDeFleurs.Models
         internal SequenceUtil.SequenceValueManager SEQ_SUPPLIERS { get { return Parent.Sequences.SEQ_SUPPLIERS; } }
 
         /// <summary>
+        /// 次の在庫ロット番号
+        /// 
+        /// 発注のタイミングで生成し、発注ロット番号と在庫ロット番号を兼用する。
+        /// </summary>
+        internal SequenceUtil.SequenceValueManager SEQ_STOCK_LOT_NUMBER { get { return Parent.Sequences.SEQ_STOCK_LOT_NUMBER; } }
+
+        /// <summary>
         /// (パッケージ内限定)コンストラクタ
         /// 
         /// モデルのプロパティとして参照できるので、外部でこのオブジェクトを作成することは想定しない。
@@ -130,22 +137,27 @@ namespace MemorieDeFleurs.Models
             {
                 using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
                 {
-                    var s = new Supplier()
-                    {
-                        Code = _model.SEQ_SUPPLIERS.Next(),
-                        Name = _name,
-                        Address1 = _address1,
-                        Address2 = _address2,
-                        Telephone = _tel,
-                        Fax = _fax,
-                        EmailAddress = _email
-                    };
-
-                    context.Suppliers.Add(s);
-                    context.SaveChanges();
-
-                    return s;
+                    return Create(context);
                 }
+            }
+            
+            private Supplier Create(MemorieDeFleursDbContext context)
+            {
+                var s = new Supplier()
+                {
+                    Code = _model.SEQ_SUPPLIERS.Next(context),
+                    Name = _name,
+                    Address1 = _address1,
+                    Address2 = _address2,
+                    Telephone = _tel,
+                    Fax = _fax,
+                    EmailAddress = _email
+                };
+
+                context.Suppliers.Add(s);
+                context.SaveChanges();
+
+                return s;
             }
         }
 
@@ -246,7 +258,7 @@ namespace MemorieDeFleurs.Models
                 .ToString());
 
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
-            var lotNo = SEQ_SUPPLIERS.Next(context);
+            var lotNo = SEQ_STOCK_LOT_NUMBER.Next(context);
             var quantity = quantityOfLot * part.QuantitiesPerLot;
 
             var param = new StockActionParameterToOrder(arrivalDate, part, lotNo, quantityOfLot);
@@ -455,6 +467,8 @@ namespace MemorieDeFleurs.Models
                     };
                     context.StockActions.Add(lacked);
                     context.SaveChanges();
+
+                    DEBUGLOG_StockActionCreated(lacked);
                 }
             }
 
@@ -543,7 +557,7 @@ namespace MemorieDeFleurs.Models
             if (toUse.Remain >= usedFromTheLot)
             {
                 // 全量払出する
-                LogUtil.DEBUGLOG_StockActionQuantityChanged(toUse, toUse.Quantity + usedFromTheLot, toUse.Quantity - usedFromTheLot);
+                LogUtil.DEBUGLOG_StockActionQuantityChanged(toUse, toUse.Quantity + usedFromTheLot, toUse.Remain - usedFromTheLot);
                 toUse.Quantity += usedFromTheLot;
                 toUse.Remain -= usedFromTheLot;
                 context.StockActions.Update(toUse);

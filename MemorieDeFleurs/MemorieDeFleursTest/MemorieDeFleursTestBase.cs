@@ -165,5 +165,41 @@ namespace MemorieDeFleursTest
                 }
             }
         }
+
+
+        /// <summary>
+        /// 中間状態のデータベースをファイルに保存する
+        /// 
+        /// デバッグ用。
+        /// </summary>
+        /// <param name="connection">テスト対象データベース</param>
+        /// <param name="dbFileName">保存するファイル名</param>
+        protected void SaveCurrentDatabaseTo(SqliteConnection connection, string dbFileName)
+        {
+            LogUtil.DEBUGLOG_BeginMethod(dbFileName);
+            try
+            {
+                if (File.Exists(dbFileName))
+                {
+                    LogUtil.Debug($"{LogUtil.Indent}Database {dbFileName} is alerdy exists. removed.");
+                    File.Delete(dbFileName);
+                }
+
+                var builder = new SqliteConnectionStringBuilder();
+                builder.DataSource = dbFileName;
+                builder.Mode = SqliteOpenMode.ReadWriteCreate;
+                builder.ForeignKeys = true;
+
+                var backupDb = new SqliteConnection(builder.ToString());
+                connection.BackupDatabase(backupDb);
+                LogUtil.Debug($"Database backuped to: {dbFileName}");
+
+                LogUtil.DEBUGLOG_EndMethod(dbFileName, $"Saved successfully.");
+            }
+            catch(Exception ex)
+            {
+                LogUtil.DEBUGLOG_EndMethod(dbFileName, $"{ex.GetType().Name}: {ex.Message}");
+            }
+        }
     }
 }

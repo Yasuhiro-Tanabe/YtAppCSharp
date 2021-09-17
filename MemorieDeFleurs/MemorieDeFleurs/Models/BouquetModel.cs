@@ -114,19 +114,23 @@ namespace MemorieDeFleurs.Models
             /// <returns>生成/データベース登録された単品オブジェクト</returns>
             public BouquetPart Create()
             {
-                var p = new BouquetPart()
+                using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
                 {
-                    Code = _code,
-                    Name = _name,
-                    LeadTime = _leadTime,
-                    QuantitiesPerLot = _parLot,
-                    ExpiryDate = _expire,
-                    Status = 0
-                };
+                    var p = new BouquetPart()
+                    {
+                        Code = _code,
+                        Name = _name,
+                        LeadTime = _leadTime,
+                        QuantitiesPerLot = _parLot,
+                        ExpiryDate = _expire,
+                        Status = 0
+                    };
 
-                _model.DbContext.BouquetParts.Add(p);
-                _model.DbContext.SaveChanges();
-                return p;
+                    context.BouquetParts.Add(p);
+                    context.SaveChanges();
+
+                    return p;
+                }
             }
         }
 
@@ -203,24 +207,27 @@ namespace MemorieDeFleurs.Models
             /// <returns>データベースに登録された商品オブジェクト</returns>
             public Bouquet Create()
             {
-                var ret = new Bouquet()
+                using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
                 {
-                    Code = _code,
-                    Name = _name,
-                    Image = _image,
-                    LeadTime = 0,
-                    Status = 0
-                };
+                    var ret = new Bouquet()
+                    {
+                        Code = _code,
+                        Name = _name,
+                        Image = _image,
+                        LeadTime = 0,
+                        Status = 0
+                    };
 
-                foreach (var p in _partsList)
-                {
-                    var item = new BouquetPartsList() { BouquetCode = _code, PartsCode = p.Key, Quantity = p.Value };
-                    ret.PartsList.Add(item);
+                    foreach (var p in _partsList)
+                    {
+                        var item = new BouquetPartsList() { BouquetCode = _code, PartsCode = p.Key, Quantity = p.Value };
+                        ret.PartsList.Add(item);
+                    }
+
+                    context.Bouquets.Add(ret);
+                    context.SaveChanges();
+                    return ret;
                 }
-                _model.DbContext.Bouquets.Add(ret);
-
-                _model.DbContext.SaveChanges();
-                return ret;
             }
 
             /// <summary>
@@ -269,7 +276,10 @@ namespace MemorieDeFleurs.Models
         /// <returns>単品オブジェクト。花コードに該当する単品がないときはnull。</returns>
         public BouquetPart FindBouquetPart(string partCode)
         {
-            return DbContext.BouquetParts.SingleOrDefault(p => p.Code == partCode);
+            using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.BouquetParts.SingleOrDefault(p => p.Code == partCode);
+            }
         }
         #endregion // 単品の登録改廃
 
@@ -281,7 +291,30 @@ namespace MemorieDeFleurs.Models
         /// <returns>商品オブジェクト。花束コードに該当する単品がないときは null。</returns>
         public Bouquet FindBouquet(string bouquetCode)
         {
-            return DbContext.Bouquets.SingleOrDefault(b => b.Code == bouquetCode);
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                var bouquet = context.Bouquets.Find(bouquetCode);
+
+                // [NOTE]
+                // 以下の２点を追加しても、Bouquet.PartsList[i].Parts が正しくセットされない状況は変わらない。
+                // （いずれにせよ商品を構成する単品を Find() でキャッシュに登録する必要がある）
+                // 
+                // 1) BouquetParts:
+                //        public IList<BouquetPartsList> Bouquets {get;} = new List<BouquetPartsList>();
+                //
+                // 2) DbContext.OnModelCreating(modelBuilder):
+                //        modelBuilder.Entity<BouquetPartsList>()
+                //            .HasOne(i => i.Parts)
+                //            .WithMany(b => b.Bouquets)
+                //            .HasForeginKye(i => i.PartsCode)
+                //
+                // 3) 単品をキャッシュに読み込む
+                foreach (var parts in context.PartsList.Where(i => i.BouquetCode == bouquetCode))
+                {
+                    parts.Part = context.BouquetParts.Find(parts.PartsCode);
+                }
+                return bouquet;
+            }
         }
         #endregion // 商品の登録改廃
 

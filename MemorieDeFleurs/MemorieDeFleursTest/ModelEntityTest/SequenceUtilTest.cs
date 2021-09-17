@@ -58,27 +58,28 @@ namespace MemorieDeFleursTest.ModelEntityTest
         [TestMethod]
         public void SequenceInTransaction_CommitAvailable()
         {
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            {
-                Assert.AreEqual(1, TestSequence.SEQ_SUPPLIERS.Next(context));
+            Assert.AreEqual(1, TestSequence.SEQ_SUPPLIERS.Next());
 
-                using (var transaction = context.Database.BeginTransaction())
-                {
-                    Assert.AreEqual(2, TestSequence.SEQ_SUPPLIERS.Next(context));
-                    transaction.Commit();
-                }
-                using (var transaction2 = context.Database.BeginTransaction())
-                {
-                    Assert.AreEqual(3, TestSequence.SEQ_SUPPLIERS.Next(context));
-                    transaction2.Commit();
-                }
-                Assert.AreEqual(4, TestSequence.SEQ_SUPPLIERS.Next(context));
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                Assert.AreEqual(2, TestSequence.SEQ_SUPPLIERS.Next(context));
+                transaction.Commit();
             }
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                Assert.AreEqual(3, TestSequence.SEQ_SUPPLIERS.Next(context));
+                transaction.Commit();
+            }
+
+            Assert.AreEqual(4, TestSequence.SEQ_SUPPLIERS.Next());
         }
 
-        #region 【懸案】トランザクションロールバックのテスト：現在は RED になるためテスト対象外
         /// <summary>
-        /// ロールバックの動作確認テスト：DbContext を使い回すのは間違い。
+        /// ロールバックの動作確認テスト：DbContext を使い回すのは間違い、
+        /// 意図しない結果が出ることを確認するテスト。
         /// </summary>
         [TestMethod]
         public void SequenceInTransaction_DoNotReuseContext()
@@ -114,10 +115,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
         [TestMethod]
         public void SequenceInTransaction_RollbackAvailable()
         {
-            using (var context1 = new MemorieDeFleursDbContext(TestDB))
-            {
-                Assert.AreEqual(1, TestSequence.SEQ_SUPPLIERS.Next(context1));
-            }
+            Assert.AreEqual(1, TestSequence.SEQ_SUPPLIERS.Next());
 
             using (var context2 = new MemorieDeFleursDbContext(TestDB))
             using(var transaction = context2.Database.BeginTransaction())
@@ -126,16 +124,15 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 transaction.Rollback();
             }
 
-            using (var context3 = new MemorieDeFleursDbContext(TestDB))
-            {
-                Assert.AreEqual(2, TestSequence.SEQ_SUPPLIERS.Next(context3));
-            }
+            Assert.AreEqual(2, TestSequence.SEQ_SUPPLIERS.Next());
         }
 
         /// <summary>
         /// 同一 DbContext 内でも、DBから再度エンティティを取り直せば、
         /// ロールバックでDbContext内のキャッシュとDBの内容が不整合になっていても
         /// 整合性を取り戻すことができる
+        /// 
+        /// 本当にここまでやるかどうかはともかく、やりようはあることを確認するテスト。
         /// </summary>
         [TestMethod]
         public void UseSingleDbContext_ReloadIsNeccessary()
@@ -174,7 +171,5 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 Assert.AreEqual(2, seqValue);
             }
         }
-
-        #endregion // 懸案
     }
 }

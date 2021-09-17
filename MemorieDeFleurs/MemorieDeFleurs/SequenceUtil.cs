@@ -85,7 +85,10 @@ namespace MemorieDeFleurs
 
         private int Next(string sequenceName)
         {
-            return Next(Parent.DbContext, sequenceName);
+            using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return Next(context, sequenceName);
+            }
         }
 
         private int Next(MemorieDeFleursDbContext context, string sequenceName)
