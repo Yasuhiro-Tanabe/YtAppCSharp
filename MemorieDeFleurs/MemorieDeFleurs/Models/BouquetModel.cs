@@ -331,6 +331,14 @@ namespace MemorieDeFleurs.Models
             return UseBouquetPart(DbContext, part, date, quantity);
         }
 
+        /// <summary>
+        /// 在庫から使用した単品を指定個数取り去る：同一トランザクション内で複数の登録削除を行う時用
+        /// </summary>
+        /// <param name="context">トランザクションコンテキスト</param>
+        /// <param name="part">対象となる単品</param>
+        /// <param name="date">日付</param>
+        /// <param name="quantity">取り去る数量</param>
+        /// <returns>取り去った後の在庫数量：当日分複数ロットの合計値</returns>
         public int UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
         {
             try
