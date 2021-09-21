@@ -10,7 +10,6 @@ namespace MemorieDeFleurs.Models
 {
     public class CustomerModel
     {
-        private MemorieDeFleursDbContext DbContext { get; set; }
         private MemorieDeFleursModel Parent { get; set; }
 
         private SequenceUtil.SequenceValueManager SEQ_CUSTOMERS
@@ -32,7 +31,6 @@ namespace MemorieDeFleurs.Models
         internal CustomerModel(MemorieDeFleursModel parent)
         {
             Parent = parent;
-            DbContext = parent.DbContext;
         }
 
         #region CustomerBuilder
@@ -289,7 +287,7 @@ namespace MemorieDeFleurs.Models
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return Order(DbContext, orderDate, bouquet, sendTo, arrivalDate, message);
+                return Order(context, orderDate, bouquet, sendTo, arrivalDate, message);
             }
         }
 
