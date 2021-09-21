@@ -303,12 +303,25 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedMay2Quantity = CurrentStock.Quantity[May2nd, lot] + used;
             var expectedMay2Remain = CurrentStock.Remain[May2nd, lot] - used;
 
-            // お届け日は在庫消費日の翌日
+            // お届け日は在庫消費日の翌日：AddDays()しているのはテスト目的が在庫の増減確認であり在庫引当日を基準にしているため。普通は 5/3 を直接指定する。
             var orderNo = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
 
             // 受注番号が正しく生成されている
             Assert.IsNotNull(orderNo);
             Assert.AreEqual($"{DateConst.May1st.ToString("yyyyMMdd")}-000001", orderNo);
+
+            // 受注情報が適切に登録されている
+            var actualOrder = Model.CustomerModel.FindOrder(orderNo);
+            var expectedOrder = new OrderFromCustomer()
+            {
+                ID = orderNo,
+                CustomerID = ExpectedCustomer.ID,
+                ShippingAddressID = ExpectedShippingAddress.ID,
+                BouquetCode = ExpectedBouquet.Code,
+                OrderDate = DateConst.May1st,
+                ShippingDate = DateConst.May2nd
+            };
+            AssertOrder(expectedOrder, actualOrder);
 
             // 受注結果通りに在庫が減っている
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
@@ -321,6 +334,29 @@ namespace MemorieDeFleursTest.ModelTest
                 .AssertAll();
 
             LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [End] =====");
+        }
+
+        private void AssertOrder(OrderFromCustomer expected, OrderFromCustomer actual)
+        {
+            var orderString = $"受注番号={expected.ID}, 受注日={expected.OrderDate.ToString("yyyyMMdd")}, 商品={expected.BouquetCode}," +
+                $" 発送日={expected.ShippingDate.ToString("yyyyMMdd")}, 得意先={expected.CustomerID}, お届け先={expected.ShippingAddressID}";
+
+            Assert.IsNotNull(actual, $"DBに登録されていない: {orderString}");
+            Assert.AreEqual(expected.ID, actual.ID, $"受注番号不正: {orderString}");
+            Assert.AreEqual(expected.OrderDate, actual.OrderDate, $"受注日不一致: {orderString}");
+            Assert.AreEqual(expected.ShippingDate, actual.ShippingDate, $"発送日不一致: {orderString}");
+
+            Assert.AreEqual(expected.BouquetCode, actual.BouquetCode, $"花束コードが不一致: {orderString}");
+            Assert.IsNotNull(actual.Bouquet, $"Bouquetが取 得できていない: {orderString}");
+            Assert.AreEqual(expected.BouquetCode, actual.Bouquet.Code, $"取得したBouquetの花束コードが不一致");
+
+            Assert.AreEqual(expected.CustomerID, actual.CustomerID, $"得意先IDが不一致: {orderString}");
+            Assert.IsNotNull(actual.Customer, $"Customer が取得できていない: {orderString}");
+            Assert.AreEqual(expected.CustomerID, actual.Customer.ID, $"取得した Customer のIDが不一致: {orderString}");
+
+            Assert.AreEqual(expected.ShippingAddressID, actual.ShippingAddressID, $"お届け先IDが不一致: {orderString}");
+            Assert.IsNotNull(actual.ShippingAddress, $"ShippingAddress が取得できていない: {orderString}");
+            Assert.AreEqual(expected.ShippingAddressID, actual.ShippingAddress.ID, $"取得した ShippingAddress のIDが不一致: {orderString}");
         }
 
         [TestMethod]

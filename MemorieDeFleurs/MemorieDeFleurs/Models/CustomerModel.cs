@@ -245,6 +245,29 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // 仕入先の登録改廃
 
+        #region 受注履歴の登録改廃
+        public OrderFromCustomer FindOrder(string orderID)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                var order = context.OrderFromCustomers.Find(orderID);
+                if(order.Bouquet == null)
+                {
+                    order.Bouquet = context.Bouquets.Find(order.BouquetCode);
+                }
+                if(order.Customer == null)
+                {
+                    order.Customer = context.Customers.Find(order.CustomerID);
+                }
+                if(order.ShippingAddress == null)
+                {
+                    order.ShippingAddress = context.ShippingAddresses.Find(order.ShippingAddressID);
+                }
+                return order;
+            }
+        }
+        #endregion // 受注履歴の登録改廃
+
         #region 注文
         /// <summary>
         /// 花束を注文する
