@@ -241,7 +241,10 @@ namespace MemorieDeFleurs.Models
         #region 仕入先の登録改廃
         public Customer Find(int id)
         {
-            return DbContext.Customers.SingleOrDefault(c => c.ID == id);
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.Customers.Find(id);
+            }
         }
         #endregion // 仕入先の登録改廃
 
