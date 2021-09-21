@@ -61,38 +61,29 @@ namespace MemorieDeFleurs.Databese.SQLite
         {
             var converter = new DateTimeConverter();
 
-            modelBuilder
-                .Entity<StockAction>()
-                .HasKey("ActionDate", "Action", "PartsCode", "ArrivalDate", "StockLotNo");
+            modelBuilder.Entity<StockAction>(ent =>
+                {
+                    ent.HasKey(nameof(StockAction.ActionDate), nameof(StockAction.Action), nameof(StockAction.PartsCode),
+                        nameof(StockAction.ArrivalDate), nameof(StockAction.StockLotNo));
+                    ent.Property(act => act.ActionDate).HasConversion(converter);
+                    ent.Property(act => act.ArrivalDate).HasConversion(converter);
+                });
+
 
             modelBuilder
                 .Entity<PartSupplier>()
                 .HasKey("SupplierCode", "PartCode");
 
-            modelBuilder
-                .Entity<StockAction>()
-                .Property(a => a.ActionDate)
-                .HasConversion(converter);
-
-            modelBuilder
-                .Entity<StockAction>()
-                .Property(a => a.ArrivalDate)
-                .HasConversion(converter);
-
-            modelBuilder
-                .Entity<BouquetPartsList>()
-                .HasKey(nameof(BouquetPartsList.BouquetCode), nameof(BouquetPartsList.PartsCode));
+            modelBuilder.Entity<BouquetPartsList>(ent =>
+                {
+                    ent.HasKey(nameof(BouquetPartsList.BouquetCode), nameof(BouquetPartsList.PartsCode));
+                    ent.HasOne(p => p.Bouquet).WithMany(b => b.PartsList).HasForeignKey(p => p.BouquetCode);
+                });
 
             modelBuilder
                 .Entity<ShippingAddress>()
                 .Property(a => a.LatestOrderDate)
                 .HasConversion(converter);
-
-            modelBuilder
-                .Entity<BouquetPartsList>()
-                .HasOne(p => p.Bouquet)
-                .WithMany(b => b.PartsList)
-                .HasForeignKey(p => p.BouquetCode);
 
             modelBuilder
                 .Entity<OrderFromCustomer>()
