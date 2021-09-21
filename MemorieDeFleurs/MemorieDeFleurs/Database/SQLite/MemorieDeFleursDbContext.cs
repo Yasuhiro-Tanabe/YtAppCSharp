@@ -94,6 +94,11 @@ namespace MemorieDeFleurs.Databese.SQLite
                 .WithMany(b => b.PartsList)
                 .HasForeignKey(p => p.BouquetCode);
 
+            modelBuilder
+                .Entity<OrderFromCustomer>()
+                .Property(o => o.OrderDate)
+                .HasConversion(converter);
+
         }
 
         /// <summary>
@@ -135,5 +140,10 @@ namespace MemorieDeFleurs.Databese.SQLite
         /// 連番管理
         /// </summary>
         public DbSet<SequenceValue> Sequences { get; set; }
+
+        /// <summary>
+        /// 得意先からの受注履歴
+        /// </summary>
+        public DbSet<OrderFromCustomer> OrderFromCustomers { get; set; }
     }
 }

@@ -304,8 +304,13 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedMay2Remain = CurrentStock.Remain[May2nd, lot] - used;
 
             // お届け日は在庫消費日の翌日
-            Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
+            var orderNo = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
 
+            // 受注番号が正しく生成されている
+            Assert.IsNotNull(orderNo);
+            Assert.AreEqual($"{DateConst.May1st.ToString("yyyyMMdd")}-000001", orderNo);
+
+            // 受注結果通りに在庫が減っている
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.April30th, lot).Begin()
                     .At(May2nd).Used(expectedMay2Quantity, expectedMay2Remain)
@@ -333,6 +338,7 @@ namespace MemorieDeFleursTest.ModelTest
                 {
                     Model.CustomerModel.Order(context, DateConst.April30th, ExpectedBigBouquet, ExpectedShippingAddress, DateConst.May9th);
                     transaction.Commit();
+                    Assert.Fail($"想定外の成功：在庫が足りないので {ExpectedBigBouquet.Code} の引当ができずに例外をスローするはず");
                 }
                 catch (NotImplementedException)
                 {

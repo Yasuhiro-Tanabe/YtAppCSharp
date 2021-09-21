@@ -253,14 +253,29 @@ namespace MemorieDeFleurs.Models
         /// <param name="bouquet">注文対象の花束</param>
         /// <param name="sendTo">花束の送り先：贈り主はここから参照して取得する</param>
         /// <param name="arrivalDate">お届け日：花束の作成は前日なので、在庫は arrivalDate - 1 日の分が消費される</param>
-        /// <param name="message"></param>
-        public void Order(DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "" )
+        /// <param name="message">（省略可能）お届けメッセージ</param>
+        public string Order(DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "" )
         {
-            Order(DbContext, orderDate, bouquet, sendTo, arrivalDate, message);
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return Order(DbContext, orderDate, bouquet, sendTo, arrivalDate, message);
+            }
         }
 
-        public void Order(MemorieDeFleursDbContext context, DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "")
+        public string Order(MemorieDeFleursDbContext context, DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "")
         {
+            var countOfOrdersToday = context.OrderFromCustomers.Count(o => o.OrderDate == orderDate);
+            var customer = context.Customers.Find(sendTo.CustomerID);
+
+            if(customer == null)
+            {
+                throw new InvalidOperationException($"得意先不明 (ID={sendTo.CustomerID})");
+            }
+            if(countOfOrdersToday > 999999)
+            {
+                throw new InvalidOperationException($"当日受注数が想定外に多い：受注日={orderDate.ToString("yyyyMMdd")}, 受注数={countOfOrdersToday}");
+            }
+
             // 在庫アクションの登録改訂に関する検証用、暫定実装
             var usedDate = arrivalDate.AddDays(-1);
             foreach (var item in bouquet.PartsList)
@@ -280,12 +295,32 @@ namespace MemorieDeFleurs.Models
                 }
             }
 
+            var order = new OrderFromCustomer()
+            {
+                ID = $"{orderDate.ToString("yyyyMMdd")}-{countOfOrdersToday+1:000000}",
+                BouquetCode = bouquet.Code,
+                CustomerID = context.Customers.Find(sendTo.CustomerID).ID,
+                ShippingAddressID = sendTo.ID,
+                OrderDate = orderDate,
+                ShippingDate = arrivalDate.AddDays(-1),
+                HasMessage = string.IsNullOrWhiteSpace(message),
+                Message = message,
+                Status = 0
+            };
+
+            context.OrderFromCustomers.Add(order);
+            context.SaveChanges();
+
             LogUtil.Info(new StringBuilder()
-                .Append("Ordered: ").Append(bouquet.Code)
+                .Append("Ordered: ")
+                .Append("ID=").Append(order.ID)
+                .Append(bouquet.Code)
                 .AppendFormat(", from '{0}'", sendTo.CustomerID)
                 .AppendFormat(" to '{0}'", sendTo.ID)
                 .AppendFormat(" at {0:yyyyMMdd}", arrivalDate)
                 .ToString());
+
+            return order.ID;
         }
         #endregion // 注文
 
