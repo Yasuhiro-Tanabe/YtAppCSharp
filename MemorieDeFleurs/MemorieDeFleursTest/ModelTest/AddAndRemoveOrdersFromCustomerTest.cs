@@ -215,15 +215,15 @@ namespace MemorieDeFleursTest.ModelTest
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
                 var used = new List<Tuple<DateTime, int>>()
-            {
-                Tuple.Create(DateConst.April30th, 20),
-                Tuple.Create(DateConst.May1st, 50),
-                Tuple.Create(DateConst.May2nd, 80),
-                Tuple.Create(DateConst.May3rd, 20),
-                Tuple.Create(DateConst.May4th, 400),
-                Tuple.Create(DateConst.May5th, 170),
-                Tuple.Create(DateConst.May6th, 40)
-            };
+                {
+                    Tuple.Create(DateConst.April30th, 20),
+                    Tuple.Create(DateConst.May1st, 50),
+                    Tuple.Create(DateConst.May2nd, 80),
+                    Tuple.Create(DateConst.May3rd, 20),
+                    Tuple.Create(DateConst.May4th, 400),
+                    Tuple.Create(DateConst.May5th, 170),
+                    Tuple.Create(DateConst.May6th, 40)
+                };
                 foreach (var u in used)
                 {
                     Model.BouquetModel.UseBouquetPart(context, ExpectedPart, u.Item1, u.Item2);
@@ -293,7 +293,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void OneOrderUpdatesCurrentStock()
         {
-            LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [Begin] =====");
+            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
             var CurrentStock = new StockCalcurator(TestDB, ExpectedPart);
             var lot = InitialOrders[DateConst.April30th][0].LotNo;
 
@@ -333,7 +333,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.Debug($"===== {nameof(OneOrderUpdatesCurrentStock)} [End] =====");
+            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
         }
 
         private void AssertOrder(OrderFromCustomer expected, OrderFromCustomer actual)

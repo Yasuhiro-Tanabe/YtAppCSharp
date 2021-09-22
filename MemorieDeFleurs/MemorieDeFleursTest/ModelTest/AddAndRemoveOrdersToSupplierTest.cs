@@ -131,7 +131,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void NewOrderWhichArrivedAt20200504()
         {
-            LogUtil.Debug("=====NewOrderWhichArrivedAt20200504 [Begin]=====");
+            LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
 
             var newLotNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedPart, 1, DateConst.May4th);
 
@@ -166,7 +166,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.Debug("=====NewOrderWhichArrivedAt20200504 [End]=====");
+            LogUtil.DEBUGLOG_EndMethod(msg: "==========");
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void NewOrderWhichArrivedAt20200502()
         {
-            LogUtil.Debug("=====NewOrderWhichArrivedAt20200502 [Begin]=====");
+            LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
             var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
             var newLotNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedPart, 1, DateConst.May2nd);
@@ -213,7 +213,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.Debug("=====NewOrderWhichArrivedAt20200502 [End]=====");
+            LogUtil.DEBUGLOG_EndMethod(msg: "==========");
         }
 
         /// <summary>
@@ -244,7 +244,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void RemoveOrderArrivedAt20200502()
         {
-            LogUtil.Debug("===== RemoveOrderArrivedAt20200502 [Begin]=====");
+            LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
 
             var lot = InitialOrders[DateConst.May2nd][0].LotNo;
             var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
@@ -268,7 +268,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.Debug("===== RemoveOrderArrivedAt20200502 [End]=====");
+            LogUtil.DEBUGLOG_EndMethod(msg: "==========");
         }
 
         /// <summary>
@@ -279,7 +279,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void ChangeOrders_RemoveFrom20200502_And_AddTwoLotTo202005005()
         {
-            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 2 Lot (200)) [Begin]=====");
+            LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
 
             var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
             var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
@@ -325,7 +325,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
                 .TargetDBIs(TestDB)
                 .AssertAll();
-            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 2 Lot (200)) [End]=====");
+            LogUtil.DEBUGLOG_EndMethod(msg: "==========");
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void ChangeOrders_RemoveFrom20200502_And_AddOneLotTo202005005()
         {
-            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 1 Lot (100)) [Begin]=====");
+            LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
 
             var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
@@ -360,7 +360,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.Debug("===== ChangeOrders_RemoveFrom20200502_And_AddTo202005005 (order = 1 Lot (100)) [End]=====");
+            LogUtil.DEBUGLOG_EndMethod(msg: "==========");
         }
 
         [TestMethod]
@@ -396,7 +396,6 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void OrderInTransaction_RoolbackAvailable()
         {
-
             LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
             var lot0509 = 0;
             var numLot = 1;
