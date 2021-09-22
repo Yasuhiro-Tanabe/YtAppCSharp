@@ -395,7 +395,7 @@ namespace MemorieDeFleurs.Models
                     context.StockActions.Remove(outOfStock);
                     context.SaveChanges();
 
-                    DEBUGLOG_ComparationOfStockRemainAndQuantity(currentOrder, outOfStock.Quantity);
+                    LogUtil.DEBUGLOG_ComparationOfStockRemainAndQuantity(currentOrder, outOfStock.Quantity);
                     if (currentOrder.Remain >= outOfStock.Quantity)
                     {
                         // 不足分全量をこの在庫ロットから払い出す
@@ -425,7 +425,7 @@ namespace MemorieDeFleurs.Models
                         .Where(act => act.Quantity > 0)
                         .OrderBy(act => act.ArrivalDate))
                 {
-                    DEBUGLOG_ComparationOfStockRemainAndQuantity(currentOrder, usedFromOthers.Quantity);
+                    LogUtil.DEBUGLOG_ComparationOfStockRemainAndQuantity(currentOrder, usedFromOthers.Quantity);
                     if (currentOrder.Remain >= usedFromOthers.Quantity)
                     {
                         // 全量をこの在庫ロットから払い出す
@@ -481,7 +481,7 @@ namespace MemorieDeFleurs.Models
                     Remain = param.Quantity
                 };
                 context.StockActions.Add(toUse);
-                DEBUGLOG_StockActionCreated(toUse);
+                LogUtil.DEBUGLOG_StockActionCreated(toUse);
             }
         }
 
@@ -498,7 +498,7 @@ namespace MemorieDeFleurs.Models
                 Remain = 0
             };
             context.StockActions.Add(discard);
-            DEBUGLOG_StockActionCreated(discard);
+            LogUtil.DEBUGLOG_StockActionCreated(discard);
         }
 
         private void AddScheduledToArriveStockAction(MemorieDeFleursDbContext context, StockActionParameterToOrder param)
@@ -514,7 +514,7 @@ namespace MemorieDeFleurs.Models
                 Remain = param.Quantity
             };
             context.StockActions.Add(arrive);
-            DEBUGLOG_StockActionCreated(arrive);
+            LogUtil.DEBUGLOG_StockActionCreated(arrive);
         }
 #endregion // 発注
 
@@ -578,7 +578,7 @@ namespace MemorieDeFleurs.Models
                     context.StockActions.Add(lacked);
                     context.SaveChanges();
 
-                    DEBUGLOG_StockActionCreated(lacked);
+                    LogUtil.DEBUGLOG_StockActionCreated(lacked);
                 }
             }
 
@@ -616,7 +616,7 @@ namespace MemorieDeFleurs.Models
                 .Where(a => a.Remain > 0)
                 .OrderBy(a => a.ArrivalDate))
             {
-                DEBUGLOG_ComparationOfStockRemainAndQuantity(action, outOfStock.Quantity);
+                LogUtil.DEBUGLOG_ComparationOfStockRemainAndQuantity(action, outOfStock.Quantity);
                 if(action.Remain >= outOfStock.Quantity)
                 {
                     // 全量をこの在庫アクションから払い出す
@@ -663,7 +663,7 @@ namespace MemorieDeFleurs.Models
                 = theLotStocks
                 .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
                 .Single(act => act.ActionDate == actionDate);
-            DEBUGLOG_ComparationOfStockRemainAndQuantity(toUse, usedFromTheLot);
+            LogUtil.DEBUGLOG_ComparationOfStockRemainAndQuantity(toUse, usedFromTheLot);
             if (toUse.Remain >= usedFromTheLot)
             {
                 // 全量払出する
@@ -694,7 +694,7 @@ namespace MemorieDeFleurs.Models
                 .Where(act => act.ActionDate > actionDate)
                 .OrderBy(act => act.ActionDate))
             {
-                DEBUGLOG_ComparisonOfStockQuantityAndPreviousRemain(action, 0);
+                LogUtil.DEBUGLOG_ComparisonOfStockQuantityAndPreviousRemain(action, 0);
                 if(action.Quantity <= previousRemain)
                 {
                     // このロットから全量払い出せる
@@ -741,40 +741,5 @@ namespace MemorieDeFleurs.Models
             LogUtil.DEBUGLOG_EndMethod();
         }
 #endregion // 払い出し予定の振替
-
-
-#if DEBUG
-#region デバッグ用
-
-        /// <summary>
-        /// 生成/登録された在庫アクションをデバッグログ出力する
-        /// </summary>
-        /// <param name="action">出力対象在庫アクション</param>
-        /// <param name="caller">このメソッドの呼び出し元：通常は指定不要。直接の呼び出し元ではなく、さらにその呼び出し元をログに残したいとき指定する</param>
-        /// <param name="line">このメソッドの呼び出し位置：ソースファイル中の行番号。calledFrom と同様通常は指定不要、呼び出し元の呼び出し元をログに残したいときのみ指定する</param>
-        [Conditional("DEBUG")]
-        private void DEBUGLOG_StockActionCreated(StockAction action, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
-        {
-            LogUtil.Debug($"{LogUtil.Indent}Created: {action.ToString("L")}", caller, path, line);
-        }
-
-        [Conditional("DEBUG")]
-        private void DEBUGLOG_ComparationOfStockRemainAndQuantity(StockAction action, int quantity, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
-        {
-            var operatorString = action.Remain >= quantity ? ">=" : "<";
-
-            LogUtil.Debug($"{LogUtil.Indent}Compare: {action.ToString("h")}.Remain({action.Remain}) {operatorString} {quantity}", caller, path, line);
-
-        }
-
-        [Conditional("DEBUG")]
-        private void DEBUGLOG_ComparisonOfStockQuantityAndPreviousRemain(StockAction action, int remain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
-        {
-            var operatorString = action.Quantity <= remain ? "<=" : ">";
-
-            LogUtil.Debug($"{LogUtil.Indent}Compare: {action.ToString("h")}.Quantity({action.Quantity}) {operatorString} {remain}", caller, path, line);
-        }
-#endregion // デバッグ用
-#endif
     }
 }
