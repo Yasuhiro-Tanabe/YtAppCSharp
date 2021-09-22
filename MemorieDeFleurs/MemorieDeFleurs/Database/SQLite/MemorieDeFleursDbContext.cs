@@ -92,6 +92,19 @@ namespace MemorieDeFleurs.Databese.SQLite
                 .Property(o => o.OrderDate)
                 .HasConversion(converter);
 
+            modelBuilder
+                .Entity<OrdersToSupplier>(order =>
+                {
+                    order.Property(o => o.DeliveryDate).HasConversion(converter);
+                    order.Property(o => o.OrderDate).HasConversion(converter);
+                });
+
+            modelBuilder
+                .Entity<OrderDetailsToSupplier>(detail =>
+                {
+                    detail.HasKey(nameof(OrderDetailsToSupplier.OrderToSupplierID), nameof(OrderDetailsToSupplier.OrderIndex));
+                    detail.HasOne(d => d.Order).WithMany(o => o.Details).HasForeignKey(d => d.OrderToSupplierID);
+                });
         }
 
         /// <summary>
@@ -138,5 +151,15 @@ namespace MemorieDeFleurs.Databese.SQLite
         /// 得意先からの受注履歴
         /// </summary>
         public DbSet<OrderFromCustomer> OrderFromCustomers { get; set; }
+
+        /// <summary>
+        /// 仕入先への発注履歴
+        /// </summary>
+        public DbSet<OrdersToSupplier> OrdersToSuppliers { get; set; }
+
+        /// <summary>
+        /// 仕入先への発注明細
+        /// </summary>
+        public DbSet<OrderDetailsToSupplier> OrderDetailsToSuppliers { get; set; }
     }
 }

@@ -172,6 +172,116 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // SupplierBuilder
 
+        #region OrderToSupplierBuilder
+        public class OrderToSupplierBuilder
+        {
+            private SupplierModel _model;
+            private Supplier _supplier;
+            private DateTime _orderDate;
+            private DateTime _delivaryDate;
+            private IDictionary<string, int> _details = new Dictionary<string, int>();
+            internal static OrderToSupplierBuilder GetInstance(SupplierModel model)
+            {
+                return new OrderToSupplierBuilder(model);
+            }
+
+            private OrderToSupplierBuilder(SupplierModel model)
+            {
+                _model = model;
+            }
+
+            public OrderToSupplierBuilder SupplierTo(Supplier supplier)
+            {
+                _supplier = supplier;
+                return this;
+            }
+
+            public OrderToSupplierBuilder OrderAt(DateTime orderDate)
+            {
+                _orderDate = orderDate;
+                return this;
+            }
+
+            public OrderToSupplierBuilder DerivalyAt(DateTime derivalyDate)
+            {
+                _delivaryDate = derivalyDate;
+                return this;
+            }
+
+            public OrderToSupplierBuilder Order(BouquetPart part, int count)
+            {
+                if(_details.ContainsKey(part.Code))
+                {
+                    _details[part.Code] += count;
+                }
+                else
+                {
+                    _details.Add(part.Code, count);
+                }
+                return this;
+            }
+
+            public OrdersToSupplier Create()
+            {
+                using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var order = Create(context);
+                        transaction.Commit();
+                        return order;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+
+            private OrdersToSupplier Create(MemorieDeFleursDbContext context)
+            {
+                var currentOrders = context.OrdersToSuppliers
+                    .Count(o => o.OrderDate == _orderDate);
+
+                var order = new OrdersToSupplier()
+                {
+                    ID = $"{_orderDate.ToString("yyyyMMdd")}-{currentOrders + 1:000000}",
+                    DeliveryDate = _delivaryDate,
+                    OrderDate = _orderDate,
+                    Supplier = _supplier.Code
+                };
+
+                var i = 1;
+                foreach (var detail in _details)
+                {
+                    var od = new OrderDetailsToSupplier()
+                    {
+                        OrderToSupplierID = order.ID,
+                        OrderIndex = i++,
+                        PartsCode = detail.Key,
+                        LotCount = detail.Value,
+                        StockLotNo = _model.SEQ_STOCK_LOT_NUMBER.Next(context)
+                    };
+
+                    context.OrderDetailsToSuppliers.Add(od);
+                    order.Details.Append(od);
+                }
+
+                context.OrdersToSuppliers.Add(order);
+                context.SaveChanges();
+
+                return order;
+            }
+        }
+
+        public OrderToSupplierBuilder GetOrderToSupplierBuilder()
+        {
+            return OrderToSupplierBuilder.GetInstance(this);
+        }
+        #endregion // OrderToSupplierBuilder
+
         #region Supplier の生成・更新・削除
         /// <summary>
         /// 仕入先コードをキーに仕入先オブジェクトを取得する
