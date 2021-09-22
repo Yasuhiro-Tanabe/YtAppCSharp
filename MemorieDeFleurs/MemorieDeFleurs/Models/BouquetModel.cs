@@ -13,7 +13,6 @@ namespace MemorieDeFleurs.Models
     /// </summary>
     public class BouquetModel
     {
-        private MemorieDeFleursDbContext DbContext { get; set; }
         private MemorieDeFleursModel Parent { get; set; }
 
         /// <summary>
@@ -25,7 +24,6 @@ namespace MemorieDeFleurs.Models
         internal BouquetModel(MemorieDeFleursModel parent)
         {
             Parent = parent;
-            DbContext = parent.DbContext;
         }
 
         #region BouquetPartBuilder
@@ -328,7 +326,10 @@ namespace MemorieDeFleurs.Models
         /// <returns>取り去った後の在庫数量：当日分複数ロットの合計値</returns>
         public int UseBouquetPart(BouquetPart part, DateTime date, int quantity)
         {
-            return UseBouquetPart(DbContext, part, date, quantity);
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return UseBouquetPart(context, part, date, quantity);
+            }
         }
 
         /// <summary>
@@ -520,7 +521,10 @@ namespace MemorieDeFleurs.Models
 
         public void CreatePartsList(string bouquet, string part, int quantity)
         {
-            CreatePartsList(DbContext, bouquet, part, quantity);
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                CreatePartsList(context, bouquet, part, quantity);
+            }
         }
 
         public void CreatePartsList(MemorieDeFleursDbContext context, string bouquet, string part, int quantity)
