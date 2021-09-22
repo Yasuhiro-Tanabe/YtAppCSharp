@@ -53,6 +53,7 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(expected.Password, actual.Password);
         }
 
+        [TestMethod]
         public void CanAddShippingAddressFromCustomerViaBuilder()
         {
             var model = new MemorieDeFleursModel(TestDB);
@@ -70,14 +71,18 @@ namespace MemorieDeFleursTest.ModelTest
                 .AddressIs("東京都中央区京橋1-10-7", "KPP八重洲ビル10階")
                 .Create();
 
-            // 正しく登録されていると確認できればよい
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                var actual = context.ShippingAddresses.Single();
+                var actualShippingAddress = context.ShippingAddresses.Single();
+                var actualCustomer = context.Customers.Find(customer.ID);
 
-                Assert.AreEqual(expected.Name, actual.Name);
-                Assert.IsNotNull(actual.Customer);
-                Assert.AreEqual(customer.ID, actual.Customer.ID);
+                Assert.AreEqual(expected.Name, actualShippingAddress.Name);
+                Assert.IsNotNull(actualShippingAddress.Customer);
+                Assert.AreEqual(customer.ID, actualShippingAddress.Customer.ID);
+
+                Assert.IsNotNull(actualCustomer.ShippingAddresses);
+                Assert.AreEqual(1, actualCustomer.ShippingAddresses.Count());
+                Assert.AreEqual(actualShippingAddress.ID, actualCustomer.ShippingAddresses[0].ID);
             }
         }
     }
