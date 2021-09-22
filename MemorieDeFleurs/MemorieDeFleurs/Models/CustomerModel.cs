@@ -241,7 +241,12 @@ namespace MemorieDeFleurs.Models
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return context.Customers.Find(id);
+                var customer = context.Customers.Find(id);
+
+                // キャッシュにお届け先をロード
+                context.ShippingAddresses.Where(ship => ship.CustomerID == id);
+
+                return customer;
             }
         }
         #endregion // 仕入先の登録改廃
@@ -258,6 +263,7 @@ namespace MemorieDeFleurs.Models
         private static OrderFromCustomer FindOrder(MemorieDeFleursDbContext context, string orderID)
         {
             var order = context.OrderFromCustomers.Find(orderID);
+
             if (order.Bouquet == null)
             {
                 order.Bouquet = context.Bouquets.Find(order.BouquetCode);

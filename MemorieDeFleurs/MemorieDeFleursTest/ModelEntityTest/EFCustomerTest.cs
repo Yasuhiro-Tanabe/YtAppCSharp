@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
+using System.Linq;
 
 namespace MemorieDeFleursTest.ModelEntityTest
 {
@@ -27,6 +28,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 // テーブル全削除はORマッピングフレームワークが持つ「DBを隠蔽する」意図にそぐわないため
                 // DbContext.Customers.Clear() のような操作は用意されていない。
                 // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
+                context.Database.ExecuteSqlRaw("delete from SHIPPING_ADDRESS");
                 context.Database.ExecuteSqlRaw("delete from CUSTOMERS");
             }
         }
@@ -134,6 +136,39 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 context.Customers.Add(customer1);
                 context.Customers.Add(customer2);
                 context.SaveChanges();
+            }
+        }
+
+        [TestMethod]
+        public void RelationOfCustomerAndShippingAddress()
+        {
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                context.Customers.Add(new Customer() { ID = 2, EmailAddress = "user2@localdomain", Name = "ユーザ2", CardNo = "1234123412341234" });
+                context.Customers.Add(new Customer() { ID = 3, EmailAddress = "user3@localdomain", Name = "ユーザ3", CardNo = "1234567890123450" });
+
+                var date = new DateTime(2021, 1, 1);
+                context.ShippingAddresses.Add(new ShippingAddress() { ID = 7, CustomerID = 2, Address1 = "住所2-1", Name = "友人A", LatestOrderDate = date });
+                context.ShippingAddresses.Add(new ShippingAddress() { ID = 8, CustomerID = 2, Address1 = "住所2-2", Name = "友人B", LatestOrderDate = date });
+                context.ShippingAddresses.Add(new ShippingAddress() { ID = 9, CustomerID = 2, Address1 = "住所2-3", Name = "友人C", LatestOrderDate = date });
+
+                context.ShippingAddresses.Add(new ShippingAddress() { ID = 14, CustomerID = 3, Address1 = "住所3-1-1", Name = "友人V", LatestOrderDate = date });
+                context.ShippingAddresses.Add(new ShippingAddress() { ID = 15, CustomerID = 3, Address1 = "住所3-1-2", Name = "友人W", LatestOrderDate = date });
+                context.ShippingAddresses.Add(new ShippingAddress() { ID = 16, CustomerID = 3, Address1 = "住所3-1-3", Name = "友人X", LatestOrderDate = date });
+                context.ShippingAddresses.Add(new ShippingAddress() { ID = 17, CustomerID = 3, Address1 = "住所3-1-4", Name = "友人Y", LatestOrderDate = date });
+
+                context.SaveChanges();
+            }
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                // 関連を正しくトラッキングするためには Customer と ShippingAddress の両方を取得する必要あり
+                var customer = context.Customers.Find(2);
+                var addresses = context.ShippingAddresses.Where(addr => addr.CustomerID == customer.ID).ToList();
+
+                Assert.IsNotNull(customer.ShippingAddresses);
+                Assert.AreEqual(3, customer.ShippingAddresses.Count);
+                Assert.AreEqual(customer.ID, customer.ShippingAddresses[0].CustomerID);
             }
         }
     }

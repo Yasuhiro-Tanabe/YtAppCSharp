@@ -54,6 +54,6 @@ namespace MemorieDeFleurs.Models.Entities
         /// 贈り主
         /// </summary>
         [ForeignKey("CustomerID")]
-        public Customer From { get; set; }
+        public Customer Customer { get; set; }
     }
 }

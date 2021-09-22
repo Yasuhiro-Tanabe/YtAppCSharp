@@ -76,8 +76,8 @@ namespace MemorieDeFleursTest.ModelTest
                 var actual = context.ShippingAddresses.Single();
 
                 Assert.AreEqual(expected.Name, actual.Name);
-                Assert.IsNotNull(actual.From);
-                Assert.AreEqual(customer.ID, actual.From.ID);
+                Assert.IsNotNull(actual.Customer);
+                Assert.AreEqual(customer.ID, actual.Customer.ID);
             }
         }
     }

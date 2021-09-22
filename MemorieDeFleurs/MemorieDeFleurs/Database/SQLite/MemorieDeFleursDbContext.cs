@@ -81,9 +81,11 @@ namespace MemorieDeFleurs.Databese.SQLite
                 });
 
             modelBuilder
-                .Entity<ShippingAddress>()
-                .Property(a => a.LatestOrderDate)
-                .HasConversion(converter);
+                .Entity<ShippingAddress>(ent =>
+                {
+                    ent.Property(a => a.LatestOrderDate).HasConversion(converter);
+                    ent.HasOne(a => a.Customer).WithMany(c => c.ShippingAddresses).HasForeignKey(a => a.CustomerID);
+                });
 
             modelBuilder
                 .Entity<OrderFromCustomer>()
