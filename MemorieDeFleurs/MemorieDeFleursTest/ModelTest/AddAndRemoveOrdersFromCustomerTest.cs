@@ -492,5 +492,139 @@ namespace MemorieDeFleursTest.ModelTest
 
             LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
         }
+
+        /// <summary>
+        /// 同一在庫ロット内でのお届け日変更：5/8→5/10 (発送日5/7→5/9)
+        /// </summary>
+        [TestMethod]
+        public void ChangeArrivalDate_FromMay8thToMay10th_StockChangedInsideLot0506Only()
+        {
+            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
+
+            // このテストでOrder() を呼ぶ前の状態：
+            //     - 5/6ロットの初期数量100、未使用
+            var order = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May8th);
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(0, 100)
+                    .At(DateConst.May7th).Used(4, 96)
+                    .At(DateConst.May8th).Used(0, 96)
+                    .At(DateConst.May9th).Used(0, 96).Discarded(96)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            // 同一ロット内で変更
+            var May10th = DateConst.May9th.AddDays(1);
+            Model.CustomerModel.ChangeArrivalDate(order, May10th);
+            LogUtil.Debug($"{LogUtil.Indent}After ordered...");
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(0, 100)
+                    .At(DateConst.May7th).Used(0, 100)
+                    .At(DateConst.May8th).Used(0, 100)
+                    .At(DateConst.May9th).Used(4, 96).Discarded(96)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+        }
+
+        /// <summary>
+        /// 同一在庫ロットをまたがるお届け日変更：5/6→5/9 (発送日5/5→5/8)
+        /// </summary>
+        [TestMethod]
+        public void ChangeArrivalDate_FromMay6thToMay9th_StockChangedInsideLot0506Only()
+        {
+            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
+            var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
+
+            // このテストでOrder() を呼ぶ前の状態：
+            //     - 5/3ロットの5/6在庫数40，残数90、当日破棄
+            //     - 5/6ロットの初期数量100、未使用のまま
+            var order = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May6th);
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May3rd, lot0503).Begin()
+                    .At(DateConst.May5th).Used(74, 126)
+                    .At(DateConst.May6th).Used(40, 86).Discarded(86)
+                    .End()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(0, 100)
+                    .At(DateConst.May7th).Used(0, 100)
+                    .At(DateConst.May8th).Used(0, 100)
+                    .At(DateConst.May9th).Used(0, 100).Discarded(100)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            Model.CustomerModel.ChangeArrivalDate(order, DateConst.May9th);
+
+            LogUtil.Debug($"{LogUtil.Indent}After ordered...");
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May3rd, lot0503).Begin()
+                    .At(DateConst.May5th).Used(70, 130)
+                    .At(DateConst.May6th).Used(40, 90).Discarded(90)
+                    .End()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(0, 100)
+                    .At(DateConst.May7th).Used(0, 100)
+                    .At(DateConst.May8th).Used(4, 96)
+                    .At(DateConst.May9th).Used(0, 96).Discarded(96)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+        }
+
+        [TestMethod]
+        public void ChangeArrivalDate_CanRollback()
+        {
+            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
+
+            // このテストでOrder() を呼ぶ前の状態：
+            //     - 5/6ロットの初期数量100、未使用
+            var order = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May8th);
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(0, 100)
+                    .At(DateConst.May7th).Used(4, 96)
+                    .At(DateConst.May8th).Used(0, 96)
+                    .At(DateConst.May9th).Used(0, 96).Discarded(96)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            using(var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                Model.CustomerModel.ChangeArrivalDate(context, order, DateConst.May9th);
+                transaction.Rollback();
+            }
+
+            // ロールバックしたので在庫推移は日付変更前の状態を保っているはず
+            LogUtil.Debug($"{LogUtil.Indent}After ordered...");
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(0, 100)
+                    .At(DateConst.May7th).Used(4, 96)
+                    .At(DateConst.May8th).Used(0, 96)
+                    .At(DateConst.May9th).Used(0, 96).Discarded(96)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+        }
     }
 }

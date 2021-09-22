@@ -395,5 +395,58 @@ namespace MemorieDeFleurs.Models
             LogUtil.DEBUGLOG_EndMethod($"order={orderNo}");
         }
         #endregion // 注文取消
+
+        #region お届け日変更
+        public void ChangeArrivalDate(string orderNo, DateTime newArrivalDate)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, {newArrivalDate.ToString("yyyyMMdd")}");
+                    ChangeArrivalDate(context, orderNo, newArrivalDate);
+                    transaction.Commit();
+                    LogUtil.DEBUGLOG_EndMethod($"{orderNo}", "succeeded.");
+                }
+                catch(Exception e)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn($"ChangeArrivalDate({orderNo},{newArrivalDate.ToString("yyyyMMdd")}) failed, cause={e.GetType().Name}: {e.Message}");
+                    LogUtil.DEBUGLOG_EndMethod($"{orderNo}", "failed.");
+                    throw;
+                }
+            }
+        }
+
+        public void ChangeArrivalDate(MemorieDeFleursDbContext context, string orderNo, DateTime newArrivalDate)
+        {
+
+            if (string.IsNullOrWhiteSpace(orderNo))
+            {
+                throw new NotImplementedException("エラー処理未実装：orderNo が null");
+            }
+
+            var order = FindOrder(context, orderNo);
+            if (order == null)
+            {
+                throw new NotImplementedException($"エラー処理未実装：{orderNo} に該当するオーダーがない");
+            }
+
+            var bouquet = Parent.BouquetModel.FindBouquet(order.BouquetCode);
+            
+            var newShippingDate = newArrivalDate.AddDays(-1);
+            var partsList = bouquet.PartsList.Select(i => $"{i.PartsCode} x{i.Quantity}");
+            LogUtil.Debug($"{LogUtil.Indent}Order={orderNo}" +
+                $", Shipping={order.ShippingDate.ToString("yyyyMMdd")}->{newShippingDate.ToString("yyyyMMdd")}" +
+                $", Bouquet({bouquet.PartsList.Count()} part(s))=[{string.Join(", ", partsList).Trim()}]");
+
+            foreach(var item in bouquet.PartsList)
+            {
+                Parent.BouquetModel.UseBouquetPart(context, item.Part, order.ShippingDate, -item.Quantity);
+                Parent.BouquetModel.UseBouquetPart(context, item.Part, newShippingDate, item.Quantity);
+            }
+        }
+        #endregion // お届け日変更
     }
 }
