@@ -439,5 +439,58 @@ namespace MemorieDeFleursTest.ModelTest
 
             LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
         }
+
+        [TestMethod]
+        public void CancelOrder_CanRollback()
+        {
+            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            var stock = new StockCalcurator(TestDB, ExpectedPart);
+            var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
+            var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
+
+            // このテストでOrder() を呼ぶ前の状態：
+            //     - 5/3ロットの5/6在庫数40，残数90、当日破棄
+            //     - 5/6ロットの初期数量100、未使用のまま
+            var order = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May6th.AddDays(1));
+
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May3rd, lot0503).Begin()
+                    .At(DateConst.May6th).Used(44, 86).Discarded(86)
+                    .End()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(0, 100)
+                    .At(DateConst.May7th).Used(0, 100)
+                    .At(DateConst.May8th).Used(0, 100)
+                    .At(DateConst.May9th).Used(0, 100).Discarded(100)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                Model.CustomerModel.CancelOrder(context, order);
+                transaction.Rollback();
+            }
+            LogUtil.Debug($"{LogUtil.Indent}After ordered...");
+
+            // CancelOrder() はロールバックされたので、在庫は Order() 実施後の状態と変わらないはず
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May3rd, lot0503).Begin()
+                    .At(DateConst.May6th).Used(44, 86).Discarded(86)
+                    .End()
+                .Lot(DateConst.May6th, lot0506).Begin()
+                    .At(DateConst.May6th).Used(0, 100)
+                    .At(DateConst.May7th).Used(0, 100)
+                    .At(DateConst.May8th).Used(0, 100)
+                    .At(DateConst.May9th).Used(0, 100).Discarded(100)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+        }
     }
 }
