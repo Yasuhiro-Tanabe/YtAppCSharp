@@ -385,6 +385,7 @@ namespace MemorieDeFleurs.Models
         /// <returns>取り去った後の在庫数量：当日分複数ロットの合計値</returns>
         public int UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
         {
+            LogUtil.DEBUGLOG_BeginMethod($"{part.Code}, {date.ToString("yyyyMMdd")}, {quantity}");
             try
             {
                 var inventory = context.InventoryActions
@@ -410,7 +411,7 @@ namespace MemorieDeFleurs.Models
                     .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE || a.Action == InventoryActionType.SHORTAGE)
                     .Where(a => 0 == a.ActionDate.CompareTo(date))
                     .Sum(a => a.Remain);
-                LogUtil.Info($"UseBouquetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) Total remain={remain}");
+                LogUtil.Info($"{nameof(UseBouquetPart)}({part.Code}, {date.ToString("yyyyMMdd")},{quantity}), Remain={remain}");
                 return remain;
             }
             catch (NotImplementedException ei)
@@ -420,9 +421,12 @@ namespace MemorieDeFleurs.Models
             }
             catch (Exception e)
             {
-                LogUtil.Error($"UseBouquetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) failed. {e.GetType().Name}: {e.Message}");
-                LogUtil.Error(e.StackTrace);
+                LogUtil.Error($"UseBouquetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) failed. {e.GetType().Name}: {e.Message}\n{e.StackTrace}");
                 throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
             }
         }
 
