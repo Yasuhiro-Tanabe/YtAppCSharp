@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using MemorieDeFleursTest.ModelTest.Fluent;
 using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Databese.SQLite;
+using System.Linq;
 
 namespace MemorieDeFleursTest.ModelTest
 {
@@ -414,6 +415,47 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
             Assert.AreEqual(lot0509, Model.Sequences.SEQ_STOCK_LOT_NUMBER.Next(), "発注がロールバックされているので、再採番したときはロールバック前に採番したロット番号が取得できるはず");
+        }
+
+        [TestMethod]
+        public void OrderToSupplier()
+        {
+            var orderNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedSupplier, DateConst.May9th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ExpectedPart, 1) });
+            var expectedLotNo = InitialOrders.Count()+1; // 新規ロット番号は既存ロット数+1 のはず
+            var date = Enumerable.Range(0, 4).Select(i => DateConst.May9th.AddDays(i)).ToArray();
+
+            Assert.AreEqual($"{DateConst.April30th.ToString("yyyyMMdd")}-000001", orderNo);
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May9th, expectedLotNo).Begin()
+                    .At(date[0]).Arrived(100).Used(0, 100)
+                    .At(date[1]).Used(0, 100)
+                    .At(date[2]).Used(0, 100)
+                    .At(date[3]).Used(0, 100).Discarded(100)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void OrderToSupplierInTransaction_CanRollback()
+        {
+            var orderNo = "";
+            var expectedLotNo = InitialOrders.Count() + 1;
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using(var transaction = context.Database.BeginTransaction())
+            {
+                orderNo = Model.SupplierModel.Order(context, DateConst.April30th, ExpectedSupplier, DateConst.May9th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ExpectedPart, 1) });
+                transaction.Rollback();
+            }
+
+            Assert.AreEqual($"{DateConst.April30th.ToString("yyyyMMdd")}-000001", orderNo);
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May9th, expectedLotNo).HasNoStockActions()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
         }
     }
 }

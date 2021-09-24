@@ -240,7 +240,7 @@ namespace MemorieDeFleurs.Models
                 }
             }
 
-            private OrdersToSupplier Create(MemorieDeFleursDbContext context)
+            public OrdersToSupplier Create(MemorieDeFleursDbContext context)
             {
                 var currentOrders = context.OrdersToSuppliers
                     .Count(o => o.OrderDate == _orderDate);
@@ -340,6 +340,54 @@ namespace MemorieDeFleurs.Models
                 Quantity = quantityOfLot * part.QuantitiesPerLot;
                 DaysToExpire = part.ExpiryDate;
             }
+        }
+
+        public string Order(DateTime orderDate, Supplier supplier, DateTime derivalyDate, IList<Tuple<BouquetPart,int>> orderParts)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                var orderList = string.Join(", ", orderParts.Select(t => $"({t.Item1.Code} x{t.Item2})"));
+                LogUtil.DEBUGLOG_BeginMethod($"{orderDate.ToString("yyyyMMdd")}, {supplier.Code}, {derivalyDate.ToString("yyyyMMdd")}, [{orderList}]");
+                try
+                {
+                    var orderNo = Order(context, orderDate, supplier, derivalyDate, orderParts);
+                    transaction.Commit();
+                    return orderNo;
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod();
+                }
+            }
+        }
+
+        public string Order(MemorieDeFleursDbContext context, DateTime orderDate, Supplier supplier, DateTime derivalyDate, IList<Tuple<BouquetPart, int>> orderParts)
+        {
+            var builder = GetOrderToSupplierBuilder()
+                .OrderAt(orderDate)
+                .SupplierTo(supplier)
+                .DerivalyAt(derivalyDate);
+
+            foreach(var item in orderParts)
+            {
+                var part = item.Item1;
+                var lotcount = item.Item2; 
+
+                builder.Order(part, lotcount);
+                Order(context, orderDate, part, lotcount, derivalyDate);
+            }
+
+            var order = builder.Create(context);
+
+            var orderDetails = orderParts.Select(t => $"({t.Item1.Code} x{t.Item2})");
+            LogUtil.Info($"{order.ID} ordered: {supplier.Code}, {derivalyDate.ToString("yyyyMMdd")}, [{string.Join(", ", orderDetails)}]");
+            return order.ID;
         }
 
         /// <summary>
