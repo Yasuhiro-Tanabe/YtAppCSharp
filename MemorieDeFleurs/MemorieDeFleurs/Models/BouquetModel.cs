@@ -113,22 +113,38 @@ namespace MemorieDeFleurs.Models
             public BouquetPart Create()
             {
                 using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    var p = new BouquetPart()
+                    try
                     {
-                        Code = _code,
-                        Name = _name,
-                        LeadTime = _leadTime,
-                        QuantitiesPerLot = _parLot,
-                        ExpiryDate = _expire,
-                        Status = 0
-                    };
-
-                    context.BouquetParts.Add(p);
-                    context.SaveChanges();
-
-                    return p;
+                        var part = Create(context);
+                        transaction.Commit();
+                        return part;
+                    }
+                    catch(Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
+            }
+
+            private BouquetPart Create(MemorieDeFleursDbContext context)
+            {
+                var p = new BouquetPart()
+                {
+                    Code = _code,
+                    Name = _name,
+                    LeadTime = _leadTime,
+                    QuantitiesPerLot = _parLot,
+                    ExpiryDate = _expire,
+                    Status = 0
+                };
+
+                context.BouquetParts.Add(p);
+                context.SaveChanges();
+
+                return p;
             }
         }
 
@@ -206,26 +222,42 @@ namespace MemorieDeFleurs.Models
             public Bouquet Create()
             {
                 using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    var ret = new Bouquet()
+                    try
                     {
-                        Code = _code,
-                        Name = _name,
-                        Image = _image,
-                        LeadTime = 0,
-                        Status = 0
-                    };
-
-                    foreach (var p in _partsList)
-                    {
-                        var item = new BouquetPartsList() { BouquetCode = _code, PartsCode = p.Key, Quantity = p.Value };
-                        ret.PartsList.Add(item);
+                        var bouquet = Create(context);
+                        transaction.Commit();
+                        return bouquet;
                     }
-
-                    context.Bouquets.Add(ret);
-                    context.SaveChanges();
-                    return ret;
+                    catch(Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
+            }
+
+            private Bouquet Create(MemorieDeFleursDbContext context)
+            {
+                var ret = new Bouquet()
+                {
+                    Code = _code,
+                    Name = _name,
+                    Image = _image,
+                    LeadTime = 0,
+                    Status = 0
+                };
+
+                foreach (var p in _partsList)
+                {
+                    var item = new BouquetPartsList() { BouquetCode = _code, PartsCode = p.Key, Quantity = p.Value };
+                    ret.PartsList.Add(item);
+                }
+
+                context.Bouquets.Add(ret);
+                context.SaveChanges();
+                return ret;
             }
 
             /// <summary>
@@ -276,7 +308,7 @@ namespace MemorieDeFleurs.Models
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return context.BouquetParts.SingleOrDefault(p => p.Code == partCode);
+                return context.BouquetParts.Find(partCode);
             }
         }
         #endregion // 単品の登録改廃
@@ -327,8 +359,19 @@ namespace MemorieDeFleurs.Models
         public int UseBouquetPart(BouquetPart part, DateTime date, int quantity)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
             {
-                return UseBouquetPart(context, part, date, quantity);
+                try
+                {
+                    var totalRemain = UseBouquetPart(context, part, date, quantity);
+                    transaction.Commit();
+                    return totalRemain;
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             }
         }
 
@@ -522,8 +565,18 @@ namespace MemorieDeFleurs.Models
         public void CreatePartsList(string bouquet, string part, int quantity)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
             {
-                CreatePartsList(context, bouquet, part, quantity);
+                try
+                {
+                    CreatePartsList(context, bouquet, part, quantity);
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             }
         }
 

@@ -136,8 +136,19 @@ namespace MemorieDeFleurs.Models
             public Supplier Create()
             {
                 using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    return Create(context);
+                    try
+                    {
+                        var supplier = Create(context);
+                        transaction.Commit();
+                        return supplier;
+                    }
+                    catch(Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
             
@@ -302,7 +313,7 @@ namespace MemorieDeFleurs.Models
         }
         private Supplier Find(MemorieDeFleursDbContext context, int supplierCode)
         {
-            return context.Suppliers.SingleOrDefault(s => s.Code == supplierCode);
+            return context.Suppliers.Find(supplierCode);
         }
         #endregion // Supplier の生成・更新・削除
 
@@ -423,8 +434,24 @@ namespace MemorieDeFleurs.Models
         public int Order(DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
             {
-                return Order(context, orderDate, part, quantityOfLot, arrivalDate);
+                LogUtil.DEBUGLOG_BeginMethod($"{orderDate.ToString("yyyyMMdd")}, {part.Code}, {quantityOfLot} Lot(s), {arrivalDate.ToString("yyyyMMdd")}");
+                try
+                {
+                    var orderNo = Order(context, orderDate, part, quantityOfLot, arrivalDate);
+                    transaction.Commit();
+                    return orderNo;
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod($"{orderDate.ToString("yyyyMMdd")}, {part.Code}, {quantityOfLot} Lot(s), {arrivalDate.ToString("yyyyMMdd")}");
+                }
             }
         }
 
@@ -595,7 +622,7 @@ namespace MemorieDeFleurs.Models
             context.StockActions.Add(arrive);
             LogUtil.DEBUGLOG_StockActionCreated(arrive);
         }
-#endregion // 発注
+        #endregion // 発注
 
         #region 発注取消
         /// <summary>
@@ -649,8 +676,23 @@ namespace MemorieDeFleurs.Models
         public void CancelOrder(int lotNo)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
             {
-                CancelOrder(context, lotNo);
+                LogUtil.DEBUGLOG_BeginMethod($"LotNo.{lotNo}");
+                try
+                {
+                    CancelOrder(context, lotNo);
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod($"LotNo.{lotNo}");
+                }
             }
         }
 

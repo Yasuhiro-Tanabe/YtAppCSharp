@@ -105,8 +105,19 @@ namespace MemorieDeFleurs.Models
             public Customer Create()
             {
                 using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    return Create(context);
+                    try
+                    {
+                        var customer = Create(context);
+                        transaction.Commit();
+                        return customer;
+                    }
+                    catch(Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
 
@@ -201,8 +212,19 @@ namespace MemorieDeFleurs.Models
             public ShippingAddress Create()
             {
                 using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    return Create(context);
+                    try
+                    {
+                        var address = Create(context);
+                        transaction.Commit();
+                        return address;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
 
@@ -292,8 +314,19 @@ namespace MemorieDeFleurs.Models
         public string Order(DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "" )
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
             {
-                return Order(context, orderDate, bouquet, sendTo, arrivalDate, message);
+                try
+                {
+                    var orderNo = Order(context, orderDate, bouquet, sendTo, arrivalDate, message);
+                    transaction.Commit();
+                    return orderNo;
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             }
         }
 
