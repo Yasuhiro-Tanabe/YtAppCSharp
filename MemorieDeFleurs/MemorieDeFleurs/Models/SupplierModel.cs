@@ -298,6 +298,114 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // OrderToSupplierBuilder
 
+        #region InventoryActionLotBuilder
+        /// <summary>
+        /// 発注時に登録する在庫アクションの共通パラメータ
+        /// </summary>
+        private class InventoryActionLotBuilder
+        {
+            private BouquetPart _part;
+            private DateTime _arrivalDate;
+            private int _lotNo;
+            private int _quantity;
+
+            private InventoryActionLotBuilder() { }
+
+            public static InventoryActionLotBuilder GetInstance()
+            {
+                return new InventoryActionLotBuilder();
+            }
+
+            public InventoryActionLotBuilder OrderPartIs(BouquetPart part, int num)
+            {
+                _part = part;
+                _quantity = num * part.QuantitiesPerLot;
+                return this;
+            }
+
+            public InventoryActionLotBuilder ArriveAt(DateTime date)
+            {
+                _arrivalDate = date;
+                return this;
+            }
+
+            public InventoryActionLotBuilder LotNumberIs(int no)
+            {
+                _lotNo = no;
+                return this;
+            }
+
+            public void Create(MemorieDeFleursDbContext context)
+            {
+                AddScheduledToArriveInventoryAction(context);
+                AddScheduledToDiscardInventoryAction(context);
+                AddScheduledToUseInventoryAction(context);
+                context.SaveChanges();
+            }
+
+            private void AddScheduledToUseInventoryAction(MemorieDeFleursDbContext context)
+            {
+                var list = new List<InventoryAction>();
+
+                // 品質維持可能日数＋1日分 (入荷日+0日目、入荷日+1日目、…、入荷日+品質維持可能日数日目)を生成
+                foreach (var d in Enumerable.Range(0, _part.ExpiryDate + 1).Select(i => _arrivalDate.AddDays(i)))
+                {
+                    var toUse = new InventoryAction()
+                    {
+                        ActionDate = d,
+                        Action = InventoryActionType.SCHEDULED_TO_USE,
+                        PartsCode = _part.Code,
+                        InventoryLotNo = _lotNo,
+                        ArrivalDate = _arrivalDate,
+                        Quantity = 0,
+                        Remain = _quantity
+                    };
+                    context.InventoryActions.Add(toUse);
+                    LogUtil.DEBUGLOG_InventoryActionCreated(toUse);
+                    list.Add(toUse);
+                }
+            }
+
+            private void AddScheduledToDiscardInventoryAction(MemorieDeFleursDbContext context)
+            {
+                var discard = new InventoryAction()
+                {
+                    ActionDate = _arrivalDate.AddDays(_part.ExpiryDate),
+                    Action = InventoryActionType.SCHEDULED_TO_DISCARD,
+                    PartsCode = _part.Code,
+                    InventoryLotNo = _lotNo,
+                    ArrivalDate = _arrivalDate,
+                    Quantity = _quantity,
+                    Remain = 0
+                };
+                context.InventoryActions.Add(discard);
+                LogUtil.DEBUGLOG_InventoryActionCreated(discard);
+            }
+
+            private void AddScheduledToArriveInventoryAction(MemorieDeFleursDbContext context)
+            {
+                var arrive = new InventoryAction()
+                {
+                    ActionDate = _arrivalDate,
+                    Action = InventoryActionType.SCHEDULED_TO_ARRIVE,
+                    PartsCode = _part.Code,
+                    InventoryLotNo = _lotNo,
+                    ArrivalDate = _arrivalDate,
+                    Quantity = _quantity,
+                    Remain = _quantity
+                };
+                context.InventoryActions.Add(arrive);
+                LogUtil.DEBUGLOG_InventoryActionCreated(arrive);
+            }
+
+        }
+
+        private InventoryActionLotBuilder GetLotBuilder()
+        {
+            return InventoryActionLotBuilder.GetInstance();
+        }
+        #endregion // InventoryActionLotBuilder
+
         #region Supplier の生成・更新・削除
         /// <summary>
         /// 仕入先コードをキーに仕入先オブジェクトを取得する
@@ -318,45 +426,6 @@ namespace MemorieDeFleurs.Models
         #endregion // Supplier の生成・更新・削除
 
         #region 発注
-        /// <summary>
-        /// 発注時に登録する在庫アクションの共通パラメータ
-        /// </summary>
-        private class InventoryActionParameterToOrder
-        {
-            /// <summary>
-            /// 到着予定日
-            /// </summary>
-            public DateTime ArrivalDate { get; private set; }
-
-            /// <summary>
-            /// 花コード
-            /// </summary>
-            public string PartsCode { get; private set; }
-
-            /// <summary>
-            /// 在庫ロット番号
-            /// </summary>
-            public int InventoryActionLotNo { get; private set; }
-
-            /// <summary>
-            /// 数量[本]：初期登録時は入荷時の数量を全量破棄する
-            /// </summary>
-            public int Quantity { get; private set; }
-
-            /// <summary>
-            /// 品質維持可能日数[日]：加工予定および破棄予定の在庫アクションで日付計算のために使用する。
-            /// </summary>
-            public int DaysToExpire { get; private set; }
-
-            public InventoryActionParameterToOrder(DateTime arrival, BouquetPart part, int lotNo, int quantityOfLot)
-            {
-                ArrivalDate = arrival;
-                PartsCode = part.Code;
-                InventoryActionLotNo = lotNo;
-                Quantity = quantityOfLot * part.QuantitiesPerLot;
-                DaysToExpire = part.ExpiryDate;
-            }
-        }
 
         /// <summary>
         /// 発注する
@@ -475,15 +544,15 @@ namespace MemorieDeFleurs.Models
 
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
             var lotNo = SEQ_INVENTORY_LOT_NUMBER.Next(context);
-            var quantity = quantityOfLot * part.QuantitiesPerLot;
+            var usedLot = new Stack<int>();
 
-            var param = new InventoryActionParameterToOrder(arrivalDate, part, lotNo, quantityOfLot);
+            // 発注分の在庫アクションを登録する
+            InventoryActionLotBuilder.GetInstance()
+                .OrderPartIs(part, quantityOfLot)
+                .ArriveAt(arrivalDate)
+                .LotNumberIs(lotNo)
+                .Create(context);
 
-            // 追加発注分の在庫アクションを登録する
-            AddScheduledToArriveInventoryAction(context, param);
-            AddScheduledToDiscardInventoryAction(context, param);
-            AddScheduledToUseInventoryAction(context, param);
-            context.SaveChanges();
 
             // 当日以降の入荷予定分と在庫不足分をこのロットに振り替える
             foreach (var currentOrder in context.InventoryActions
@@ -571,57 +640,6 @@ namespace MemorieDeFleurs.Models
             return lotNo;
         }
 
-        private void AddScheduledToUseInventoryAction(MemorieDeFleursDbContext context, InventoryActionParameterToOrder param)
-        {
-            // 品質維持可能日数＋1日分 (入荷日+0日目、入荷日+1日目、…、入荷日+品質維持可能日数日目)を生成
-            foreach (var d in Enumerable.Range(0, param.DaysToExpire + 1).Select(i => param.ArrivalDate.AddDays(i)))
-            {
-                var toUse = new InventoryAction()
-                {
-                    ActionDate = d,
-                    Action = InventoryActionType.SCHEDULED_TO_USE,
-                    PartsCode = param.PartsCode,
-                    InventoryLotNo = param.InventoryActionLotNo,
-                    ArrivalDate = param.ArrivalDate,
-                    Quantity = 0,
-                    Remain = param.Quantity
-                };
-                context.InventoryActions.Add(toUse);
-                LogUtil.DEBUGLOG_InventoryActionCreated(toUse);
-            }
-        }
-
-        private void AddScheduledToDiscardInventoryAction(MemorieDeFleursDbContext context, InventoryActionParameterToOrder param)
-        {
-            var discard = new InventoryAction()
-            {
-                ActionDate = param.ArrivalDate.AddDays(param.DaysToExpire),
-                Action = InventoryActionType.SCHEDULED_TO_DISCARD,
-                PartsCode = param.PartsCode,
-                InventoryLotNo = param.InventoryActionLotNo,
-                ArrivalDate = param.ArrivalDate,
-                Quantity = param.Quantity,
-                Remain = 0
-            };
-            context.InventoryActions.Add(discard);
-            LogUtil.DEBUGLOG_InventoryActionCreated(discard);
-        }
-
-        private void AddScheduledToArriveInventoryAction(MemorieDeFleursDbContext context, InventoryActionParameterToOrder param)
-        {
-            var arrive = new InventoryAction()
-            {
-                ActionDate = param.ArrivalDate,
-                Action = InventoryActionType.SCHEDULED_TO_ARRIVE,
-                PartsCode = param.PartsCode,
-                InventoryLotNo = param.InventoryActionLotNo,
-                ArrivalDate = param.ArrivalDate,
-                Quantity = param.Quantity,
-                Remain = param.Quantity
-            };
-            context.InventoryActions.Add(arrive);
-            LogUtil.DEBUGLOG_InventoryActionCreated(arrive);
-        }
         #endregion // 発注
 
         #region 発注取消
