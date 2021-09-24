@@ -10,10 +10,6 @@ namespace MemorieDeFleurs.Models
     /// </summary>
     public class MemorieDeFleursModel
     {
-        /// <summary>
-        /// (パッケージ内限定) Entity Framework Data Context
-        /// </summary>
-        internal MemorieDeFleursDbContext DbContext { get; private set; }
         internal SqliteConnection DbConnection { get; private set; }
         
         public SupplierModel SupplierModel { get; private set; }
@@ -28,26 +24,6 @@ namespace MemorieDeFleurs.Models
         /// <summary>
         /// データモデルを生成する。
         /// 
-        /// テスト・デバッグの利便性を考慮し、操作するデータベース(Entity Framework Data Context) を
-        /// 外部から指定できるようにしている。
-        /// </summary>
-        /// <param name="db"></param>
-        public MemorieDeFleursModel(MemorieDeFleursDbContext db)
-        {
-            DbContext = db;
-            DbConnection = db.Database.GetDbConnection() as SqliteConnection;
-
-            SupplierModel = new SupplierModel(this);
-            BouquetModel = new BouquetModel(this);
-            CustomerModel = new CustomerModel(this);
-            
-            DateMaster = new DateUtil(DbConnection);
-            Sequences = new SequenceUtil(this);
-        }
-
-        /// <summary>
-        /// データモデルを生成する。
-        /// 
         /// テスト・デバッグの利便性を考慮し、操作するデータベースを
         /// 外部から指定できるようにしている。
         /// </summary>
@@ -55,7 +31,6 @@ namespace MemorieDeFleurs.Models
         public MemorieDeFleursModel(SqliteConnection connection)
         {
             DbConnection = connection;
-            DbContext = new MemorieDeFleursDbContext(DbConnection);
 
             SupplierModel = new SupplierModel(this);
             BouquetModel = new BouquetModel(this);
