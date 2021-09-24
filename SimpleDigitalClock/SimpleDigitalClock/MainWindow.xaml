@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimpleDigitalClock"
         mc:Ignorable="d"
-        Title="SimpleDigitalClock" Height="250" Width="800">
+        Title="SimpleDigitalClock" Height="250" Width="800"
+        ResizeMode="NoResize">
     <Window.DataContext>
         <local:SimpleClockViewModel/>
     </Window.DataContext>
