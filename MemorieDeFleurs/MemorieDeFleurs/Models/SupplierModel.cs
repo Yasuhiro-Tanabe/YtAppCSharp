@@ -175,11 +175,16 @@ namespace MemorieDeFleurs.Models
         #region OrderToSupplierBuilder
         public class OrderToSupplierBuilder
         {
+            private class OrderDetail
+            {
+                internal int LotCount { get; set; }
+                internal int LotNo { get; set; }
+            }
             private SupplierModel _model;
             private Supplier _supplier;
             private DateTime _orderDate;
             private DateTime _delivaryDate;
-            private IDictionary<string, int> _details = new Dictionary<string, int>();
+            private IDictionary<string, OrderDetail> _details = new Dictionary<string, OrderDetail>();
             internal static OrderToSupplierBuilder GetInstance(SupplierModel model)
             {
                 return new OrderToSupplierBuilder(model);
@@ -208,15 +213,15 @@ namespace MemorieDeFleurs.Models
                 return this;
             }
 
-            public OrderToSupplierBuilder Order(BouquetPart part, int count)
+            public OrderToSupplierBuilder Order(BouquetPart part, int count, int lotNo = 0)
             {
                 if(_details.ContainsKey(part.Code))
                 {
-                    _details[part.Code] += count;
+                    _details[part.Code].LotCount += count;
                 }
                 else
                 {
-                    _details.Add(part.Code, count);
+                    _details.Add(part.Code, new OrderDetail() { LotCount = count, LotNo = lotNo });
                 }
                 return this;
             }
@@ -261,8 +266,8 @@ namespace MemorieDeFleurs.Models
                         OrderToSupplierID = order.ID,
                         OrderIndex = i++,
                         PartsCode = detail.Key,
-                        LotCount = detail.Value,
-                        StockLotNo = _model.SEQ_STOCK_LOT_NUMBER.Next(context)
+                        LotCount = detail.Value.LotCount,
+                        StockLotNo = detail.Value.LotNo == 0 ? _model.SEQ_STOCK_LOT_NUMBER.Next(context) : detail.Value.LotNo
                     };
 
                     context.OrderDetailsToSuppliers.Add(od);
@@ -342,6 +347,14 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 発注する
+        /// </summary>
+        /// <param name="orderDate">発注日</param>
+        /// <param name="supplier">発注先</param>
+        /// <param name="derivalyDate">納品予定日</param>
+        /// <param name="orderParts">発注明細</param>
+        /// <returns>発注番号</returns>
         public string Order(DateTime orderDate, Supplier supplier, DateTime derivalyDate, IList<Tuple<BouquetPart,int>> orderParts)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -367,6 +380,15 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 発注する：トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderDate">発注日</param>
+        /// <param name="supplier">発注先</param>
+        /// <param name="derivalyDate">納品予定日</param>
+        /// <param name="orderParts">発注明細</param>
+        /// <returns>発注番号</returns>
         public string Order(MemorieDeFleursDbContext context, DateTime orderDate, Supplier supplier, DateTime derivalyDate, IList<Tuple<BouquetPart, int>> orderParts)
         {
             var builder = GetOrderToSupplierBuilder()
@@ -379,8 +401,8 @@ namespace MemorieDeFleurs.Models
                 var part = item.Item1;
                 var lotcount = item.Item2; 
 
-                builder.Order(part, lotcount);
-                Order(context, orderDate, part, lotcount, derivalyDate);
+                var lotNo = Order(context, orderDate, part, lotcount, derivalyDate);
+                builder.Order(part, lotcount, lotNo);
             }
 
             var order = builder.Create(context);
@@ -391,7 +413,7 @@ namespace MemorieDeFleurs.Models
         }
 
         /// <summary>
-        /// (試作) 注文処理に伴う在庫アクション登録
+        /// 注文処理に伴う在庫アクション登録
         /// </summary>
         /// <param name="orderDate">発注日</param>
         /// <param name="part">単品</param>
@@ -406,6 +428,15 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 発注処理に伴う在庫アクション登録、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderDate">発注日</param>
+        /// <param name="part">単品</param>
+        /// <param name="quantityOfLot">注文ロット数</param>
+        /// <param name="arrivalDate">納品予定日</param>
+        /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
         public int Order(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
             LogUtil.DEBUGLOG_BeginMethod(new StringBuilder()
@@ -567,6 +598,54 @@ namespace MemorieDeFleurs.Models
 #endregion // 発注
 
         #region 発注取消
+        /// <summary>
+        /// 発注を取り消す
+        /// </summary>
+        /// <param name="orderNo">発注番号</param>
+        public void CancelOrder(string orderNo)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                LogUtil.DEBUGLOG_BeginMethod(orderNo);
+                try
+                {
+                    CancelOrder(context, orderNo);
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(orderNo);
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// 発注を取り消す、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderNo">発注番号</param>
+        public void CancelOrder(MemorieDeFleursDbContext context, string orderNo)
+        {
+            var order = context.OrdersToSuppliers.Find(orderNo);
+            var details = context.OrderDetailsToSuppliers.Where(d => d.OrderToSupplierID == order.ID);
+
+            foreach(var d in details)
+            {
+                CancelOrder(context, d.StockLotNo);
+            }
+
+            context.OrderDetailsToSuppliers.RemoveRange(details);
+            context.OrdersToSuppliers.Remove(order);
+            context.SaveChanges();
+        }
+
         public void CancelOrder(int lotNo)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -591,7 +670,7 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
 
             var partCode = theLot.First().PartsCode;
-            var part = Parent.BouquetModel.FindBouquetPart(partCode);
+            var part = context.BouquetParts.Find(partCode);
             if (part == null)
             {
                 throw new NotImplementedException($"単品 {partCode} が見つからない： Lot No. {lotNo}");

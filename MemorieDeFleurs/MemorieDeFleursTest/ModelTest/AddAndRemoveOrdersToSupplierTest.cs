@@ -424,6 +424,11 @@ namespace MemorieDeFleursTest.ModelTest
             var expectedLotNo = InitialOrders.Count()+1; // 新規ロット番号は既存ロット数+1 のはず
             var date = Enumerable.Range(0, 4).Select(i => DateConst.May9th.AddDays(i)).ToArray();
 
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                Assert.AreEqual(1, context.OrdersToSuppliers.Count());
+                Assert.AreEqual(1, context.OrderDetailsToSuppliers.Count());
+            }
             Assert.AreEqual($"{DateConst.April30th.ToString("yyyyMMdd")}-000001", orderNo);
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May9th, expectedLotNo).Begin()
@@ -450,9 +455,68 @@ namespace MemorieDeFleursTest.ModelTest
                 transaction.Rollback();
             }
 
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                Assert.AreEqual(0, context.OrdersToSuppliers.Count());
+                Assert.AreEqual(0, context.OrderDetailsToSuppliers.Count());
+            }
             Assert.AreEqual($"{DateConst.April30th.ToString("yyyyMMdd")}-000001", orderNo);
             StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May9th, expectedLotNo).HasNoStockActions()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void CanelOrderToSupplier()
+        {
+            var orderNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedSupplier, DateConst.May9th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ExpectedPart, 1) });
+            var expectedLotNo = InitialOrders.Count() + 1;
+
+            Model.SupplierModel.CancelOrder(orderNo);
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                Assert.AreEqual(0, context.OrdersToSuppliers.Count());
+                Assert.AreEqual(0, context.OrderDetailsToSuppliers.Count());
+            }
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May9th, expectedLotNo).HasNoStockActions()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+        }
+
+        [TestMethod]
+        public void CancelOrderToSupplierInTransaction_CanRollback()
+        {
+            var orderNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedSupplier, DateConst.May9th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ExpectedPart, 1) });
+            var expectedLotNo = InitialOrders.Count() + 1;
+
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                Model.SupplierModel.CancelOrder(context, orderNo);
+                transaction.Rollback();
+            }
+
+            // キャンセルを取り消したので注文は残っているはず
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            {
+                Assert.AreEqual(1, context.OrdersToSuppliers.Count());
+                Assert.AreEqual(1, context.OrderDetailsToSuppliers.Count());
+            }
+
+            var date = Enumerable.Range(0, 4).Select(i => DateConst.May9th.AddDays(i)).ToArray();
+            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May9th, expectedLotNo).Begin()
+                    .At(date[0]).Arrived(100).Used(0, 100)
+                    .At(date[1]).Used(0, 100)
+                    .At(date[2]).Used(0, 100)
+                    .At(date[3]).Used(0, 100).Discarded(100)
+                    .End()
                 .End()
                 .TargetDBIs(TestDB)
                 .AssertAll();
