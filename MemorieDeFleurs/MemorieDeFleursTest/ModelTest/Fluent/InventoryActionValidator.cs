@@ -13,24 +13,24 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
     /// <summary>
     /// 在庫アクション検証器：在庫アクションの期待値を登録し、期待値通りに登録されているかどうかを検証するクラス
     /// </summary>
-    public class StockActionsValidator : Dictionary<string, PartStockActionValidator>
+    public class InventoryActionValidator : Dictionary<string, PartsInventoryActionValidator>
     {
-        private StockActionsValidator() { }
+        private InventoryActionValidator() { }
 
         /// <summary>
         /// 検証クラスのインスタンスを生成する
         /// </summary>
         /// <returns>このクラスのオブジェクト</returns>
-        public static StockActionsValidator NewInstance()
+        public static InventoryActionValidator NewInstance()
         {
-            return new StockActionsValidator();
+            return new InventoryActionValidator();
         }
 
         private BouquetPart CurrentPart { get; set; } = null;
 
-        private PartStockActionValidator CurrentChild { get; set; } = null;
+        private PartsInventoryActionValidator CurrentChild { get; set; } = null;
 
-        private IDictionary<StockActionType, int> ExpectedStockActionCount { get; } = new Dictionary<StockActionType, int>();
+        private IDictionary<InventoryActionType, int> ExpectedInventoryActionCount { get; } = new Dictionary<InventoryActionType, int>();
 
         private SqliteConnection CurrentConnection { get; set; }
 
@@ -39,12 +39,12 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// </summary>
         /// <param name="part">単品</param>
         /// <returns>単品在庫アクション検証器</returns>
-        public StockActionsValidator BouquetPart(BouquetPart part)
+        public InventoryActionValidator BouquetPart(BouquetPart part)
         {
-            PartStockActionValidator validator;
+            PartsInventoryActionValidator validator;
             if (!TryGetValue(part.Code, out validator))
             {
-                validator = new PartStockActionValidator(this);
+                validator = new PartsInventoryActionValidator(this);
                 Add(part.Code, validator);
             }
             CurrentPart = part;
@@ -56,7 +56,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// 単品在庫アクション検証器に制御を移す
         /// </summary>
         /// <returns>単品在庫アクション検証器</returns>
-        public PartStockActionValidator Begin()
+        public PartsInventoryActionValidator Begin()
         {
             if(null == CurrentChild)
             {
@@ -71,9 +71,9 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="type">在庫アクションタイプ</param>
         /// <param name="expected">期待値(個数)</param>
         /// <returns>自分自身</returns>
-        public StockActionsValidator StockActionCountShallBe(StockActionType type, int expected)
+        public InventoryActionValidator InventoryActionCountShallBe(InventoryActionType type, int expected)
         {
-            ExpectedStockActionCount[type] = expected;
+            ExpectedInventoryActionCount[type] = expected;
             return this;
         }
 
@@ -90,14 +90,14 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
 
             this.All(kv => { kv.Value.AssertAll(context, kv.Key); return true; });
 
-            foreach(var expected in ExpectedStockActionCount)
+            foreach(var expected in ExpectedInventoryActionCount)
             {
-                Assert.AreEqual(expected.Value, context.StockActions.Count(act => act.Action == expected.Key), $"Type: {expected.Key}");
+                Assert.AreEqual(expected.Value, context.InventoryActions.Count(act => act.Action == expected.Key), $"Type: {expected.Key}");
 
             }
         }
 
-        public StockActionsValidator TargetDBIs(SqliteConnection connection)
+        public InventoryActionValidator TargetDBIs(SqliteConnection connection)
         {
             CurrentConnection = connection;
             return this;

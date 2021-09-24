@@ -138,7 +138,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May1st, findLotNo).Begin()
                     .At(DateConst.May4th).Used(300, 0).Discarded(0)
                     .End()
@@ -182,7 +182,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             var newLotNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedPart, 1, DateConst.May2nd);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.April30th, findLotNo).Begin()
                     .At(DateConst.May2nd).Used(80, 50)
                     .At(DateConst.May3rd).Used(20, 30).Discarded(30)
@@ -229,8 +229,8 @@ namespace MemorieDeFleursTest.ModelTest
             Model.SupplierModel.CancelOrder(lot);
 
             // 他在庫ロットの在庫アクションで、破棄した在庫ロットの入荷日以降の在庫アクションに変化がない
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May6th, lot).HasNoStockActions()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May6th, lot).HasNoInventoryActions()
                 .Lot(DateConst.May3rd, findLotNo).Begin()
                     .At(DateConst.May6th).Used(40, 90).Discarded(90)
                     .End()
@@ -252,11 +252,11 @@ namespace MemorieDeFleursTest.ModelTest
 
             Model.SupplierModel.CancelOrder(lot);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May2nd, lot).HasNoStockActions()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May2nd, lot).HasNoInventoryActions()
                 .Lot(DateConst.May3rd, findLotNo).Begin()
                     .At(DateConst.May4th).Used(100, 100)
-                    .At(DateConst.May5th).Used(100, 0).OutOfStock(70)
+                    .At(DateConst.May5th).Used(100, 0).Shortage(70)
                     .At(DateConst.May6th).Used(0, 0).Discarded(0)
                     .End()
                 .Lot(DateConst.May6th, findLotNo).Begin()
@@ -290,11 +290,11 @@ namespace MemorieDeFleursTest.ModelTest
             LogUtil.Debug($"+++ CancelOrder({lot0502})");
             Model.SupplierModel.CancelOrder(lot0502);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May2nd, lot0502).HasNoInventoryActions()
                 .Lot(DateConst.May3rd, lot0503).Begin()
                     .At(DateConst.May4th).Used(100, 100)
-                    .At(DateConst.May5th).Used(100, 0).OutOfStock(70)
+                    .At(DateConst.May5th).Used(100, 0).Shortage(70)
                     .At(DateConst.May6th).Used(0, 0).Discarded(0)
                     .End()
                 .Lot(DateConst.May6th, lot0506).Begin()
@@ -310,8 +310,8 @@ namespace MemorieDeFleursTest.ModelTest
             LogUtil.Debug($"+++ Order({DateConst.May5th.ToString("yyyyMMdd")})");
             lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 2, DateConst.May5th);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May2nd, lot0502).HasNoInventoryActions()
                 .Lot(DateConst.May5th, lot0505).Begin()
                     .At(DateConst.May5th).Used(70, 130)
                     .At(DateConst.May6th).Used(40, 90)
@@ -323,7 +323,7 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May8th).Used(0, 100)
                     .At(DateConst.May9th).Used(0, 100).Discarded(100).End()
                 .End()
-                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
+                .InventoryActionCountShallBe(InventoryActionType.SHORTAGE, 0)
                 .TargetDBIs(TestDB)
                 .AssertAll();
             LogUtil.DEBUGLOG_EndMethod(msg: "==========");
@@ -344,8 +344,8 @@ namespace MemorieDeFleursTest.ModelTest
             Model.SupplierModel.CancelOrder(lot0502);
             lot0505 = Model.SupplierModel.Order(DateConst.May1st, ExpectedPart, 1, DateConst.May5th);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May2nd, lot0502).HasNoStockActions()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May2nd, lot0502).HasNoInventoryActions()
                 .Lot(DateConst.May5th, lot0505).Begin()
                     .At(DateConst.May5th).Used(70, 30)
                     .At(DateConst.May6th).Used(30, 0)
@@ -357,7 +357,7 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May8th).Used(0, 90)
                     .At(DateConst.May9th).Used(0, 90).Discarded(90).End()
                 .End()
-                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
+                .InventoryActionCountShallBe(InventoryActionType.SHORTAGE, 0)
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
@@ -379,7 +379,7 @@ namespace MemorieDeFleursTest.ModelTest
                 transaction.Commit();
             }
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May9th, lot0509).Begin()
                     .At(DateConst.May9th).Arrived(quantity).Used(0, quantity)
                     .At(DateConst.May9th.AddDays(1)).Used(0, quantity)
@@ -409,12 +409,12 @@ namespace MemorieDeFleursTest.ModelTest
                 transaction.Rollback();
             }
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May9th, lot0509).HasNoStockActions()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May9th, lot0509).HasNoInventoryActions()
                 .End()
                 .TargetDBIs(TestDB)
                 .AssertAll();
-            Assert.AreEqual(lot0509, Model.Sequences.SEQ_STOCK_LOT_NUMBER.Next(), "発注がロールバックされているので、再採番したときはロールバック前に採番したロット番号が取得できるはず");
+            Assert.AreEqual(lot0509, Model.Sequences.SEQ_INVENTORY_LOT_NUMBER.Next(), "発注がロールバックされているので、再採番したときはロールバック前に採番したロット番号が取得できるはず");
         }
 
         [TestMethod]
@@ -430,7 +430,7 @@ namespace MemorieDeFleursTest.ModelTest
                 Assert.AreEqual(1, context.OrderDetailsToSuppliers.Count());
             }
             Assert.AreEqual($"{DateConst.April30th.ToString("yyyyMMdd")}-000001", orderNo);
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May9th, expectedLotNo).Begin()
                     .At(date[0]).Arrived(100).Used(0, 100)
                     .At(date[1]).Used(0, 100)
@@ -461,8 +461,8 @@ namespace MemorieDeFleursTest.ModelTest
                 Assert.AreEqual(0, context.OrderDetailsToSuppliers.Count());
             }
             Assert.AreEqual($"{DateConst.April30th.ToString("yyyyMMdd")}-000001", orderNo);
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May9th, expectedLotNo).HasNoStockActions()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May9th, expectedLotNo).HasNoInventoryActions()
                 .End()
                 .TargetDBIs(TestDB)
                 .AssertAll();
@@ -481,8 +481,8 @@ namespace MemorieDeFleursTest.ModelTest
                 Assert.AreEqual(0, context.OrdersToSuppliers.Count());
                 Assert.AreEqual(0, context.OrderDetailsToSuppliers.Count());
             }
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.May9th, expectedLotNo).HasNoStockActions()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May9th, expectedLotNo).HasNoInventoryActions()
                 .End()
                 .TargetDBIs(TestDB)
                 .AssertAll();
@@ -510,7 +510,7 @@ namespace MemorieDeFleursTest.ModelTest
             }
 
             var date = Enumerable.Range(0, 4).Select(i => DateConst.May9th.AddDays(i)).ToArray();
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May9th, expectedLotNo).Begin()
                     .At(date[0]).Arrived(100).Used(0, 100)
                     .At(date[1]).Used(0, 100)

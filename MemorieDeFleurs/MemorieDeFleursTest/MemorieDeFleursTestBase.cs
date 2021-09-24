@@ -140,7 +140,7 @@ namespace MemorieDeFleursTest
             // 削除対象テーブル、削除順
             var tables = new List<string>()
             {
-                "STOCK_ACTIONS",
+                "INVENTORY_ACTIONS",
                 "ORDER_DETAILS_FROM_CUSTOMER",
                 "ORDER_DETAILS_TO_SUPPLIER",
                 "BOUQUET_PARTS_LIST",

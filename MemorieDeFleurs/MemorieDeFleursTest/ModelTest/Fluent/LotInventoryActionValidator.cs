@@ -11,22 +11,22 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
     /// <summary>
     /// ロットの在庫アクション検証器
     /// </summary>
-    public class LotStockActionValidator : Dictionary<DateTime, ActionDateStockActionValidator>
+    public class LotInventoryActionValidator : Dictionary<DateTime, DateInventoryActionValidator>
     {
         /// <summary>
         /// この検証器の呼び出し元
         /// </summary>
-        private PartStockActionValidator Parent { get; set; } = null;
+        private PartsInventoryActionValidator Parent { get; set; } = null;
 
-        private ActionDateStockActionValidator CurrentChild { get; set; } = null;
+        private DateInventoryActionValidator CurrentChild { get; set; } = null;
 
-        internal bool HasNoStockActions { get; set; } = false;
+        internal bool HasInventoryShortageAction { get; set; } = false;
 
         /// <summary>
         /// 検証器を作成する
         /// </summary>
         /// <param name="p">呼び出し元の検証器</param>
-        public LotStockActionValidator(PartStockActionValidator p)
+        public LotInventoryActionValidator(PartsInventoryActionValidator p)
         {
             Parent = p;
         }
@@ -41,12 +41,12 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// </summary>
         /// <param name="actionDate">基準日</param>
         /// <returns>日別在庫アクション検証器</returns>
-        public ActionDateStockActionValidator At(DateTime actionDate)
+        public DateInventoryActionValidator At(DateTime actionDate)
         {
-            ActionDateStockActionValidator validator;
+            DateInventoryActionValidator validator;
             if (!TryGetValue(actionDate, out validator))
             {
-                validator = new ActionDateStockActionValidator(this);
+                validator = new DateInventoryActionValidator(this);
                 Add(actionDate, validator);
             }
 
@@ -59,7 +59,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// 呼び出し元の単品在庫アクション検証器に制御を戻す
         /// </summary>
         /// <returns>単品在庫アクション検証器</returns>
-        public PartStockActionValidator End()
+        public PartsInventoryActionValidator End()
         {
             return Parent;
         }
@@ -74,9 +74,9 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="lotNo">対象ロットのロット番号</param>
         public void AssertAll(MemorieDeFleursDbContext context, string partsCode, DateTime arrivedDate, int lotNo)
         {
-            if(HasNoStockActions)
+            if(HasInventoryShortageAction)
             {
-                Assert.AreEqual(0, context.StockActions.Where(act => act.PartsCode == partsCode).Count(act => act.StockLotNo == lotNo),
+                Assert.AreEqual(0, context.InventoryActions.Where(act => act.PartsCode == partsCode).Count(act => act.InventoryLotNo == lotNo),
                     $"LotNo={lotNo} (part={partsCode}, arrived={arrivedDate}");
             }
             else

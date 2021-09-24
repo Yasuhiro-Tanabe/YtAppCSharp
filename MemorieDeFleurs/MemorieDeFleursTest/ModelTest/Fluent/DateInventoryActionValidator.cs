@@ -8,18 +8,18 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
     /// <summary>
     /// 日別在庫アクション検証
     /// </summary>
-    public class ActionDateStockActionValidator : List<ExpectedStockAction>
+    public class DateInventoryActionValidator : List<ExpectedInventoryAction>
     {
         /// <summary>
         /// この検証器の呼び出し元
         /// </summary>
-        private LotStockActionValidator Parent { get; set; }
+        private LotInventoryActionValidator Parent { get; set; }
 
         /// <summary>
         /// 検証器を作成する
         /// </summary>
         /// <param name="p">呼び出し元の検証器</param>
-        public ActionDateStockActionValidator(LotStockActionValidator p)
+        public DateInventoryActionValidator(LotInventoryActionValidator p)
         {
             Parent = p;
         }
@@ -29,9 +29,9 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// </summary>
         /// <param name="arrived">入荷本数</param>
         /// <returns>自分自身</returns>
-        public ActionDateStockActionValidator Arrived(int arrived)
+        public DateInventoryActionValidator Arrived(int arrived)
         {
-            Add(ExpectedStockAction.CreateArrivedAction(arrived));
+            Add(ExpectedInventoryAction.CreateArrivedAction(arrived));
             return this;
         }
 
@@ -41,15 +41,20 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="used">使用量</param>
         /// <param name="remain">残数</param>
         /// <returns>自分自身</returns>
-        public ActionDateStockActionValidator Used(int used, int remain)
+        public DateInventoryActionValidator Used(int used, int remain)
         {
-            Add(ExpectedStockAction.CreateUsedAction(used, remain));
+            Add(ExpectedInventoryAction.CreateUsedAction(used, remain));
             return this;
         }
 
-        public ActionDateStockActionValidator OutOfStock(int lacked)
+        /// <summary>
+        /// 在庫不足の期待値を登録する
+        /// </summary>
+        /// <param name="shortage">在庫不足量</param>
+        /// <returns>自分自身</returns>
+        public DateInventoryActionValidator Shortage(int shortage)
         {
-            Add(ExpectedStockAction.CreateOutOfStockAction(lacked));
+            Add(ExpectedInventoryAction.CreateInventoryShortageAction(shortage));
             return this;
         }
 
@@ -58,9 +63,9 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// </summary>
         /// <param name="discarded">破棄数</param>
         /// <returns>自分自身</returns>
-        public ActionDateStockActionValidator Discarded(int discarded)
+        public DateInventoryActionValidator Discarded(int discarded)
         {
-            Add(ExpectedStockAction.CreateDiscardAction(discarded));
+            Add(ExpectedInventoryAction.CreateDiscardAction(discarded));
             return this;
         }
 
@@ -68,12 +73,12 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// 呼び出し元のロットの在庫アクション検証器に制御を戻す
         /// </summary>
         /// <returns>ロットの在庫アクション検証器</returns>
-        public PartStockActionValidator End()
+        public PartsInventoryActionValidator End()
         {
             return Parent.End();
         }
 
-        public ActionDateStockActionValidator At(DateTime date)
+        public DateInventoryActionValidator At(DateTime date)
         {
             return Parent.At(date);
         }

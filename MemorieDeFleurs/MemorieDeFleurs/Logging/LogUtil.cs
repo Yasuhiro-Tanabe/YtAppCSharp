@@ -87,7 +87,7 @@ namespace MemorieDeFleurs.Logging
         /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
         /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_StockActionQuantityChanged(StockAction oldAction, int newQuantity, int newRemain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        public static void DEBUGLOG_InventoryActionQuantityChanged(InventoryAction oldAction, int newQuantity, int newRemain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var qnew = newQuantity == oldAction.Quantity ? "(same)" : $"-> {newQuantity}";
             var rnew = newRemain == oldAction.Remain ? $"(same)" : $"-> {newRemain}";
@@ -102,14 +102,14 @@ namespace MemorieDeFleurs.Logging
         /// <param name="caller">このメソッドの呼び出し元：通常は指定不要。直接の呼び出し元ではなく、さらにその呼び出し元をログに残したいとき指定する</param>
         /// <param name="line">このメソッドの呼び出し位置：ソースファイル中の行番号。calledFrom と同様通常は指定不要、呼び出し元の呼び出し元をログに残したいときのみ指定する</param>
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_StockActionCreated(StockAction action, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        public static void DEBUGLOG_InventoryActionCreated(InventoryAction action, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             LogUtil.Debug($"{Indent}Created: {action.ToString("L")}", caller, path, line);
         }
 
 
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_ComparationOfStockRemainAndQuantity(StockAction action, int quantity, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        public static void DEBUGLOG_ComparationOfInventoryRemainAndQuantity(InventoryAction action, int quantity, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var operatorString = action.Remain >= quantity ? ">=" : "<";
 
@@ -118,7 +118,7 @@ namespace MemorieDeFleurs.Logging
         }
 
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_ComparisonOfStockQuantityAndPreviousRemain(StockAction action, int remain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        public static void DEBUGLOG_ComparisonOfInventoryQuantityAndPreviousRemain(InventoryAction action, int remain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var operatorString = action.Quantity <= remain ? "<=" : ">";
 

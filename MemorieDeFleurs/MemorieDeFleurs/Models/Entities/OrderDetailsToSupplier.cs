@@ -36,8 +36,8 @@ namespace MemorieDeFleurs.Models.Entities
         /// <summary>
         /// 在庫ロット番号
         /// </summary>
-        [Column("STOCK_LOT_NO")]
-        public int StockLotNo { get; set; }
+        [Column("INVENTORY_LOT_NO")]
+        public int InventoryLotNo { get; set; }
 
         
         [ForeignKey(nameof(OrderToSupplierID))]

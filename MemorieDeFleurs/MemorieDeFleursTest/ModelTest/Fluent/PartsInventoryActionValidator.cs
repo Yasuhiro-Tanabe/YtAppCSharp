@@ -9,20 +9,20 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
     /// <summary>
     /// 単品在庫アクション検証器
     /// </summary>
-    public class PartStockActionValidator : Dictionary<Tuple<DateTime, int>, LotStockActionValidator>
+    public class PartsInventoryActionValidator : Dictionary<Tuple<DateTime, int>, LotInventoryActionValidator>
     {
         /// <summary>
         /// この検証器の呼び出し元
         /// </summary>
-        private StockActionsValidator Parent { get; set; }
+        private InventoryActionValidator Parent { get; set; }
 
-        private LotStockActionValidator CurrentChild { get; set; } = null;
+        private LotInventoryActionValidator CurrentChild { get; set; } = null;
 
         /// <summary>
         /// 検証器を作成する
         /// </summary>
         /// <param name="p">呼び出し元の検証器</param>
-        public PartStockActionValidator(StockActionsValidator p)
+        public PartsInventoryActionValidator(InventoryActionValidator p)
         {
             Parent = p;
         }
@@ -33,13 +33,13 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="arrivedDate">入荷予定日</param>
         /// <param name="lotNo">ロット番号</param>
         /// <returns>自分自身</returns>
-        public PartStockActionValidator Lot(DateTime arrivedDate, int lotNo)
+        public PartsInventoryActionValidator Lot(DateTime arrivedDate, int lotNo)
         {
-            LotStockActionValidator validator;
+            LotInventoryActionValidator validator;
             var key = Tuple.Create(arrivedDate, lotNo);
             if (!TryGetValue(key, out validator))
             {
-                validator = new LotStockActionValidator(this);
+                validator = new LotInventoryActionValidator(this);
                 Add(key, validator);
             }
 
@@ -53,7 +53,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="arrivalDate">入荷予定日</param>
         /// <param name="findLotNumber">入荷予定日からロット番号を特定するためのメソッドまたはデレゲート</param>
         /// <returns>自分自身</returns>
-        public PartStockActionValidator Lot(DateTime arrivalDate, Func<DateTime, int> findLotNumber)
+        public PartsInventoryActionValidator Lot(DateTime arrivalDate, Func<DateTime, int> findLotNumber)
         {
             return Lot(arrivalDate, findLotNumber(arrivalDate));
         }
@@ -65,9 +65,9 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// Lot() で別のロットを割り当てること。
         /// </summary>
         /// <returns></returns>
-        public PartStockActionValidator HasNoStockActions()
+        public PartsInventoryActionValidator HasNoInventoryActions()
         {
-            CurrentChild.HasNoStockActions = true;
+            CurrentChild.HasInventoryShortageAction = true;
             CurrentChild = null;
             return this;
         }
@@ -76,7 +76,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// ロットの在庫アクション検証器に制御を移す
         /// </summary>
         /// <returns>ロットの在庫アクション検証器</returns>
-        public LotStockActionValidator Begin()
+        public LotInventoryActionValidator Begin()
         {
             if (CurrentChild == null)
             {
@@ -89,7 +89,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// 呼び出し元の在庫アクション検証器に制御を戻す
         /// </summary>
         /// <returns>在庫アクション検証器</returns>
-        public StockActionsValidator End()
+        public InventoryActionValidator End()
         {
             return Parent;
         }

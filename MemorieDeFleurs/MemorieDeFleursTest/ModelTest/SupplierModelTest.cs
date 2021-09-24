@@ -1,6 +1,5 @@
 ﻿using MemorieDeFleurs.Databese.SQLite;
 using MemorieDeFleurs.Models;
-using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -89,7 +88,7 @@ namespace MemorieDeFleursTest.ModelTest
                 Assert.AreEqual(expectedOrder.ID, actualOrder.Details[0].OrderToSupplierID);
                 Assert.AreEqual(expectedPart.Code, actualOrder.Details[0].PartsCode);
                 Assert.AreEqual(2, actualOrder.Details[0].LotCount);
-                Assert.AreEqual(1, actualOrder.Details[0].StockLotNo);
+                Assert.AreEqual(1, actualOrder.Details[0].InventoryLotNo);
             }
         }
     }

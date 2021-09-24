@@ -61,10 +61,10 @@ namespace MemorieDeFleurs.Databese.SQLite
         {
             var converter = new DateTimeConverter();
 
-            modelBuilder.Entity<StockAction>(ent =>
+            modelBuilder.Entity<InventoryAction>(ent =>
                 {
-                    ent.HasKey(nameof(StockAction.ActionDate), nameof(StockAction.Action), nameof(StockAction.PartsCode),
-                        nameof(StockAction.ArrivalDate), nameof(StockAction.StockLotNo));
+                    ent.HasKey(nameof(InventoryAction.ActionDate), nameof(InventoryAction.Action), nameof(InventoryAction.PartsCode),
+                        nameof(InventoryAction.ArrivalDate), nameof(InventoryAction.InventoryLotNo));
                     ent.Property(act => act.ActionDate).HasConversion(converter);
                     ent.Property(act => act.ArrivalDate).HasConversion(converter);
                 });
@@ -115,7 +115,7 @@ namespace MemorieDeFleurs.Databese.SQLite
         /// <summary>
         /// 在庫アクション
         /// </summary>
-        public DbSet<StockAction> StockActions { get; set; }
+        public DbSet<InventoryAction> InventoryActions { get; set; }
 
         /// <summary>
         /// 仕入先

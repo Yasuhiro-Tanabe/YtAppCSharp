@@ -16,12 +16,12 @@ namespace MemorieDeFleursTest.ModelTest
     /// 発注処理 (仕入先への注文) による在庫管理
     /// </summary>
     [TestClass]
-    public class StockActionLogicTest : MemorieDeFleursTestBase
+    public class InventoryActionLogicTest : MemorieDeFleursTestBase
     {
         private Supplier ExpectedSupplier { get; set; }
         private BouquetPart ExpectedPart { get; set; }
 
-        public StockActionLogicTest() : base()
+        public InventoryActionLogicTest() : base()
         {
             AfterTestBaseInitializing += PrepareModel;
             BeforeTestBaseCleaningUp += CleanupDb;
@@ -87,7 +87,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             var expectedLotNumber = Model.SupplierModel.Order(orderDate, ExpectedPart, numLot, arrivalDate);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(arrivalDate, expectedLotNumber).Begin()
                     .At(arrivalDate).Arrived(expectedQuantity).Used(0, expectedQuantity)
                     .At(arrivalDate.AddDays(1)).Used(0, expectedQuantity)
@@ -106,7 +106,7 @@ namespace MemorieDeFleursTest.ModelTest
         public void CanAddManyOrdersToSingleSupplier()
         {
             var expectedCountOfOrders = InitialOrders.SelectMany(i => i.Value).Count();
-            var expectedCountOfScheduledToUseStockActions = (ExpectedPart.ExpiryDate + 1) * expectedCountOfOrders;
+            var expectedCountOfScheduledToUseInventoryActions = (ExpectedPart.ExpiryDate + 1) * expectedCountOfOrders;
 
             // 登録は TestInitialize で行っている処理で代用
 
@@ -114,10 +114,10 @@ namespace MemorieDeFleursTest.ModelTest
 
             AssertAllLotNumbersAreUnique();
 
-            StockActionsValidator.NewInstance()
-                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_ARRIVE, expectedCountOfOrders)
-                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_USE, expectedCountOfScheduledToUseStockActions)
-                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_DISCARD, expectedCountOfOrders)
+            InventoryActionValidator.NewInstance()
+                .InventoryActionCountShallBe(InventoryActionType.SCHEDULED_TO_ARRIVE, expectedCountOfOrders)
+                .InventoryActionCountShallBe(InventoryActionType.SCHEDULED_TO_USE, expectedCountOfScheduledToUseInventoryActions)
+                .InventoryActionCountShallBe(InventoryActionType.SCHEDULED_TO_DISCARD, expectedCountOfOrders)
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
@@ -126,12 +126,12 @@ namespace MemorieDeFleursTest.ModelTest
         /// 複数ロットの入荷(予定)在庫アクションに潤沢な数量がある状態では、入荷日の一番若い在庫ロットの数量ないで加工が行われることの確認
         /// </summary>
         [TestMethod]
-        public void WillBeUsedEarliestArrivedStockLotWhenTwoOrMoreLotHasEnoughQuantity()
+        public void WillBeUsedEarliestArrivedInventoryLotWhenTwoOrMoreLotHasEnoughQuantity()
         {
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May1st, 60);
             var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 // 引当てされた同一ロットに属する前日、当日、翌日の在庫アクションの数量/残数が意図通りに変化している
                 .Lot(DateConst.April30th, findLotNo).Begin()
                     .At(DateConst.April30th).Used(0, 200)
@@ -153,7 +153,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var orderCancelDate = DateConst.May2nd;
             var expectedCountOfOrders = InitialOrders.SelectMany(i => i.Value).Count() - 1;
-            var expectedCountOfScheduledToUseStockActions = (ExpectedPart.ExpiryDate + 1) * expectedCountOfOrders;
+            var expectedCountOfScheduledToUseInventoryActions = (ExpectedPart.ExpiryDate + 1) * expectedCountOfOrders;
 
             var expectedCanceledLotNumber = InitialOrders[orderCancelDate][0].LotNo;
 
@@ -164,27 +164,27 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(expectedCountOfOrders, actualCountOfOrders, $"注文数と発注ロット数の不一致：仕入先={ExpectedSupplier.Name}, 花コード={ExpectedPart.Name}");
 
             AssertAllLotNumbersAreUnique();
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 // 対象在庫ロットに関する在庫アクションが消えていること
-                .Lot(DateConst.May2nd, expectedCanceledLotNumber).HasNoStockActions()
+                .Lot(DateConst.May2nd, expectedCanceledLotNumber).HasNoInventoryActions()
                 .End()
                 // ほかの在庫ロットアクションが消えていないこと
-                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_ARRIVE, expectedCountOfOrders)
-                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_USE, expectedCountOfScheduledToUseStockActions)
-                .StockActionCountShallBe(StockActionType.SCHEDULED_TO_DISCARD, expectedCountOfOrders)
+                .InventoryActionCountShallBe(InventoryActionType.SCHEDULED_TO_ARRIVE, expectedCountOfOrders)
+                .InventoryActionCountShallBe(InventoryActionType.SCHEDULED_TO_USE, expectedCountOfScheduledToUseInventoryActions)
+                .InventoryActionCountShallBe(InventoryActionType.SCHEDULED_TO_DISCARD, expectedCountOfOrders)
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
 
         [TestMethod]
-        public void CanRemoveUsedQuantityOfPartsFromStockAction()
+        public void CanRemoveUsedQuantityOfPartsFromInventoryAction()
         {
             var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 20);
 
             Assert.AreEqual(180, actualRemain);
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.April30th, lotNo).Begin()
                     .At(DateConst.April30th).Used(20, 180)
                     .At(DateConst.May1st).Used(0, 180)
@@ -197,13 +197,13 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         [TestMethod]
-        public void AllStocksInTheDayIsUsed()
+        public void AllInventoriesInTheDayIsUsed()
         {
             var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 200);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.April30th, lotNo).Begin()
                     .At(DateConst.April30th).Used(200, 0)
                     .At(DateConst.May1st).Used(0, 0)
@@ -216,15 +216,15 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         [TestMethod]
-        public void NotEnoughStocksInTheDay_andOutofStockRecordGenerated()
+        public void NotEnoughInventoriesInTheDay_andInventoryShortageRecordGenerated()
         {
             var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 220);
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.April30th, lotNo).Begin()
-                    .At(DateConst.April30th).Used(200, 0).OutOfStock(20)
+                    .At(DateConst.April30th).Used(200, 0).Shortage(20)
                     .At(DateConst.May1st).Used(0, 0)
                     .At(DateConst.May2nd).Used(0, 0)
                     .At(DateConst.May3rd).Used(0, 0).Discarded(0)
@@ -238,7 +238,7 @@ namespace MemorieDeFleursTest.ModelTest
         /// 一つの在庫アクションの残数では使用数を賄えないとき、同一日付の別在庫アクションからも使用数不足分を引くことができる
         /// </summary>
         [TestMethod]
-        public void CanRemoveFromTwoOrMoreStockActions()
+        public void CanRemoveFromTwoOrMoreInventoryActions()
         {
             var lotNo = new int[]
             {
@@ -250,7 +250,7 @@ namespace MemorieDeFleursTest.ModelTest
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May2nd, 500);
 
             // 2ロット分の全量を消費し、ただし3ロット目は消費しない
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.April30th, lotNo[0]).Begin()
                     .At(DateConst.May1st).Used(0, 200)
                     .At(DateConst.May2nd).Used(200, 0)
@@ -268,7 +268,7 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May5th).Discarded(200)
                     .End()
                 .End()
-                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
+                .InventoryActionCountShallBe(InventoryActionType.SHORTAGE, 0)
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
@@ -295,7 +295,7 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.IsTrue(actualRemain.All(r => r > 0));
 
             // 検証2 全在庫アクションが意図通り登録されていること
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.April30th, findLotNo).Begin()
                     .At(DateConst.April30th).Arrived(200).Used(20, 180)
                     .At(DateConst.May1st).Used(50, 130)
@@ -327,7 +327,7 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May9th).Used(0, 100).Discarded(100)
                     .End()
                 .End()
-                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
+                .InventoryActionCountShallBe(InventoryActionType.SHORTAGE, 0)
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
@@ -346,8 +346,8 @@ namespace MemorieDeFleursTest.ModelTest
                 {
                     foreach (var j in i.Value)
                     {
-                        var actual = context.StockActions.Count(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == j.LotNo);
-                        var days = context.StockActions.Where(a => a.Action == StockActionType.SCHEDULED_TO_ARRIVE && a.StockLotNo == j.LotNo).Select(a => a.ArrivalDate);
+                        var actual = context.InventoryActions.Count(a => a.Action == InventoryActionType.SCHEDULED_TO_ARRIVE && a.InventoryLotNo == j.LotNo);
+                        var days = context.InventoryActions.Where(a => a.Action == InventoryActionType.SCHEDULED_TO_ARRIVE && a.InventoryLotNo == j.LotNo).Select(a => a.ArrivalDate);
                         Assert.AreEqual(1, actual, $"ロット番号={j}, 入荷日=[{string.Join(", ", days)}]");
                     }
                 }

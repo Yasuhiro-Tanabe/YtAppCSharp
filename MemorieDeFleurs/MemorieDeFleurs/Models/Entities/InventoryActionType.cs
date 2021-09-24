@@ -3,7 +3,7 @@
     /// <summary>
     /// 在庫アクション
     /// </summary>
-    public enum StockActionType
+    public enum InventoryActionType
     {
         /// <summary>
         /// 入荷予定
@@ -28,7 +28,7 @@
         /// <summary>
         /// 在庫不足
         /// </summary>
-        OUT_OF_STOCK,
+        SHORTAGE,
 
         /// <summary>
         /// 破棄予定

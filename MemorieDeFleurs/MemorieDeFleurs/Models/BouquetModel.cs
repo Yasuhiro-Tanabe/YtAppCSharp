@@ -387,27 +387,27 @@ namespace MemorieDeFleurs.Models
         {
             try
             {
-                var stock = context.StockActions
-                    .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE)
+                var inventory = context.InventoryActions
+                    .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE)
                     .Where(a => 0 == a.ActionDate.CompareTo(date))
                     .Where(a => a.Remain > 0)
                     .OrderBy(a => a.ArrivalDate)
                     .FirstOrDefault();
 
-                if (stock == null)
+                if (inventory == null)
                 {
                     throw new NotImplementedException($"該当ストックなし：基準日={date.ToString("yyyyMMdd")}, 花コード{part.Code}, 数量={quantity}");
                 }
                 else
                 {
                     var usedLot = new Stack<int>();
-                    UseFromThisLot(context, stock, quantity, usedLot);
+                    UseFromThisLot(context, inventory, quantity, usedLot);
                 }
 
                 context.SaveChanges();
 
-                var remain = context.StockActions
-                    .Where(a => a.Action == StockActionType.SCHEDULED_TO_USE || a.Action == StockActionType.OUT_OF_STOCK)
+                var remain = context.InventoryActions
+                    .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE || a.Action == InventoryActionType.SHORTAGE)
                     .Where(a => 0 == a.ActionDate.CompareTo(date))
                     .Sum(a => a.Remain);
                 LogUtil.Info($"UseBouquetPart(part={part.Code}, date={date.ToString("yyyyMMdd")}, quantity={quantity}) Total remain={remain}");
@@ -426,21 +426,21 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        private void UseFromThisLot(MemorieDeFleursDbContext context, StockAction today, int quantity, Stack<int> usedLot)
+        private void UseFromThisLot(MemorieDeFleursDbContext context, InventoryAction today, int quantity, Stack<int> usedLot)
         {
             LogUtil.DEBUGLOG_BeginMethod($"today={today.ToString("s")}, quantity={quantity}, usedLot={string.Join(",", usedLot)}");
 
-            var theLot = context.StockActions
+            var theLot = context.InventoryActions
                 .Where(act => act.PartsCode == today.PartsCode)
-                .Where(act => act.StockLotNo == today.StockLotNo)
+                .Where(act => act.InventoryLotNo == today.InventoryLotNo)
                 .Where(act => act.ActionDate >= today.ActionDate)
                 .ToList();
 
-            var outOfStockAction = theLot.FirstOrDefault(act => act.Action == StockActionType.OUT_OF_STOCK);
-            if (outOfStockAction != null)
+            var invventoryShortageaction = theLot.FirstOrDefault(act => act.Action == InventoryActionType.SHORTAGE);
+            if (invventoryShortageaction != null)
             {
                 // 在庫不足があるロットの対応は未考慮
-                throw new NotImplementedException($"在庫不足がある：{outOfStockAction.ToString("L")}");
+                throw new NotImplementedException($"在庫不足がある：{invventoryShortageaction.ToString("L")}");
             }
 
             if (today.Remain >= quantity)
@@ -448,7 +448,7 @@ namespace MemorieDeFleurs.Models
                 // 全量引き出せる
                 today.Quantity += quantity;
                 today.Remain -= quantity;
-                context.StockActions.Update(today);
+                context.InventoryActions.Update(today);
 
             }
             else
@@ -458,16 +458,16 @@ namespace MemorieDeFleurs.Models
                 var useFromOtherLot = quantity - today.Remain;
                 today.Quantity += useFromThisLot;
                 today.Remain -= useFromThisLot;
-                context.StockActions.Update(today);
+                context.InventoryActions.Update(today);
 
-                usedLot.Push(today.StockLotNo);
+                usedLot.Push(today.InventoryLotNo);
                 UseFromOtherLot(context, today, useFromOtherLot, usedLot);
                 usedLot.Pop();
             }
 
             var previousRemain = today.Remain;
             foreach (var action in theLot
-                .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
+                .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
                 .Where(act => act.ActionDate > today.ActionDate)
                 .OrderBy(act => act.ActionDate))
             {
@@ -475,7 +475,7 @@ namespace MemorieDeFleurs.Models
                 {
                     // 全量引き出せる
                     action.Remain = previousRemain - action.Quantity;
-                    context.StockActions.Update(action);
+                    context.InventoryActions.Update(action);
 
                     previousRemain -= action.Quantity;
                 }
@@ -487,40 +487,40 @@ namespace MemorieDeFleurs.Models
 
                     action.Quantity = usedFromThisLot;
                     action.Remain = 0;
-                    context.StockActions.Update(action);
+                    context.InventoryActions.Update(action);
 
-                    usedLot.Push(action.StockLotNo);
+                    usedLot.Push(action.InventoryLotNo);
                     UseFromOtherLot(context, action, useFromOtherLot, usedLot);
                     previousRemain = 0;
                 }
             }
 
-            var discard = theLot.Single(act => act.Action == StockActionType.SCHEDULED_TO_DISCARD);
+            var discard = theLot.Single(act => act.Action == InventoryActionType.SCHEDULED_TO_DISCARD);
             discard.Quantity = previousRemain;
-            context.StockActions.Update(discard);
+            context.InventoryActions.Update(discard);
 
             LogUtil.DEBUGLOG_EndMethod();
         }
 
-        private void UseFromOtherLot(MemorieDeFleursDbContext context, StockAction stock, int quantity, Stack<int> usedLot)
+        private void UseFromOtherLot(MemorieDeFleursDbContext context, InventoryAction inventory, int quantity, Stack<int> usedLot)
         {
-            LogUtil.DEBUGLOG_BeginMethod($"stock={stock.ToString("s")}, quantity={quantity}, usedLot={string.Join(",", usedLot)}");
+            LogUtil.DEBUGLOG_BeginMethod($"inventory={inventory.ToString("s")}, quantity={quantity}, usedLot={string.Join(",", usedLot)}");
 
-            var usableLots = context.StockActions
-                .Where(act => act.PartsCode == stock.PartsCode)
-                .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
-                .Where(act => act.ActionDate == stock.ActionDate)
-                //.Where(act => !usedLot.Contains(act.StockLotNo)) // Linq式の中で Stack<>.Contains() などのメソッド呼び出しはできない
+            var usableLots = context.InventoryActions
+                .Where(act => act.PartsCode == inventory.PartsCode)
+                .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
+                .Where(act => act.ActionDate == inventory.ActionDate)
+                //.Where(act => !usedLot.Contains(act.InventoryLotNo)) // Linq式の中で Stack<>.Contains() などのメソッド呼び出しはできない
                 .Where(act => act.Remain > 0)
                 .ToList();
 
             var useToThisLot = quantity;
-            var previousLot = stock;
+            var previousLot = inventory;
 
             foreach(var action in usableLots.OrderBy(act => act.ArrivalDate))
             {
                 // すでに引当対象としたロットは除外：Linq式で usableLots を生成するタイミングでは除外できなかったため。
-                if(usedLot.Contains(action.StockLotNo)) { continue; }
+                if(usedLot.Contains(action.InventoryLotNo)) { continue; }
 
                 if(action.Remain >= useToThisLot)
                 {
@@ -540,21 +540,21 @@ namespace MemorieDeFleurs.Models
 
             if(useToThisLot > 0)
             {
-                LogUtil.Debug($"NextStock is null: date={stock.ActionDate}, part={stock.PartsCode}");
+                LogUtil.Debug($"Inventory shortage: date={inventory.ActionDate}, part={inventory.PartsCode}");
                 // 在庫不足レコード追加
-                var outOfStockAction = new StockAction()
+                var inventoryShortageAction = new InventoryAction()
                 {
-                    Action = StockActionType.OUT_OF_STOCK,
-                    ActionDate = stock.ActionDate,
-                    ArrivalDate = stock.ArrivalDate,
-                    PartsCode = stock.PartsCode,
-                    StockLotNo = stock.StockLotNo,
+                    Action = InventoryActionType.SHORTAGE,
+                    ActionDate = inventory.ActionDate,
+                    ArrivalDate = inventory.ArrivalDate,
+                    PartsCode = inventory.PartsCode,
+                    InventoryLotNo = inventory.InventoryLotNo,
                     Quantity = useToThisLot,
                     Remain = -useToThisLot
                 };
-                context.StockActions.Add(outOfStockAction);
+                context.InventoryActions.Add(inventoryShortageAction);
                 context.SaveChanges();
-                LogUtil.Debug($"OutOfStockAction : date={outOfStockAction.ActionDate.ToString("yyyyMMdd")}, quantity");
+                LogUtil.DEBUGLOG_InventoryActionCreated(inventoryShortageAction);
             }
 
             LogUtil.DEBUGLOG_EndMethod();

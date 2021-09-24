@@ -149,15 +149,15 @@ namespace MemorieDeFleursTest.ModelEntityTest
         {
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Assert.AreEqual(0, context.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
+                Assert.AreEqual(0, context.InventoryActions.Count(), "事前検証エラー：在庫アクションテーブルが空でない");
             }
 
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {
-                    CreateStockAction(context, 1);
-                    Assert.AreEqual(1, context.StockActions.Count(), "登録されている在庫アクション数が１つあるはず");
+                    CreateInventoryAction(context, 1);
+                    Assert.AreEqual(1, context.InventoryActions.Count(), "登録されている在庫アクションが１つあるはず");
                     transaction.Commit();
 
                 }
@@ -165,7 +165,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
 
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Assert.AreEqual(1, context.StockActions.Count(), "コミットにより在庫アクションが保存されるはず");
+                Assert.AreEqual(1, context.InventoryActions.Count(), "コミットにより在庫アクションが保存されるはず");
             }
         }
 
@@ -174,47 +174,47 @@ namespace MemorieDeFleursTest.ModelEntityTest
         {
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Assert.AreEqual(0, context.StockActions.Count(), "事前検証エラー：StockActionsが空でない");
+                Assert.AreEqual(0, context.InventoryActions.Count(), "事前検証エラー：在庫アクションテーブルが空でない");
             }
 
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {
-                    CreateStockAction(context, 1);
-                    Assert.AreEqual(1, context.StockActions.Count(), "ロールバック前なので、登録された在庫アクションが残っているはず");
+                    CreateInventoryAction(context, 1);
+                    Assert.AreEqual(1, context.InventoryActions.Count(), "ロールバック前なので、登録された在庫アクションが残っているはず");
                     transaction.Rollback();
                 }
             }
 
             using (var context = new MemorieDeFleursDbContext(TestDB))
             {
-                Assert.AreEqual(0, context.StockActions.Count(), "ロールバック後も在庫アクションが残っている");
+                Assert.AreEqual(0, context.InventoryActions.Count(), "ロールバック後も在庫アクションが残っている");
             }
         }
 
         #region 在庫アクションの登録
-        private StockAction CreateStockAction(MemorieDeFleursDbContext context, int lotNo)
+        private InventoryAction CreateInventoryAction(MemorieDeFleursDbContext context, int lotNo)
         {
-            StockAction action = CreateStockActionWithoutCallingSaveChanges(context, lotNo);
+            InventoryAction action = CreateInventoryActionWithoutCallingSaveChanges(context, lotNo);
             context.SaveChanges();
             return action;
         }
 
-        private StockAction CreateStockActionWithoutCallingSaveChanges(MemorieDeFleursDbContext context, int lotNo)
+        private InventoryAction CreateInventoryActionWithoutCallingSaveChanges(MemorieDeFleursDbContext context, int lotNo)
         {
-            StockAction action = new StockAction()
+            InventoryAction action = new InventoryAction()
             {
                 ActionDate = new DateTime(2004, 03, 30),
-                Action = StockActionType.SCHEDULED_TO_ARRIVE,
+                Action = InventoryActionType.SCHEDULED_TO_ARRIVE,
                 PartsCode = ExpectedPart.Code,
                 ArrivalDate = new DateTime(2004, 03, 30),
-                StockLotNo = lotNo,
+                InventoryLotNo = lotNo,
                 Quantity = 200,
                 Remain = 200
             };
 
-            context.StockActions.Add(action);
+            context.InventoryActions.Add(action);
             return action;
         }
         #endregion // 在庫アクションの登録
@@ -234,12 +234,12 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 int numActions = 10;
                 using (var transaction = context.Database.BeginTransaction())
                 {
-                    Enumerable.Range(1, numActions).Select(i => CreateStockAction(context, i));
+                    Enumerable.Range(1, numActions).Select(i => CreateInventoryAction(context, i));
                     transaction.Commit();
                 }
 
                 // ??? Linq の IEnumerable<T1>.Select<T1,T2>() 内で呼び出すと、Commit() してもトランザクションに反映されない？
-                Assert.AreEqual(0, context.StockActions.Count());
+                Assert.AreEqual(0, context.InventoryActions.Count());
             }
 
         }
@@ -253,10 +253,10 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 using (var transaction = context.Database.BeginTransaction())
                 {
                     var list = Enumerable.Range(1, numActions).ToList();
-                    list.ForEach(i => CreateStockAction(context, i));
+                    list.ForEach(i => CreateInventoryAction(context, i));
                     transaction.Commit();
                 }
-                Assert.AreEqual(numActions, context.StockActions.Count());
+                Assert.AreEqual(numActions, context.InventoryActions.Count());
             }
         }
 
@@ -271,11 +271,11 @@ namespace MemorieDeFleursTest.ModelEntityTest
                     var list = Enumerable.Range(1, numActions);
                     foreach (var i in list)
                     {
-                        CreateStockAction(context, i);
+                        CreateInventoryAction(context, i);
                     }
                     transaction.Commit();
                 }
-                Assert.AreEqual(numActions, context.StockActions.Count());
+                Assert.AreEqual(numActions, context.InventoryActions.Count());
             }
         }
 
@@ -287,13 +287,13 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 int numActions = 10;
                 using (var transaction = context.Database.BeginTransaction())
                 {
-                    Enumerable.Range(1, numActions).Select(i => CreateStockAction(context, i));
+                    Enumerable.Range(1, numActions).Select(i => CreateInventoryAction(context, i));
                     transaction.Rollback();
                 }
 
                 // Commit しても反映されていないので、現時点ではテストが無意味。
                 // SaveChangesInTransaction_CallForEachCreatedEntity_LinqSelect_Commit() 参照。
-                Assert.AreEqual(0, context.StockActions.Count());
+                Assert.AreEqual(0, context.InventoryActions.Count());
             }
         }
 
@@ -306,10 +306,10 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 using (var transaction = context.Database.BeginTransaction())
                 {
                     var list = Enumerable.Range(1, numActions).ToList();
-                    list.ForEach(i => CreateStockAction(context, i));
+                    list.ForEach(i => CreateInventoryAction(context, i));
                     transaction.Rollback();
                 }
-                Assert.AreEqual(0, context.StockActions.Count());
+                Assert.AreEqual(0, context.InventoryActions.Count());
             }
         }
 
@@ -324,11 +324,11 @@ namespace MemorieDeFleursTest.ModelEntityTest
                     var list = Enumerable.Range(1, numActions);
                     foreach (var i in list)
                     {
-                        CreateStockAction(context, i);
+                        CreateInventoryAction(context, i);
                     }
                     transaction.Rollback();
                 }
-                Assert.AreEqual(0, context.StockActions.Count());
+                Assert.AreEqual(0, context.InventoryActions.Count());
             }
         }
         #endregion // コレクションの操作方法により DB 登録できたりできなかったりする
@@ -348,12 +348,12 @@ namespace MemorieDeFleursTest.ModelEntityTest
                     var list = Enumerable.Range(1, numActions);
                     foreach (var i in list)
                     {
-                        CreateStockActionWithoutCallingSaveChanges(context, i);
+                        CreateInventoryActionWithoutCallingSaveChanges(context, i);
                     }
                     context.SaveChanges();
                     transaction.Commit();
                 }
-                Assert.AreEqual(numActions, context.StockActions.Count());
+                Assert.AreEqual(numActions, context.InventoryActions.Count());
             }
         }
 
@@ -369,12 +369,12 @@ namespace MemorieDeFleursTest.ModelEntityTest
                     var list = Enumerable.Range(1, numActions);
                     foreach (var i in list)
                     {
-                        CreateStockActionWithoutCallingSaveChanges(context, i);
+                        CreateInventoryActionWithoutCallingSaveChanges(context, i);
                     }
                     context.SaveChanges();
                     transaction.Rollback();
                 }
-                Assert.AreEqual(0, context.StockActions.Count());
+                Assert.AreEqual(0, context.InventoryActions.Count());
             }
         }
         #endregion // 基本型
@@ -393,7 +393,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
                         var list = Enumerable.Range(1, numActions);
                         foreach (var i in list)
                         {
-                            CreateStockActionWithoutCallingSaveChanges(context, i);
+                            CreateInventoryActionWithoutCallingSaveChanges(context, i);
                             context.SaveChanges();
                         }
                     };
@@ -401,7 +401,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
                     action();
                     transaction.Commit();
                 }
-                Assert.AreEqual(numActions, context.StockActions.Count());
+                Assert.AreEqual(numActions, context.InventoryActions.Count());
             }
         }
 
@@ -418,7 +418,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
                         var list = Enumerable.Range(1, numActions);
                         foreach (var i in list)
                         {
-                            CreateStockActionWithoutCallingSaveChanges(context, i);
+                            CreateInventoryActionWithoutCallingSaveChanges(context, i);
                         }
                         context.SaveChanges();
                     };
@@ -426,7 +426,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
                     action();
                     transaction.Rollback();
                 }
-                Assert.AreEqual(0, context.StockActions.Count());
+                Assert.AreEqual(0, context.InventoryActions.Count());
             }
         }
         #endregion // Action 内、同期呼出
@@ -445,7 +445,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
                         var list = Enumerable.Range(1, numActions);
                         foreach (var i in list)
                         {
-                            CreateStockActionWithoutCallingSaveChanges(context, i);
+                            CreateInventoryActionWithoutCallingSaveChanges(context, i);
                         }
                         context.SaveChanges();
                         transaction.Commit();
@@ -453,7 +453,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
 
                     task.Wait();
                 }
-                Assert.AreEqual(numActions, context.StockActions.Count());
+                Assert.AreEqual(numActions, context.InventoryActions.Count());
             }
         }
 
@@ -470,7 +470,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
                         var list = Enumerable.Range(1, numActions);
                         foreach (var i in list)
                         {
-                            CreateStockActionWithoutCallingSaveChanges(context, i);
+                            CreateInventoryActionWithoutCallingSaveChanges(context, i);
                         }
                         context.SaveChanges();
                         transaction.Rollback();
@@ -478,7 +478,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
 
                     task.Wait();
                 }
-                Assert.AreEqual(0, context.StockActions.Count());
+                Assert.AreEqual(0, context.InventoryActions.Count());
             }
         }
         #endregion // 別タスク

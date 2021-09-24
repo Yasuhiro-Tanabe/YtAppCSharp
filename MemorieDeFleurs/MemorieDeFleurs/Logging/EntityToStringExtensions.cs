@@ -10,7 +10,7 @@ namespace MemorieDeFleurs.Logging
 {
     public static class EntityToStringExtensions
     {
-        public static string ToString(this StockAction action, string format = "")
+        public static string ToString(this InventoryAction action, string format = "")
         {
             if(string.IsNullOrWhiteSpace(format))
             {
@@ -20,7 +20,7 @@ namespace MemorieDeFleurs.Logging
             {
                 return new StringBuilder()
                     .Append(action.PartsCode)
-                    .AppendFormat(".Lot{0}[{1:yyyyMMdd}]", action.StockLotNo, action.ActionDate)
+                    .AppendFormat(".Lot{0}[{1:yyyyMMdd}]", action.InventoryLotNo, action.ActionDate)
                     .AppendFormat("(Q={0},R={1})", action.Quantity, action.Remain)
                     .ToString();
             }
@@ -30,7 +30,7 @@ namespace MemorieDeFleurs.Logging
                     .Append(action.Action).Append("[")
                     .AppendFormat("Parts={0}", action.PartsCode)
                     .AppendFormat(", ArrivalDate={0:yyyyMMdd}", action.ArrivalDate)
-                    .AppendFormat(", Lot={0}", action.StockLotNo)
+                    .AppendFormat(", Lot={0}", action.InventoryLotNo)
                     .AppendFormat(", ActionDate={0:yyyyMMdd}", action.ActionDate)
                     .AppendFormat(", Quality={0}", action.Quantity)
                     .AppendFormat(", Remain={0}", action.Remain)
@@ -38,7 +38,7 @@ namespace MemorieDeFleurs.Logging
             }
             else if(format == "h")
             {
-                return $"{action.PartsCode}.Lot{action.StockLotNo}[{action.ActionDate.ToString("yyyyMMdd")}]";
+                return $"{action.PartsCode}.Lot{action.InventoryLotNo}[{action.ActionDate.ToString("yyyyMMdd")}]";
             }
             else
             {

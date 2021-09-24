@@ -55,10 +55,10 @@ namespace MemorieDeFleursTest.ModelTest
         /// <summary>
         /// 在庫一覧：日々の在庫数に関する、テスト前の初期値。受注による在庫増減の期待値を計算するために使用
         /// </summary>
-        private IDictionary<DateTime, int> InitialStocks { get; } = new Dictionary<DateTime, int>();
+        private IDictionary<DateTime, int> InitialInventories { get; } = new Dictionary<DateTime, int>();
 
-        #region CurrentStock
-        private class StockCalcurator
+        #region InventoryCalcurator
+        private class InventoryCalcurator
         {
             public class Base
             {
@@ -78,28 +78,28 @@ namespace MemorieDeFleursTest.ModelTest
                     DbConnection = connection;
                     PartCode = part.Code;
                 }
-                protected IQueryable<StockAction> FindStockActionByDate(DateTime d)
+                protected IQueryable<InventoryAction> FindInventoryActionByDate(DateTime d)
                 {
                     if (DbContext == null)
                     {
                         using (var context = new MemorieDeFleursDbContext(DbConnection))
                         {
                             // 一回DBとの接続が切れるので、コピーを生成してから返す
-                            return FindStockActionByDate(context, d).ToList().AsQueryable();
+                            return FindInventoryActionByDate(context, d).ToList().AsQueryable();
                         }
                     }
                     else
                     {
                         // 同一トランザクション内からの呼出を想定しておりDBとの接続は切れない。そのまま返す。
-                        return FindStockActionByDate(DbContext, d);
+                        return FindInventoryActionByDate(DbContext, d);
                     }
                 }
 
-                private IQueryable<StockAction> FindStockActionByDate(MemorieDeFleursDbContext context, DateTime d)
+                private IQueryable<InventoryAction> FindInventoryActionByDate(MemorieDeFleursDbContext context, DateTime d)
                 {
-                    return context.StockActions
+                    return context.InventoryActions
                         .Where(act => act.PartsCode == PartCode)
-                        .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
+                        .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
                         .Where(act => act.ActionDate == d);
                 }
             }
@@ -111,7 +111,7 @@ namespace MemorieDeFleursTest.ModelTest
 
                 public int this[DateTime d] {
                     get
-                    { return FindStockActionByDate(d)
+                    { return FindInventoryActionByDate(d)
                             .Sum(act => act.Quantity);
                     }
                 }
@@ -119,8 +119,8 @@ namespace MemorieDeFleursTest.ModelTest
                 public int this[DateTime d, int lotNo] {
                     get
                     {
-                        return FindStockActionByDate(d)
-                            .Where(act => act.StockLotNo == lotNo)
+                        return FindInventoryActionByDate(d)
+                            .Where(act => act.InventoryLotNo == lotNo)
                             .Single()
                             .Quantity;
                     }
@@ -136,7 +136,7 @@ namespace MemorieDeFleursTest.ModelTest
                 {
                     get
                     {
-                        return FindStockActionByDate(d)
+                        return FindInventoryActionByDate(d)
                             .Sum(act => act.Remain);
                     }
                 }
@@ -145,8 +145,8 @@ namespace MemorieDeFleursTest.ModelTest
                 {
                     get
                     {
-                        return FindStockActionByDate(d)
-                            .Where(act => act.StockLotNo == lotNo)
+                        return FindInventoryActionByDate(d)
+                            .Where(act => act.InventoryLotNo == lotNo)
                             .Single().Remain;
                     }
                 }
@@ -154,20 +154,20 @@ namespace MemorieDeFleursTest.ModelTest
             public QuantityCalculator Quantity { get; private set; }
             public RemainCalculator Remain { get; private set; }
 
-            public StockCalcurator(SqliteConnection connection, BouquetPart part)
+            public InventoryCalcurator(SqliteConnection connection, BouquetPart part)
             {
                 Quantity = new QuantityCalculator(connection, part);
                 Remain = new RemainCalculator(connection, part);
             }
 
-            public StockCalcurator(MemorieDeFleursDbContext context, BouquetPart part)
+            public InventoryCalcurator(MemorieDeFleursDbContext context, BouquetPart part)
             {
                 Quantity = new QuantityCalculator(context, part);
                 Remain = new RemainCalculator(context, part);
             }
 
         }
-        #endregion // CurrentStock
+        #endregion // InventoryCalcurator
 
 
 
@@ -231,9 +231,9 @@ namespace MemorieDeFleursTest.ModelTest
 
                 foreach (var d in Enumerable.Range(0, 10).Select(i => DateConst.April30th.AddDays(i)))
                 {
-                    InitialStocks.Add(d, context.StockActions
+                    InitialInventories.Add(d, context.InventoryActions
                         .Where(act => act.PartsCode == ExpectedPart.Code)
-                        .Where(act => act.Action == StockActionType.SCHEDULED_TO_USE)
+                        .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
                         .Where(act => act.ActionDate == d)
                         .Sum(act => act.Remain));
                 }
@@ -291,17 +291,17 @@ namespace MemorieDeFleursTest.ModelTest
         /// 引当可能：既存在庫への影響なし
         /// </summary>
         [TestMethod]
-        public void OneOrderUpdatesCurrentStock()
+        public void OneOrderUpdatesCurrentInventory()
         {
             LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
-            var CurrentStock = new StockCalcurator(TestDB, ExpectedPart);
+            var caclurator = new InventoryCalcurator(TestDB, ExpectedPart);
             var lot = InitialOrders[DateConst.April30th][0].LotNo;
 
-            // Order() 後に CurrentStock の値が変わるので期待値をあらかじめ計算する
+            // Order() 後に在庫数が変わるので期待値をあらかじめ計算する
             var May2nd = DateConst.May2nd;
             var used = ExpectedBouquet.PartsList.Single(p => p.PartsCode == ExpectedPart.Code).Quantity;
-            var expectedMay2Quantity = CurrentStock.Quantity[May2nd, lot] + used;
-            var expectedMay2Remain = CurrentStock.Remain[May2nd, lot] - used;
+            var expectedMay2Quantity = caclurator.Quantity[May2nd, lot] + used;
+            var expectedMay2Remain = caclurator.Remain[May2nd, lot] - used;
 
             // お届け日は在庫消費日の翌日：AddDays()しているのはテスト目的が在庫の増減確認であり在庫引当日を基準にしているため。普通は 5/3 を直接指定する。
             var orderNo = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, May2nd.AddDays(1));
@@ -324,12 +324,12 @@ namespace MemorieDeFleursTest.ModelTest
             AssertOrder(expectedOrder, actualOrder);
 
             // 受注結果通りに在庫が減っている
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.April30th, lot).Begin()
                     .At(May2nd).Used(expectedMay2Quantity, expectedMay2Remain)
                     .End()
                 .End()
-                .StockActionCountShallBe(StockActionType.OUT_OF_STOCK, 0)
+                .InventoryActionCountShallBe(InventoryActionType.SHORTAGE, 0)
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
@@ -364,8 +364,8 @@ namespace MemorieDeFleursTest.ModelTest
         {
             LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
             var lot = InitialOrders[DateConst.May6th][0].LotNo;
-            var currentStock = new StockCalcurator(TestDB, ExpectedPart);
-            var expectedRemain = currentStock.Remain[DateConst.May8th, lot]; // お届け日前日(=発送日)の当日残：注文がロールバックされるので当日残に増減はないはず
+            var calcurator = new InventoryCalcurator(TestDB, ExpectedPart);
+            var expectedRemain = calcurator.Remain[DateConst.May8th, lot]; // お届け日前日(=発送日)の当日残：注文がロールバックされるので当日残に増減はないはず
 
             using (var context = new MemorieDeFleursDbContext(TestDB))
             using(var transaction = context.Database.BeginTransaction())
@@ -382,7 +382,7 @@ namespace MemorieDeFleursTest.ModelTest
                 }
             }
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May6th, lot).Begin()
                     .At(DateConst.May8th).Used(0, expectedRemain)
                     .At(DateConst.May9th).Used(0, expectedRemain).Discarded(expectedRemain)
@@ -398,7 +398,6 @@ namespace MemorieDeFleursTest.ModelTest
         public void CancelOrder_CanCommit()
         {
             LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
-            var stock = new StockCalcurator(TestDB, ExpectedPart);
             var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
 
@@ -407,7 +406,7 @@ namespace MemorieDeFleursTest.ModelTest
             //     - 5/6ロットの初期数量100、未使用のまま
             var order = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May6th.AddDays(1));
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May3rd, lot0503).Begin()
                     .At(DateConst.May6th).Used(44, 86).Discarded(86)
                     .End()
@@ -423,7 +422,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             Model.CustomerModel.CancelOrder(order);
             LogUtil.Debug($"{LogUtil.Indent}After ordered...");
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May3rd, lot0503).Begin()
                     .At(DateConst.May6th).Used(40, 90).Discarded(90)
                     .End()
@@ -444,7 +443,6 @@ namespace MemorieDeFleursTest.ModelTest
         public void CancelOrder_CanRollback()
         {
             LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
-            var stock = new StockCalcurator(TestDB, ExpectedPart);
             var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
 
@@ -453,7 +451,7 @@ namespace MemorieDeFleursTest.ModelTest
             //     - 5/6ロットの初期数量100、未使用のまま
             var order = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May6th.AddDays(1));
 
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May3rd, lot0503).Begin()
                     .At(DateConst.May6th).Used(44, 86).Discarded(86)
                     .End()
@@ -476,7 +474,7 @@ namespace MemorieDeFleursTest.ModelTest
             LogUtil.Debug($"{LogUtil.Indent}After ordered...");
 
             // CancelOrder() はロールバックされたので、在庫は Order() 実施後の状態と変わらないはず
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May3rd, lot0503).Begin()
                     .At(DateConst.May6th).Used(44, 86).Discarded(86)
                     .End()
@@ -497,7 +495,7 @@ namespace MemorieDeFleursTest.ModelTest
         /// 同一在庫ロット内でのお届け日変更：5/8→5/10 (発送日5/7→5/9)
         /// </summary>
         [TestMethod]
-        public void ChangeArrivalDate_FromMay8thToMay10th_StockChangedInsideLot0506Only()
+        public void ChangeArrivalDate_FromMay8thToMay10th_InventoryChangedInsideLot0506Only()
         {
             LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
@@ -505,7 +503,7 @@ namespace MemorieDeFleursTest.ModelTest
             // このテストでOrder() を呼ぶ前の状態：
             //     - 5/6ロットの初期数量100、未使用
             var order = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May8th);
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May6th, lot0506).Begin()
                     .At(DateConst.May6th).Used(0, 100)
                     .At(DateConst.May7th).Used(4, 96)
@@ -520,7 +518,7 @@ namespace MemorieDeFleursTest.ModelTest
             var May10th = DateConst.May9th.AddDays(1);
             Model.CustomerModel.ChangeArrivalDate(order, May10th);
             LogUtil.Debug($"{LogUtil.Indent}After ordered...");
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May6th, lot0506).Begin()
                     .At(DateConst.May6th).Used(0, 100)
                     .At(DateConst.May7th).Used(0, 100)
@@ -538,7 +536,7 @@ namespace MemorieDeFleursTest.ModelTest
         /// 同一在庫ロットをまたがるお届け日変更：5/6→5/9 (発送日5/5→5/8)
         /// </summary>
         [TestMethod]
-        public void ChangeArrivalDate_FromMay6thToMay9th_StockChangedInsideLot0506Only()
+        public void ChangeArrivalDate_FromMay6thToMay9th_InventoryChangedInsideLot0506Only()
         {
             LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
             var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
@@ -548,7 +546,7 @@ namespace MemorieDeFleursTest.ModelTest
             //     - 5/3ロットの5/6在庫数40，残数90、当日破棄
             //     - 5/6ロットの初期数量100、未使用のまま
             var order = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May6th);
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May3rd, lot0503).Begin()
                     .At(DateConst.May5th).Used(74, 126)
                     .At(DateConst.May6th).Used(40, 86).Discarded(86)
@@ -566,7 +564,7 @@ namespace MemorieDeFleursTest.ModelTest
             Model.CustomerModel.ChangeArrivalDate(order, DateConst.May9th);
 
             LogUtil.Debug($"{LogUtil.Indent}After ordered...");
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May3rd, lot0503).Begin()
                     .At(DateConst.May5th).Used(70, 130)
                     .At(DateConst.May6th).Used(40, 90).Discarded(90)
@@ -593,7 +591,7 @@ namespace MemorieDeFleursTest.ModelTest
             // このテストでOrder() を呼ぶ前の状態：
             //     - 5/6ロットの初期数量100、未使用
             var order = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May8th);
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May6th, lot0506).Begin()
                     .At(DateConst.May6th).Used(0, 100)
                     .At(DateConst.May7th).Used(4, 96)
@@ -613,7 +611,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             // ロールバックしたので在庫推移は日付変更前の状態を保っているはず
             LogUtil.Debug($"{LogUtil.Indent}After ordered...");
-            StockActionsValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
                 .Lot(DateConst.May6th, lot0506).Begin()
                     .At(DateConst.May6th).Used(0, 100)
                     .At(DateConst.May7th).Used(4, 96)

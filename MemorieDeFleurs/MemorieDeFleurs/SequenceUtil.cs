@@ -66,7 +66,7 @@ namespace MemorieDeFleurs
         /// </summary>
         public SequenceValueManager SEQ_SESSION { get; private set; }
 
-        public SequenceValueManager SEQ_STOCK_LOT_NUMBER { get; private set; }
+        public SequenceValueManager SEQ_INVENTORY_LOT_NUMBER { get; private set; }
 
         private MemorieDeFleursModel Parent { get; set; }
         public object SingleOrDefault { get; private set; }
@@ -80,7 +80,7 @@ namespace MemorieDeFleurs
             SEQ_SHIPPING = new SequenceValueManager("SEQ_SHIPPING", this);
             SEQ_SUPPLIERS = new SequenceValueManager("SEQ_SUPPLIERS", this);
             SEQ_SESSION = new SequenceValueManager("SEQ_SESSION", this);
-            SEQ_STOCK_LOT_NUMBER = new SequenceValueManager("SEQ_STOCK_LOT_NUMBER", this);
+            SEQ_INVENTORY_LOT_NUMBER = new SequenceValueManager("SEQ_STOCK_LOT_NUMBER", this);
         }
 
         private int Next(string sequenceName)

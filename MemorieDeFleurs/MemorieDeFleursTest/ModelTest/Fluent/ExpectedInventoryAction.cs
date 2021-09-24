@@ -12,12 +12,12 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
     /// <summary>
     /// 在庫アクションの期待値
     /// </summary>
-    public class ExpectedStockAction
+    public class ExpectedInventoryAction
     {
         /// <summary>
         /// アクションタイプ
         /// </summary>
-        public StockActionType Type { get; private set; }
+        public InventoryActionType Type { get; private set; }
 
         /// <summary>
         /// 数量(入荷数・使用数・破棄数)の期待値
@@ -35,7 +35,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="t">在庫アクションタイプ</param>
         /// <param name="q">数量</param>
         /// <param name="r">残数</param>
-        private ExpectedStockAction(StockActionType t, int q, int r)
+        private ExpectedInventoryAction(InventoryActionType t, int q, int r)
         {
             Type = t;
             Quantity = q;
@@ -47,9 +47,9 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// </summary>
         /// <param name="arrived">入荷数量</param>
         /// <returns>入荷予定在庫アクションの期待値</returns>
-        public static ExpectedStockAction CreateArrivedAction(int arrived)
+        public static ExpectedInventoryAction CreateArrivedAction(int arrived)
         {
-            return new ExpectedStockAction(StockActionType.SCHEDULED_TO_ARRIVE, arrived, arrived);
+            return new ExpectedInventoryAction(InventoryActionType.SCHEDULED_TO_ARRIVE, arrived, arrived);
         }
 
         /// <summary>
@@ -58,9 +58,9 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="used">加工数量</param>
         /// <param name="remain">当日の残数</param>
         /// <returns>加工予定在庫アクションの期待値</returns>
-        public static ExpectedStockAction CreateUsedAction(int used, int remain)
+        public static ExpectedInventoryAction CreateUsedAction(int used, int remain)
         {
-            return new ExpectedStockAction(StockActionType.SCHEDULED_TO_USE, used, remain);
+            return new ExpectedInventoryAction(InventoryActionType.SCHEDULED_TO_USE, used, remain);
         }
 
         /// <summary>
@@ -68,14 +68,14 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// </summary>
         /// <param name="discarded">破棄数量</param>
         /// <returns>破棄予定在庫アクションの期待値</returns>
-        public static ExpectedStockAction CreateDiscardAction(int discarded)
+        public static ExpectedInventoryAction CreateDiscardAction(int discarded)
         {
-            return new ExpectedStockAction(StockActionType.SCHEDULED_TO_DISCARD, discarded, 0);
+            return new ExpectedInventoryAction(InventoryActionType.SCHEDULED_TO_DISCARD, discarded, 0);
         }
 
-        public static ExpectedStockAction CreateOutOfStockAction(int lacked)
+        public static ExpectedInventoryAction CreateInventoryShortageAction(int lacked)
         {
-            return new ExpectedStockAction(StockActionType.OUT_OF_STOCK, lacked, -lacked);
+            return new ExpectedInventoryAction(InventoryActionType.SHORTAGE, lacked, -lacked);
         }
 
         /// <summary>
@@ -96,11 +96,11 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
                 .AppendFormat(", 入荷日={0:yyyyMMdd}", arrivedDate)
                 .ToString();
 
-            var candidate = context.StockActions
+            var candidate = context.InventoryActions
                 .Where(a => a.Action == Type)
                 .Where(a => a.ActionDate == actionDate)
                 .Where(a => a.PartsCode == part)
-                .Where(a => a.StockLotNo == lot)
+                .Where(a => a.InventoryLotNo == lot)
                 .Where(a => a.ArrivalDate == arrivedDate);
 
             Assert.IsNotNull(candidate, "抽出結果が null：" + key);

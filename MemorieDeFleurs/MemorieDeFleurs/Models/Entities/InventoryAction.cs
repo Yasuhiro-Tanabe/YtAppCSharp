@@ -6,8 +6,8 @@ namespace MemorieDeFleurs.Models.Entities
     /// <summary>
     /// 在庫アクション
     /// </summary>
-    [Table("STOCK_ACTIONS")]
-    public class StockAction
+    [Table("INVENTORY_ACTIONS")]
+    public class InventoryAction
     {
         /// <summary>
         /// 基準日
@@ -19,7 +19,7 @@ namespace MemorieDeFleurs.Models.Entities
         /// アクション
         /// </summary>
         [Column("ACTION")]
-        public StockActionType Action { get; set; }
+        public InventoryActionType Action { get; set; }
 
         /// <summary>
         /// 花コード
@@ -37,7 +37,7 @@ namespace MemorieDeFleurs.Models.Entities
         /// 在庫ロット番号
         /// </summary>
         [Column("LOT_NO")]
-        public int StockLotNo { get; set; }
+        public int InventoryLotNo { get; set; }
 
         /// <summary>
         /// 数量：入荷(予定)数、加工(予定)数、破棄(予定)数

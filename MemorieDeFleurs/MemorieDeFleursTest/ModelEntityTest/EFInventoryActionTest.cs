@@ -11,7 +11,7 @@ using System.Linq;
 namespace MemorieDeFleursTest.ModelEntityTest
 {
     [TestClass]
-    public class EFStockActionTest : MemorieDeFleursTestBase
+    public class EFInventoryActionTest : MemorieDeFleursTestBase
     {
         private static string PartCodeKey = "@part";
         private static string SupplierCodeKey = "@supplier";
@@ -23,7 +23,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
         private static string ExpectedSupplierAddress = "東京都中央区銀座";
 
 
-        public EFStockActionTest() : base()
+        public EFInventoryActionTest() : base()
         {
             AfterTestBaseInitializing += AppendSomeObjects;
             BeforeTestBaseCleaningUp += CleanupTestData;
@@ -32,7 +32,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
 
         private void AppendSomeObjects(object sender, EventArgs unused)
         {
-            LogUtil.Debug($"EFStockActionTest#AppendBouquetParts() is called.");
+            LogUtil.Debug($"EFInventoryActionTest#AppendBouquetParts() is called.");
             // Entity 未作成の単品情報は、SQLを使って直接登録する
             AppendBouquetParts();
             AppendSuppliers();
@@ -78,12 +78,12 @@ namespace MemorieDeFleursTest.ModelEntityTest
 
         private void CleanupTestData(object sender, EventArgs unused)
         {
-            LogUtil.Debug($"EFStockActionTest#CleanupTestData() is called.");
+            LogUtil.Debug($"EFInventoryActionTest#CleanupTestData() is called.");
 
             // テーブル全削除はORマッピングフレームワークが持つ「DBを隠蔽する」意図にそぐわないため
             // DbContext.Customers.Clear() のような操作は用意されていない。
             // DbConnection 経由かDbContext.Database.ExecuteSqlRaw() を使い、DELETEまたはTRUNCATE文を発行すること。
-            CleanupTable(TestDB, "STOCK_ACTIONS");
+            CleanupTable(TestDB, "INVENTORY_ACTIONS");
             CleanupTable(TestDB, "BOUQUET_SUPPLIERS");
             CleanupTable(TestDB, "BOUQUET_PARTS");
             CleanupTable(TestDB, "SUPPLIERS");
@@ -99,29 +99,29 @@ namespace MemorieDeFleursTest.ModelEntityTest
         }
 
         [TestMethod]
-        public void CanAddStockAction()
+        public void CanAddInventoryAction()
         {
             using (var context =new  MemorieDeFleursDbContext(TestDB))
             {
                 var code = ExpectedPartCode;
 
-                StockAction action = new StockAction()
+                InventoryAction action = new InventoryAction()
                 {
                     ActionDate = new DateTime(2004, 03, 30),
-                    Action = StockActionType.SCHEDULED_TO_ARRIVE,
+                    Action = InventoryActionType.SCHEDULED_TO_ARRIVE,
                     PartsCode = ExpectedPartCode,
                     ArrivalDate = new DateTime(2004, 03, 30),
-                    StockLotNo = 1,
+                    InventoryLotNo = 1,
                     Quantity = 200,
                     Remain = 200
                 };
 
-                context.StockActions.Add(action);
+                context.InventoryActions.Add(action);
                 context.SaveChanges();
 
-                Assert.AreEqual(1, context.StockActions
+                Assert.AreEqual(1, context.InventoryActions
                     .Count(x => x.PartsCode == ExpectedPartCode));
-                Assert.IsTrue(context.StockActions
+                Assert.IsTrue(context.InventoryActions
                     .Where(x => x.PartsCode == ExpectedPartCode)
                     .All(x => x.BouquetPart.Name == ExpectedPartName));
             }
