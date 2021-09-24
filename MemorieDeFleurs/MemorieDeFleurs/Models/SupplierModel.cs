@@ -338,8 +338,8 @@ namespace MemorieDeFleurs.Models
             public void Create(MemorieDeFleursDbContext context)
             {
                 AddScheduledToArriveInventoryAction(context);
-                AddScheduledToDiscardInventoryAction(context);
                 AddScheduledToUseInventoryAction(context);
+                AddScheduledToDiscardInventoryAction(context);
                 context.SaveChanges();
             }
 
@@ -567,26 +567,30 @@ namespace MemorieDeFleurs.Models
                     .Where(act => act.ActionDate == currentOrder.ActionDate)
                     .OrderBy(act => act.ArrivalDate).ToList())
                 {
-                    context.InventoryActions.Remove(shortageAction);
-                    context.SaveChanges();
 
                     LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(currentOrder, shortageAction.Quantity);
                     if (currentOrder.Remain >= shortageAction.Quantity)
                     {
                         // 不足分全量をこの在庫ロットから払い出す
-                        AddQuantityToInventoryLot(context, part, lotNo, shortageAction.ActionDate, shortageAction.Quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(currentOrder, shortageAction.Quantity);
+                        LogUtil.Debug($"{LogUtil.Indent}Remove: {shortageAction.ToString("L")}");
+
+                        Parent.BouquetModel.UseFromThisLot(context, currentOrder, shortageAction.Quantity, usedLot);
+                        context.InventoryActions.Remove(shortageAction);
                     }
                     else
                     {
-                        throw new NotImplementedException(new StringBuilder()
-                            .Append("在庫不足：発注量では在庫不足を賄えない:")
-                            .Append(" 品目=").Append(part.Code)
-                            .Append(", 発注ロット：").Append(lotNo)
-                            .AppendFormat(", 発注日={0:yyyyMMdd}", orderDate)
-                            .AppendFormat(", 不足日={0:yyyyMMdd", currentOrder.ActionDate)
-                            .Append(", 不足数=").Append(shortageAction.Quantity)
-                            .Append(", 当日残=").Append(currentOrder.Remain)
-                            .ToString());
+                        // 移し替えできる分だけ移し替え、残余は在庫不足のままとする
+                        var quantity = currentOrder.Remain;
+
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(currentOrder, quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(shortageAction, -quantity);
+
+                        Parent.BouquetModel.UseFromThisLot(context, currentOrder, quantity, usedLot);
+
+                        shortageAction.Quantity -= quantity;
+                        shortageAction.Remain += quantity;
+                        context.InventoryActions.Update(shortageAction);
                     }
                     LogUtil.Info($"Inventory shortage was eliminated. Date={shortageAction.ActionDate.ToString("yyyyMMdd")}, lot={shortageAction.InventoryLotNo}, lacked={shortageAction.Quantity}");
                 }
@@ -604,36 +608,30 @@ namespace MemorieDeFleurs.Models
                     if (currentOrder.Remain >= usedFromOthers.Quantity)
                     {
                         // 全量をこの在庫ロットから払い出す
-                        AddQuantityToInventoryLot(context, part, lotNo, usedFromOthers.ActionDate, usedFromOthers.Quantity);
-                        AddQuantityToInventoryLot(context, part, usedFromOthers.InventoryLotNo, usedFromOthers.ActionDate, -usedFromOthers.Quantity);
+                        var quantity = usedFromOthers.Quantity;
+
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(currentOrder, quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(usedFromOthers, -quantity);
+
+                        Parent.BouquetModel.UseFromThisLot(context, currentOrder, quantity, usedLot);
+                        Parent.BouquetModel.UseFromThisLot(context, usedFromOthers, -quantity, usedLot);
                     }
                     else
                     {
-                        var shortageQuantity = usedFromOthers.Quantity - currentOrder.Remain;
+                        // 振替可能な分は currentOrder に振り替え、残余は usedFromOthers に残す
+                        var quantity = currentOrder.Remain;
 
-                        // 再振替のため、振替元の加工数を一旦ゼロに戻す
-                        AddQuantityToInventoryLot(context, part, usedFromOthers.InventoryLotNo, usedFromOthers.ActionDate, -usedFromOthers.Quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(currentOrder, quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(usedFromOthers, -quantity);
 
-                        // 振替元で加工していた分をこのロット＋他ロットで再度振替なおす
-                        AddQuantityToInventoryLot(context, part, lotNo, usedFromOthers.ActionDate, currentOrder.Remain);
-                        var inventoryShortageAction = TransferToOtherLot(context, part, currentOrder.ActionDate, usedFromOthers.ArrivalDate, shortageQuantity);
-
-                        if (inventoryShortageAction.Quantity > 0)
-                        {
-                            throw new NotImplementedException(new StringBuilder()
-                                .Append("在庫不足：発注量では既存在庫ロットを全量振替できない:")
-                                .Append(" 品目=").Append(part.Code)
-                                .Append(", 発注ロット：").Append(lotNo)
-                                .AppendFormat(", 発注日={0:yyyyMMdd}", orderDate)
-                                .AppendFormat(", 不足日={0:yyyyMMdd}", currentOrder.ActionDate)
-                                .Append("最終振替対象ロット").Append(inventoryShortageAction.InventoryLotNo)
-                                .Append(", 振替残数=").Append(shortageQuantity)
-                                .ToString());
-                        }
+                        Parent.BouquetModel.UseFromThisLot(context, currentOrder, quantity, usedLot);
+                        Parent.BouquetModel.UseFromThisLot(context, usedFromOthers, -quantity, usedLot);
                     }
 
                 }
             }
+
+            context.SaveChanges();
 
             LogUtil.Info($"{orderDate.ToString("yyyyMMdd")}: {part.Code} x {quantityOfLot}[Lot(s)] ordered. arrive at {arrivalDate.ToString("yyyyMMdd")}, OrderLot#={lotNo}.");
             LogUtil.DEBUGLOG_EndMethod($"{part.Code}, {arrivalDate.ToString("yyyyMMdd")}", $"Lot#={lotNo}");

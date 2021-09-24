@@ -96,6 +96,20 @@ namespace MemorieDeFleurs.Logging
         }
 
         /// <summary>
+        /// 在庫アクションの変更ログを出力する
+        /// </summary>
+        /// <param name="oldAction">変更前の在庫アクションオブジェクト</param>
+        /// <param name="used">変更後の数量</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
+        [Conditional("DEBUG")]
+        public static void DEBUGLOG_InventoryActionQuantityChanged(InventoryAction oldAction, int used, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        {
+            DEBUGLOG_InventoryActionQuantityChanged(oldAction, oldAction.Quantity + used, oldAction.Remain - used, caller, path, line);
+        }
+
+        /// <summary>
         /// 生成/登録された在庫アクションをデバッグログ出力する
         /// </summary>
         /// <param name="action">出力対象在庫アクション</param>
