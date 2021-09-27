@@ -77,7 +77,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             if(HasInventoryShortageAction)
             {
                 Assert.AreEqual(0, context.InventoryActions.Where(act => act.PartsCode == partsCode).Count(act => act.InventoryLotNo == lotNo),
-                    $"LotNo={lotNo} (part={partsCode}, arrived={arrivedDate}");
+                    $"このロットの在庫アクションは存在しないはず： LotNo={lotNo} (part={partsCode}, arrived={arrivedDate})");
             }
             else
             {
