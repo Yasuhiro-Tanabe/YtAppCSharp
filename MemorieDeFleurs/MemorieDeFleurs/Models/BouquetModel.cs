@@ -532,7 +532,7 @@ namespace MemorieDeFleurs.Models
             LogUtil.DEBUGLOG_EndMethod();
         }
 
-        private void UseFromOtherLot(MemorieDeFleursDbContext context, InventoryAction inventory, int quantity, Stack<int> usedLot)
+        public void UseFromOtherLot(MemorieDeFleursDbContext context, InventoryAction inventory, int quantity, Stack<int> usedLot)
         {
             LogUtil.DEBUGLOG_BeginMethod($"inventory={inventory.ToString("s")}, quantity={quantity}, usedLot={string.Join(",", usedLot)}");
 
@@ -552,6 +552,7 @@ namespace MemorieDeFleurs.Models
                 // すでに引当対象としたロットは除外：Linq式で usableLots を生成するタイミングでは除外できなかったため。
                 if(usedLot.Contains(action.InventoryLotNo)) { continue; }
 
+                LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, useToThisLot);
                 if(action.Remain >= useToThisLot)
                 {
                     // このロットから全量引き出す
@@ -566,7 +567,7 @@ namespace MemorieDeFleurs.Models
                     // 残数分はこのロットから、引き出せなかった分は次のロットから引き出す
                     LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, action.Remain);
 
-                    useToThisLot = action.Remain;
+                    useToThisLot -= action.Remain;
                     UseFromThisLot(context, action, action.Remain, usedLot);
                     previousLot = action;
                 }

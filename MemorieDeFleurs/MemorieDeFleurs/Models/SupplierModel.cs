@@ -553,7 +553,6 @@ namespace MemorieDeFleurs.Models
                 .LotNumberIs(lotNo)
                 .Create(context);
 
-
             // 当日以降の入荷予定分と在庫不足分をこのロットに振り替える
             foreach (var currentOrder in context.InventoryActions
                 .Where(act => act.InventoryLotNo == lotNo)
@@ -567,6 +566,7 @@ namespace MemorieDeFleurs.Models
                     .Where(act => act.ActionDate == currentOrder.ActionDate)
                     .OrderBy(act => act.ArrivalDate).ToList())
                 {
+                    LogUtil.Debug($"Shortage Found:{shortageAction.ToString("s")}");
 
                     LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(currentOrder, shortageAction.Quantity);
                     if (currentOrder.Remain >= shortageAction.Quantity)
@@ -740,191 +740,24 @@ namespace MemorieDeFleurs.Models
                 .OrderBy(act => act.ActionDate))
             {
                 // このロットで払い出されている加工数量を他のロットに移動する
-                var shortageInventory = TransferToOtherLot(context, part, action.ActionDate, action.ArrivalDate, action.Quantity);
-                if (shortageInventory.Quantity > 0)
+                try
                 {
-                    LogUtil.Warn($"Inventory shortage : {part.Code}, {action.ActionDate.ToString("yyyyMMdd")}, Lacked={shortageInventory} at lot {action.InventoryLotNo}");
-                    var inventoryShortageAction = context.InventoryActions
-                        .Where(act => act.InventoryLotNo == shortageInventory.InventoryLotNo)
-                        .Single(act => act.ActionDate == action.ActionDate);
-
-                    // 在庫不足アクションの生成
-                    var lacked = new InventoryAction()
-                    {
-                        Action = InventoryActionType.SHORTAGE,
-                        ActionDate = inventoryShortageAction.ActionDate,
-                        BouquetPart = inventoryShortageAction.BouquetPart,
-                        InventoryLotNo = inventoryShortageAction.InventoryLotNo,
-                        ArrivalDate = inventoryShortageAction.ArrivalDate,
-                        PartsCode = inventoryShortageAction.PartsCode,
-                        Quantity = shortageInventory.Quantity,
-                        Remain = -shortageInventory.Quantity
-                    };
-                    context.InventoryActions.Add(lacked);
-                    context.SaveChanges();
-
-                    LogUtil.DEBUGLOG_InventoryActionCreated(lacked);
+                    var usedLot = new Stack<int>();
+                    usedLot.Push(action.InventoryLotNo);
+                    Parent.BouquetModel.UseFromOtherLot(context, action, action.Quantity, usedLot);
+                }
+                catch(InventoryShortageException eis)
+                {
+                    context.InventoryActions.Add(eis.InventoryShortageAction);
+                    LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
                 }
             }
+
+            context.SaveChanges();
 
             LogUtil.Info($"Lot {lotNo} removed.");
             LogUtil.DEBUGLOG_EndMethod($"lotNo={lotNo}");
         }
         #endregion // 発注取消
-
-        #region 払い出し予定の振替
-        private class ShortageInventory
-        {
-            public int InventoryLotNo { get; set; }
-            public int Quantity { get; set; }
-        }
-        /// <summary>
-        /// ロット方向に払出予定を展開する：入荷日 arrivalDate 以降に納品されたロットの、
-        /// 基準日 actionDate の加工予定在庫アクションを入荷日別に並べ、順次残数の許す限り quantity を引く
-        /// </summary>
-        /// <param name="part">展開対象の単品</param>
-        /// <param name="actionDate">基準日</param>
-        /// <param name="arrivalDate">入荷日</param>
-        /// <param name="quantity">振替数量</param>
-        private ShortageInventory TransferToOtherLot(MemorieDeFleursDbContext context, BouquetPart part, DateTime actionDate, DateTime arrivalDate, int quantity)
-        {
-            LogUtil.DEBUGLOG_BeginMethod(string.Format("part={0}, date={1:yyyyMMdd}, arrived={2:yyyyMMdd}, quantity={3}", part.Code, actionDate, arrivalDate, quantity));
-
-            var inventory = new ShortageInventory() { InventoryLotNo = 0, Quantity = quantity };
-
-            // 基準日が等しい加工予定在庫アクションのうち、残数＞0のロットの加工予定在庫アクションに振り替える
-            foreach (var action in context.InventoryActions
-                .Where(a => a.PartsCode == part.Code)
-                .Where(a => a.ActionDate == actionDate)
-                .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE)
-                .Where(a => a.ArrivalDate >= arrivalDate)
-                .Where(a => a.Remain > 0)
-                .OrderBy(a => a.ArrivalDate))
-            {
-                LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, inventory.Quantity);
-                if(action.Remain >= inventory.Quantity)
-                {
-                    // 全量をこの在庫アクションから払い出す
-                    AddQuantityToInventoryLot(context, part, action.InventoryLotNo, action.ActionDate, inventory.Quantity);
-                    inventory.Quantity = 0;
-                    break;
-                }
-                else
-                {
-                    // 払い出せる分だけこの在庫アクションから払い出す
-                    var usedFromThisInventory = action.Remain;
-                    AddQuantityToInventoryLot(context, part, action.InventoryLotNo, action.ActionDate, usedFromThisInventory);
-
-                    inventory.Quantity -= usedFromThisInventory;
-                    inventory.InventoryLotNo = action.InventoryLotNo;
-
-                    LogUtil.Debug($"{LogUtil.Indent}Inventory shortage: {inventory.Quantity + usedFromThisInventory}->{inventory.Quantity}");
-                }
-            }
-
-            LogUtil.DEBUGLOG_EndMethod(msg: $"lacked={inventory.Quantity}, at {actionDate.ToString("yyyyMMdd")}");
-            return inventory;
-        }
-
-        /// <summary>
-        /// 日付方向に払出予定を展開する：同一ロットのactionDate、翌日、その翌日…と破棄予定日までの残数から quantity を引く
-        /// </summary>
-        /// <param name="part">払出対象の単品</param>
-        /// <param name="lotNo">払出を行うロット番号</param>
-        /// <param name="actionDate">基準日</param>
-        /// <param name="quantity">払出数量</param>
-        private void AddQuantityToInventoryLot(MemorieDeFleursDbContext context, BouquetPart part, int lotNo, DateTime actionDate, int quantity)
-        {
-            LogUtil.DEBUGLOG_BeginMethod(args: $"part={part.Code}, lot={lotNo}, date={actionDate.ToString("yyyyMMdd")}, quantity={quantity}");
-
-            // ロット lotNo の、actionDate 以降の加工予定アクションから quantity 本の単品を払い出す
-            var theLotInventories = context.InventoryActions
-                .Where(act => act.PartsCode == part.Code)
-                .Where(act => act.InventoryLotNo == lotNo);
-            var usedFromTheLot = quantity;
-
-            // actionDate 当日分：加工数に quantity を加算する
-            var toUse
-                = theLotInventories
-                .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
-                .Single(act => act.ActionDate == actionDate);
-            LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(toUse, usedFromTheLot);
-            if (toUse.Remain >= usedFromTheLot)
-            {
-                // 全量払出する
-                LogUtil.DEBUGLOG_InventoryActionQuantityChanged(toUse, toUse.Quantity + usedFromTheLot, toUse.Remain - usedFromTheLot);
-                toUse.Quantity += usedFromTheLot;
-                toUse.Remain -= usedFromTheLot;
-                context.InventoryActions.Update(toUse);
-            }
-            else
-            {
-                throw new NotImplementedException(new StringBuilder()
-                    .Append("在庫払い出しできない：残数が要求された使用量より小さい. ")
-                    .AppendFormat(" 払出開始日：{0:yyyyMMdd}", actionDate)
-                    .AppendFormat(" 不足発生日={0:yyyyMMdd}", toUse.ActionDate)
-                    .Append(", 花コード=").Append(toUse.PartsCode)
-                    .Append(", ロット番号").Append(toUse.InventoryLotNo)
-                    .AppendFormat(", 納品日={0:yyyyMMdd}", toUse.ArrivalDate)
-                    .Append(", 要求数量=").Append(usedFromTheLot)
-                    .Append(", 在庫数量=").Append(toUse.Remain)
-                    .ToString());
-            }
-
-            var previousRemain = toUse.Remain;
-
-            // actionDate 翌日以降：加工数は変更せず残数から usedFromTheLot を引く
-            foreach (var action in theLotInventories
-                .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
-                .Where(act => act.ActionDate > actionDate)
-                .OrderBy(act => act.ActionDate))
-            {
-                LogUtil.DEBUGLOG_ComparisonOfInventoryQuantityAndPreviousRemain(action, 0);
-                if(action.Quantity <= previousRemain)
-                {
-                    // このロットから全量払い出せる
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, action.Quantity, previousRemain - action.Quantity);
-                    action.Remain = previousRemain - action.Quantity;
-                    context.InventoryActions.Update(action);
-
-                    previousRemain -= action.Quantity;
-                }
-                else
-                {
-                    // このロットだけでは払い出せない：前日残分はこのロットから、残りは別のロットから払い出す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, previousRemain, 0);
-                    var inventoryShortageQuantity = action.Quantity - previousRemain;
-                    action.Quantity = previousRemain;
-                    action.Remain = 0;
-                    context.InventoryActions.Update(action);
-
-                    var shortageInventory = TransferToOtherLot(context, part, action.ActionDate, action.ArrivalDate, inventoryShortageQuantity);
-                    if(shortageInventory.Quantity > 0)
-                    {
-                        throw new NotImplementedException(new StringBuilder()
-                            .Append("在庫振替不可：当日分在庫不足")
-                            .AppendFormat(" 払出開始日：{0:yyyyMMdd}", actionDate)
-                            .AppendFormat(" 不足発生日={0:yyyyMMdd}", action.ActionDate)
-                            .Append(", 花コード=").Append(action.PartsCode)
-                            .Append(", ロット番号").Append(action.InventoryLotNo)
-                            .AppendFormat(", 納品日={0:yyyyMMdd}", action.ArrivalDate)
-                            .Append(", 要求数量=").Append(usedFromTheLot)
-                            .Append(", 在庫数量=").Append(action.Remain)
-                            .ToString());
-                    }
-                    previousRemain = 0;
-                }
-            }
-
-            // 破棄アクションの更新
-            var toDiscard = theLotInventories.Single(act => act.Action == InventoryActionType.SCHEDULED_TO_DISCARD);
-            LogUtil.DEBUGLOG_InventoryActionQuantityChanged(toDiscard, previousRemain, 0);
-            toDiscard.Quantity = previousRemain;
-            context.InventoryActions.Update(toDiscard);
-
-            context.SaveChanges();
-            LogUtil.DEBUGLOG_EndMethod();
-        }
-#endregion // 払い出し予定の振替
     }
 }
