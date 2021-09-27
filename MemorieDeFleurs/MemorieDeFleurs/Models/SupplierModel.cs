@@ -4,10 +4,7 @@ using MemorieDeFleurs.Models.Entities;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace MemorieDeFleurs.Models
 {
@@ -524,7 +521,7 @@ namespace MemorieDeFleurs.Models
         }
 
         /// <summary>
-        /// 発注処理に伴う在庫アクション登録、トランザクション内での呼出用
+        /// 発注処理に伴う在庫アクション登録、トランザクション内での呼出用、ロット番号を新規発行する
         /// </summary>
         /// <param name="context">トランザクション中のDBコンテキスト</param>
         /// <param name="orderDate">発注日</param>
@@ -535,33 +532,65 @@ namespace MemorieDeFleurs.Models
         public int Order(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
             var lotNo = SEQ_INVENTORY_LOT_NUMBER.Next(context);
-            Order(context, orderDate, part, quantityOfLot, arrivalDate, lotNo);
+            var orderParam = new InventoryAction()
+            {
+                ArrivalDate = arrivalDate,
+                BouquetPart = part,
+                PartsCode = part.Code,
+                Quantity = quantityOfLot * part.QuantitiesPerLot,
+                InventoryLotNo = lotNo,
+            };
+            Order(context, orderDate, orderParam);
             return lotNo;
         }
 
-        private void Order(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate, int lotNo)
+        /// <summary>
+        /// 単品を発注する
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderDate">発注日</param>
+        /// <param name="orderParam">発注情報：以下の値をセットしておくこと。
+        ///     <list type="">
+        ///         <item>
+        ///             <term>【必須】<see cref="InventoryAction.ArrivalDate"/></term>
+        ///             <description>納品予定日</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>(任意)<see cref="InventoryAction.BouquetPart"/></term>
+        ///             <description>単品オブジェクト。<see cref="InventoryAction.PartsCode"/>だけでも良いがその場合は nullでなければならない。</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>【必須】<see cref="InventoryAction.InventoryLotNo"/></term>
+        ///             <description>在庫ロット番号。ゼロを指定した場合は内部で新規番号を採番する。</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>【必須】<see cref="InventoryAction.PartsCode"/></term>
+        ///             <description>単品の花コード。<see cref="InventoryAction.BouquetPart"/>を指定しない場合でも花コードは必須。</description>
+        ///         </item>
+        ///         <item>
+        ///             <term>【必須】<see cref="InventoryAction.Quantity"/></term>
+        ///             <description>数量。注文ロット数ではなく、注文ロット数×購入単位数で入力すること。</description>
+        ///         </item>
+        ///     </list>"
+        /// </param>
+        private void Order(MemorieDeFleursDbContext context, DateTime orderDate, InventoryAction orderParam)
         {
-            LogUtil.DEBUGLOG_BeginMethod(new StringBuilder()
-                .AppendFormat("order={0:yyyyMMdd}", orderDate)
-                .Append(", part=").Append(part.Code)
-                .AppendFormat(", quantity={0}[lot(s)]({1}[parts])", quantityOfLot, quantityOfLot * part.QuantitiesPerLot)
-                .AppendFormat(", arrival={0:yyyyMMdd}", arrivalDate)
-                .Append(", lotNo=").Append(lotNo)
-                .ToString());
+            LogUtil.DEBUGLOG_BeginMethod($"context, {orderDate.ToString("yyyyMMdd")}, {orderParam.ToString("o")}");
 
-            // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
             var usedLot = new Stack<int>();
+            var part = orderParam.BouquetPart == null ? context.BouquetParts.Find(orderParam.PartsCode) : orderParam.BouquetPart;
+            var lotCount = orderParam.Quantity / part.QuantitiesPerLot;
 
             // 発注分の在庫アクションを登録する
             InventoryActionLotBuilder.GetInstance()
-                .OrderPartIs(part, quantityOfLot)
-                .ArriveAt(arrivalDate)
-                .LotNumberIs(lotNo)
+                .OrderPartIs(orderParam.BouquetPart, lotCount)
+                .ArriveAt(orderParam.ArrivalDate)
+                .LotNumberIs(orderParam.InventoryLotNo)
                 .Create(context);
 
             // 当日以降の入荷予定分と在庫不足分をこのロットに振り替える
             foreach (var currentOrder in context.InventoryActions
-                .Where(act => act.InventoryLotNo == lotNo)
+                .Where(act => act.InventoryLotNo == orderParam.InventoryLotNo)
                 .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
                 .OrderBy(act => act.ActionDate))
             {
@@ -579,10 +608,12 @@ namespace MemorieDeFleurs.Models
                     {
                         // 不足分全量をこの在庫ロットから払い出す
                         LogUtil.DEBUGLOG_InventoryActionQuantityChanged(currentOrder, shortageAction.Quantity);
-                        LogUtil.Debug($"{LogUtil.Indent}Remove: {shortageAction.ToString("L")}");
 
                         Parent.BouquetModel.UseFromThisLot(context, currentOrder, shortageAction.Quantity, usedLot);
                         context.InventoryActions.Remove(shortageAction);
+
+                        LogUtil.Debug($"{LogUtil.Indent}Removed: {shortageAction.ToString("L")}");
+                        LogUtil.Info($"Inventory shortage was eliminated. Date={shortageAction.ActionDate.ToString("yyyyMMdd")}, Lot={shortageAction.InventoryLotNo}, quantity={shortageAction.Quantity}");
                     }
                     else
                     {
@@ -597,8 +628,9 @@ namespace MemorieDeFleurs.Models
                         shortageAction.Quantity -= quantity;
                         shortageAction.Remain += quantity;
                         context.InventoryActions.Update(shortageAction);
+                        
+                        LogUtil.Warn($"Inventory shortage remains: Date={shortageAction.ActionDate.ToString("yyyyMMdd")}, Lot={shortageAction.InventoryLotNo}, quantity={shortageAction.InventoryLotNo}");
                     }
-                    LogUtil.Info($"Inventory shortage was eliminated. Date={shortageAction.ActionDate.ToString("yyyyMMdd")}, lot={shortageAction.InventoryLotNo}, lacked={shortageAction.Quantity}");
                 }
 
                 // 納品予定が翌日以降の在庫ロットからの振り替え
@@ -639,10 +671,9 @@ namespace MemorieDeFleurs.Models
 
             context.SaveChanges();
 
-            LogUtil.Info($"{orderDate.ToString("yyyyMMdd")}: {part.Code} x {quantityOfLot}[Lot(s)] ordered. arrive at {arrivalDate.ToString("yyyyMMdd")}, OrderLot#={lotNo}.");
-            LogUtil.DEBUGLOG_EndMethod($"{part.Code}, {arrivalDate.ToString("yyyyMMdd")}, Lot#={lotNo}");
+            LogUtil.Info($"{orderDate.ToString("yyyyMMdd")}: {part.Code} x {lotCount}[Lot(s)] ordered. arrive at {orderParam.ArrivalDate.ToString("yyyyMMdd")}, OrderLot#={orderParam.InventoryLotNo}.");
+            LogUtil.DEBUGLOG_EndMethod($"context, {orderDate.ToString("yyyyMMdd")}, {orderParam.ToString("o")}");
         }
-
         #endregion // 発注
 
         #region 発注取消
@@ -844,8 +875,16 @@ namespace MemorieDeFleurs.Models
                     .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE)
                     .Single();
 
+                var orderParameter = new InventoryAction()
+                {
+                    ArrivalDate = newArrivalDate,
+                    BouquetPart = oldArrivalLot.BouquetPart == null ? context.BouquetParts.Find(oldArrivalLot.PartsCode) : oldArrivalLot.BouquetPart,
+                    InventoryLotNo = oldArrivalLot.InventoryLotNo,
+                    PartsCode = oldArrivalLot.PartsCode,
+                    Quantity = oldArrivalLot.Quantity
+                };
                 CancelOrder(context, lotNo);
-                Order(context, orderDate, part, oldArrivalLot.Quantity / part.QuantitiesPerLot, newArrivalDate, oldArrivalLot.InventoryLotNo);
+                Order(context, orderDate, orderParameter);
             }
             finally
             {

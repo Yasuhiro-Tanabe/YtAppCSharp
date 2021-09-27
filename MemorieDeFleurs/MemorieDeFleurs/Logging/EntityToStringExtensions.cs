@@ -16,7 +16,7 @@ namespace MemorieDeFleurs.Logging
         /// 書式毎の出力内容は下記。
         /// <code>
         /// var action = new InventoryAction() {
-        ///     InventoryActionType.SCHEDULED_TO_USE,
+        ///     Action = InventoryActionType.SCHEDULED_TO_USE,
         ///     ActionDate = new DateTime(2020, 5, 3),
         ///     ArrivalDate = new DateTime(2020, 5, 5),
         ///     InventoryLotNo = 1,
