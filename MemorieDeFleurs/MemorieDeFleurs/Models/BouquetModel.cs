@@ -469,8 +469,16 @@ namespace MemorieDeFleurs.Models
                 today.Remain -= useFromThisLot;
                 context.InventoryActions.Update(today);
 
-                usedLot.Push(today.InventoryLotNo);
-                UseFromOtherLot(context, today, useFromOtherLot, usedLot);
+                try
+                {
+                    usedLot.Push(today.InventoryLotNo);
+                    UseFromOtherLot(context, today, useFromOtherLot, usedLot);
+                }
+                catch (InventoryShortageException eis)
+                {
+                    context.InventoryActions.Add(eis.InventoryShortageAction);
+                    LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
+                }
                 usedLot.Pop();
             }
 
@@ -503,8 +511,16 @@ namespace MemorieDeFleurs.Models
                     action.Remain = 0;
                     context.InventoryActions.Update(action);
 
-                    usedLot.Push(action.InventoryLotNo);
-                    UseFromOtherLot(context, action, useFromOtherLot, usedLot);
+                    try
+                    {
+                        usedLot.Push(action.InventoryLotNo);
+                        UseFromOtherLot(context, action, useFromOtherLot, usedLot);
+                    }
+                    catch (InventoryShortageException eis)
+                    {
+                        context.InventoryActions.Add(eis.InventoryShortageAction);
+                        LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
+                    }
                     previousRemain = 0;
                 }
             }
@@ -558,21 +574,9 @@ namespace MemorieDeFleurs.Models
 
             if(useToThisLot > 0)
             {
-                LogUtil.Debug($"Inventory shortage: date={inventory.ActionDate}, part={inventory.PartsCode}");
-                // 在庫不足レコード追加
-                var inventoryShortageAction = new InventoryAction()
-                {
-                    Action = InventoryActionType.SHORTAGE,
-                    ActionDate = inventory.ActionDate,
-                    ArrivalDate = inventory.ArrivalDate,
-                    PartsCode = inventory.PartsCode,
-                    InventoryLotNo = inventory.InventoryLotNo,
-                    Quantity = useToThisLot,
-                    Remain = -useToThisLot
-                };
-                context.InventoryActions.Add(inventoryShortageAction);
-                context.SaveChanges();
-                LogUtil.DEBUGLOG_InventoryActionCreated(inventoryShortageAction);
+                LogUtil.Warn($"Inventory shortage detected. {previousLot.ToString("h")}, quantity={useToThisLot}");
+                LogUtil.DEBUGLOG_EndMethod();
+                throw new InventoryShortageException(previousLot, useToThisLot);
             }
 
             LogUtil.DEBUGLOG_EndMethod();
