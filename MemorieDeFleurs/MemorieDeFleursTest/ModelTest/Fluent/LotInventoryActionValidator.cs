@@ -76,8 +76,12 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         {
             if(HasInventoryShortageAction)
             {
-                Assert.AreEqual(0, context.InventoryActions.Where(act => act.PartsCode == partsCode).Count(act => act.InventoryLotNo == lotNo),
-                    $"このロットの在庫アクションは存在しないはず： LotNo={lotNo} (part={partsCode}, arrived={arrivedDate})");
+                var actual = context.InventoryActions
+                    .Where(act => act.PartsCode == partsCode)
+                    .Where(act => act.ArrivalDate == arrivedDate)
+                    .Count(act => act.InventoryLotNo == lotNo);
+                Assert.AreEqual(0, actual,
+                    $"このロットの在庫アクションは存在しないはず： LotNo={lotNo} (part={partsCode}, arrived={arrivedDate.ToString("yyyyMMdd")})");
             }
             else
             {
