@@ -426,7 +426,6 @@ namespace MemorieDeFleurs.Models
         #endregion // Supplier の生成・更新・削除
 
         #region 発注
-
         /// <summary>
         /// 発注する
         /// </summary>
@@ -535,15 +534,22 @@ namespace MemorieDeFleurs.Models
         /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
         public int Order(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
+            var lotNo = SEQ_INVENTORY_LOT_NUMBER.Next(context);
+            Order(context, orderDate, part, quantityOfLot, arrivalDate, lotNo);
+            return lotNo;
+        }
+
+        private void Order(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate, int lotNo)
+        {
             LogUtil.DEBUGLOG_BeginMethod(new StringBuilder()
                 .AppendFormat("order={0:yyyyMMdd}", orderDate)
                 .Append(", part=").Append(part.Code)
                 .AppendFormat(", quantity={0}[lot(s)]({1}[parts])", quantityOfLot, quantityOfLot * part.QuantitiesPerLot)
                 .AppendFormat(", arrival={0:yyyyMMdd}", arrivalDate)
+                .Append(", lotNo=").Append(lotNo)
                 .ToString());
 
             // [TODO] 発注ロット番号=在庫ロット番号は発注時に採番する。
-            var lotNo = SEQ_INVENTORY_LOT_NUMBER.Next(context);
             var usedLot = new Stack<int>();
 
             // 発注分の在庫アクションを登録する
@@ -634,8 +640,7 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
 
             LogUtil.Info($"{orderDate.ToString("yyyyMMdd")}: {part.Code} x {quantityOfLot}[Lot(s)] ordered. arrive at {arrivalDate.ToString("yyyyMMdd")}, OrderLot#={lotNo}.");
-            LogUtil.DEBUGLOG_EndMethod($"{part.Code}, {arrivalDate.ToString("yyyyMMdd")}", $"Lot#={lotNo}");
-            return lotNo;
+            LogUtil.DEBUGLOG_EndMethod($"{part.Code}, {arrivalDate.ToString("yyyyMMdd")}, Lot#={lotNo}");
         }
 
         #endregion // 発注
@@ -759,5 +764,94 @@ namespace MemorieDeFleurs.Models
             LogUtil.DEBUGLOG_EndMethod($"lotNo={lotNo}");
         }
         #endregion // 発注取消
+
+        #region 納品予定日変更
+        /// <summary>
+        /// 納品予定日を変更する
+        /// </summary>
+        /// <param name="orderNo">発注番号</param>
+        /// <param name="newArrivalDate">変更後の納品予定日</param>
+        public void ChangeArrivalDate(string orderNo, DateTime newArrivalDate)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, {newArrivalDate.ToString("yyyyMMDD")}");
+
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    ChangeArrivalDate(context, orderNo, newArrivalDate);
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod($"{orderNo}, {newArrivalDate.ToString("yyyyMMDD")}");
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// 納品予定日を変更する：トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderNo">発注番号</param>
+        /// <param name="newArrivalDate">変更後の納品予定日</param>
+        public void ChangeArrivalDate(MemorieDeFleursDbContext context, string orderNo, DateTime newArrivalDate)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"context, {orderNo}, {newArrivalDate.ToString("yyyyMMdd")}");
+
+            var order = context.OrdersToSuppliers.Find(orderNo);
+            var oldArrivalDate = order.DeliveryDate;
+            var details = context.OrderDetailsToSuppliers
+                .Where(d => d.OrderToSupplierID == order.ID).OrderBy(d => d.OrderIndex);
+            var detailStrings = details.Select(d => $"{d.PartsCode} x {d.LotCount}");
+
+            LogUtil.Debug($"Order {orderNo} contains {details.Count()} parts: [{string.Join(", ", details)}]");
+
+            foreach(var item in details.OrderBy(d => d.OrderIndex))
+            {
+                var part = context.BouquetParts.Find(item.PartsCode);
+                ChangeArrivalDate(context, order.OrderDate, item.BouquetPart, item.InventoryLotNo, newArrivalDate);
+            }
+            context.SaveChanges();
+
+            LogUtil.Info($"Arrival date changed: {orderNo}, {oldArrivalDate.ToString("yyyyMMdd")} -> {newArrivalDate.ToString("yyyyMMdd")}");
+            LogUtil.DEBUGLOG_EndMethod($"context, {orderNo}, {newArrivalDate.ToString("yyyyMMdd")}");
+        }
+
+        /// <summary>
+        /// 個々の単品について納品予定日を変更する、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderDate">発注日：発注日は変更しない</param>
+        /// <param name="part">発注対象単品</param>
+        /// <param name="lotNo">在庫ロット番号</param>
+        /// <param name="newArrivalDate">変更後の納品予定日</param>
+        private void ChangeArrivalDate(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int lotNo, DateTime newArrivalDate)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"{part.Code}, {lotNo}, {newArrivalDate.ToString("yyyyMMdd")}");
+            try
+            {
+                var oldArrivalLot = context.InventoryActions
+                    .Where(act => act.PartsCode == part.Code)
+                    .Where(act => act.InventoryLotNo == lotNo)
+                    .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE)
+                    .Single();
+
+                CancelOrder(context, lotNo);
+                Order(context, orderDate, part, oldArrivalLot.Quantity / part.QuantitiesPerLot, newArrivalDate, oldArrivalLot.InventoryLotNo);
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod($"{part.Code}, {lotNo}, {newArrivalDate.ToString("yyyyMMdd")}");
+            }
+        }
+        #endregion // 納品予定日変更
     }
 }

@@ -527,5 +527,60 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
+
+        [TestMethod]
+        public void ChangeArrivalDate_UnusedInventory()
+        {
+            LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
+            var orderNo = Model.SupplierModel.Order(DateConst.May1st, ExpectedSupplier, DateConst.May7th, new List<Tuple<BouquetPart,int>>() { Tuple.Create(ExpectedPart, 1) });
+            var lotNo = InitialOrders.Count() + 1;
+
+            Model.SupplierModel.ChangeArrivalDate(orderNo, DateConst.May9th);
+
+            var days = Enumerable.Range(0, ExpectedPart.ExpiryDate + 1).Select(i => DateConst.May9th.AddDays(i)).ToArray();
+
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May7th, lotNo).HasNoInventoryActions()
+                .Lot(DateConst.May9th, lotNo).Begin()
+                    .At(days[0]).Arrived(100).Used(0, 100)
+                    .At(days[1]).Used(0, 100)
+                    .At(days[2]).Used(0, 100)
+                    .At(days[3]).Used(0, 100).Discarded(100)
+                    .End()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+            LogUtil.DEBUGLOG_EndMethod(msg: "==========");
+        }
+
+        [TestMethod]
+        public void ChangeArrivalDate_CanRollback()
+        {
+            LogUtil.DEBUGLOG_BeginMethod(msg: "==========");
+            var orderNo = Model.SupplierModel.Order(DateConst.May1st, ExpectedSupplier, DateConst.May7th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ExpectedPart, 1) });
+            var lotNo = InitialOrders.Count() + 1;
+
+            using(var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                Model.SupplierModel.ChangeArrivalDate(context, orderNo, DateConst.May9th);
+                transaction.Rollback();
+            }
+
+            var days = Enumerable.Range(0, ExpectedPart.ExpiryDate + 1).Select(i => DateConst.May7th.AddDays(i)).ToArray();
+
+            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+                .Lot(DateConst.May7th, lotNo).Begin()
+                    .At(days[0]).Arrived(100).Used(0, 100)
+                    .At(days[1]).Used(0, 100)
+                    .At(days[2]).Used(0, 100)
+                    .At(days[3]).Used(0, 100).Discarded(100)
+                    .End()
+                .Lot(DateConst.May9th, lotNo).HasNoInventoryActions()
+                .End()
+                .TargetDBIs(TestDB)
+                .AssertAll();
+            LogUtil.DEBUGLOG_EndMethod(msg: "==========");
+        }
     }
 }
