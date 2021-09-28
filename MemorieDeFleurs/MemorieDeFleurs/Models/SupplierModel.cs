@@ -589,81 +589,81 @@ namespace MemorieDeFleurs.Models
                 .Create(context);
 
             // 当日以降の入荷予定分と在庫不足分をこのロットに振り替える
-            foreach (var currentOrder in context.InventoryActions
+            foreach (var action in context.InventoryActions
                 .Where(act => act.InventoryLotNo == orderParam.InventoryLotNo)
                 .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
                 .OrderBy(act => act.ActionDate))
             {
                 // 在庫不足の解消: ループイテレータを都度 DBContext から削除するので、ループ対象のコピーを取る。
-                foreach (var shortageAction in context.InventoryActions
-                    .Where(act => act.PartsCode == currentOrder.PartsCode)
+                foreach (var shortage in context.InventoryActions
+                    .Where(act => act.PartsCode == action.PartsCode)
                     .Where(act => act.Action == InventoryActionType.SHORTAGE)
-                    .Where(act => act.ActionDate == currentOrder.ActionDate)
+                    .Where(act => act.ActionDate == action.ActionDate)
                     .OrderBy(act => act.ArrivalDate).ToList())
                 {
-                    LogUtil.Debug($"Shortage Found:{shortageAction.ToString("s")}");
+                    LogUtil.Debug($"Shortage Found:{shortage.ToString("s")}");
 
-                    LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(currentOrder, shortageAction.Quantity);
-                    if (currentOrder.Remain >= shortageAction.Quantity)
+                    LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, shortage.Quantity);
+                    if (action.Remain >= shortage.Quantity)
                     {
                         // 不足分全量をこの在庫ロットから払い出す
-                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(currentOrder, shortageAction.Quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, shortage.Quantity);
 
-                        Parent.BouquetModel.UseFromThisLot(context, currentOrder, shortageAction.Quantity, usedLot);
-                        context.InventoryActions.Remove(shortageAction);
+                        Parent.BouquetModel.UseFromThisLot(context, action, shortage.Quantity, usedLot);
+                        context.InventoryActions.Remove(shortage);
 
-                        LogUtil.Debug($"{LogUtil.Indent}Removed: {shortageAction.ToString("L")}");
-                        LogUtil.Info($"Inventory shortage was eliminated. Date={shortageAction.ActionDate.ToString("yyyyMMdd")}, Lot={shortageAction.InventoryLotNo}, quantity={shortageAction.Quantity}");
+                        LogUtil.Debug($"{LogUtil.Indent}Removed: {shortage.ToString("L")}");
+                        LogUtil.Info($"Inventory shortage was eliminated. Date={shortage.ActionDate.ToString("yyyyMMdd")}, Lot={shortage.InventoryLotNo}, quantity={shortage.Quantity}");
                     }
                     else
                     {
                         // 移し替えできる分だけ移し替え、残余は在庫不足のままとする
-                        var quantity = currentOrder.Remain;
+                        var quantity = action.Remain;
 
-                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(currentOrder, quantity);
-                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(shortageAction, -quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(shortage, -quantity);
 
-                        Parent.BouquetModel.UseFromThisLot(context, currentOrder, quantity, usedLot);
+                        Parent.BouquetModel.UseFromThisLot(context, action, quantity, usedLot);
 
-                        shortageAction.Quantity -= quantity;
-                        shortageAction.Remain += quantity;
-                        context.InventoryActions.Update(shortageAction);
+                        shortage.Quantity -= quantity;
+                        shortage.Remain += quantity;
+                        context.InventoryActions.Update(shortage);
                         
-                        LogUtil.Warn($"Inventory shortage remains: Date={shortageAction.ActionDate.ToString("yyyyMMdd")}, Lot={shortageAction.InventoryLotNo}, quantity={shortageAction.InventoryLotNo}");
+                        LogUtil.Warn($"Inventory shortage remains: Date={shortage.ActionDate.ToString("yyyyMMdd")}, Lot={shortage.InventoryLotNo}, quantity={shortage.InventoryLotNo}");
                     }
                 }
 
                 // 納品予定が翌日以降の在庫ロットからの振り替え
-                foreach (var usedFromOthers in context.InventoryActions
-                        .Where(act => act.PartsCode == currentOrder.PartsCode)
-                        .Where(act => act.ActionDate == currentOrder.ActionDate)
-                        .Where(act => act.ArrivalDate > currentOrder.ArrivalDate)
+                foreach (var others in context.InventoryActions
+                        .Where(act => act.PartsCode == action.PartsCode)
+                        .Where(act => act.ActionDate == action.ActionDate)
+                        .Where(act => act.ArrivalDate > action.ArrivalDate)
                         .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
                         .Where(act => act.Quantity > 0)
                         .OrderBy(act => act.ArrivalDate))
                 {
-                    LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(currentOrder, usedFromOthers.Quantity);
-                    if (currentOrder.Remain >= usedFromOthers.Quantity)
+                    LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, others.Quantity);
+                    if (action.Remain >= others.Quantity)
                     {
                         // 全量をこの在庫ロットから払い出す
-                        var quantity = usedFromOthers.Quantity;
+                        var quantity = others.Quantity;
 
-                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(currentOrder, quantity);
-                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(usedFromOthers, -quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(others, -quantity);
 
-                        Parent.BouquetModel.UseFromThisLot(context, currentOrder, quantity, usedLot);
-                        Parent.BouquetModel.UseFromThisLot(context, usedFromOthers, -quantity, usedLot);
+                        Parent.BouquetModel.UseFromThisLot(context, action, quantity, usedLot);
+                        Parent.BouquetModel.UseFromThisLot(context, others, -quantity, usedLot);
                     }
                     else
                     {
                         // 振替可能な分は currentOrder に振り替え、残余は usedFromOthers に残す
-                        var quantity = currentOrder.Remain;
+                        var quantity = action.Remain;
 
-                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(currentOrder, quantity);
-                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(usedFromOthers, -quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, quantity);
+                        LogUtil.DEBUGLOG_InventoryActionQuantityChanged(others, -quantity);
 
-                        Parent.BouquetModel.UseFromThisLot(context, currentOrder, quantity, usedLot);
-                        Parent.BouquetModel.UseFromThisLot(context, usedFromOthers, -quantity, usedLot);
+                        Parent.BouquetModel.UseFromThisLot(context, action, quantity, usedLot);
+                        Parent.BouquetModel.UseFromThisLot(context, others, -quantity, usedLot);
                     }
 
                 }

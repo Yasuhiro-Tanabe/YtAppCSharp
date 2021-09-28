@@ -440,11 +440,13 @@ namespace MemorieDeFleurs.Models
                 .Where(act => act.ActionDate >= today.ActionDate)
                 .ToList();
 
-            var invventoryShortageaction = theLot.FirstOrDefault(act => act.Action == InventoryActionType.SHORTAGE);
-            if (invventoryShortageaction != null)
+            var shortage = theLot.FirstOrDefault(act => act.Action == InventoryActionType.SHORTAGE);
+            if (shortage != null)
             {
                 // 在庫不足があるロットの対応は未考慮
-                throw new NotImplementedException($"在庫不足がある：{invventoryShortageaction.ToString("L")}");
+                var ex = new NotImplementedException($"在庫不足がある：{shortage.ToString("s")}, today={today.ToString("s")}, quantity={quantity}");
+                LogUtil.DEBUGLOG_EndMethod(msg: $"{ex.GetType().Name} thrown: {ex.Message}");
+                throw ex;
             }
 
             LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(today, quantity);
