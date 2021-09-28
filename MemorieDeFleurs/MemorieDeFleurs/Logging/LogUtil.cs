@@ -113,15 +113,23 @@ namespace MemorieDeFleurs.Logging
         /// 生成/登録された在庫アクションをデバッグログ出力する
         /// </summary>
         /// <param name="action">出力対象在庫アクション</param>
-        /// <param name="caller">このメソッドの呼び出し元：通常は指定不要。直接の呼び出し元ではなく、さらにその呼び出し元をログに残したいとき指定する</param>
-        /// <param name="line">このメソッドの呼び出し位置：ソースファイル中の行番号。calledFrom と同様通常は指定不要、呼び出し元の呼び出し元をログに残したいときのみ指定する</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
         [Conditional("DEBUG")]
         public static void DEBUGLOG_InventoryActionCreated(InventoryAction action, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             LogUtil.Debug($"{Indent}Created: {action.ToString("L")}", caller, path, line);
         }
 
-
+        /// <summary>
+        /// 基準日にこのロットから要求数量をすべて引当できるかどうかの判定ログを出力する
+        /// </summary>
+        /// <param name="action">比較対象アクション</param>
+        /// <param name="quantity">要求数量</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
         [Conditional("DEBUG")]
         public static void DEBUGLOG_ComparationOfInventoryRemainAndQuantity(InventoryAction action, int quantity, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
@@ -131,6 +139,14 @@ namespace MemorieDeFleurs.Logging
 
         }
 
+        /// <summary>
+        /// 基準日に前日残から当日要求されていた数量をすべて引当できるかどうかの判定ログを出力する
+        /// </summary>
+        /// <param name="action">比較対象アクション</param>
+        /// <param name="remain">前日残</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
         [Conditional("DEBUG")]
         public static void DEBUGLOG_ComparisonOfInventoryQuantityAndPreviousRemain(InventoryAction action, int remain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
@@ -139,6 +155,30 @@ namespace MemorieDeFleurs.Logging
             LogUtil.Debug($"{Indent}Compare: {action.ToString("h")}.Quantity({action.Quantity}) {operatorString} {remain}", caller, path, line);
         }
 
+
+        /// <summary>
+        /// テスト開始ログを、通常のメソッド開始終了ログとは別フォーマットで出力する
+        /// </summary>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
+        [Conditional("DEBUG")]
+        public static void DEBUGLOG_BeginTest([CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        {
+            LogUtil.DebugFormat("========== {0} [BEGIN] ========== ({1}:{2})", caller, Path.GetFileName(path), line);
+        }
+
+        /// <summary>
+        /// テスト終了ログを、通常のメソッド開始終了ログとは別フォーマットで出力する
+        /// </summary>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
+        [Conditional("DEBUG")]
+        public static void DEBUGLOG_EndTest([CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        {
+            LogUtil.DebugFormat("========== {0} [END] ========== ({1}:{2})", caller, Path.GetFileName(path), line);
+        }
         #endregion
     }
 }
