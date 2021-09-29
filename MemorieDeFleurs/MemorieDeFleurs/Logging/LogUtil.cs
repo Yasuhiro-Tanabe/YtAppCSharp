@@ -55,7 +55,7 @@ namespace MemorieDeFleurs.Logging
             var argument = string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )";
             var message = string.IsNullOrWhiteSpace(msg) ? "" : $" {msg}";
 
-            LogUtil.Debug($"{Indent}[BEGIN] {caller}{argument}{message}", caller, path, line);
+            LogUtil.DebugFormat($"{Indent}[BEGIN] {caller}{argument}{message} ({Path.GetFileName(path)}:{line})");
             Indent++;
         }
 
@@ -74,7 +74,7 @@ namespace MemorieDeFleurs.Logging
             var message = string.IsNullOrWhiteSpace(msg) ? string.Empty : $" {msg}";
 
             Indent--;
-            LogUtil.Debug($"{Indent}[END] {caller}{argument}{message}", caller, path, line);
+            LogUtil.DebugFormat($"{Indent}[END] {caller}{argument}{message} ({Path.GetFileName(path)}:{line})");
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace MemorieDeFleurs.Logging
             var qnew = newQuantity == oldAction.Quantity ? "(same)" : $"-> {newQuantity}";
             var rnew = newRemain == oldAction.Remain ? $"(same)" : $"-> {newRemain}";
 
-            LogUtil.Debug($"{Indent}Update: {oldAction.ToString("h")}=[quantity={oldAction.Quantity}{qnew}, remain={oldAction.Remain}{rnew}]", caller, path, line);
+            LogUtil.Debug($"{Indent}Update: {oldAction.ToString("h")}=[quantity={oldAction.Quantity} {qnew}, remain={oldAction.Remain} {rnew}]", caller, path, line);
         }
 
         /// <summary>
