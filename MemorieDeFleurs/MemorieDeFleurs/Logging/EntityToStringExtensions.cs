@@ -29,6 +29,7 @@ namespace MemorieDeFleurs.Logging
         /// action.ToString("L");  // SCHEDULED_TO_USE[Parts=BA001, ArrivalDate=20200503, Lot=1, ActionDate=20200505, Quality=0, Remain=100]
         /// action.ToString("h");  // BA001.Lot1[20200505]
         /// action.ToString("o");  // Lot1, BA001 x 0, arrive at 20200503
+        /// action.ToStirng("DB"); // 20200505|SCHEDULED_TO_USE    |BA001|20200503|     0|   100
         /// action.ToString("x");  // s, L, h, o 以外の書式を指定した場合、ArguemtException がスローされる
         /// action.ToString(" ");  // 空白類を指定した場合も、上記同様 ArguemtException がスローされる
         /// action.ToString("");   // ArgumentNullException がスローされる
@@ -52,6 +53,10 @@ namespace MemorieDeFleurs.Logging
         ///     <item>
         ///         <term>"o"</term>
         ///         <description>発注パラメータ書式：花コード、ロット番号、数量、納品予定日のみを含む文字列</description>
+        ///     </item>
+        ///     <item>
+        ///         <term>"DB"</term>
+        ///         <description>長い書式の内容を、DB風の区切り文字と空白文字で固定長に整形した文字列</description>
         ///     </item>
         /// </list>
         /// </summary>
@@ -93,6 +98,17 @@ namespace MemorieDeFleurs.Logging
                     .AppendFormat("Lot{0}", action.InventoryLotNo)
                     .AppendFormat(", {0} x {1}", action.PartsCode, action.Quantity)
                     .AppendFormat(", arrive at {0:yyyyMMdd}", action.ArrivalDate)
+                    .ToString();
+            }
+            else if(format == "DB")
+            {
+                return new StringBuilder()
+                    .AppendFormat("{0:yyyyMMdd}", action.ActionDate)
+                    .AppendFormat("|{0, -20}", action.Action)
+                    .AppendFormat("|{0, 5}", action.PartsCode)
+                    .AppendFormat("|{0:yyyyMMdd}", action.ArrivalDate)
+                    .AppendFormat("|{0, 2}", action.InventoryLotNo)
+                    .AppendFormat("|{0, 5}|{1, 5}", action.Quantity, action.Remain)
                     .ToString();
             }
             else
