@@ -96,7 +96,10 @@ namespace MemorieDeFleurs.Logging
         }
 
         /// <summary>
-        /// 在庫アクションの変更ログを出力する
+        /// 変更処理実施前に在庫アクションの変更ログを出力する
+        /// 
+        /// oldAction.Quantity が oldAction.Quantity から (oldAction.Quantity + used) に、Remain が oldAction.Remain から (oldAction.Remain － used) に
+        /// 変更されたことをログ出力する。
         /// </summary>
         /// <param name="oldAction">変更前の在庫アクションオブジェクト</param>
         /// <param name="used">変更後の数量</param>
@@ -104,9 +107,31 @@ namespace MemorieDeFleurs.Logging
         /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
         /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_InventoryActionQuantityChanged(InventoryAction oldAction, int used, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        public static void DEBUGLOG_InventoryActionQuantityChangingTo(InventoryAction oldAction, int used, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             DEBUGLOG_InventoryActionQuantityChanged(oldAction, oldAction.Quantity + used, oldAction.Remain - used, caller, path, line);
+        }
+
+        /// <summary>
+        /// 変更処理実施後に在庫アクションの変更ログを出力する
+        /// 
+        /// newAction.Quantity が (newAction.Quantity － used) から newAction.Quantity に、Remain が (newAction.Remain ＋ used) から newAction.Remain に
+        /// 変更されたことをログ出力する。
+        /// </summary>
+        /// <param name="newAction">変更後の在庫アクションオブジェクト</param>
+        /// <param name="used">変更した数量：変更前の数量は内部で計算する</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
+        public static void DEBUGLOG_InventoryActionQuantityChanged(InventoryAction newAction, int used, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        {
+            var oldQuantity = newAction.Quantity - used;
+            var oldRemain = newAction.Remain + used;
+
+            var txtQuantity = oldQuantity == newAction.Quantity ? "(same)" : $"-> {newAction.Quantity}";
+            var txtRemain = oldRemain == newAction.Remain ? "(same)" : $"-> {newAction.Remain}";
+
+            LogUtil.Debug($"{Indent}Update: {newAction.ToString("h")}=[quantity={oldQuantity} {txtQuantity}, remain={oldRemain} {txtRemain}", caller, path, line);
         }
 
         /// <summary>
@@ -179,6 +204,6 @@ namespace MemorieDeFleurs.Logging
         {
             LogUtil.DebugFormat("========== {0} [END] ========== ({1}:{2})", caller, Path.GetFileName(path), line);
         }
-        #endregion
+#endregion
     }
 }

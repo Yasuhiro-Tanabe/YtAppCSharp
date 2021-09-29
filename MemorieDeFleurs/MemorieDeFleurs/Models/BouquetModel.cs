@@ -453,7 +453,7 @@ namespace MemorieDeFleurs.Models
             if (today.Remain >= quantity)
             {
                 // 全量引き出せる
-                LogUtil.DEBUGLOG_InventoryActionQuantityChanged(today, quantity);
+                LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(today, quantity);
 
                 today.Quantity += quantity;
                 today.Remain -= quantity;
@@ -463,7 +463,7 @@ namespace MemorieDeFleurs.Models
             else
             {
                 // 残数分はこのロットから、それ以外は他のロットから引き出す
-                LogUtil.DEBUGLOG_InventoryActionQuantityChanged(today, today.Remain);
+                LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(today, today.Remain);
 
                 var useFromThisLot = today.Remain;
                 var useFromOtherLot = quantity - today.Remain;
@@ -558,7 +558,7 @@ namespace MemorieDeFleurs.Models
                 if(action.Remain >= useToThisLot)
                 {
                     // このロットから全量引き出す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, useToThisLot);
+                    LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(action, useToThisLot);
 
                     UseFromThisLot(context, action, quantity, usedLot);
                     LogUtil.DEBUGLOG_EndMethod(msg: $"resolved");
@@ -567,7 +567,7 @@ namespace MemorieDeFleurs.Models
                 else
                 {
                     // 残数分はこのロットから、引き出せなかった分は次のロットから引き出す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, action.Remain);
+                    LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(action, action.Remain);
 
                     useToThisLot -= action.Remain;
                     UseFromThisLot(context, action, action.Remain, usedLot);
