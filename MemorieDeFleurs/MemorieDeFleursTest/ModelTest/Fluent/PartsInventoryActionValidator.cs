@@ -9,8 +9,11 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
     /// <summary>
     /// 単品在庫アクション検証器
     /// </summary>
-    public class PartsInventoryActionValidator : Dictionary<Tuple<DateTime, int>, LotInventoryActionValidator>
+    public class PartsInventoryActionValidator
     {
+        private IDictionary<Tuple<DateTime, int>, LotInventoryActionValidator> LotValidators { get; }
+            = new SortedDictionary<Tuple<DateTime, int>, LotInventoryActionValidator>();
+
         /// <summary>
         /// この検証器の呼び出し元
         /// </summary>
@@ -37,10 +40,10 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         {
             LotInventoryActionValidator validator;
             var key = Tuple.Create(arrivedDate, lotNo);
-            if (!TryGetValue(key, out validator))
+            if (!LotValidators.TryGetValue(key, out validator))
             {
                 validator = new LotInventoryActionValidator(this);
-                Add(key, validator);
+                LotValidators.Add(key, validator);
             }
 
             CurrentChild = validator;
@@ -73,26 +76,30 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         }
 
         /// <summary>
+        /// ロット検証条件登録開始マーク：
+        /// 
         /// ロットの在庫アクション検証器に制御を移す
         /// </summary>
         /// <returns>ロットの在庫アクション検証器</returns>
-        public LotInventoryActionValidator Begin()
+        public LotInventoryActionValidator BEGIN
         {
-            if (CurrentChild == null)
+            get
             {
-                throw new InvalidOperationException($"Call {nameof(Lot)}() before calling {nameof(Begin)}().");
+                if (CurrentChild == null)
+                {
+                    throw new InvalidOperationException($"Call {nameof(Lot)}() before calling {nameof(BEGIN)}().");
+                }
+                return CurrentChild;
             }
-            return CurrentChild;
         }
 
         /// <summary>
+        /// ロット検証条件登録終了マーク：
+        /// 
         /// 呼び出し元の在庫アクション検証器に制御を戻す
         /// </summary>
         /// <returns>在庫アクション検証器</returns>
-        public InventoryActionValidator End()
-        {
-            return Parent;
-        }
+        public InventoryActionValidator END { get { return Parent; } }
 
         /// <summary>
         /// データベース上の在庫アクションのうちこの検証器に登録されている各ロットの在庫アクションが、
@@ -102,7 +109,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="partsCode">検証対象の単品</param>
         public void AssertAll(MemorieDeFleursDbContext context, string partsCode)
         {
-            this.All(kv => { kv.Value.AssertAll(context, partsCode, kv.Key.Item1, kv.Key.Item2); return true; });
+            LotValidators.All(kv => { kv.Value.AssertAll(context, partsCode, kv.Key.Item1, kv.Key.Item2); return true; });
         }
     }
 }

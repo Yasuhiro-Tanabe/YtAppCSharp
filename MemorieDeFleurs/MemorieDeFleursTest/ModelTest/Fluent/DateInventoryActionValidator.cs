@@ -2,14 +2,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MemorieDeFleursTest.ModelTest.Fluent
 {
     /// <summary>
     /// 日別在庫アクション検証
     /// </summary>
-    public class DateInventoryActionValidator : List<ExpectedInventoryAction>
+    public class DateInventoryActionValidator
     {
+        private IList<ExpectedInventoryAction> ExpectedActions { get; } = new List<ExpectedInventoryAction>();
+
         /// <summary>
         /// この検証器の呼び出し元
         /// </summary>
@@ -31,7 +34,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <returns>自分自身</returns>
         public DateInventoryActionValidator Arrived(int arrived)
         {
-            Add(ExpectedInventoryAction.CreateArrivedAction(arrived));
+            ExpectedActions.Add(ExpectedInventoryAction.CreateArrivedAction(arrived));
             return this;
         }
 
@@ -43,7 +46,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <returns>自分自身</returns>
         public DateInventoryActionValidator Used(int used, int remain)
         {
-            Add(ExpectedInventoryAction.CreateUsedAction(used, remain));
+            ExpectedActions.Add(ExpectedInventoryAction.CreateUsedAction(used, remain));
             return this;
         }
 
@@ -54,7 +57,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <returns>自分自身</returns>
         public DateInventoryActionValidator Shortage(int shortage)
         {
-            Add(ExpectedInventoryAction.CreateInventoryShortageAction(shortage));
+            ExpectedActions.Add(ExpectedInventoryAction.CreateInventoryShortageAction(shortage));
             return this;
         }
 
@@ -65,18 +68,17 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <returns>自分自身</returns>
         public DateInventoryActionValidator Discarded(int discarded)
         {
-            Add(ExpectedInventoryAction.CreateDiscardAction(discarded));
+            ExpectedActions.Add(ExpectedInventoryAction.CreateDiscardAction(discarded));
             return this;
         }
 
         /// <summary>
+        /// 日別在庫検証項目登録終了マーク：
+        /// 
         /// 呼び出し元のロットの在庫アクション検証器に制御を戻す
         /// </summary>
         /// <returns>ロットの在庫アクション検証器</returns>
-        public PartsInventoryActionValidator End()
-        {
-            return Parent.End();
-        }
+        public PartsInventoryActionValidator END { get { return Parent.END; } }
 
         public DateInventoryActionValidator At(DateTime date)
         {
@@ -93,7 +95,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="lotNo">対象ロットのロット番号</param>
         public void AssertAll(MemorieDeFleursDbContext context, string partsCode, DateTime arrivedDate, int lotNo, DateTime actionDate)
         {
-            ForEach(a => a.AssertExists(context, actionDate, partsCode, lotNo, arrivedDate));
+            ExpectedActions.All(a => { a.AssertExists(context, actionDate, partsCode, lotNo, arrivedDate); return true; });
         }
     }
 }

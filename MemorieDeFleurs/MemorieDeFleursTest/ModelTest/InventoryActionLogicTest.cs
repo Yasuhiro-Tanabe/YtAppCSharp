@@ -87,14 +87,14 @@ namespace MemorieDeFleursTest.ModelTest
 
             var expectedLotNumber = Model.SupplierModel.Order(orderDate, ExpectedPart, numLot, arrivalDate);
 
-            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(arrivalDate, expectedLotNumber).Begin()
+            InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
+                .Lot(arrivalDate, expectedLotNumber).BEGIN
                     .At(arrivalDate).Arrived(expectedQuantity).Used(0, expectedQuantity)
                     .At(arrivalDate.AddDays(1)).Used(0, expectedQuantity)
                     .At(arrivalDate.AddDays(2)).Used(0, expectedQuantity)
                     .At(arrivalDate.AddDays(3)).Used(0, expectedQuantity).Discarded(expectedQuantity)
-                    .End()
-                .End()
+                    .END
+                .END
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
@@ -131,19 +131,19 @@ namespace MemorieDeFleursTest.ModelTest
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May1st, 60);
             var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
 
-            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 // 引当てされた同一ロットに属する前日、当日、翌日の在庫アクションの数量/残数が意図通りに変化している
-                .Lot(DateConst.April30th, findLotNo).Begin()
+                .Lot(DateConst.April30th, findLotNo).BEGIN
                     .At(DateConst.April30th).Used(0, 200)
                     .At(DateConst.May1st).Used(60, 140)
                     .At(DateConst.May2nd).Used(0, 140)
-                    .End()
+                    .END
                 // 引当てされたのとは別ロットに影響が出ていない
-                .Lot(DateConst.May1st, findLotNo).Begin()
+                .Lot(DateConst.May1st, findLotNo).BEGIN
                     .At(DateConst.May1st).Used(0, 300)
                     .At(DateConst.May2nd).Used(0, 300)
-                    .End()
-                .End()
+                    .END
+                .END
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
@@ -164,10 +164,10 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(expectedCountOfOrders, actualCountOfOrders, $"注文数と発注ロット数の不一致：仕入先={ExpectedSupplier.Name}, 花コード={ExpectedPart.Name}");
 
             AssertAllLotNumbersAreUnique();
-            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
+            InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 // 対象在庫ロットに関する在庫アクションが消えていること
                 .Lot(DateConst.May2nd, expectedCanceledLotNumber).HasNoInventoryActions()
-                .End()
+                .END
                 // ほかの在庫ロットアクションが消えていないこと
                 .InventoryActionCountShallBe(InventoryActionType.SCHEDULED_TO_ARRIVE, expectedCountOfOrders)
                 .InventoryActionCountShallBe(InventoryActionType.SCHEDULED_TO_USE, expectedCountOfScheduledToUseInventoryActions)
@@ -184,14 +184,14 @@ namespace MemorieDeFleursTest.ModelTest
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 20);
 
             Assert.AreEqual(180, actualRemain);
-            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.April30th, lotNo).Begin()
+            InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
+                .Lot(DateConst.April30th, lotNo).BEGIN
                     .At(DateConst.April30th).Used(20, 180)
                     .At(DateConst.May1st).Used(0, 180)
                     .At(DateConst.May2nd).Used(0, 180)
                     .At(DateConst.May3rd).Used(0, 180).Discarded(180)
-                    .End()
-                .End()
+                    .END
+                .END
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
@@ -203,14 +203,14 @@ namespace MemorieDeFleursTest.ModelTest
 
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 200);
 
-            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.April30th, lotNo).Begin()
+            InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
+                .Lot(DateConst.April30th, lotNo).BEGIN
                     .At(DateConst.April30th).Used(200, 0)
                     .At(DateConst.May1st).Used(0, 0)
                     .At(DateConst.May2nd).Used(0, 0)
                     .At(DateConst.May3rd).Used(0, 0).Discarded(0)
-                    .End()
-                .End()
+                    .END
+                .END
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
@@ -222,14 +222,14 @@ namespace MemorieDeFleursTest.ModelTest
 
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 220);
 
-            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.April30th, lotNo).Begin()
+            InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
+                .Lot(DateConst.April30th, lotNo).BEGIN
                     .At(DateConst.April30th).Used(200, 0).Shortage(20)
                     .At(DateConst.May1st).Used(0, 0)
                     .At(DateConst.May2nd).Used(0, 0)
                     .At(DateConst.May3rd).Used(0, 0).Discarded(0)
-                    .End()
-                .End()
+                    .END
+                .END
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
@@ -250,24 +250,24 @@ namespace MemorieDeFleursTest.ModelTest
             var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May2nd, 500);
 
             // 2ロット分の全量を消費し、ただし3ロット目は消費しない
-            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.April30th, lotNo[0]).Begin()
+            InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
+                .Lot(DateConst.April30th, lotNo[0]).BEGIN
                     .At(DateConst.May1st).Used(0, 200)
                     .At(DateConst.May2nd).Used(200, 0)
                     .At(DateConst.May3rd).Used(0, 0).Discarded(0)
-                    .End()
-                .Lot(DateConst.May1st, lotNo[1]).Begin()
+                    .END
+                .Lot(DateConst.May1st, lotNo[1]).BEGIN
                     .At(DateConst.May1st).Used(0, 300)
                     .At(DateConst.May2nd).Used(300, 0)
                     .At(DateConst.May3rd).Used(0, 0)
                     .At(DateConst.May4th).Used(0, 0).Discarded(0)
-                    .End()
-                .Lot(DateConst.May2nd, lotNo[2]).Begin()
+                    .END
+                .Lot(DateConst.May2nd, lotNo[2]).BEGIN
                     .At(DateConst.May2nd).Used(0, 200)
                     .At(DateConst.May3rd).Used(0, 200)
                     .At(DateConst.May5th).Discarded(200)
-                    .End()
-                .End()
+                    .END
+                .END
                 .InventoryActionCountShallBe(InventoryActionType.SHORTAGE, 0)
                 .TargetDBIs(TestDB)
                 .AssertAll();
@@ -295,38 +295,38 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.IsTrue(actualRemain.All(r => r > 0));
 
             // 検証2 全在庫アクションが意図通り登録されていること
-            InventoryActionValidator.NewInstance().BouquetPart(ExpectedPart).Begin()
-                .Lot(DateConst.April30th, findLotNo).Begin()
+            InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
+                .Lot(DateConst.April30th, findLotNo).BEGIN
                     .At(DateConst.April30th).Arrived(200).Used(20, 180)
                     .At(DateConst.May1st).Used(50, 130)
                     .At(DateConst.May2nd).Used(80, 50)
                     .At(DateConst.May3rd).Used(20, 30).Discarded(30)
-                    .End()
-                .Lot(DateConst.May1st, findLotNo).Begin()
+                    .END
+                .Lot(DateConst.May1st, findLotNo).BEGIN
                     .At(DateConst.May1st).Arrived(300).Used(0, 300)
                     .At(DateConst.May2nd).Used(0, 300)
                     .At(DateConst.May3rd).Used(0, 300)
                     .At(DateConst.May4th).Used(300, 0).Discarded(0)
-                    .End()
-                .Lot(DateConst.May2nd, findLotNo).Begin()
+                    .END
+                .Lot(DateConst.May2nd, findLotNo).BEGIN
                     .At(DateConst.May2nd).Arrived(200).Used(0, 200)
                     .At(DateConst.May3rd).Used(0, 200)
                     .At(DateConst.May4th).Used(100, 100)
                     .At(DateConst.May5th).Used(100, 0).Discarded(0)
-                    .End()
-                .Lot(DateConst.May3rd, findLotNo).Begin()
+                    .END
+                .Lot(DateConst.May3rd, findLotNo).BEGIN
                     .At(DateConst.May3rd).Arrived(200).Used(0, 200)
                     .At(DateConst.May4th).Used(0, 200)
                     .At(DateConst.May5th).Used(70, 130)
                     .At(DateConst.May6th).Used(40, 90).Discarded(90)
-                    .End()
-                .Lot(DateConst.May6th, findLotNo).Begin()
+                    .END
+                .Lot(DateConst.May6th, findLotNo).BEGIN
                     .At(DateConst.May6th).Arrived(100).Used(0, 100)
                     .At(DateConst.May7th).Used(0, 100)
                     .At(DateConst.May8th).Used(0, 100)
                     .At(DateConst.May9th).Used(0, 100).Discarded(100)
-                    .End()
-                .End()
+                    .END
+                .END
                 .InventoryActionCountShallBe(InventoryActionType.SHORTAGE, 0)
                 .TargetDBIs(TestDB)
                 .AssertAll();

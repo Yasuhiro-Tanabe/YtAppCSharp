@@ -11,8 +11,11 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
     /// <summary>
     /// ロットの在庫アクション検証器
     /// </summary>
-    public class LotInventoryActionValidator : Dictionary<DateTime, DateInventoryActionValidator>
+    public class LotInventoryActionValidator
     {
+        private IDictionary<DateTime, DateInventoryActionValidator> DateValidators { get; }
+            = new SortedDictionary<DateTime, DateInventoryActionValidator>();
+
         /// <summary>
         /// この検証器の呼び出し元
         /// </summary>
@@ -44,10 +47,10 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         public DateInventoryActionValidator At(DateTime actionDate)
         {
             DateInventoryActionValidator validator;
-            if (!TryGetValue(actionDate, out validator))
+            if (!DateValidators.TryGetValue(actionDate, out validator))
             {
                 validator = new DateInventoryActionValidator(this);
-                Add(actionDate, validator);
+                DateValidators.Add(actionDate, validator);
             }
 
             CurrentActionDate = actionDate;
@@ -56,13 +59,12 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         }
 
         /// <summary>
+        /// 日別在庫検証項目登録終了マーク：
+        /// 
         /// 呼び出し元の単品在庫アクション検証器に制御を戻す
         /// </summary>
         /// <returns>単品在庫アクション検証器</returns>
-        public PartsInventoryActionValidator End()
-        {
-            return Parent;
-        }
+        public PartsInventoryActionValidator END { get { return Parent; } }
 
         /// <summary>
         /// データベース上の在庫アクションのうちこの検証器に登録されている各基準日の在庫アクションが、
@@ -85,7 +87,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             }
             else
             {
-                this.All(kv => { kv.Value.AssertAll(context, partsCode, arrivedDate, lotNo, kv.Key); return true; });
+                DateValidators.All(kv => { kv.Value.AssertAll(context, partsCode, arrivedDate, lotNo, kv.Key); return true; });
             }
         }
 

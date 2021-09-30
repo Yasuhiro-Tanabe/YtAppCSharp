@@ -13,8 +13,10 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
     /// <summary>
     /// 在庫アクション検証器：在庫アクションの期待値を登録し、期待値通りに登録されているかどうかを検証するクラス
     /// </summary>
-    public class InventoryActionValidator : Dictionary<string, PartsInventoryActionValidator>
+    public class InventoryActionValidator
     {
+        private IDictionary<string, PartsInventoryActionValidator> PartsValidators { get; } = new SortedDictionary<string, PartsInventoryActionValidator>();
+
         private InventoryActionValidator() { }
 
         /// <summary>
@@ -39,13 +41,13 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// </summary>
         /// <param name="part">単品</param>
         /// <returns>単品在庫アクション検証器</returns>
-        public InventoryActionValidator BouquetPart(BouquetPart part)
+        public InventoryActionValidator BouquetPartIs(BouquetPart part)
         {
             PartsInventoryActionValidator validator;
-            if (!TryGetValue(part.Code, out validator))
+            if (!PartsValidators.TryGetValue(part.Code, out validator))
             {
                 validator = new PartsInventoryActionValidator(this);
-                Add(part.Code, validator);
+                PartsValidators.Add(part.Code, validator);
             }
             CurrentPart = part;
             CurrentChild = validator;
@@ -53,16 +55,21 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         }
 
         /// <summary>
+        /// 単品在庫アクション登録開始マーク：
+        /// 
         /// 単品在庫アクション検証器に制御を移す
         /// </summary>
         /// <returns>単品在庫アクション検証器</returns>
-        public PartsInventoryActionValidator Begin()
+        public PartsInventoryActionValidator BEGIN
         {
-            if(null == CurrentChild)
+            get
             {
-                throw new InvalidOperationException($"Call {nameof(BouquetPart)}() before calling {nameof(Begin)}().");
+                if (null == CurrentChild)
+                {
+                    throw new InvalidOperationException($"Call {nameof(BouquetPartIs)}() before calling {nameof(BEGIN)}().");
+                }
+                return CurrentChild;
             }
-            return CurrentChild;
         }
 
         /// <summary>
@@ -88,7 +95,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
                 throw new ArgumentNullException(nameof(context));
             }
 
-            this.All(kv => { kv.Value.AssertAll(context, kv.Key); return true; });
+            PartsValidators.All(kv => { kv.Value.AssertAll(context, kv.Key); return true; });
 
             foreach(var expected in ExpectedInventoryActionCount)
             {
