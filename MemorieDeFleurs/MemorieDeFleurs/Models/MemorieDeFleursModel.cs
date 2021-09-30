@@ -18,7 +18,6 @@ namespace MemorieDeFleurs.Models
 
         public CustomerModel CustomerModel { get; private set; }
 
-        public DateUtil DateMaster { get; private set; }
         public SequenceUtil Sequences { get; set; }
 
         /// <summary>
@@ -36,7 +35,6 @@ namespace MemorieDeFleurs.Models
             BouquetModel = new BouquetModel(this);
             CustomerModel = new CustomerModel(this);
 
-            DateMaster = new DateUtil(DbConnection);
             Sequences = new SequenceUtil(this);
         }
     }
