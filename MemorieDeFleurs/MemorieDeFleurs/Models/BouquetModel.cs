@@ -569,14 +569,21 @@ namespace MemorieDeFleurs.Models
 
         #endregion // UseBouquetPart
 
-        public void CreatePartsList(string bouquet, string part, int quantity)
+        #region 商品構成の追加削除
+        /// <summary>
+        /// 登録済み商品の商品構成に、登録済みの単品を追加する
+        /// </summary>
+        /// <param name="bouquetCode">花束コード</param>
+        /// <param name="partCode">花コード</param>
+        /// <param name="quantity">数量</param>
+        public void AppendPartsTo(string bouquetCode, string partCode, int quantity)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    CreatePartsList(context, bouquet, part, quantity);
+                    AppendPartsTo(context, bouquetCode, partCode, quantity);
                     transaction.Commit();
                 }
                 catch(Exception)
@@ -587,11 +594,19 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        public void CreatePartsList(MemorieDeFleursDbContext context, string bouquet, string part, int quantity)
+        /// <summary>
+        /// 登録済み商品の商品構成に，登録済みの単品を追加する、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="bouquetCode">花束コード</param>
+        /// <param name="partCode">花コード</param>
+        /// <param name="quantity">数量</param>
+        private void AppendPartsTo(MemorieDeFleursDbContext context, string bouquetCode, string partCode, int quantity)
         {
-            var item = new BouquetPartsList() { BouquetCode = bouquet, PartsCode = part, Quantity = quantity };
+            var item = new BouquetPartsList() { BouquetCode = bouquetCode, PartsCode = partCode, Quantity = quantity };
             context.PartsList.Add(item);
             context.SaveChanges();
         }
+        #endregion // 商品構成の追加削除
     }
 }

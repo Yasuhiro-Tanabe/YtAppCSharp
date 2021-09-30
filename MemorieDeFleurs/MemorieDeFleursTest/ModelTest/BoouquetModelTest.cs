@@ -67,7 +67,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .ExpiryDateIs(3)
                 .Create();
 
-            Model.BouquetModel.CreatePartsList(expectedBouquet.Code, expectedPart.Code, 4);
+            Model.BouquetModel.AppendPartsTo(expectedBouquet.Code, expectedPart.Code, 4);
 
             var actualBouquet = Model.BouquetModel.FindBouquet(expectedBouquet.Code);
 
