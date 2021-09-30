@@ -352,7 +352,12 @@ namespace MemorieDeFleurs.Models
             foreach (var item in bouquet.PartsList)
             {
                 var part = context.BouquetParts.Find(item.PartsCode);
-                var remain = Parent.BouquetModel.UseBouquetPart(context, part, usedDate, item.Quantity);
+                Parent.BouquetModel.UseBouquetPart(context, part, usedDate, item.Quantity);
+
+                var remain = context.InventoryActions
+                    .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE || a.Action == InventoryActionType.SHORTAGE)
+                    .Where(a => a.ActionDate == usedDate)
+                    .Sum(a => a.Remain);
                 if (remain < 0)
                 {
                     throw new NotImplementedException(new StringBuilder()

@@ -128,18 +128,19 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void WillBeUsedEarliestArrivedInventoryLotWhenTwoOrMoreLotHasEnoughQuantity()
         {
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May1st, 60);
-            var findLotNo = new Func<DateTime, int>(d => InitialOrders[d][0].LotNo);
+            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May1st, 60);
+            var lot0430 = InitialOrders[DateConst.April30th][0].LotNo;
+            var lot0501 = InitialOrders[DateConst.May1st][0].LotNo;
 
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 // 引当てされた同一ロットに属する前日、当日、翌日の在庫アクションの数量/残数が意図通りに変化している
-                .Lot(DateConst.April30th, findLotNo).BEGIN
+                .Lot(DateConst.April30th, lot0430).BEGIN
                     .At(DateConst.April30th).Used(0, 200)
                     .At(DateConst.May1st).Used(60, 140)
                     .At(DateConst.May2nd).Used(0, 140)
                     .END
                 // 引当てされたのとは別ロットに影響が出ていない
-                .Lot(DateConst.May1st, findLotNo).BEGIN
+                .Lot(DateConst.May1st, lot0501).BEGIN
                     .At(DateConst.May1st).Used(0, 300)
                     .At(DateConst.May2nd).Used(0, 300)
                     .END
@@ -151,14 +152,13 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void CanRemoveOneOrdersOfSingleSupplier()
         {
-            var orderCancelDate = DateConst.May2nd;
             var expectedCountOfOrders = InitialOrders.SelectMany(i => i.Value).Count() - 1;
             var expectedCountOfScheduledToUseInventoryActions = (ExpectedPart.ExpiryDate + 1) * expectedCountOfOrders;
 
-            var expectedCanceledLotNumber = InitialOrders[orderCancelDate][0].LotNo;
+            var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
 
-            Model.SupplierModel.CancelOrder(expectedCanceledLotNumber);
-            InitialOrders.Remove(expectedCanceledLotNumber);
+            Model.SupplierModel.CancelOrder(lot0502);
+            InitialOrders.Remove(lot0502);
 
             var actualCountOfOrders = InitialOrders.SelectMany(i => i.Value).Count();
             Assert.AreEqual(expectedCountOfOrders, actualCountOfOrders, $"注文数と発注ロット数の不一致：仕入先={ExpectedSupplier.Name}, 花コード={ExpectedPart.Name}");
@@ -166,7 +166,7 @@ namespace MemorieDeFleursTest.ModelTest
             AssertAllLotNumbersAreUnique();
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 // 対象在庫ロットに関する在庫アクションが消えていること
-                .Lot(DateConst.May2nd, expectedCanceledLotNumber).HasNoInventoryActions()
+                .Lot(DateConst.May2nd, lot0502).HasNoInventoryActions()
                 .END
                 // ほかの在庫ロットアクションが消えていないこと
                 .InventoryActionCountShallBe(InventoryActionType.SCHEDULED_TO_ARRIVE, expectedCountOfOrders)
@@ -181,9 +181,8 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 20);
+            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 20);
 
-            Assert.AreEqual(180, actualRemain);
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.April30th, lotNo).BEGIN
                     .At(DateConst.April30th).Used(20, 180)
@@ -201,7 +200,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 200);
+            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 200);
 
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.April30th, lotNo).BEGIN
@@ -220,7 +219,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 220);
+            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 220);
 
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.April30th, lotNo).BEGIN
@@ -247,7 +246,7 @@ namespace MemorieDeFleursTest.ModelTest
                 InitialOrders[DateConst.May2nd][0].LotNo,
             };
 
-            var actualRemain = Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May2nd, 500);
+            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May2nd, 500);
 
             // 2ロット分の全量を消費し、ただし3ロット目は消費しない
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
@@ -289,13 +288,13 @@ namespace MemorieDeFleursTest.ModelTest
                 { DateConst.May6th, 40 }
             };
 
-            var actualRemain = input.Select(u => Model.BouquetModel.UseBouquetPart(ExpectedPart, u.Key, u.Value));
+            foreach(var order in input)
+            {
+                Model.BouquetModel.UseBouquetPart(ExpectedPart, order.Key, order.Value);
+            }
 
-            // 検証1：注文反映中に在庫不足が発生していないこと
-            Assert.IsTrue(actualRemain.All(r => r > 0));
-
-            // 検証2 全在庫アクションが意図通り登録されていること
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
+                // 検証1 全在庫アクションが意図通り登録されていること
                 .Lot(DateConst.April30th, findLotNo).BEGIN
                     .At(DateConst.April30th).Arrived(200).Used(20, 180)
                     .At(DateConst.May1st).Used(50, 130)
@@ -327,6 +326,7 @@ namespace MemorieDeFleursTest.ModelTest
                     .At(DateConst.May9th).Used(0, 100).Discarded(100)
                     .END
                 .END
+                // 検証2：注文反映中に在庫不足が発生していないこと
                 .InventoryActionCountShallBe(InventoryActionType.SHORTAGE, 0)
                 .TargetDBIs(TestDB)
                 .AssertAll();

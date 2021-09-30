@@ -355,17 +355,15 @@ namespace MemorieDeFleurs.Models
         /// <param name="part">対象となる単品</param>
         /// <param name="date">日付</param>
         /// <param name="quantity">取り去る数量</param>
-        /// <returns>取り去った後の在庫数量：当日分複数ロットの合計値</returns>
-        public int UseBouquetPart(BouquetPart part, DateTime date, int quantity)
+        public void UseBouquetPart(BouquetPart part, DateTime date, int quantity)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    var totalRemain = UseBouquetPart(context, part, date, quantity);
+                    UseBouquetPart(context, part, date, quantity);
                     transaction.Commit();
-                    return totalRemain;
                 }
                 catch(Exception)
                 {
@@ -382,8 +380,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="part">対象となる単品</param>
         /// <param name="date">日付</param>
         /// <param name="quantity">取り去る数量</param>
-        /// <returns>取り去った後の在庫数量：当日分複数ロットの合計値</returns>
-        public int UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
+        public void UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{part.Code}, {date.ToString("yyyyMMdd")}, {quantity}");
             try
@@ -406,13 +403,7 @@ namespace MemorieDeFleurs.Models
                 }
 
                 context.SaveChanges();
-
-                var remain = context.InventoryActions
-                    .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE || a.Action == InventoryActionType.SHORTAGE)
-                    .Where(a => 0 == a.ActionDate.CompareTo(date))
-                    .Sum(a => a.Remain);
-                LogUtil.Info($"{nameof(UseBouquetPart)}({part.Code}, {date.ToString("yyyyMMdd")},{quantity}), Remain={remain}");
-                return remain;
+                LogUtil.Info($"{date:yyyyMMdd}, {part.Code} x {quantity} used.");
             }
             catch (NotImplementedException ei)
             {
@@ -439,15 +430,6 @@ namespace MemorieDeFleurs.Models
                 .Where(act => act.InventoryLotNo == today.InventoryLotNo)
                 .Where(act => act.ActionDate >= today.ActionDate)
                 .ToList();
-
-            var shortage = theLot.FirstOrDefault(act => act.Action == InventoryActionType.SHORTAGE);
-            if (shortage != null)
-            {
-                // 在庫不足があるロットの対応は未考慮
-                var ex = new NotImplementedException($"在庫不足がある：{shortage.ToString("s")}, today={today.ToString("s")}, quantity={quantity}");
-                LogUtil.DEBUGLOG_EndMethod(msg: $"{ex.GetType().Name} thrown: {ex.Message}");
-                throw ex;
-            }
 
             LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(today, quantity);
             if (today.Remain >= quantity)
