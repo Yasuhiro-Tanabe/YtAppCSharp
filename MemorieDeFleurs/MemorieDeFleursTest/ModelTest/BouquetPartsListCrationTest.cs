@@ -32,12 +32,24 @@ namespace MemorieDeFleursTest.ModelTest
         #region TestInitialize
         private void PrepareModel(object sender, EventArgs unused)
         {
-            RegisterBouquetParts();
-            RegisterBouquets();
-
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    RegisterBouquetParts(context);
+                    RegisterBouquets(context);
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
         }
 
-        private void RegisterBouquets()
+        private void RegisterBouquets(MemorieDeFleursDbContext context)
         {
             HasPartsList = BouquetModel.GetBouquetBuilder()
                 .CodeIs("HT002")
@@ -45,15 +57,15 @@ namespace MemorieDeFleursTest.ModelTest
                 .Uses("BA001", 3)
                 .Uses("BA002", 5)
                 .Uses("BA003", 3)
-                .Create();
+                .Create(context);
 
             NoPartsList = BouquetModel.GetBouquetBuilder()
                 .CodeIs("HT001")
                 .NameIs("花束-Aセット")
-                .Create();
+                .Create(context);
         }
 
-        private void RegisterBouquetParts()
+        private void RegisterBouquetParts(MemorieDeFleursDbContext context)
         {
             var builder = BouquetModel.GetBouquetPartBuilder();
             BouquetParts.Add("BA001",
@@ -62,28 +74,28 @@ namespace MemorieDeFleursTest.ModelTest
                         .LeadTimeIs(1)
                         .QauntityParLotIs(100)
                         .ExpiryDateIs(3)
-                        .Create());
+                        .Create(context));
             BouquetParts.Add("BA002",
                 builder.PartCodeIs("BA002")
                         .PartNameIs("薔薇(白)")
                         .LeadTimeIs(1)
                         .QauntityParLotIs(100)
                         .ExpiryDateIs(3)
-                        .Create());
+                        .Create(context));
             BouquetParts.Add("BA003",
                 builder.PartCodeIs("BA003")
                         .PartNameIs("薔薇(ピンク)")
                         .LeadTimeIs(1)
                         .QauntityParLotIs(100)
                         .ExpiryDateIs(3)
-                        .Create());
+                        .Create(context));
             BouquetParts.Add("GP001",
                 builder.PartCodeIs("GP001")
                         .PartNameIs("かすみ草")
                         .LeadTimeIs(2)
                         .QauntityParLotIs(50)
                         .ExpiryDateIs(2)
-                        .Create());
+                        .Create(context));
         }
         #endregion // TestInitialize
 

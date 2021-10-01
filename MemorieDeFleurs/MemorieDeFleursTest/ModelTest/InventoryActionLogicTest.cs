@@ -29,36 +29,49 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareModel(object sender, EventArgs unused)
         {
-            ExpectedSupplier = Model.SupplierModel.GetSupplierBuilder()
-                .NameIs("新橋園芸")
-                .AddressIs("東京都中央区銀座", "銀座六丁目園芸団地21-8")
-                .Create();
-            ExpectedPart = Model.BouquetModel.GetBouquetPartBuilder()
-                .PartCodeIs("BA001")
-                .PartNameIs("薔薇(赤)")
-                .LeadTimeIs(1)
-                .QauntityParLotIs(100)
-                .ExpiryDateIs(3)
-                .Create();
-
-            var orders = new
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
             {
-                Supplier = ExpectedSupplier,
-                Part = ExpectedPart,
-                OrderDate = new DateTime(2020, 4, 25),
-                OrderBody = new List<Tuple<DateTime, int>>() {
-                    Tuple.Create(DateConst.April30th, 2),
-                    Tuple.Create(DateConst.May1st, 3),
-                    Tuple.Create(DateConst.May2nd, 2),
-                    Tuple.Create(DateConst.May3rd, 2),
-                    Tuple.Create(DateConst.May6th, 1)
+                try
+                {
+                    ExpectedSupplier = Model.SupplierModel.GetSupplierBuilder()
+                        .NameIs("新橋園芸")
+                        .AddressIs("東京都中央区銀座", "銀座六丁目園芸団地21-8")
+                        .Create(context);
+                    ExpectedPart = Model.BouquetModel.GetBouquetPartBuilder()
+                        .PartCodeIs("BA001")
+                        .PartNameIs("薔薇(赤)")
+                        .LeadTimeIs(1)
+                        .QauntityParLotIs(100)
+                        .ExpiryDateIs(3)
+                        .Create(context);
+
+                    var orders = new
+                    {
+                        Supplier = ExpectedSupplier,
+                        Part = ExpectedPart,
+                        OrderDate = new DateTime(2020, 4, 25),
+                        OrderBody = new List<Tuple<DateTime, int>>() {
+                            Tuple.Create(DateConst.April30th, 2),
+                            Tuple.Create(DateConst.May1st, 3),
+                            Tuple.Create(DateConst.May2nd, 2),
+                            Tuple.Create(DateConst.May3rd, 2),
+                            Tuple.Create(DateConst.May6th, 1)
+                        }
+                    };
+
+                    foreach (var o in orders.OrderBody)
+                    {
+                        var lotNo = Model.SupplierModel.Order(context, orders.OrderDate, orders.Part, o.Item2, o.Item1);
+                        InitialOrders.Append(o.Item1, lotNo, o.Item2 * orders.Part.QuantitiesPerLot);
+                    }
+                    transaction.Commit();
                 }
-            };
-
-            foreach(var o in orders.OrderBody)
-            {
-                var lotNo = Model.SupplierModel.Order(orders.OrderDate, orders.Part, o.Item2, o.Item1);
-                InitialOrders.Append(o.Item1, lotNo, o.Item2 * orders.Part.QuantitiesPerLot);
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             }
         }
 

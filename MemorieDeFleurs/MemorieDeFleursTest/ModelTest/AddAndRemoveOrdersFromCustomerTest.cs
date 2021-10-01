@@ -15,7 +15,7 @@ using System.Linq;
 namespace MemorieDeFleursTest.ModelTest
 {
     [TestClass]
-    public class AddAndRemoveOrdersFromCustomerTest : MemorieDeFleursTestBase
+    public class AddAndRemoveOrdersFromCustomerTest : MemorieDeFleursModelTestBase
     {
         /// <summary>
         /// テストで使用する商品
@@ -41,11 +41,6 @@ namespace MemorieDeFleursTest.ModelTest
         /// テストで使用するお届け先
         /// </summary>
         private ShippingAddress ExpectedShippingAddress { get; set; }
-
-        /// <summary>
-        /// 検証対象モデル
-        /// </summary>
-        private MemorieDeFleursModel Model { get; set; }
 
         /// <summary>
         /// 在庫一覧：在庫ロット毎の、ロット番号と入荷(予定)数量。在庫アクションの検証に使用
@@ -171,26 +166,36 @@ namespace MemorieDeFleursTest.ModelTest
 
 
 
-        public AddAndRemoveOrdersFromCustomerTest()
+        public AddAndRemoveOrdersFromCustomerTest() : base()
         {
             AfterTestBaseInitializing += PrepareModel;
-            BeforeTestBaseCleaningUp += CleanupModel;
         }
 
         #region TestInitialize
         private void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDB);
-
-            PrepareBouquet();
-            PrepeareCustomer();
-            PrepareInitialOrders();
-            PrepareInitialUsed();
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    PrepareBouquet(context);
+                    PrepeareCustomer(context);
+                    PrepareInitialOrders(context);
+                    PrepareInitialUsed(context);
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
 
         }
 
 
-        private void PrepareInitialOrders()
+        private void PrepareInitialOrders(MemorieDeFleursDbContext context)
         {
             var orders = new
             {
@@ -205,16 +210,14 @@ namespace MemorieDeFleursTest.ModelTest
             };
             foreach (var o in orders.OrderBody)
             {
-                var lotNo = Model.SupplierModel.Order(orders.OrderDate, ExpectedPart, o.Item2, o.Item1);
+                var lotNo = Model.SupplierModel.Order(context, orders.OrderDate, ExpectedPart, o.Item2, o.Item1);
                 InitialOrders.Append(o.Item1, lotNo, o.Item2 * ExpectedPart.QuantitiesPerLot);
             }
         }
 
-        private void PrepareInitialUsed()
+        private void PrepareInitialUsed(MemorieDeFleursDbContext context)
         {
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            {
-                var used = new List<Tuple<DateTime, int>>()
+            var used = new List<Tuple<DateTime, int>>()
                 {
                     Tuple.Create(DateConst.April30th, 20),
                     Tuple.Create(DateConst.May1st, 50),
@@ -224,39 +227,38 @@ namespace MemorieDeFleursTest.ModelTest
                     Tuple.Create(DateConst.May5th, 170),
                     Tuple.Create(DateConst.May6th, 40)
                 };
-                foreach (var u in used)
-                {
-                    Model.BouquetModel.UseBouquetPart(context, ExpectedPart, u.Item1, u.Item2);
-                }
+            foreach (var u in used)
+            {
+                Model.BouquetModel.UseBouquetPart(context, ExpectedPart, u.Item1, u.Item2);
+            }
 
-                foreach (var d in Enumerable.Range(0, 10).Select(i => DateConst.April30th.AddDays(i)))
-                {
-                    InitialInventories.Add(d, context.InventoryActions
-                        .Where(act => act.PartsCode == ExpectedPart.Code)
-                        .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
-                        .Where(act => act.ActionDate == d)
-                        .Sum(act => act.Remain));
-                }
+            foreach (var d in Enumerable.Range(0, 10).Select(i => DateConst.April30th.AddDays(i)))
+            {
+                InitialInventories.Add(d, context.InventoryActions
+                    .Where(act => act.PartsCode == ExpectedPart.Code)
+                    .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
+                    .Where(act => act.ActionDate == d)
+                    .Sum(act => act.Remain));
             }
         }
 
-        private void PrepeareCustomer()
+        private void PrepeareCustomer(MemorieDeFleursDbContext context)
         {
             ExpectedCustomer = Model.CustomerModel.GetCustomerBuilder()
                 .EmailAddressIs("ysoga@localdomain")
                 .NameIs("蘇我幸恵")
                 .PasswordIs("sogayukie12345")
                 .CardNoIs("9876543210123210")
-                .Create();
+                .Create(context);
 
             ExpectedShippingAddress = Model.CustomerModel.GetShippingAddressBuilder()
                 .From(ExpectedCustomer)
                 .To("ピアノ生徒1")
                 .AddressIs("東京都中央区京橋1-10-7", "KPP八重洲ビル10階")
-                .Create();
+                .Create(context);
         }
 
-        private void PrepareBouquet()
+        private void PrepareBouquet(MemorieDeFleursDbContext context)
         {
             ExpectedPart = Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("BA001")
@@ -264,28 +266,21 @@ namespace MemorieDeFleursTest.ModelTest
                 .LeadTimeIs(1)
                 .QauntityParLotIs(100)
                 .ExpiryDateIs(3)
-                .Create();
+                .Create(context);
 
             ExpectedBouquet = Model.BouquetModel.GetBouquetBuilder()
                 .CodeIs("HT001")
                 .NameIs("花束-Aセット")
                 .Uses(ExpectedPart, 4)
-                .Create();
+                .Create(context);
 
             ExpectedBigBouquet = Model.BouquetModel.GetBouquetBuilder()
                 .CodeIs("HUGE0")
                 .NameIs("検証用の巨大ブーケ")
                 .Uses(ExpectedPart, 150)
-                .Create();
+                .Create(context);
         }
         #endregion // TestInitialize
-
-        #region TestCleanup
-        private void CleanupModel(object sender, EventArgs unused)
-        {
-            ClearAll();
-        }
-        #endregion // TestCleanup
 
         /// <summary>
         /// 引当可能：既存在庫への影響なし

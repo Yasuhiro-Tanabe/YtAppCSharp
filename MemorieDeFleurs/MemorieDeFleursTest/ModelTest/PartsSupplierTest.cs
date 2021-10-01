@@ -20,12 +20,25 @@ namespace MemorieDeFleursTest.ModelTest
         #region TestInitialize
         private void PrepareModel(object sender, EventArgs unused)
         {
-            PrepareParts();
-            PrepareSuppliers();
-            PreparePartsSuppliers();
+            using(var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    PrepareParts(context);
+                    PrepareSuppliers(context);
+                    PreparePartsSuppliers();
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
         }
 
-        private void PrepareParts()
+        private void PrepareParts(MemorieDeFleursDbContext context)
         {
             Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("BA001")
@@ -33,48 +46,48 @@ namespace MemorieDeFleursTest.ModelTest
                 .LeadTimeIs(1)
                 .QauntityParLotIs(100)
                 .ExpiryDateIs(3)
-                .Create();
+                .Create(context);
             Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("BA002")
                 .PartNameIs("薔薇(白)")
                 .LeadTimeIs(1)
                 .QauntityParLotIs(100)
                 .ExpiryDateIs(3)
-                .Create();
+                .Create(context);
             Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("BA003")
                 .PartNameIs("薔薇(ピンク)")
                 .LeadTimeIs(1)
                 .QauntityParLotIs(100)
                 .ExpiryDateIs(3)
-                .Create();
+                .Create(context);
             Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("GP001")
                 .PartNameIs("かすみ草")
                 .LeadTimeIs(2)
                 .QauntityParLotIs(50)
                 .ExpiryDateIs(2)
-                .Create();
+                .Create(context);
             Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("CN001")
                 .PartNameIs("カーネーション(赤)")
                 .LeadTimeIs(3)
                 .QauntityParLotIs(100)
                 .ExpiryDateIs(5)
-                .Create();
+                .Create(context);
             Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("CN002")
                 .PartNameIs("カーネーション(ピンク)")
                 .LeadTimeIs(3)
                 .QauntityParLotIs(100)
                 .ExpiryDateIs(5)
-                .Create();
+                .Create(context);
         }
 
         private Supplier SupplierProvidesNoParts { get; set; }
         private Supplier SupplierProvidesManyParts { get; set; }
 
-        private void PrepareSuppliers()
+        private void PrepareSuppliers(MemorieDeFleursDbContext context)
         {
             SupplierProvidesNoParts = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs("新橋園芸")
@@ -82,7 +95,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .PhoneNumberIs("03012345678")
                 .FaxNumberIs("03012345677")
                 .EmailIs("shinbashi@localdomain")
-                .Create();
+                .Create(context);
 
             SupplierProvidesManyParts = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs("木挽町花壇")
@@ -90,7 +103,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .PhoneNumberIs("09098765432")
                 .FaxNumberIs("0120000000")
                 .EmailIs("kobiki@localdomain")
-                .Create();
+                .Create(context);
         }
 
         private void PreparePartsSuppliers()
@@ -98,7 +111,6 @@ namespace MemorieDeFleursTest.ModelTest
             ExecuteSqlRaw("insert into BOUQUET_SUPPLIERS values (2, 'GP001' )");
             ExecuteSqlRaw("insert into BOUQUET_SUPPLIERS values (2, 'CN001' )");
             ExecuteSqlRaw("insert into BOUQUET_SUPPLIERS values (2, 'CN002' )");
-
         }
 
         private void ExecuteSqlRaw(string sql)

@@ -17,7 +17,7 @@ namespace MemorieDeFleursTest.ModelTest
     /// 追加発注および発注取消に関するテスト
     /// </summary>
     [TestClass]
-    public class AddAndRemoveOrdersToSupplierTest : MemorieDeFleursTestBase
+    public class AddAndRemoveOrdersToSupplierTest : MemorieDeFleursModelTestBase
     {
         /// <summary>
         /// テストで使用する仕入先
@@ -30,11 +30,6 @@ namespace MemorieDeFleursTest.ModelTest
         private BouquetPart ExpectedPart { get; set; }
 
         /// <summary>
-        /// 検証対象モデル
-        /// </summary>
-        private MemorieDeFleursModel Model { get; set; }
-
-        /// <summary>
         /// 各ロット毎のロット番号と入荷(予定)数量
         /// </summary>
         private TestOrder InitialOrders { get; } = new TestOrder();
@@ -45,30 +40,40 @@ namespace MemorieDeFleursTest.ModelTest
         public AddAndRemoveOrdersToSupplierTest() : base()
         {
             AfterTestBaseInitializing += PrepareModel;
-            BeforeTestBaseCleaningUp += CleanupModel;
-
         }
 
         #region TestInitialize
         private void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDB);
+            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    PrepareSuppliers(context);
+                    PrepareBouquetParts(context);
+                    PrepareInitialOrders(context);
+                    PrepareInitialUsed(context);
 
-            PrepareSuppliers();
-            PrepareBouquetParts();
-            PrepareInitialOrders();
-            PrepareInitialUsed();
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
         }
 
-        private void PrepareSuppliers()
+        private void PrepareSuppliers(MemorieDeFleursDbContext context)
         {
             ExpectedSupplier = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs("新橋園芸")
                 .AddressIs("東京都中央区銀座", "銀座六丁目園芸団地21-8")
-                .Create();
+                .Create(context);
         }
 
-        private void PrepareBouquetParts()
+        private void PrepareBouquetParts(MemorieDeFleursDbContext context)
         {
             ExpectedPart = Model.BouquetModel.GetBouquetPartBuilder()
                 .PartCodeIs("BA001")
@@ -76,10 +81,10 @@ namespace MemorieDeFleursTest.ModelTest
                 .LeadTimeIs(1)
                 .QauntityParLotIs(100)
                 .ExpiryDateIs(3)
-                .Create();
+                .Create(context);
         }
 
-        private void PrepareInitialUsed()
+        private void PrepareInitialUsed(MemorieDeFleursDbContext context)
         {
             var used = new List<Tuple<DateTime, int>>()
             {
@@ -93,11 +98,11 @@ namespace MemorieDeFleursTest.ModelTest
             };
             foreach (var u in used)
             {
-                Model.BouquetModel.UseBouquetPart(ExpectedPart, u.Item1, u.Item2);
+                Model.BouquetModel.UseBouquetPart(context, ExpectedPart, u.Item1, u.Item2);
             }
         }
 
-        private void PrepareInitialOrders()
+        private void PrepareInitialOrders(MemorieDeFleursDbContext context)
         {
             var orders = new
             {
@@ -112,19 +117,11 @@ namespace MemorieDeFleursTest.ModelTest
             };
             foreach (var o in orders.OrderBody)
             {
-                var lotNo = Model.SupplierModel.Order(orders.OrderDate, ExpectedPart, o.Item2, o.Item1);
+                var lotNo = Model.SupplierModel.Order(context, orders.OrderDate, ExpectedPart, o.Item2, o.Item1);
                 InitialOrders.Append(o.Item1, lotNo, o.Item2 * ExpectedPart.QuantitiesPerLot);
             }
         }
         #endregion // TestInitialize
-
-        #region TestCleanup
-        private void CleanupModel(object sender, EventArgs unused)
-        {
-            ClearAll();
-        }
-        #endregion // TesetCleanup
-
 
         /// <summary>
         /// 5/4納品予定分追加発注の検証：当日以降の加工予定と入荷予定に影響を与えないこと
