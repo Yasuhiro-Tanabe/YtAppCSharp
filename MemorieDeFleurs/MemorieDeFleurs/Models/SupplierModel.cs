@@ -58,6 +58,8 @@ namespace MemorieDeFleurs.Models
             private string _fax;
             private string _email;
 
+            private ISet<string> _supplyParts = new SortedSet<string>();
+
             internal static SupplierBuilder GetInstance(SupplierModel parent)
             {
                 return new SupplierBuilder(parent);
@@ -127,6 +129,19 @@ namespace MemorieDeFleurs.Models
                 return this;
             }
 
+            public SupplierBuilder SupplyParts(params string[] partsCodes)
+            {
+                foreach(var code in partsCodes)
+                {
+                    if(!_supplyParts.Contains(code))
+                    {
+                        _supplyParts.Add(code);
+                    }
+                }
+
+                return this;
+            }
+
             /// <summary>
             /// 登録変更した内容で仕入先を登録する
             /// 
@@ -174,6 +189,12 @@ namespace MemorieDeFleurs.Models
                 };
 
                 context.Suppliers.Add(s);
+
+                foreach(var code in _supplyParts)
+                {
+                    _model.StartProvidingParts(context, s.Code, code);
+                }
+
                 context.SaveChanges();
 
                 return s;
@@ -1011,7 +1032,7 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <param name="supplierCode">仕入先コード</param>
         /// <param name="partsCode">花コード</param>
-        public void StartPrividingParts(int supplierCode, string partsCode)
+        public void StartProvidingParts(int supplierCode, string partsCode)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
