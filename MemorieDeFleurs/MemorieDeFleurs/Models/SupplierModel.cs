@@ -996,5 +996,112 @@ namespace MemorieDeFleurs.Models
             }
         }
         #endregion // 納品予定日変更
+
+        #region 単品仕入先の登録改廃
+        /// <summary>
+        /// 仕入先が部品の提供を開始する
+        /// </summary>
+        /// <param name="supplierCode">仕入先コード</param>
+        /// <param name="partsCode">花コード</param>
+        public void StartPrividingParts(int supplierCode, string partsCode)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    StartProvidingParts(context, supplierCode, partsCode);
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 仕入先が部品の提供を開始する、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="supplierCode">仕入先コード</param>
+        /// <param name="partsCode">花コード</param>
+        private void StartProvidingParts(MemorieDeFleursDbContext context, int supplierCode, string partsCode)
+        {
+            if(context.Suppliers.Find(supplierCode) == null)
+            {
+                throw new ArgumentException($"仕入先未登録： {supplierCode}");
+            }
+            if(context.BouquetParts.Find(partsCode) == null)
+            {
+                throw new ArgumentException($"単品未登録： {partsCode}");
+            }
+
+            var item = context.PartsSuppliers.Find(supplierCode, partsCode);
+            if(item == null)
+            {
+                context.PartsSuppliers.Add(new PartSupplier() { SupplierCode = supplierCode, PartCode = partsCode });
+                context.SaveChanges();
+            }
+            else
+            {
+                // 登録済み：何もしない
+            }
+        }
+
+        /// <summary>
+        /// 仕入先が部品の提供を停止する
+        /// </summary>
+        /// <param name="supplieerCode">仕入先コード</param>
+        /// <param name="partsCode">花コード</param>
+        public void StopProvidingParts(int supplieerCode, string partsCode)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    StopProvidingParts(context, supplieerCode, partsCode);
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 仕入先が部品の提供を停止する、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="supplieerCode">仕入先コード</param>
+        /// <param name="partsCode">花コード</param>
+        public void StopProvidingParts(MemorieDeFleursDbContext context, int supplierCode, string partsCode)
+        {
+            var supplier = context.Suppliers.Find(supplierCode);
+            if (supplier == null)
+            {
+                throw new ArgumentException($"仕入先未登録： {supplierCode}");
+            }
+            if (context.BouquetParts.Find(partsCode) == null)
+            {
+                throw new ArgumentException($"単品未登録： {partsCode}");
+            }
+
+            var item = context.PartsSuppliers.Find(supplierCode, partsCode);
+            if(item == null)
+            {
+                throw new ArgumentException($"仕入先 {supplierCode} ({supplier.Name}) は単品を提供していない： {partsCode}");
+            }
+            else
+            {
+                context.PartsSuppliers.Remove(item);
+                context.SaveChanges();
+            }
+        }
+        #endregion // 単品仕入先の登録改廃
     }
 }

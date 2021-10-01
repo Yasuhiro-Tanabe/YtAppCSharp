@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MemorieDeFleurs.Models.Entities
@@ -50,5 +51,11 @@ namespace MemorieDeFleurs.Models.Entities
         /// </summary>
         [Column("E_MAIL")]
         public string EmailAddress { get; set; }
+
+
+        /// <summary>
+        /// この仕入先が提供する商品一覧
+        /// </summary>
+        public IList<PartSupplier> SupplyParts { get; } = new List<PartSupplier>();
     }
 }
