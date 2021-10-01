@@ -378,8 +378,9 @@ namespace MemorieDeFleurs.Models
                 {
                     UseBouquetPart(context, part, date, quantity);
                     transaction.Commit();
+                    LogUtil.Info($"{date:yyyyMMdd}, {part.Code} x {quantity} used.");
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     transaction.Rollback();
                     throw;
@@ -418,7 +419,6 @@ namespace MemorieDeFleurs.Models
                 }
 
                 context.SaveChanges();
-                LogUtil.Info($"{date:yyyyMMdd}, {part.Code} x {quantity} used.");
             }
             catch (NotImplementedException ei)
             {

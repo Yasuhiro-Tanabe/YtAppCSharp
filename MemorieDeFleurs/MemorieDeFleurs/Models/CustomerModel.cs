@@ -370,9 +370,13 @@ namespace MemorieDeFleurs.Models
                 {
                     var orderNo = Order(context, orderDate, bouquet, sendTo, arrivalDate, message);
                     transaction.Commit();
+
+                    var partsList = context.PartsList.Where(i => i.BouquetCode == bouquet.Code).Select(item => $"{item.PartsCode} x {item.Quantity}");
+                    LogUtil.Info($"{arrivalDate:yyyyMMdd}, {bouquet.Code} ordered: {orderNo}, Using {string.Join(", ", partsList)}");
+
                     return orderNo;
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     transaction.Rollback();
                     throw;
@@ -436,8 +440,6 @@ namespace MemorieDeFleurs.Models
 
             context.OrderFromCustomers.Add(order);
             context.SaveChanges();
-
-            LogUtil.Info($"{bouquet.Code} ordered: {order.ID}");
             
             LogUtil.DEBUGLOG_EndMethod();
             return order.ID;
@@ -454,6 +456,7 @@ namespace MemorieDeFleurs.Models
                 {
                     CancelOrder(context, orderNo);
                     transaction.Commit();
+                    LogUtil.Info($"Order canceled: {orderNo}");
                 }
                 catch (Exception)
                 {
@@ -485,7 +488,6 @@ namespace MemorieDeFleurs.Models
                 Parent.BouquetModel.UseBouquetPart(context, part, order.ShippingDate, - item.Quantity);
             }
 
-            LogUtil.Info($"Order canceled: {orderNo}");
             LogUtil.DEBUGLOG_EndMethod($"order={orderNo}");
         }
         #endregion // 注文取消
@@ -498,10 +500,13 @@ namespace MemorieDeFleurs.Models
             {
                 try
                 {
-                    LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, {newArrivalDate.ToString("yyyyMMdd")}");
+                    var oldShippingDate = context.OrderFromCustomers.Find(orderNo).ShippingDate;
+
+                    LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, {newArrivalDate:yyyyMMdd}");
                     ChangeArrivalDate(context, orderNo, newArrivalDate);
                     transaction.Commit();
                     LogUtil.DEBUGLOG_EndMethod($"{orderNo}", "succeeded.");
+                    LogUtil.Info($"Shipping Date changed; order={orderNo}, from {oldShippingDate:yyyyMMdd} to {newArrivalDate.AddDays(-1):yyyyMMdd}");
                 }
                 catch(Exception e)
                 {

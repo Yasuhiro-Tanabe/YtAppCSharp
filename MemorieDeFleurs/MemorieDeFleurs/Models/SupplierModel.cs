@@ -468,12 +468,20 @@ namespace MemorieDeFleurs.Models
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
-                var orderList = string.Join(", ", orderParts.Select(t => $"({t.Item1.Code} x{t.Item2})"));
-                LogUtil.DEBUGLOG_BeginMethod($"{orderDate.ToString("yyyyMMdd")}, {supplier.Code}, {derivalyDate.ToString("yyyyMMdd")}, [{orderList}]");
+                LogUtil.DEBUGLOG_BeginMethod($"{orderDate:yyyyMMdd}, {supplier.Code}, {derivalyDate:yyyyMMdd}, " +
+                    $"[{string.Join(", ", orderParts.Select(t => $"({t.Item1.Code} x{t.Item2})"))}]");
                 try
                 {
                     var orderNo = Order(context, orderDate, supplier, derivalyDate, orderParts);
                     transaction.Commit();
+
+                    var details = context.OrderDetailsToSuppliers
+                        .Where(item => item.OrderToSupplierID == orderNo)
+                        .OrderBy(item => item.OrderIndex)
+                        .Select(item => $"{item.PartsCode}.Lot{item.InventoryLotNo}({item.LotCount} lot(s))");
+
+                    LogUtil.Info($"{orderDate:yyyyMMdd}, {orderNo} ordered: Supplier{supplier.Code}, {derivalyDate:yyyyMMdd}, [{string.Join(", ", details)}]");
+
                     return orderNo;
                 }
                 catch(Exception)
@@ -516,7 +524,6 @@ namespace MemorieDeFleurs.Models
             var order = builder.Create(context);
 
             var orderDetails = orderParts.Select(t => $"({t.Item1.Code} x{t.Item2})");
-            LogUtil.Info($"{order.ID} ordered: {supplier.Code}, {derivalyDate.ToString("yyyyMMdd")}, [{string.Join(", ", orderDetails)}]");
             return order.ID;
         }
 
@@ -657,9 +664,6 @@ namespace MemorieDeFleurs.Models
                 target = next;
             } while (target != null);
  
-
-
-            LogUtil.Info($"{orderDate.ToString("yyyyMMdd")}: {orderParam.BouquetPart.Code} x {lotCount}[Lot(s)] ordered. arrive at {orderParam.ArrivalDate.ToString("yyyyMMdd")}, OrderLot#={orderParam.InventoryLotNo}.");
             LogUtil.DEBUGLOG_EndMethod($"context, {orderDate.ToString("yyyyMMdd")}, {orderParam.ToString("o")}");
         }
 
@@ -867,8 +871,9 @@ namespace MemorieDeFleurs.Models
                 {
                     CancelOrder(context, lotNo);
                     transaction.Commit();
+                    LogUtil.Info($"Lot {lotNo} removed.");
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     transaction.Rollback();
                     throw;
@@ -923,7 +928,6 @@ namespace MemorieDeFleurs.Models
 
             context.SaveChanges();
 
-            LogUtil.Info($"Lot {lotNo} removed.");
             LogUtil.DEBUGLOG_EndMethod($"lotNo={lotNo}");
         }
         #endregion // 発注取消
@@ -936,15 +940,19 @@ namespace MemorieDeFleurs.Models
         /// <param name="newArrivalDate">変更後の納品予定日</param>
         public void ChangeArrivalDate(string orderNo, DateTime newArrivalDate)
         {
-            LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, {newArrivalDate.ToString("yyyyMMDD")}");
+            LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, {newArrivalDate:yyyyMMDD}");
 
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
+                    var oldArrivalDate = context.OrdersToSuppliers.Find(orderNo).DeliveryDate;
+
                     ChangeArrivalDate(context, orderNo, newArrivalDate);
                     transaction.Commit();
+                    
+                    LogUtil.Info($"Arrival date changed: {orderNo}, from {oldArrivalDate:yyyyMMdd} to {newArrivalDate:yyyyMMdd}");
                 }
                 catch (Exception)
                 {
@@ -953,7 +961,7 @@ namespace MemorieDeFleurs.Models
                 }
                 finally
                 {
-                    LogUtil.DEBUGLOG_EndMethod($"{orderNo}, {newArrivalDate.ToString("yyyyMMDD")}");
+                    LogUtil.DEBUGLOG_EndMethod($"{orderNo}, {newArrivalDate:yyyyMMDD}");
                 }
 
             }
@@ -984,7 +992,6 @@ namespace MemorieDeFleurs.Models
             }
             context.SaveChanges();
 
-            LogUtil.Info($"Arrival date changed: {orderNo}, {oldArrivalDate.ToString("yyyyMMdd")} -> {newArrivalDate.ToString("yyyyMMdd")}");
             LogUtil.DEBUGLOG_EndMethod($"context, {orderNo}, {newArrivalDate.ToString("yyyyMMdd")}");
         }
 
