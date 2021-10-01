@@ -184,7 +184,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void StartProvidingParts()
         {
-            Model.SupplierModel.StartPrividingParts(SupplierProvidesNoParts.Code, "BA001");
+            Model.SupplierModel.StartProvidingParts(SupplierProvidesNoParts.Code, "BA001");
 
             SupplierPartsValidator.NewInstance().SupplierIs(SupplierProvidesNoParts)
                 .Provides("BA001")
@@ -196,7 +196,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void StartProvidingParts_SamePartsToSupplier()
         {
-            Model.SupplierModel.StartPrividingParts(SupplierProvidesManyParts.Code, "GP001");
+            Model.SupplierModel.StartProvidingParts(SupplierProvidesManyParts.Code, "GP001");
 
             SupplierPartsValidator.NewInstance().SupplierIs(SupplierProvidesManyParts)
                 .Provides("GP001", "CN001", "CN002")

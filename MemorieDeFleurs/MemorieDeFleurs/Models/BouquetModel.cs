@@ -400,6 +400,7 @@ namespace MemorieDeFleurs.Models
             try
             {
                 var inventory = context.InventoryActions
+                    .Where(a => a.PartsCode == part.Code)
                     .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE)
                     .Where(a => 0 == a.ActionDate.CompareTo(date))
                     .Where(a => a.Remain > 0)
