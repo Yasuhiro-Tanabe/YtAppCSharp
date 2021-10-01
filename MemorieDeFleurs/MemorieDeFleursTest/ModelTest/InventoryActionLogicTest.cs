@@ -1,5 +1,4 @@
 ﻿using MemorieDeFleurs.Databese.SQLite;
-using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
 using MemorieDeFleursTest.ModelTest.Fluent;
@@ -16,7 +15,7 @@ namespace MemorieDeFleursTest.ModelTest
     /// 発注処理 (仕入先への注文) による在庫管理
     /// </summary>
     [TestClass]
-    public class InventoryActionLogicTest : MemorieDeFleursTestBase
+    public class InventoryActionLogicTest : MemorieDeFleursModelTestBase
     {
         private Supplier ExpectedSupplier { get; set; }
         private BouquetPart ExpectedPart { get; set; }
@@ -24,17 +23,12 @@ namespace MemorieDeFleursTest.ModelTest
         public InventoryActionLogicTest() : base()
         {
             AfterTestBaseInitializing += PrepareModel;
-            BeforeTestBaseCleaningUp += CleanupDb;
         }
-
-        private MemorieDeFleursModel Model { get; set; }
 
         private TestOrder InitialOrders { get; } = new TestOrder();
 
         private void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDB);
-
             ExpectedSupplier = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs("新橋園芸")
                 .AddressIs("東京都中央区銀座", "銀座六丁目園芸団地21-8")
@@ -66,11 +60,6 @@ namespace MemorieDeFleursTest.ModelTest
                 var lotNo = Model.SupplierModel.Order(orders.OrderDate, orders.Part, o.Item2, o.Item1);
                 InitialOrders.Append(o.Item1, lotNo, o.Item2 * orders.Part.QuantitiesPerLot);
             }
-        }
-
-        private void CleanupDb(object sender, EventArgs unused)
-        {
-            ClearAll();
         }
 
         /// <summary>

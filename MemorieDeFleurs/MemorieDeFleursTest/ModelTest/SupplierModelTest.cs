@@ -1,36 +1,16 @@
 ﻿using MemorieDeFleurs.Databese.SQLite;
-using MemorieDeFleurs.Models;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using System;
 using System.Linq;
 
 namespace MemorieDeFleursTest.ModelTest
 {
     [TestClass]
-    public class SupplierModelTest : MemorieDeFleursTestBase
+    public class SupplierModelTest : MemorieDeFleursModelTestBase
     {
         private const string expectedName = "農園1";
         private const string expectedAddress = "住所1";
-
-        private MemorieDeFleursModel Model { get; set; }
-
-        public SupplierModelTest() : base()
-        {
-            AfterTestBaseInitializing += PrepareModel;
-            BeforeTestBaseCleaningUp += CleanupModel;
-        }
-
-        private void PrepareModel(object sender, EventArgs unused)
-        {
-            Model = new MemorieDeFleursModel(TestDB);
-        }
-
-        private void CleanupModel(object sender ,EventArgs unused)
-        {
-            ClearAll();
-        }
 
         [TestMethod]
         public void CanRegisterNewSupplier()

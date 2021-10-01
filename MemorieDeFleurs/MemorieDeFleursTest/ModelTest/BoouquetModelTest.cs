@@ -1,42 +1,14 @@
-﻿using MemorieDeFleurs.Models;
-using MemorieDeFleurs.Models.Entities;
-
+﻿
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace MemorieDeFleursTest.ModelTest
 {
     [TestClass]
-    public class BoouquetModelTest : MemorieDeFleursTestBase
+    public class BoouquetModelTest : MemorieDeFleursModelTestBase
     {
-        private MemorieDeFleursModel Model { get; set; }
-
-        private Bouquet ExpectedBouquet { get; set; }
-        private Customer ExpectedCustomr { get; set; }
-
-        public BoouquetModelTest()
-        {
-            AfterTestBaseInitializing += PrepareModel;
-            BeforeTestBaseCleaningUp += CleanupModel;
-        }
-
-        #region TestInitialize
-        public  void PrepareModel(object sender, EventArgs unused)
-        {
-            Model = new MemorieDeFleursModel(TestDB);
-        }
-        #endregion // TestInitialize
-
-        #region TestCleanup
-        public void CleanupModel(object sender, EventArgs unused)
-        {
-            ClearAll();
-        }
-        #endregion // TestCleanup
-
         [TestMethod]
         public void CanAddBouquetViaModel()
         {

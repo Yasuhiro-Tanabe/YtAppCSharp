@@ -7,7 +7,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 
 namespace MemorieDeFleursTest.ModelTest
 {
@@ -15,9 +14,8 @@ namespace MemorieDeFleursTest.ModelTest
     /// 商品構成の登録改廃に関するテスト
     /// </summary>
     [TestClass]
-    public class BouquetPartsListCrationTest : MemorieDeFleursTestBase
+    public class BouquetPartsListCrationTest : MemorieDeFleursModelTestBase
     {
-        private MemorieDeFleursModel Model { get; set; }
         private BouquetModel BouquetModel { get { return Model.BouquetModel; } }
 
         private Bouquet HasPartsList { get; set; }
@@ -29,13 +27,11 @@ namespace MemorieDeFleursTest.ModelTest
         public BouquetPartsListCrationTest() : base()
         {
             AfterTestBaseInitializing += PrepareModel;
-            BeforeTestBaseCleaningUp += ClearModel;
         }
 
         #region TestInitialize
         private void PrepareModel(object sender, EventArgs unused)
         {
-            Model = new MemorieDeFleursModel(TestDB);
             RegisterBouquetParts();
             RegisterBouquets();
 
@@ -90,13 +86,6 @@ namespace MemorieDeFleursTest.ModelTest
                         .Create());
         }
         #endregion // TestInitialize
-
-        #region TestCleanup
-        private void ClearModel(object sender, EventArgs unused)
-        {
-            ClearAll();
-        }
-        #endregion // TestCleanup
 
         #region PartsListValidator
         private class PartsListValidator
