@@ -3,6 +3,7 @@ using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -48,6 +49,8 @@ namespace MemorieDeFleurs.Models
             string _password;
             string _cardNo;
 
+            IDictionary<string, Tuple<string, string>> _shipping = new SortedDictionary<string, Tuple<string, string>>();            
+
             internal static CustomerBuilder GetInstance(CustomerModel parent)
             {
                 return new CustomerBuilder(parent);   
@@ -88,6 +91,23 @@ namespace MemorieDeFleurs.Models
             public CustomerBuilder PasswordIs(string passwd)
             {
                 _password = passwd;
+                return this;
+            }
+
+            /// <summary>
+            /// お届け先を登録する
+            /// </summary>
+            /// <param name="name">お届け先名称</param>
+            /// <param name="address1">お届け先住所1</param>
+            /// <param name="address2">(省略可)お届け先住所2</param>
+            /// <returns></returns>
+            public CustomerBuilder SendTo(string name, string address1, string address2 = "")
+            {
+                if (_shipping.ContainsKey(name))
+                {
+                    throw new ArgumentException($"すでに登録済み： {name}");
+                }
+                _shipping.Add(name, Tuple.Create(address1, address2));
                 return this;
             }
 
@@ -145,6 +165,18 @@ namespace MemorieDeFleurs.Models
                 };
 
                 context.Customers.Add(c);
+
+                if(_shipping.Count > 0)
+                {
+                    var builder = _model.GetShippingAddressBuilder();
+                    foreach (var addr in _shipping)
+                    {
+                        builder.From(c)
+                            .To(addr.Key)
+                            .AddressIs(addr.Value.Item1, addr.Value.Item2)
+                            .Create(context);
+                    }
+                }
                 context.SaveChanges();
 
                 return c;
