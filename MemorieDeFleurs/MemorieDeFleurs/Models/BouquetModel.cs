@@ -129,7 +129,14 @@ namespace MemorieDeFleurs.Models
                 }
             }
 
-            private BouquetPart Create(MemorieDeFleursDbContext context)
+            /// <summary>
+            /// 現在の内容で単品オブジェクトを生成、データベースに登録する
+            /// 
+            /// トランザクション内での呼出用
+            /// </summary>
+            /// <param name="context">トランザクション中のDBコンテキスト</param>
+            /// <returns>生成/データベース登録された単品オブジェクト</returns>
+            public BouquetPart Create(MemorieDeFleursDbContext context)
             {
                 var p = new BouquetPart()
                 {
@@ -238,7 +245,14 @@ namespace MemorieDeFleurs.Models
                 }
             }
 
-            private Bouquet Create(MemorieDeFleursDbContext context)
+            /// <summary>
+            /// 現在の内容で商品オブジェクトを生成、データベースに登録する
+            /// 
+            /// トランザクション内での呼出用
+            /// </summary>
+            /// <param name="context">トランザクション中のDBコンテキスト</param>
+            /// <returns>データベースに登録された商品オブジェクト</returns>
+            public Bouquet Create(MemorieDeFleursDbContext context)
             {
                 var ret = new Bouquet()
                 {

@@ -151,8 +151,16 @@ namespace MemorieDeFleurs.Models
                     }
                 }
             }
-            
-            private Supplier Create(MemorieDeFleursDbContext context)
+
+            /// <summary>
+            /// 登録変更した内容で仕入先を登録する
+            /// 
+            /// 仕入先コードの採番はこのメソッド内で行われる。
+            /// トランザクション内での呼出用。
+            /// </summary>
+            /// <param name="context">トランザクション中のDBコンテキスト</param>
+            /// <returns>登録された仕入先オブジェクト</returns>
+            public Supplier Create(MemorieDeFleursDbContext context)
             {
                 var s = new Supplier()
                 {

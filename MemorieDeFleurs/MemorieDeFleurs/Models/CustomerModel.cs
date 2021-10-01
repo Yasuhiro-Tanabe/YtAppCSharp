@@ -102,6 +102,10 @@ namespace MemorieDeFleurs.Models
                 return this;
             }
 
+            /// <summary>
+            /// 現在の内容で仕入先オブジェクトを生成、データベースに登録する
+            /// </summary>
+            /// <returns>データベースに登録された仕入先オブジェクト</returns>
             public Customer Create()
             {
                 using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
@@ -121,7 +125,14 @@ namespace MemorieDeFleurs.Models
                 }
             }
 
-            private Customer Create(MemorieDeFleursDbContext context)
+            /// <summary>
+            /// 現在の内容で仕入先オブジェクトを生成、データベースに登録する
+            /// 
+            /// トランザクション内での呼出用
+            /// </summary>
+            /// <param name="context">トランザクション中のDBコンテキスト</param>
+            /// <returns>データベースに登録された仕入先オブジェクト</returns>
+            public Customer Create(MemorieDeFleursDbContext context)
             {
                 var c = new Customer()
                 {
@@ -206,9 +217,9 @@ namespace MemorieDeFleurs.Models
             }
 
             /// <summary>
-            /// お届け先オブジェクトを生成する
+            /// 現在の内容でお届け先オブジェクトを生成しデータベースに登録する
             /// </summary>
-            /// <returns></returns>
+            /// <returns>データベースに登録されたお届け先オブジェクト</returns>
             public ShippingAddress Create()
             {
                 using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
@@ -228,7 +239,14 @@ namespace MemorieDeFleurs.Models
                 }
             }
 
-            private ShippingAddress Create(MemorieDeFleursDbContext context)
+            /// <summary>
+            /// 現在の内容でお届け先オブジェクトを生成しデータベースに登録する
+            /// 
+            /// トランザクション内での呼出用
+            /// </summary>
+            /// <param name="context">トランザクション中のDBコンテキスト</param>
+            /// <returns>データベースに登録されたお届け先オブジェクト</returns>
+            public ShippingAddress Create(MemorieDeFleursDbContext context)
             {
                 if (_sendFrom == null)
                 {
