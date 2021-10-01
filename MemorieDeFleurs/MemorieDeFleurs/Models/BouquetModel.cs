@@ -566,24 +566,24 @@ namespace MemorieDeFleurs.Models
 
             LogUtil.DEBUGLOG_EndMethod();
         }
-
         #endregion // UseBouquetPart
 
         #region 商品構成の追加削除
+        #region 新規作成・追加
         /// <summary>
         /// 登録済み商品の商品構成に、登録済みの単品を追加する
         /// </summary>
         /// <param name="bouquetCode">花束コード</param>
-        /// <param name="partCode">花コード</param>
+        /// <param name="partsCode">花コード</param>
         /// <param name="quantity">数量</param>
-        public void AppendPartsTo(string bouquetCode, string partCode, int quantity)
+        public void AppendPartsTo(string bouquetCode, string partsCode, int quantity)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    AppendPartsTo(context, bouquetCode, partCode, quantity);
+                    AppendPartsTo(context, bouquetCode, partsCode, quantity);
                     transaction.Commit();
                 }
                 catch(Exception)
@@ -599,14 +599,239 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <param name="context">トランザクション中のDBコンテキスト</param>
         /// <param name="bouquetCode">花束コード</param>
-        /// <param name="partCode">花コード</param>
+        /// <param name="partsCode">花コード</param>
         /// <param name="quantity">数量</param>
-        private void AppendPartsTo(MemorieDeFleursDbContext context, string bouquetCode, string partCode, int quantity)
+        private void AppendPartsTo(MemorieDeFleursDbContext context, string bouquetCode, string partsCode, int quantity)
         {
-            var item = new BouquetPartsList() { BouquetCode = bouquetCode, PartsCode = partCode, Quantity = quantity };
-            context.PartsList.Add(item);
+            if (context.Bouquets.Find(bouquetCode) == null)
+            {
+                throw new ArgumentException($"花束未登録： {bouquetCode}");
+            }
+            if (context.BouquetParts.Find(partsCode) == null)
+            {
+                throw new ArgumentException($"単品未登録： {partsCode}");
+            }
+
+            CreateOrUpdatePartsList(context, bouquetCode, partsCode, quantity);
+        }
+
+        private void CreateOrUpdatePartsList(MemorieDeFleursDbContext context, string bouquetCode, string partsCode, int quantity)
+        {
+            if(quantity <= 0)
+            {
+                throw new ArgumentException($"本数不正： {bouquetCode}.{partsCode}, {quantity}");
+            }
+
+            var item = context.PartsList.Find(bouquetCode, partsCode);
+            if(item == null)
+            {
+                context.PartsList.Add(new BouquetPartsList() { BouquetCode = bouquetCode, PartsCode = partsCode, Quantity = quantity });
+            }
+            else
+            {
+                item.Quantity += quantity;
+                context.PartsList.Update(item);
+            }
             context.SaveChanges();
         }
+
+
+        /// <summary>
+        /// 商品構成を新規作成する
+        /// </summary>
+        /// <param name="bouquetCode">花束コード：商品はあらかじめ登録されていなければならない。</param>
+        /// <param name="partsList">単品の花コードと使用数量の一覧：単品はあらかじめ登録されていなければならない。</param>
+        /// <remarks><see cref="BouquetBuilder"/> を使って商品を登録する時は <see cref="BouquetBuilder.Uses(string, int))"/>
+        /// または <see cref="BouquetBuilder.Uses(BouquetPart, int)"/> を使用する。
+        /// </remarks>
+        public void CreatePartsListOf(string bouquetCode, IEnumerable<KeyValuePair<string, int>> partsList)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    CreatePartsListOf(context, bouquetCode, partsList);
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 商品構成を新規作成する
+        /// 
+        /// トランザクション内での呼出用。
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="bouquetCode">花束コード：商品はあらかじめ登録されていなければならない。</param>
+        /// <param name="partsList">単品の花コードと使用数量の一覧：単品はあらかじめ登録されていなければならない。</param>
+        public void CreatePartsListOf(MemorieDeFleursDbContext context, string bouquetCode, IEnumerable<KeyValuePair<string, int>> partsList)
+        {
+            if (context.Bouquets.Find(bouquetCode) == null)
+            {
+                throw new ArgumentException($"花束未登録： {bouquetCode}");
+            }
+            foreach (var item in partsList)
+            {
+                if (context.BouquetParts.Find(item.Key) == null)
+                {
+                    throw new ArgumentException($"単品未登録： {item.Key}");
+                }
+                CreateOrUpdatePartsList(context, bouquetCode, item.Key, item.Value);
+            }
+            context.SaveChanges();
+        }
+        #endregion // 新規作成・追加
+
+        #region 削除
+        /// <summary>
+        /// 指定商品の商品構成から指定した単品を除外する
+        /// </summary>
+        /// <param name="bouquetCode">花束コード</param>
+        /// <param name="partsCode">花コード</param>
+        /// <exception cref="ArgumentException">
+        /// コードに該当する単品または商品が存在しない、単品が商品構成にない
+        /// </exception>
+        public void RemovePartsFrom(string bouquetCode, string partsCode)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    RemovePartsFrom(context, bouquetCode, partsCode);
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 指定商品の商品構成から指定した単品を除外する
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="bouquetCode">花束コード</param>
+        /// <param name="partsCode">花コード</param>
+        private void RemovePartsFrom(MemorieDeFleursDbContext context, string bouquetCode, string partsCode)
+        {
+            if (context.Bouquets.Find(bouquetCode) == null)
+            {
+                throw new ArgumentException($"花束未登録： {bouquetCode}");
+            }
+            if (context.BouquetParts.Find(partsCode) == null)
+            {
+                throw new ArgumentException($"単品未登録： {partsCode}");
+            }
+
+            var item = context.PartsList.Find(bouquetCode, partsCode);
+            if(item == null)
+            {
+                throw new ArgumentException($"{partsCode} は {bouquetCode} の構成要素ではない");
+            }
+
+            context.PartsList.Remove(item);
+            context.SaveChanges();
+        }
+
+        /// <summary>
+        /// 指定商品の商品構成をすべて破棄する
+        /// </summary>
+        /// <param name="bouquetCode">花束コード</param>
+        public void RemoveAllPartsFrom(string bouquetCode)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    RemoveAllPartsFrom(context, bouquetCode);
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 指定商品の商品構成をすべて破棄する
+        /// 
+        /// トランザクション内での呼出用。
+        /// </summary>
+        /// <param name="bouquetCode">花束コード</param>
+        private void RemoveAllPartsFrom(MemorieDeFleursDbContext context, string bouquetCode)
+        {
+            var pats = context.PartsList.Where(item => item.BouquetCode == bouquetCode).ToList();
+            context.PartsList.RemoveRange(pats);
+            context.SaveChanges();
+        }
+        #endregion // 削除
+
+        #region 数量更新
+        /// <summary>
+        /// 商品構成数量を変更する
+        /// </summary>
+        /// <param name="bouquetCode">花束コード</param>
+        /// <param name="partsCode">花コード</param>
+        /// <param name="newQuantity">数量</param>
+        public void UpdateQuantityOf(string bouquetCode, string partsCode, int newQuantity)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    UpdateQuantityOf(context, bouquetCode, partsCode, newQuantity);
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 商品構成数量を変更する、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="bouquetCode">花束コード</param>
+        /// <param name="partsCode">花コード</param>
+        /// <param name="newQuantity">数量</param>
+        private void UpdateQuantityOf(MemorieDeFleursDbContext context, string bouquetCode, string partsCode, int newQuantity)
+        {
+            if (context.Bouquets.Find(bouquetCode) == null)
+            {
+                throw new ArgumentException($"花束未登録： {bouquetCode}");
+            }
+            if (context.BouquetParts.Find(partsCode) == null)
+            {
+                throw new ArgumentException($"単品未登録： {partsCode}");
+            }
+
+            var item = context.PartsList.Find(bouquetCode, partsCode);
+            if(item == null)
+            {
+                throw new ArgumentException($"該当構成なし： {bouquetCode} - {partsCode}");
+            }
+
+            item.Quantity = newQuantity;
+            context.PartsList.Update(item);
+            context.SaveChanges();
+        }
+        #endregion // 数量更新
         #endregion // 商品構成の追加削除
     }
 }
