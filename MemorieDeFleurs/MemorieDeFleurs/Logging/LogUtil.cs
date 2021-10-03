@@ -38,6 +38,11 @@ namespace MemorieDeFleurs.Logging
         public static void Fatal(string msg) => _logger.Fatal(msg);
         public static void FatalFormat(string fmt, params object[] args) => _logger.FatalFormat(fmt, args);
 
+        public static bool IsDebugEnabled { get { return _logger.IsDebugEnabled; } }
+        public static bool IsInfoEnabled { get { return _logger.IsInfoEnabled; } }
+        public static bool IsWarnEnabled { get { return _logger.IsWarnEnabled; } }
+        public static bool IsErrorEnabled { get { return _logger.IsErrorEnabled; } }
+        public static bool IsFatalEnabled { get { return _logger.IsFatalEnabled; } }
         #endregion
 
         #region デバッグ用の拡張ログ出力
