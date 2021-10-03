@@ -11,4 +11,10 @@
     <PackageReference Include="Svg" Version="3.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="no_images.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
