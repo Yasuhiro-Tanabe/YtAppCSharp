@@ -4,7 +4,7 @@ namespace SVGEditor
 {
     internal class SaveAsNewFileCommand : CommandBase
     {
-        public void Execute()
+        protected override void Execute()
         {
             var dialog = new SaveFileDialog()
             {

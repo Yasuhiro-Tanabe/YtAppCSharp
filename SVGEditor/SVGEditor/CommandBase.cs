@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace SVGEditor
 {
-    internal class CommandBase : ICommand
+    internal abstract class CommandBase : ICommand
     {
         public event EventHandler CanExecuteChanged;
 
@@ -17,25 +17,22 @@ namespace SVGEditor
 
         public bool CanExecute(object parameter)
         {
-            return CanExecuteImpl();
+            return CanExecute();
         }
 
         public void Execute(object parameter)
         {
             ViewModel = parameter as MainWindowViewModel;
 
-            ExecuteImpl();
+            Execute();
         }
 
-        protected virtual bool CanExecuteImpl()
+        protected virtual bool CanExecute()
         {
             return true;
         }
 
-        protected virtual void ExecuteImpl()
-        {
-
-        }
+        protected abstract void Execute();
 
     }
 }

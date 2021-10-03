@@ -4,7 +4,7 @@ namespace SVGEditor
 {
     internal class OpenFileCommand : CommandBase
     {
-        public virtual void Execute()
+        protected override void Execute()
         {
             var dialog = new OpenFileDialog()
             {

@@ -2,11 +2,11 @@
 {
     internal class SaveToFileCommand : CommandBase
     {
-        public void Execute()
+        protected override void Execute()
         {
-            if(string.IsNullOrWhiteSpace(ViewModel.SvgFileName))
+            if (string.IsNullOrWhiteSpace(ViewModel.SvgFileName))
             {
-                ViewModel.SaveAs.Execute();
+                ViewModel.SaveAs.Execute(ViewModel);
             }
             else
             {
