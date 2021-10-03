@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using Svg;
+
+using System.Drawing;
+using System.IO;
 using System.Xml;
 
 namespace SVGEditor
@@ -21,6 +24,15 @@ namespace SVGEditor
             var src = new XmlDocument() { PreserveWhitespace = true, XmlResolver = null };
             src.Load(fileName);
             return src.InnerXml;
+        }
+
+        public Bitmap Render(string code)
+        {
+            var xml = new XmlDocument();
+            xml.LoadXml(code);
+            var svg = SvgDocument.Open(xml);
+
+            return svg.Draw();
         }
     }
 }

@@ -1,6 +1,10 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace SVGEditor
 {
@@ -11,6 +15,11 @@ namespace SVGEditor
         private void SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = "")
         {
             property = value;
+            RaisePropertyChanged(propertyName);
+        }
+
+        private void RaisePropertyChanged(string propertyName)
+        {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
@@ -18,6 +27,9 @@ namespace SVGEditor
         /// ウィンドウタイトル共通部
         /// </summary>
         private static string WINDOW_TITLE = "SVGEditor";
+        private static string NoImageFile = "./no_images.png";
+
+        private SVGEditorModel Model { get; } = new SVGEditorModel();
 
         /// <summary>
         /// ウィンドウタイトル
@@ -54,5 +66,30 @@ namespace SVGEditor
         public SaveToFileCommand Save { get; } = new SaveToFileCommand();
         public SaveAsNewFileCommand SaveAs { get; } = new SaveAsNewFileCommand();
 
+        public ImageSource ImageSource { get { return RenderImage(); } }
+
+        private BitmapImage RenderImage()
+        {
+            var bmp = string.IsNullOrWhiteSpace(SourceCode)
+                ? Bitmap.FromFile(NoImageFile)
+                : Model.Render(SourceCode);
+
+            var stream = new MemoryStream();
+            bmp.Save(stream, ImageFormat.Bmp);
+            stream.Seek(0, SeekOrigin.Begin);
+
+            var im = new BitmapImage();
+            im.BeginInit();
+            im.CacheOption = BitmapCacheOption.OnLoad;
+            im.StreamSource = stream;
+            im.EndInit();
+
+            return im;
+        }
+
+        public void RefreshImage()
+        {
+            RaisePropertyChanged(nameof(ImageSource));
+        }
     }
 }

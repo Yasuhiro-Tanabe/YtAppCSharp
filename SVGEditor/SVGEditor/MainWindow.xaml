@@ -32,7 +32,7 @@
                       HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
                       HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
             <Border BorderBrush="LightGray" BorderThickness="1">
-                <Image x:Name="SvgImage"/>
+                <Image x:Name="SvgImage" Source="{Binding ImageSource, Mode=OneWay}" />
             </Border>
         </ScrollViewer>
 

@@ -6,7 +6,7 @@ namespace SVGEditor
     {
         protected override void Execute()
         {
-            MessageBox.Show($"parameter={ViewModel?.GetType().Name}", $"{this.GetType().Name}.Execute()", MessageBoxButton.OK);
+            ViewModel.RefreshImage();
         }
     }
 }
