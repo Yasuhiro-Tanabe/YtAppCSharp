@@ -362,6 +362,16 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // 商品の登録改廃
 
+        /// <summary>
+        /// 単品引当中に発生した在庫不足アクション一覧
+        /// 
+        /// 引当処理、とくにロット内日付方向への在庫払出展開処理では、
+        /// 在庫不足発生時は在庫不足アクションを登録して先に進むため例外がスローされない。
+        /// 都合の良いタイミングで在庫不足例外をスローするため、
+        /// 登録された在庫不足アクションを逐次このリストに登録しておく。
+        /// </summary>
+        public IList<InventoryAction> ShortageInventories { get; } = new List<InventoryAction>();
+
         #region UseBouquetPart
         /// <summary>
         /// 在庫から使用した単品を指定個数取り去る
@@ -400,6 +410,8 @@ namespace MemorieDeFleurs.Models
             LogUtil.DEBUGLOG_BeginMethod($"{part.Code}, {date.ToString("yyyyMMdd")}, {quantity}");
             try
             {
+                ShortageInventories.Clear();
+
                 var inventory = context.InventoryActions
                     .Where(a => a.PartsCode == part.Code)
                     .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE)
@@ -410,7 +422,19 @@ namespace MemorieDeFleurs.Models
 
                 if (inventory == null)
                 {
-                    throw new NotImplementedException($"該当ストックなし：基準日={date.ToString("yyyyMMdd")}, 花コード{part.Code}, 数量={quantity}");
+                    var shortage = new InventoryAction()
+                    {
+                        Action = InventoryActionType.SHORTAGE,
+                        ActionDate = date,
+                        ArrivalDate = date,
+                        InventoryLotNo = -1,
+                        BouquetPart = part,
+                        PartsCode = part.Code,
+                        Quantity = quantity,
+                        Remain = -quantity
+                    };
+                    ShortageInventories.Add(shortage);
+                    throw new InventoryShortageException(shortage, quantity);
                 }
                 else
                 {
@@ -475,6 +499,7 @@ namespace MemorieDeFleurs.Models
                 }
                 catch (InventoryShortageException eis)
                 {
+                    ShortageInventories.Add(eis.InventoryShortageAction);
                     context.InventoryActions.Add(eis.InventoryShortageAction);
                     LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
                 }
@@ -517,6 +542,7 @@ namespace MemorieDeFleurs.Models
                     }
                     catch (InventoryShortageException eis)
                     {
+                        ShortageInventories.Add(eis.InventoryShortageAction);
                         context.InventoryActions.Add(eis.InventoryShortageAction);
                         LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
                     }

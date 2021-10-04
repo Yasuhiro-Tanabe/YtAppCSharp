@@ -408,20 +408,9 @@ namespace MemorieDeFleurs.Models
                 var part = context.BouquetParts.Find(item.PartsCode);
                 Parent.BouquetModel.UseBouquetPart(context, part, usedDate, item.Quantity);
 
-                var remain = context.InventoryActions
-                    .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE || a.Action == InventoryActionType.SHORTAGE)
-                    .Where(a => a.ActionDate == usedDate)
-                    .Sum(a => a.Remain);
-                if (remain < 0)
+                if (Parent.BouquetModel.ShortageInventories.Count() > 0)
                 {
-                    throw new NotImplementedException(new StringBuilder()
-                        .Append("注文不可：単品在庫なし、")
-                        .AppendFormat(" お届け日={0:yyyyMMdd}", arrivalDate)
-                        .Append(", 商品=").Append(bouquet.Code)
-                        .Append(", 単品=").Append(item.PartsCode)
-                        .Append(", 要求数=").Append(item.Quantity)
-                        .Append(", 不足数=").Append(-remain) // 符号を＋に変えて表示
-                        .ToString());
+                    throw new InventoryShortageException(Parent.BouquetModel.ShortageInventories.First(), item.Quantity);
                 }
             }
 

@@ -371,7 +371,7 @@ namespace MemorieDeFleursTest.ModelTest
                     transaction.Commit();
                     Assert.Fail($"想定外の成功：在庫が足りないので {ExpectedBigBouquet.Code} の引当ができずに例外をスローするはず");
                 }
-                catch (NotImplementedException)
+                catch (InventoryShortageException)
                 {
                     transaction.Rollback();
                 }
