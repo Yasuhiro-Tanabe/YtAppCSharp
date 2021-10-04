@@ -130,7 +130,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void WillBeUsedEarliestArrivedInventoryLotWhenTwoOrMoreLotHasEnoughQuantity()
         {
-            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May1st, 60);
+            Model.BouquetModel.UseFromInventory(ExpectedPart, DateConst.May1st, 60);
             var lot0430 = InitialOrders[DateConst.April30th][0].LotNo;
             var lot0501 = InitialOrders[DateConst.May1st][0].LotNo;
 
@@ -183,7 +183,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
-            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 20);
+            Model.BouquetModel.UseFromInventory(ExpectedPart, DateConst.April30th, 20);
 
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.April30th, lotNo).BEGIN
@@ -202,7 +202,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
-            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 200);
+            Model.BouquetModel.UseFromInventory(ExpectedPart, DateConst.April30th, 200);
 
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.April30th, lotNo).BEGIN
@@ -221,7 +221,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var lotNo = InitialOrders[DateConst.April30th][0].LotNo;
 
-            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.April30th, 220);
+            Model.BouquetModel.UseFromInventory(ExpectedPart, DateConst.April30th, 220);
 
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.April30th, lotNo).BEGIN
@@ -248,7 +248,7 @@ namespace MemorieDeFleursTest.ModelTest
                 InitialOrders[DateConst.May2nd][0].LotNo,
             };
 
-            Model.BouquetModel.UseBouquetPart(ExpectedPart, DateConst.May2nd, 500);
+            Model.BouquetModel.UseFromInventory(ExpectedPart, DateConst.May2nd, 500);
 
             // 2ロット分の全量を消費し、ただし3ロット目は消費しない
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
@@ -292,7 +292,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             foreach(var order in input)
             {
-                Model.BouquetModel.UseBouquetPart(ExpectedPart, order.Key, order.Value);
+                Model.BouquetModel.UseFromInventory(ExpectedPart, order.Key, order.Value);
             }
 
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN

@@ -406,7 +406,7 @@ namespace MemorieDeFleurs.Models
             foreach (var item in bouquet.PartsList)
             {
                 var part = context.BouquetParts.Find(item.PartsCode);
-                Parent.BouquetModel.UseBouquetPart(context, part, usedDate, item.Quantity);
+                Parent.BouquetModel.UseFromInventory(context, part, usedDate, item.Quantity);
 
                 if (Parent.BouquetModel.ShortageInventories.Count() > 0)
                 {
@@ -474,7 +474,7 @@ namespace MemorieDeFleurs.Models
             {
                 var part = context.BouquetParts.Find(item.PartsCode);
                 // 受注したのと同じ数量を引く
-                Parent.BouquetModel.UseBouquetPart(context, part, order.ShippingDate, - item.Quantity);
+                Parent.BouquetModel.UseFromInventory(context, part, order.ShippingDate, - item.Quantity);
             }
 
             LogUtil.DEBUGLOG_EndMethod($"order={orderNo}");
@@ -531,8 +531,8 @@ namespace MemorieDeFleurs.Models
 
             foreach(var item in bouquet.PartsList)
             {
-                Parent.BouquetModel.UseBouquetPart(context, item.Part, order.ShippingDate, -item.Quantity);
-                Parent.BouquetModel.UseBouquetPart(context, item.Part, newShippingDate, item.Quantity);
+                Parent.BouquetModel.UseFromInventory(context, item.Part, order.ShippingDate, -item.Quantity);
+                Parent.BouquetModel.UseFromInventory(context, item.Part, newShippingDate, item.Quantity);
             }
         }
         #endregion // お届け日変更

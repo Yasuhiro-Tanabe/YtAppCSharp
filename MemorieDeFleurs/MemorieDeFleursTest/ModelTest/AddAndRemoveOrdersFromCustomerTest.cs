@@ -229,7 +229,7 @@ namespace MemorieDeFleursTest.ModelTest
                 };
             foreach (var u in used)
             {
-                Model.BouquetModel.UseBouquetPart(context, ExpectedPart, u.Item1, u.Item2);
+                Model.BouquetModel.UseFromInventory(context, ExpectedPart, u.Item1, u.Item2);
             }
 
             foreach (var d in Enumerable.Range(0, 10).Select(i => DateConst.April30th.AddDays(i)))

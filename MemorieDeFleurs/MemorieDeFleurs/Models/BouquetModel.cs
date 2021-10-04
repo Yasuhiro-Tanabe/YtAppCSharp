@@ -379,14 +379,14 @@ namespace MemorieDeFleurs.Models
         /// <param name="part">対象となる単品</param>
         /// <param name="date">日付</param>
         /// <param name="quantity">取り去る数量</param>
-        public void UseBouquetPart(BouquetPart part, DateTime date, int quantity)
+        public void UseFromInventory(BouquetPart part, DateTime date, int quantity)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    UseBouquetPart(context, part, date, quantity);
+                    UseFromInventory(context, part, date, quantity);
                     transaction.Commit();
                     LogUtil.Info($"{date:yyyyMMdd}, {part.Code} x {quantity} used.");
                 }
@@ -405,7 +405,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="part">対象となる単品</param>
         /// <param name="date">日付</param>
         /// <param name="quantity">取り去る数量</param>
-        public void UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
+        public void UseFromInventory(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{part.Code}, {date.ToString("yyyyMMdd")}, {quantity}");
             try

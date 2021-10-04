@@ -474,8 +474,6 @@ namespace MemorieDeFleursTest.ModelTest
             {
                 Assert.Fail($"想定外のエラー、{ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}");
             }
-            Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd, "メッセージ");
-
         }
     }
 }

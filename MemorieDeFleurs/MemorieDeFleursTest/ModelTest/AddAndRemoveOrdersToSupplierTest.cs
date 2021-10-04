@@ -98,7 +98,7 @@ namespace MemorieDeFleursTest.ModelTest
             };
             foreach (var u in used)
             {
-                Model.BouquetModel.UseBouquetPart(context, ExpectedPart, u.Item1, u.Item2);
+                Model.BouquetModel.UseFromInventory(context, ExpectedPart, u.Item1, u.Item2);
             }
         }
 
