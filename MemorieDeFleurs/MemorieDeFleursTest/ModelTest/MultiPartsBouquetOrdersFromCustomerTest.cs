@@ -8,9 +8,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MemorieDeFleursTest.ModelTest
 {
@@ -31,9 +30,60 @@ namespace MemorieDeFleursTest.ModelTest
 
         private ISet<string> InitialOrdersToSupplyer { get; } = new SortedSet<string>();
 
+        #region LotNumberFinder
+        private class LotNumberFinder
+        {
+            private DbConnection _connection;
+            private MemorieDeFleursDbContext _context;
+
+            public LotNumberFinder(DbConnection conn)
+            {
+                _connection = conn;
+            }
+
+            public int this[BouquetPart part, DateTime arrivedAt, int index = 0]
+            {
+                get
+                {
+                    bool isContextCreated = (_context == null);
+
+                    if(isContextCreated)
+                    {
+                        _context = new MemorieDeFleursDbContext(_connection);
+                    }
+                    var lotNumbers = _context.InventoryActions
+                        .Where(act => act.PartsCode == part.Code)
+                        .Where(act => act.ActionDate == arrivedAt)
+                        .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE)
+                        .OrderBy(act => act.InventoryLotNo)
+                        .Select(act => act.InventoryLotNo).ToArray();
+                    if(isContextCreated)
+                    {
+                        _context.Dispose();
+                        _context = null;
+                    }
+
+                    if(lotNumbers.Length == 0)
+                    {
+                        throw new ArgumentException($"該当ロットなし：入荷日={arrivedAt:yyyyMMdd}");
+                    }
+                    if(index >= lotNumbers.Length)
+                    {
+                        throw new IndexOutOfRangeException($"{arrivedAt:yyyyMMdd}入荷ロット数={lotNumbers.Length}, index={index}");
+                    }
+                    
+                    return lotNumbers[index];
+                }
+            }
+        }
+
+        private LotNumberFinder LotNumber { get; set; }
+        #endregion
+
         public MultiPartsBouquetOrdersFromCustomerTest() : base()
         {
             AfterTestBaseInitializing += PrepareModel;
+            LotNumber = new LotNumberFinder(TestDB);
         }
 
         #region TestInitialize
@@ -257,32 +307,38 @@ namespace MemorieDeFleursTest.ModelTest
         public void Order1()
         {
             LogUtil.DEBUGLOG_BeginTest();
+
             Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd, "メッセージ");
+            
+            var lotBA001 = LotNumber[BouquetParts["BA001"], DateConst.April30th];
+            var lotBA002 = LotNumber[BouquetParts["BA002"], DateConst.April30th];
+            var lotBA003 = LotNumber[BouquetParts["BA003"], DateConst.April30th];
+            var lotGP001 = LotNumber[BouquetParts["GP001"], DateConst.April30th];
 
             InventoryActionValidator.NewInstance()
                 .BouquetPartIs(BouquetParts["BA001"]).BEGIN
-                    .Lot(DateConst.April30th, 1).BEGIN
+                    .Lot(DateConst.April30th, lotBA001).BEGIN
                         .At(DateConst.April30th).Arrived(10)
                         .At(DateConst.May1st).Used(3, 7)
                         .At(DateConst.May3rd).Discarded(7)
                         .END
                     .END
                 .BouquetPartIs(BouquetParts["BA002"]).BEGIN
-                    .Lot(DateConst.April30th, 2).BEGIN
+                    .Lot(DateConst.April30th, lotBA002).BEGIN
                         .At(DateConst.April30th).Arrived(10)
                         .At(DateConst.May1st).Used(5, 5)
                         .At(DateConst.May3rd).Discarded(5)
                         .END
                     .END
                 .BouquetPartIs(BouquetParts["BA003"]).BEGIN
-                    .Lot(DateConst.April30th, 3).BEGIN
+                    .Lot(DateConst.April30th, lotBA003).BEGIN
                         .At(DateConst.April30th).Arrived(10)
                         .At(DateConst.May1st).Used(3, 7)
                         .At(DateConst.May3rd).Discarded(7)
                         .END
                     .END
                 .BouquetPartIs(BouquetParts["GP001"]).BEGIN
-                    .Lot(DateConst.April30th, 4).BEGIN
+                    .Lot(DateConst.April30th, lotGP001).BEGIN
                         .At(DateConst.April30th).Arrived(5)
                         .At(DateConst.May1st).Used(5, 0)
                         .At(DateConst.May2nd).Discarded(0)
