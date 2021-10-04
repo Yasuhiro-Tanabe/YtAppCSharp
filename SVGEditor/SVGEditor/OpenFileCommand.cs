@@ -17,6 +17,7 @@ namespace SVGEditor
             {
                 ViewModel.SvgFileName = dialog.FileName;
                 ViewModel.SourceCode = Model.LoadXmlFile(ViewModel.SvgFileName);
+                ViewModel.RefreshImage();
             }
         }
     }
