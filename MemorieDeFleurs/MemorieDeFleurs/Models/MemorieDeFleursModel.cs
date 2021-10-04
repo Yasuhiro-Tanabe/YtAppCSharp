@@ -3,6 +3,8 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
+using System;
+
 namespace MemorieDeFleurs.Models
 {
     /// <summary>
@@ -36,6 +38,20 @@ namespace MemorieDeFleurs.Models
             CustomerModel = new CustomerModel(this);
 
             Sequences = new SequenceUtil(this);
+        }
+
+        /// <summary>
+        /// 在庫推移表を作成する
+        /// </summary>
+        /// <param name="partsCode">対象単品の花コード</param>
+        /// <param name="date">起点となる日付</param>
+        /// <param name="numDays">作成期間</param>
+        /// <returns>在庫推移表 (期間： date ～ date + numDays)</returns>
+        public InventoryTransitionTable CreateInventoryTransitionTable(string partsCode, DateTime date, int numDays)
+        {
+            var ret = new InventoryTransitionTable();
+            ret.Fill(DbConnection, partsCode, date, numDays);
+            return ret;
         }
     }
 }
