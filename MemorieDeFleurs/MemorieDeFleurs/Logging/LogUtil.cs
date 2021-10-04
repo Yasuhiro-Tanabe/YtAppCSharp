@@ -166,7 +166,21 @@ namespace MemorieDeFleurs.Logging
             var operatorString = action.Remain >= quantity ? ">=" : "<";
 
             LogUtil.Debug($"{Indent}Compare: {action.ToString("h")}.Remain({action.Remain}) {operatorString} {quantity}", caller, path, line);
+        }
 
+        /// <summary>
+        /// 基準日にこのロットへ全量戻せるかどうかの判定ログを出力する
+        /// </summary>
+        /// <param name="action">比較対象アクション</param>
+        /// <param name="quantityToReturn">在庫に戻す数量</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
+        [Conditional("DEBUG")]
+        public static void DEBUGLOG_ComparationOfInventoryUsedAndReturns(InventoryAction action, int quantityToReturn, [CallerMemberName] string caller = "", [CallerFilePath] string path="", [CallerLineNumber] int line = 0)
+        {
+            var operatorString = action.Quantity >= quantityToReturn ? ">=" : "<";
+            LogUtil.Debug($"{Indent}Comparet: {action.ToString("h")}.Quantity({action.Quantity}) {operatorString} {quantityToReturn}", caller, path, line);
         }
 
         /// <summary>
@@ -178,7 +192,7 @@ namespace MemorieDeFleurs.Logging
         /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
         /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
         [Conditional("DEBUG")]
-        public static void DEBUGLOG_ComparisonOfInventoryQuantityAndPreviousRemain(InventoryAction action, int remain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        public static void DEBUGLOG_ComparationOfInventoryQuantityAndPreviousRemain(InventoryAction action, int remain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var operatorString = action.Quantity <= remain ? "<=" : ">";
 

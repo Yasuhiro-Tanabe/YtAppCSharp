@@ -627,8 +627,6 @@ namespace MemorieDeFleurs.Models
                 .LotNumberIs(orderParam.InventoryLotNo)
                 .Create(context);
 
-            DEBUGLOG_ShowInventoryActions(context, orderParam.PartsCode, new int[] { 4, 5, 6 });
-
             var usedLot = new Stack<int>();
             // 発注した在庫アクションを起点に、後続の入荷予定ロットすべてに対して加工予定数の前詰めを行う。
             var target = orderParam;
@@ -637,12 +635,8 @@ namespace MemorieDeFleurs.Models
                 EliminateInventoryShortages(context, target, usedLot);
                 context.SaveChanges(); // 削除した在庫不足アクション確定のため、ここで一度キャッシュを確定する
 
-                DEBUGLOG_ShowInventoryActions(context, target.BouquetPart.Code, new int[] { 4, 5, 6 });
-
                 FrontUpInventories(context, target, usedLot);
                 //context.SaveChanges();
-
-                DEBUGLOG_ShowInventoryActions(context, target.BouquetPart.Code, new int[] { 4, 5, 6 });
 
                 usedLot.Push(target.InventoryLotNo);
 
@@ -720,7 +714,7 @@ namespace MemorieDeFleurs.Models
                     Parent.BouquetModel.UseFromThisLot(context, action, quantity, usedLot);
 
                     usedLot.Push(action.InventoryLotNo);
-                    Parent.BouquetModel.UseFromThisLot(context, others, -quantity, usedLot);
+                    Parent.BouquetModel.ReturnToThisLot(context, others, quantity, usedLot);
                     usedLot.Pop();
 
                     LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, quantity);
@@ -734,7 +728,7 @@ namespace MemorieDeFleurs.Models
                     Parent.BouquetModel.UseFromThisLot(context, action, quantity, usedLot);
 
                     usedLot.Push(action.InventoryLotNo);
-                    Parent.BouquetModel.UseFromThisLot(context, others, -quantity, usedLot);
+                    Parent.BouquetModel.ReturnToThisLot(context, others, quantity, usedLot);
                     usedLot.Pop();
 
                     LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, quantity);

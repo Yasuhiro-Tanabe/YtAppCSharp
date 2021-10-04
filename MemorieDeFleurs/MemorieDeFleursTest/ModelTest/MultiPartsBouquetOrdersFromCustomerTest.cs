@@ -475,5 +475,50 @@ namespace MemorieDeFleursTest.ModelTest
                 Assert.Fail($"想定外のエラー、{ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
+        [TestMethod,TestCategory("RED")]
+        public void OrderAndCancelOrder()
+        {
+            var orderNo = Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd);
+            Model.CustomerModel.CancelOrder(orderNo);
+
+            var lotBA001 = LotNumber[BouquetParts["BA001"], DateConst.April30th];
+            var lotBA002 = LotNumber[BouquetParts["BA002"], DateConst.April30th];
+            var lotBA003 = LotNumber[BouquetParts["BA003"], DateConst.April30th];
+            var lotGP001_0 = LotNumber[BouquetParts["GP001"], DateConst.April30th, 0];
+            var lotGP001_1 = LotNumber[BouquetParts["GP001"], DateConst.April30th, 1];
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(BouquetParts["BA001"]).BEGIN
+                    .Lot(DateConst.April30th, lotBA001).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May3rd).Discarded(10)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["BA002"]).BEGIN
+                    .Lot(DateConst.April30th, lotBA002).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May3rd).Discarded(10)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["BA003"]).BEGIN
+                    .Lot(DateConst.April30th, lotBA003).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May3rd).Discarded(10)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["GP001"]).BEGIN
+                    .Lot(DateConst.April30th, lotGP001_0).BEGIN
+                        .At(DateConst.April30th).Arrived(5)
+                        .At(DateConst.May2nd).Discarded(5)
+                        .END
+                    .Lot(DateConst.April30th, lotGP001_1).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May2nd).Discarded(10)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
     }
 }
