@@ -476,7 +476,7 @@ namespace MemorieDeFleursTest.ModelTest
             }
         }
 
-        [TestMethod,TestCategory("RED")]
+        [TestMethod]
         public void OrderAndCancelOrder()
         {
             var orderNo = Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd);
@@ -519,6 +519,57 @@ namespace MemorieDeFleursTest.ModelTest
                     .END
                 .TargetDBIs(TestDB)
                 .AssertAll();
+        }
+
+        [TestMethod]
+        public void ChangeArrivalDate()
+        {
+            var orderNo = Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT004"], Customers[1].ShippingAddresses[0], DateConst.May1st);
+            Model.CustomerModel.ChangeArrivalDate(orderNo, DateConst.May3rd);
+
+            var lotBA002 = LotNumber[BouquetParts["BA002"], DateConst.April30th];
+            var lotBA003 = LotNumber[BouquetParts["BA003"], DateConst.April30th];
+            var lotGP001_0 = LotNumber[BouquetParts["GP001"], DateConst.April30th, 0];
+            var lotGP001_1 = LotNumber[BouquetParts["GP001"], DateConst.April30th, 1];
+            var lotCN002 = LotNumber[BouquetParts["CN002"], DateConst.April30th];
+
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(BouquetParts["BA002"]).BEGIN
+                    .Lot(DateConst.April30th, lotBA002).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May2nd).Used(3, 7)
+                        .At(DateConst.May3rd).Discarded(7)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["BA003"]).BEGIN
+                    .Lot(DateConst.April30th, lotBA003).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May2nd).Used(5, 5)
+                        .At(DateConst.May3rd).Discarded(5)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["GP001"]).BEGIN
+                    .Lot(DateConst.April30th, lotGP001_0).BEGIN
+                        .At(DateConst.April30th).Arrived(5)
+                        .At(DateConst.May2nd).Used(3, 2)
+                        .At(DateConst.May2nd).Discarded(2)
+                        .END
+                    .Lot(DateConst.April30th, lotGP001_1).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May2nd).Discarded(10)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["CN002"]).BEGIN
+                    .Lot(DateConst.April30th, lotCN002).BEGIN
+                        .At(DateConst.April30th).Arrived(40)
+                        .At(DateConst.May2nd).Used(3, 37)
+                        .At(DateConst.May5th).Discarded(37)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
         }
     }
 }
