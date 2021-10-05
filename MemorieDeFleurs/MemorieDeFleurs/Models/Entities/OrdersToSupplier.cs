@@ -40,7 +40,7 @@ namespace MemorieDeFleurs.Models.Entities
         /// 状態
         /// </summary>
         [Column("STATUS")]
-        public int Status { get; set; }
+        public OrderToSupplierStatus Status { get; set; }
 
 
         public IList<OrderDetailsToSupplier> Details { get; } = new List<OrderDetailsToSupplier>();
