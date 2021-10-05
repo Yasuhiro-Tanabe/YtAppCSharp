@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Databese.SQLite;
+using MemorieDeFleurs.Logging;
 
 using MemorieDeFleursTest.ModelTest.Fluent;
 
@@ -133,6 +134,8 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void OrdersAreArrived_TwoOrMoreOrders()
         {
+            LogUtil.DEBUGLOG_BeginTest();
+
             var supplier1 = Model.SupplierModel.GetSupplierBuilder()
                 .NameIs(expectedName)
                 .AddressIs(expectedAddress)
@@ -171,11 +174,46 @@ namespace MemorieDeFleursTest.ModelTest
                 Model.SupplierModel.Order(DateConst.April30th, supplier2, DateConst.May2nd, new [] { Tuple.Create(gp001, 2), Tuple.Create(cn001, 2) }),
             };
 
-            Model.SupplierModel.OrdersAreArrived(DateConst.May2nd, orders[0], orders[1], orders[2]);
+            Model.SupplierModel.OrdersAreArrived(DateConst.May2nd, orders[0], orders[2]);
+            Model.SupplierModel.OrdersAreArrived(DateConst.May3rd, orders[1]);
 
             Assert.ThrowsException<ApplicationException>(() => Model.SupplierModel.CancelOrder(orders[0]));
             Assert.ThrowsException<ApplicationException>(() => Model.SupplierModel.CancelOrder(orders[1]));
             Assert.ThrowsException<ApplicationException>(() => Model.SupplierModel.CancelOrder(orders[2]));
+
+            DEBUGLOG_ShowInventoryActions(TestDB, ba001.Code);
+            DEBUGLOG_ShowInventoryActions(TestDB, gp001.Code);
+            DEBUGLOG_ShowInventoryActions(TestDB, cn001.Code);
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(ba001).BEGIN
+                    .Lot(DateConst.May2nd, 1).BEGIN
+                        .At(DateConst.May2nd).Arrived(2 * ba001.QuantitiesPerLot)
+                        .END
+                    .Lot(DateConst.May3rd, 3).BEGIN
+                        .At(DateConst.May3rd).Arrived(1 * ba001.QuantitiesPerLot)
+                        .END
+                    .END
+                .BouquetPartIs(gp001).BEGIN
+                    .Lot(DateConst.May2nd, 2).BEGIN
+                        .At(DateConst.May2nd).Arrived(2 * gp001.QuantitiesPerLot)
+                        .END
+                    .Lot(DateConst.May2nd, 5).BEGIN
+                        .At(DateConst.May2nd).Arrived(2 * gp001.QuantitiesPerLot)
+                        .END
+                    .Lot(DateConst.May3rd, 4).BEGIN
+                        .At(DateConst.May3rd).Arrived(3 * gp001.QuantitiesPerLot)
+                        .END
+                    .END
+                .BouquetPartIs(cn001).BEGIN
+                    .Lot(DateConst.May2nd, 6).BEGIN
+                        .At(DateConst.May2nd).Arrived(2 * cn001.QuantitiesPerLot)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            LogUtil.DEBUGLOG_EndTest();
         }
     }
 }

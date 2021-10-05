@@ -4,6 +4,7 @@ using MemorieDeFleurs.Models.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -96,8 +97,16 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
                 .AppendFormat(", 入荷日={0:yyyyMMdd}", arrivedDate)
                 .ToString();
 
+            var anotherType = new SortedDictionary<InventoryActionType, InventoryActionType>()
+            {
+                { InventoryActionType.SCHEDULED_TO_ARRIVE, InventoryActionType.ARRIVED },
+                { InventoryActionType.SCHEDULED_TO_DISCARD, InventoryActionType.DISCARDED },
+                { InventoryActionType.SCHEDULED_TO_USE, InventoryActionType.USED },
+                { InventoryActionType.SHORTAGE, InventoryActionType.SHORTAGE }
+            };
+
             var candidate = context.InventoryActions
-                .Where(a => a.Action == Type)
+                .Where(a => a.Action == Type || a.Action == anotherType[Type])
                 .Where(a => a.ActionDate == actionDate)
                 .Where(a => a.PartsCode == part)
                 .Where(a => a.InventoryLotNo == lot)
