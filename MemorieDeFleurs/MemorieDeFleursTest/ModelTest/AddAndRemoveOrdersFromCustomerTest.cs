@@ -288,7 +288,8 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void OneOrderUpdatesCurrentInventory()
         {
-            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            LogUtil.DEBUGLOG_BeginTest();
+
             var caclurator = new InventoryCalcurator(TestDB, ExpectedPart);
             var lot = InitialOrders[DateConst.April30th][0].LotNo;
 
@@ -328,7 +329,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+            LogUtil.DEBUGLOG_EndTest();
         }
 
         private void AssertOrder(OrderFromCustomer expected, OrderFromCustomer actual)
@@ -357,7 +358,8 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void CanRollbackCurrentOrder()
         {
-            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            LogUtil.DEBUGLOG_BeginTest();
+
             var lot = InitialOrders[DateConst.May6th][0].LotNo;
             var calcurator = new InventoryCalcurator(TestDB, ExpectedPart);
             var expectedRemain = calcurator.Remain[DateConst.May8th, lot]; // お届け日前日(=発送日)の当日残：注文がロールバックされるので当日残に増減はないはず
@@ -386,13 +388,14 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+            LogUtil.DEBUGLOG_EndTest();
         }
 
         [TestMethod]
         public void CancelOrder_CanCommit()
         {
-            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            LogUtil.DEBUGLOG_BeginTest();
+
             var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
 
@@ -431,13 +434,14 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+            LogUtil.DEBUGLOG_EndTest();
         }
 
         [TestMethod]
         public void CancelOrder_CanRollback()
         {
-            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            LogUtil.DEBUGLOG_BeginTest();
+
             var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
 
@@ -483,7 +487,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+            LogUtil.DEBUGLOG_EndTest();
         }
 
         /// <summary>
@@ -492,7 +496,8 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void ChangeArrivalDate_FromMay8thToMay10th_InventoryChangedInsideLot0506Only()
         {
-            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            LogUtil.DEBUGLOG_BeginTest();
+
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
 
             // このテストでOrder() を呼ぶ前の状態：
@@ -524,7 +529,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+            LogUtil.DEBUGLOG_EndTest();
         }
 
         /// <summary>
@@ -533,7 +538,8 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void ChangeArrivalDate_FromMay6thToMay9th_InventoryChangedInsideLot0506Only()
         {
-            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            LogUtil.DEBUGLOG_BeginTest();
+
             var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
 
@@ -574,13 +580,14 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+            LogUtil.DEBUGLOG_EndTest();
         }
 
         [TestMethod]
         public void ChangeArrivalDate_CanRollback()
         {
-            LogUtil.DEBUGLOG_BeginMethod(msg: "===== TEST BEGIN =====");
+            LogUtil.DEBUGLOG_BeginTest();
+
             var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
 
             // このテストでOrder() を呼ぶ前の状態：
@@ -617,7 +624,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            LogUtil.DEBUGLOG_EndMethod(msg: "===== TEST END =====");
+            LogUtil.DEBUGLOG_EndTest();
         }
     }
 }
