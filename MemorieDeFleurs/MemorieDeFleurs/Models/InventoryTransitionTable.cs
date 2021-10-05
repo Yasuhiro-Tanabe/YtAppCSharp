@@ -76,7 +76,7 @@ namespace MemorieDeFleurs.Models
                         _remains[d.Item1] = actions
                             .Where(act => act.ActionDate == date)
                             .Where(act => act.ArrivalDate == d.Item2)
-                            .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE || act.Action == InventoryActionType.USED)
+                            .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE || act.Action == InventoryActionType.USED || act.Action == InventoryActionType.SHORTAGE)
                             .Sum(act => act.Remain);
                     }
                 }

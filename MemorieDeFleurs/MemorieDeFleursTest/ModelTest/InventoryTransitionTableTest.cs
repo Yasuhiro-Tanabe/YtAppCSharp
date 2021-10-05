@@ -2,6 +2,8 @@
 using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
+using MemorieDeFleursTest.ModelTest.Fluent;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
@@ -83,14 +85,21 @@ namespace MemorieDeFleursTest.ModelTest
             Model.BouquetModel.UseFromInventory(context, ExpectedPart, DateConst.May6th, 40);
         }
 
+        IDictionary<DateTime, string> InitialOrders { get; } = new SortedDictionary<DateTime, string>();
+
         private void PrepareInitialOrders(MemorieDeFleursDbContext context)
         {
             var OrderDate = new DateTime(2020, 4, 25);
-            Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.April30th, new[] { Tuple.Create(ExpectedPart, 2) });
-            Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.May1st, new[] { Tuple.Create(ExpectedPart, 3) });
-            Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.May2nd, new[] { Tuple.Create(ExpectedPart, 2) });
-            Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.May3rd, new[] { Tuple.Create(ExpectedPart, 2) });
-            Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.May6th, new[] { Tuple.Create(ExpectedPart, 1) });
+            InitialOrders.Add(DateConst.April30th,
+                Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.April30th, new[] { Tuple.Create(ExpectedPart, 2) }));
+            InitialOrders.Add(DateConst.May1st,
+                Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.May1st, new[] { Tuple.Create(ExpectedPart, 3) }));
+            InitialOrders.Add(DateConst.May2nd,
+                Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.May2nd, new[] { Tuple.Create(ExpectedPart, 2) }));
+            InitialOrders.Add(DateConst.May3rd,
+                Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.May3rd, new[] { Tuple.Create(ExpectedPart, 2) }));
+            InitialOrders.Add(DateConst.May6th,
+                Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.May6th, new[] { Tuple.Create(ExpectedPart, 1) }));
         }
         #endregion // TestInitialize
 
@@ -196,7 +205,7 @@ namespace MemorieDeFleursTest.ModelTest
                     
                     foreach(var d in Enumerable.Range(0, item.Value.Remains.Count))
                     {
-                        Assert.AreEqual(item.Value.Remains[d], Table[item.Key, -d]);
+                        Assert.AreEqual(item.Value.Remains[d], Table[item.Key, -d], $"{item.Key:yyyyMMdd}, Remains[{-d}={item.Key.AddDays(-d):yyyyMMdd}]");
                     }
                 }
             }
@@ -228,6 +237,23 @@ namespace MemorieDeFleursTest.ModelTest
                 .At(DateConst.May4th).Used(400).Remains(100, 200, 0).END
                 .At(DateConst.May5th).Used(170).Remains(130, 0, 0).END
                 .At(DateConst.May6th).Arrived(100).Used(40).Remains(0, 0, 100).Discarded(90).END
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void BA001_InventoryShortage()
+        {
+            Model.SupplierModel.CancelOrder(InitialOrders[DateConst.May2nd]);
+            var table = Model.CreateInventoryTransitionTable("BA001", DateConst.April30th, 7);
+
+            TableValidator.TableIs(table)
+                .At(DateConst.April30th).Arrived(200).Used(20).Remains(0, 0, 180).END
+                .At(DateConst.May1st).Arrived(300).Used(50).Remains(0, 130, 300).END
+                .At(DateConst.May2nd).Used(80).Remains(50, 300, 0).END
+                .At(DateConst.May3rd).Arrived(200).Used(20).Remains(300, 0, 200).Discarded(30).END
+                .At(DateConst.May4th).Used(400).Remains(0, 100, 0).END
+                .At(DateConst.May5th).Used(170).Remains(-70, 0, 0).END
+                .At(DateConst.May6th).Arrived(100).Used(40).Remains(0, 0, 60).Discarded(0).END
                 .AssertAll();
         }
     }
