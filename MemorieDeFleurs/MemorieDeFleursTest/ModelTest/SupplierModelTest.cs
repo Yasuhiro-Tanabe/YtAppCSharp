@@ -215,5 +215,50 @@ namespace MemorieDeFleursTest.ModelTest
 
             LogUtil.DEBUGLOG_EndTest();
         }
+
+        [TestMethod]
+        public void OrdersAreArrived_InventoryUsed()
+        {
+            var supplier = Model.SupplierModel.GetSupplierBuilder()
+                .NameIs(expectedName)
+                .AddressIs(expectedAddress)
+                .Create();
+            var ba001 = Model.BouquetModel.GetBouquetPartBuilder()
+                .PartCodeIs("BA001")
+                .PartNameIs("薔薇(赤)")
+                .QauntityParLotIs(100)
+                .LeadTimeIs(1)
+                .ExpiryDateIs(3)
+                .Create();
+            var ht001 = Model.BouquetModel.GetBouquetBuilder()
+                .CodeIs("HT001")
+                .NameIs("花束-Aセット")
+                .Uses("BA001", 4)
+                .Create();
+            var customer = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs("蘇我幸恵")
+                .PasswordIs("sogayukie12345")
+                .EmailAddressIs("ysoga@localdomain")
+                .CardNoIs("9876543210123210")
+                .SendTo("ピアノ生徒1", "東京都中央区京橋1-10-7", "KPP八重洲ビル10階")
+                .Create();
+
+            // 時系列：4/30発注→5/1受注(1件目)→5/2納品→5/3受注(2件目)
+            var orderNo = Model.SupplierModel.Order(DateConst.April30th, supplier, DateConst.May2nd, new[] { Tuple.Create(ba001, 2) });
+            Model.CustomerModel.Order(DateConst.May1st, ht001, customer.ShippingAddresses[0], DateConst.May5th);
+            Model.SupplierModel.OrdersAreArrived(DateConst.May2nd, orderNo);
+            Model.CustomerModel.Order(DateConst.May3rd, ht001, customer.ShippingAddresses[0], DateConst.May6th);
+
+            InventoryActionValidator.NewInstance().BouquetPartIs(ba001).BEGIN
+                .Lot(DateConst.May2nd, 1).BEGIN
+                    .At(DateConst.May2nd).Arrived(200).Used(0, 200)
+                    .At(DateConst.May3rd).Used(0, 200)
+                    .At(DateConst.May4th).Used(4, 196)
+                    .At(DateConst.May5th).Used(4, 192).Discarded(192)
+                    .END
+                .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
     }
 }
