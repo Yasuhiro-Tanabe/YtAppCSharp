@@ -390,48 +390,58 @@ namespace MemorieDeFleurs.Models
             LogUtil.DEBUGLOG_BeginMethod($"orderDate={orderDate.ToString("yyyyMMdd")}, bouquet={bouquet.Code}" +
                 $", shipping={sendTo.CustomerID}-{sendTo.ID}, arrivalDate={arrivalDate.ToString("yyyyMMdd")}");
 
-            var countOfOrdersToday = context.OrderFromCustomers.Count(o => o.OrderDate == orderDate);
-            var customer = context.Customers.Find(sendTo.CustomerID);
-
-            if(customer == null)
+            try
             {
-                throw new InvalidOperationException($"得意先不明 (ID={sendTo.CustomerID})");
-            }
-            if(countOfOrdersToday > 999999)
-            {
-                throw new InvalidOperationException($"当日受注数が想定外に多い：受注日={orderDate.ToString("yyyyMMdd")}, 受注数={countOfOrdersToday}");
-            }
+                var countOfOrdersToday = context.OrderFromCustomers.Count(o => o.OrderDate == orderDate);
+                var customer = context.Customers.Find(sendTo.CustomerID);
 
-            var usedDate = arrivalDate.AddDays(-1);
-            foreach (var item in bouquet.PartsList)
-            {
-                var part = context.BouquetParts.Find(item.PartsCode);
-                Parent.BouquetModel.UseFromInventory(context, part, usedDate, item.Quantity);
-
-                if (Parent.BouquetModel.ShortageInventories.Count() > 0)
+                if (customer == null)
                 {
-                    throw new InventoryShortageException(Parent.BouquetModel.ShortageInventories.First(), item.Quantity);
+                    throw new InvalidOperationException($"得意先不明 (ID={sendTo.CustomerID})");
                 }
+                if (countOfOrdersToday > 999999)
+                {
+                    throw new InvalidOperationException($"当日受注数が想定外に多い：受注日={orderDate.ToString("yyyyMMdd")}, 受注数={countOfOrdersToday}");
+                }
+
+                var usedDate = arrivalDate.AddDays(-1);
+                foreach (var item in bouquet.PartsList)
+                {
+                    var part = context.BouquetParts.Find(item.PartsCode);
+                    Parent.BouquetModel.UseFromInventory(context, part, usedDate, item.Quantity);
+
+                    if (Parent.BouquetModel.ShortageInventories.Count() > 0)
+                    {
+                        throw new InventoryShortageException(Parent.BouquetModel.ShortageInventories.First(), item.Quantity);
+                    }
+                }
+
+                var order = new OrderFromCustomer()
+                {
+                    ID = $"{orderDate.ToString("yyyyMMdd")}-{countOfOrdersToday + 1:000000}",
+                    BouquetCode = bouquet.Code,
+                    CustomerID = context.Customers.Find(sendTo.CustomerID).ID,
+                    ShippingAddressID = sendTo.ID,
+                    OrderDate = orderDate,
+                    ShippingDate = arrivalDate.AddDays(-1),
+                    HasMessage = string.IsNullOrWhiteSpace(message),
+                    Message = message,
+                    Status = 0
+                };
+
+                context.OrderFromCustomers.Add(order);
+                context.SaveChanges();
+                return order.ID;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
             }
 
-            var order = new OrderFromCustomer()
-            {
-                ID = $"{orderDate.ToString("yyyyMMdd")}-{countOfOrdersToday+1:000000}",
-                BouquetCode = bouquet.Code,
-                CustomerID = context.Customers.Find(sendTo.CustomerID).ID,
-                ShippingAddressID = sendTo.ID,
-                OrderDate = orderDate,
-                ShippingDate = arrivalDate.AddDays(-1),
-                HasMessage = string.IsNullOrWhiteSpace(message),
-                Message = message,
-                Status = 0
-            };
-
-            context.OrderFromCustomers.Add(order);
-            context.SaveChanges();
-            
-            LogUtil.DEBUGLOG_EndMethod();
-            return order.ID;
         }
         #endregion // 注文
 
@@ -459,24 +469,33 @@ namespace MemorieDeFleurs.Models
         {
             LogUtil.DEBUGLOG_BeginMethod($"order={orderNo}");
 
-            var order = FindOrder(context, orderNo);
-            if (order == null)
+            try
             {
-                throw new NotSupportedException($"該当する受注履歴なし：{orderNo}");
+                var order = FindOrder(context, orderNo);
+                if (order == null)
+                {
+                    throw new NotSupportedException($"該当する受注履歴なし：{orderNo}");
+                }
+
+                var partsList = context.PartsList.Where(i => i.BouquetCode == order.BouquetCode);
+
+                LogUtil.Debug($"{LogUtil.Indent}{order.BouquetCode} ({partsList.Count()} part(s)):" +
+                    $" {string.Join(", ", partsList.Select(p => $"({p.PartsCode} x {p.Quantity})"))}");
+
+                foreach (var item in partsList)
+                {
+                    var part = context.BouquetParts.Find(item.PartsCode);
+                    Parent.BouquetModel.ReturnToInventory(context, part, order.ShippingDate, item.Quantity);
+                }
             }
-
-            var partsList = context.PartsList.Where(i => i.BouquetCode == order.BouquetCode);
-
-            LogUtil.Debug($"{LogUtil.Indent}{order.BouquetCode} ({partsList.Count()} part(s)):" +
-                $" {string.Join(", ", partsList.Select(p => $"({p.PartsCode} x {p.Quantity})"))}");
-
-            foreach(var item in partsList)
+            catch (Exception)
             {
-                var part = context.BouquetParts.Find(item.PartsCode);
-                Parent.BouquetModel.ReturnToInventory(context, part, order.ShippingDate, item.Quantity);
+                throw;
             }
-
-            LogUtil.DEBUGLOG_EndMethod($"order={orderNo}");
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod($"order={orderNo}");
+            }
         }
         #endregion // 注文取消
 

@@ -883,53 +883,63 @@ namespace MemorieDeFleurs.Models
         public void CancelOrder(MemorieDeFleursDbContext context, int lotNo)
         {
             LogUtil.DEBUGLOG_BeginMethod($"lotNo={lotNo}");
-            var lot = context.InventoryActions.Where(a => a.InventoryLotNo == lotNo);
-            if (lot.Count() == 0)
+            try
             {
-                LogUtil.Warn($"CancelOrder: Lot {lotNo} was not found in inventory actions.");
-                return;
-            }
-
-            var arrived = lot.SingleOrDefault(act => act.Action == InventoryActionType.ARRIVED);
-            if (arrived != null)
-            {
-                throw new ApplicationException($"単品納品済み変更不可： {arrived.PartsCode}.Lot{arrived.InventoryLotNo}, 入荷日 {arrived.ArrivalDate:yyyyMMdd}");
-            }
-
-            // コピーを取ってコピー元(データベースの中身)を削除
-            var theLot = lot.ToList();
-            context.InventoryActions.RemoveRange(theLot);
-            context.SaveChanges();
-
-            var partCode = theLot.First().PartsCode;
-            var part = context.BouquetParts.Find(partCode);
-            if (part == null)
-            {
-                throw new NotImplementedException($"単品 {partCode} が見つからない： Lot No. {lotNo}");
-            }
-
-            foreach (var action in theLot
-                .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
-                .Where(act => act.Quantity > 0)
-                .OrderBy(act => act.ActionDate))
-            {
-                // このロットで払い出されている加工数量を他のロットに移動する
-                try
+                var lot = context.InventoryActions.Where(a => a.InventoryLotNo == lotNo);
+                if (lot.Count() == 0)
                 {
-                    var usedLot = new Stack<int>();
-                    usedLot.Push(action.InventoryLotNo);
-                    Parent.BouquetModel.UseFromOtherLot(context, action, action.Quantity, usedLot);
+                    LogUtil.Warn($"CancelOrder: Lot {lotNo} was not found in inventory actions.");
+                    return;
                 }
-                catch(InventoryShortageException eis)
+
+                var arrived = lot.SingleOrDefault(act => act.Action == InventoryActionType.ARRIVED);
+                if (arrived != null)
                 {
-                    context.InventoryActions.Add(eis.InventoryShortageAction);
-                    LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
+                    throw new ApplicationException($"単品納品済み変更不可： {arrived.PartsCode}.Lot{arrived.InventoryLotNo}, 入荷日 {arrived.ArrivalDate:yyyyMMdd}");
                 }
+
+                // コピーを取ってコピー元(データベースの中身)を削除
+                var theLot = lot.ToList();
+                context.InventoryActions.RemoveRange(theLot);
+                context.SaveChanges();
+
+                var partCode = theLot.First().PartsCode;
+                var part = context.BouquetParts.Find(partCode);
+                if (part == null)
+                {
+                    throw new NotImplementedException($"単品 {partCode} が見つからない： Lot No. {lotNo}");
+                }
+
+                foreach (var action in theLot
+                    .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
+                    .Where(act => act.Quantity > 0)
+                    .OrderBy(act => act.ActionDate))
+                {
+                    // このロットで払い出されている加工数量を他のロットに移動する
+                    try
+                    {
+                        var usedLot = new Stack<int>();
+                        usedLot.Push(action.InventoryLotNo);
+                        Parent.BouquetModel.UseFromOtherLot(context, action, action.Quantity, usedLot);
+                    }
+                    catch (InventoryShortageException eis)
+                    {
+                        context.InventoryActions.Add(eis.InventoryShortageAction);
+                        LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
+                    }
+                }
+
+                context.SaveChanges();
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod($"lotNo={lotNo}");
             }
 
-            context.SaveChanges();
-
-            LogUtil.DEBUGLOG_EndMethod($"lotNo={lotNo}");
         }
         #endregion // 発注取消
 
@@ -978,22 +988,32 @@ namespace MemorieDeFleurs.Models
         {
             LogUtil.DEBUGLOG_BeginMethod($"context, {orderNo}, {newArrivalDate.ToString("yyyyMMdd")}");
 
-            var order = context.OrdersToSuppliers.Find(orderNo);
-            var oldArrivalDate = order.DeliveryDate;
-            var details = context.OrderDetailsToSuppliers
-                .Where(d => d.OrderToSupplierID == order.ID).OrderBy(d => d.OrderIndex);
-            var detailStrings = details.Select(d => $"{d.PartsCode} x {d.LotCount}");
-
-            LogUtil.Debug($"Order {orderNo} contains {details.Count()} parts: [{string.Join(", ", details)}]");
-
-            foreach(var item in details.OrderBy(d => d.OrderIndex))
+            try
             {
-                var part = context.BouquetParts.Find(item.PartsCode);
-                ChangeArrivalDate(context, order.OrderDate, item.BouquetPart, item.InventoryLotNo, newArrivalDate);
-            }
-            context.SaveChanges();
+                var order = context.OrdersToSuppliers.Find(orderNo);
+                var oldArrivalDate = order.DeliveryDate;
+                var details = context.OrderDetailsToSuppliers
+                    .Where(d => d.OrderToSupplierID == order.ID).OrderBy(d => d.OrderIndex);
+                var detailStrings = details.Select(d => $"{d.PartsCode} x {d.LotCount}");
 
-            LogUtil.DEBUGLOG_EndMethod($"context, {orderNo}, {newArrivalDate.ToString("yyyyMMdd")}");
+                LogUtil.Debug($"Order {orderNo} contains {details.Count()} parts: [{string.Join(", ", details)}]");
+
+                foreach (var item in details.OrderBy(d => d.OrderIndex))
+                {
+                    var part = context.BouquetParts.Find(item.PartsCode);
+                    ChangeArrivalDate(context, order.OrderDate, item.BouquetPart, item.InventoryLotNo, newArrivalDate);
+                }
+                context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod($"context, {orderNo}, {newArrivalDate.ToString("yyyyMMdd")}");
+            }
+
         }
 
         /// <summary>
@@ -1031,6 +1051,10 @@ namespace MemorieDeFleurs.Models
                 };
                 CancelOrder(context, lotNo);
                 Order(context, orderDate, orderParameter);
+            }
+            catch(Exception)
+            {
+                throw;
             }
             finally
             {
@@ -1183,83 +1207,101 @@ namespace MemorieDeFleurs.Models
         {
             LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, {orderNo}");
 
-            var order = context.OrdersToSuppliers.Find(orderNo);
-
-            if(order.Status == OrderToSupplierStatus.ARRIVED)
+            try
             {
-                throw new ApplicationException($"納品済み変更不可： {orderNo}");
+                var order = context.OrdersToSuppliers.Find(orderNo);
+
+                if (order.Status == OrderToSupplierStatus.ARRIVED)
+                {
+                    throw new ApplicationException($"納品済み変更不可： {orderNo}");
+                }
+
+                var details = context.OrderDetailsToSuppliers
+                    .Where(d => d.OrderToSupplierID == orderNo)
+                    .OrderBy(d => d.OrderIndex).ToList();
+
+                foreach (var item in details)
+                {
+                    OrderPartsIsArrived(context, date, orderNo, item);
+                }
+
+                order.Status = OrderToSupplierStatus.ARRIVED;
+                context.OrdersToSuppliers.Update(order);
+
             }
-
-            var details = context.OrderDetailsToSuppliers
-                .Where(d => d.OrderToSupplierID == orderNo)
-                .OrderBy(d => d.OrderIndex).ToList();
-
-            foreach(var item in details)
+            catch(Exception)
             {
-                OrderPartsIsArrived(context, date, orderNo, item);
+                throw;
             }
-
-            order.Status = OrderToSupplierStatus.ARRIVED;
-            context.OrdersToSuppliers.Update(order);
-
-            LogUtil.DEBUGLOG_EndMethod();
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
         }
 
         private void OrderPartsIsArrived(MemorieDeFleursDbContext context, DateTime date, string orderNo, OrderDetailsToSupplier item)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, {orderNo}, {item.PartsCode}.Lot{item.InventoryLotNo}");
 
-            DEBUGLOG_ShowInventoryActions(context, item.PartsCode, new[] { item.InventoryLotNo });
-
-            var arrived = context.InventoryActions
-                .Where(act => act.PartsCode == item.PartsCode)
-                .Where(act => act.InventoryLotNo == item.InventoryLotNo)
-                .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE || act.Action == InventoryActionType.ARRIVED)
-                .SingleOrDefault(); // ロットの在庫アクションは発注時点で一式登録されるので、必ず1つ存在するはず。
-            if (arrived == null)
+            try
             {
-                throw new ApplicationException($"発注分の在庫予定アクションが見つからない： {orderNo}");
-            }
-            else if (arrived.Action == InventoryActionType.ARRIVED)
-            {
-                throw new ApplicationException($"納品済み変更不可： {orderNo}-{item.OrderIndex}, {item.PartsCode}.Lot{item.InventoryLotNo}");
-            }
-
-            if (arrived.ArrivalDate != date)
-            {
-                var oldArrivalDate = arrived.ArrivalDate;
-
-                // 入荷予定日を先に変更する
-                ChangeArrivalDate(context, orderNo, date);
-
-                arrived = context.InventoryActions
-                    .Where(act => act.BouquetPart == item.BouquetPart)
+                var arrived = context.InventoryActions
+                    .Where(act => act.PartsCode == item.PartsCode)
                     .Where(act => act.InventoryLotNo == item.InventoryLotNo)
-                    .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE)
-                    .SingleOrDefault();
+                    .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE || act.Action == InventoryActionType.ARRIVED)
+                    .SingleOrDefault(); // ロットの在庫アクションは発注時点で一式登録されるので、必ず1つ存在するはず。
                 if (arrived == null)
                 {
-                    throw new ApplicationException($"入荷日変更後の在庫予定アクションが見つからない： {orderNo}-{item.OrderIndex}" +
-                        $", {item.PartsCode}(Lot{item.InventoryLotNo}), {oldArrivalDate:yyyyMMdd}->{date:yyyyMMdd}");
+                    throw new ApplicationException($"発注分の在庫予定アクションが見つからない： {orderNo}");
                 }
+                else if (arrived.Action == InventoryActionType.ARRIVED)
+                {
+                    throw new ApplicationException($"納品済み変更不可： {orderNo}-{item.OrderIndex}, {item.PartsCode}.Lot{item.InventoryLotNo}");
+                }
+
+                if (arrived.ArrivalDate != date)
+                {
+                    var oldArrivalDate = arrived.ArrivalDate;
+
+                    // 入荷予定日を先に変更する
+                    ChangeArrivalDate(context, orderNo, date);
+
+                    arrived = context.InventoryActions
+                        .Where(act => act.BouquetPart == item.BouquetPart)
+                        .Where(act => act.InventoryLotNo == item.InventoryLotNo)
+                        .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE)
+                        .SingleOrDefault();
+                    if (arrived == null)
+                    {
+                        throw new ApplicationException($"入荷日変更後の在庫予定アクションが見つからない： {orderNo}-{item.OrderIndex}" +
+                            $", {item.PartsCode}(Lot{item.InventoryLotNo}), {oldArrivalDate:yyyyMMdd}->{date:yyyyMMdd}");
+                    }
+                }
+
+                // InventoryAction.Action は在庫アクションテーブルのプライマリキーなので UPDATE ではなく DELETE → INSERT する。
+                var newArrived = new InventoryAction()
+                {
+                    Action = InventoryActionType.ARRIVED,
+                    ActionDate = arrived.ActionDate,
+                    ArrivalDate = arrived.ArrivalDate,
+                    BouquetPart = arrived.BouquetPart,
+                    InventoryLotNo = arrived.InventoryLotNo,
+                    PartsCode = arrived.PartsCode,
+                    Quantity = arrived.Quantity,
+                    Remain = arrived.Remain
+                };
+                context.InventoryActions.Remove(arrived);
+                context.InventoryActions.Add(newArrived);
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
             }
 
-            // InventoryAction.Action は在庫アクションテーブルのプライマリキーなので UPDATE ではなく DELETE → INSERT する。
-            var newArrived = new InventoryAction()
-            {
-                Action = InventoryActionType.ARRIVED,
-                ActionDate = arrived.ActionDate,
-                ArrivalDate = arrived.ArrivalDate,
-                BouquetPart = arrived.BouquetPart,
-                InventoryLotNo = arrived.InventoryLotNo,
-                PartsCode = arrived.PartsCode,
-                Quantity = arrived.Quantity,
-                Remain = arrived.Remain
-            };
-            context.InventoryActions.Remove(arrived);
-            context.InventoryActions.Add(newArrived);
-
-            LogUtil.DEBUGLOG_EndMethod();
         }
         #endregion // 納品
     }
