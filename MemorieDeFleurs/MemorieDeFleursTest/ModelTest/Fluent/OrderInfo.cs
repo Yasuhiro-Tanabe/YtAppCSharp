@@ -16,5 +16,9 @@
             return new OrderInfo(lotNo, initial);
         }
 
+        public override string ToString()
+        {
+            return $"Lot{LotNo}(Q={InitialQuantity})";
+        }
     }
 }
