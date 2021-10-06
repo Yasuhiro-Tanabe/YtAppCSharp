@@ -1091,5 +1091,45 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // 数量更新
         #endregion // 商品構成の追加削除
+
+        #region 入荷予定数量変更
+        /// <summary>
+        /// 入荷予定数量を変更し、必要に応じて在庫払出展開する、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="partsCode">花コード</param>
+        /// <param name="lotNo">発注ロット番号(=在庫ロット番号)</param>
+        /// <param name="newQuantity">変更後の入荷数量</param>
+        public void ChangeArrivalQuantity(MemorieDeFleursDbContext context, string partsCode, int lotNo, int newQuantity)
+        {
+            var arrived = context.InventoryActions
+                .Where(act => act.PartsCode == partsCode)
+                .Where(act => act.InventoryLotNo == lotNo)
+                .SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE || act.Action == InventoryActionType.ARRIVED);
+
+            if (arrived == null)
+            {
+                throw new NotImplementedException($"対象ロットが見つからない：{partsCode}.Lot{lotNo}");
+            }
+            else if (arrived.Action == InventoryActionType.ARRIVED)
+            {
+                throw new NotImplementedException($"入荷済み変更不可：{partsCode}.Lot{lotNo}");
+            }
+
+            if (arrived.Quantity == newQuantity)
+            {
+                // 変更不要
+                return;
+            }
+
+            arrived.Quantity = newQuantity;
+            arrived.Remain = newQuantity;
+            context.InventoryActions.Update(arrived);
+
+            var usedLot = new Stack<int>();
+            Parent.BouquetModel.UseFromPreviousRemain(context, arrived, arrived.ArrivalDate, usedLot);
+            context.SaveChanges();
+        }
+        #endregion // 入荷予定数量変更
     }
 }

@@ -461,7 +461,7 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <param name="orderDate">発注日</param>
         /// <param name="supplier">発注先</param>
-        /// <param name="derivalyDate">納品予定日</param>
+        /// <param name="derivalyDate">入荷予定日</param>
         /// <param name="orderParts">発注明細</param>
         /// <returns>発注番号</returns>
         public string Order(DateTime orderDate, Supplier supplier, DateTime derivalyDate, IList<Tuple<BouquetPart,int>> orderParts)
@@ -503,7 +503,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="context">トランザクション中のDBコンテキスト</param>
         /// <param name="orderDate">発注日</param>
         /// <param name="supplier">発注先</param>
-        /// <param name="derivalyDate">納品予定日</param>
+        /// <param name="derivalyDate">入荷予定日</param>
         /// <param name="orderParts">発注明細</param>
         /// <returns>発注番号</returns>
         public string Order(MemorieDeFleursDbContext context, DateTime orderDate, Supplier supplier, DateTime derivalyDate, IList<Tuple<BouquetPart, int>> orderParts)
@@ -534,7 +534,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="orderDate">発注日</param>
         /// <param name="part">単品</param>
         /// <param name="quantityOfLot">注文ロット数</param>
-        /// <param name="arrivalDate">納品予定日</param>
+        /// <param name="arrivalDate">入荷予定日</param>
         /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
         public int Order(DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
@@ -567,7 +567,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="orderDate">発注日</param>
         /// <param name="part">単品</param>
         /// <param name="quantityOfLot">注文ロット数</param>
-        /// <param name="arrivalDate">納品予定日</param>
+        /// <param name="arrivalDate">入荷予定日</param>
         /// <returns>発注ロット番号(＝在庫ロット番号)</returns>
         public int Order(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int quantityOfLot, DateTime arrivalDate)
         {
@@ -594,7 +594,7 @@ namespace MemorieDeFleurs.Models
         ///     <list type="">
         ///         <item>
         ///             <term>【必須】<see cref="InventoryAction.ArrivalDate"/></term>
-        ///             <description>納品予定日</description>
+        ///             <description>入荷予定日</description>
         ///         </item>
         ///         <item>
         ///             <term>【必須】<see cref="InventoryAction.InventoryLotNo"/></term>
@@ -681,7 +681,7 @@ namespace MemorieDeFleurs.Models
                 .OrderBy(act => act.ActionDate))
             {
 
-                // 納品予定が翌日以降の在庫ロットからの振り替え
+                // 入荷予定が翌日以降の在庫ロットからの振り替え
                 TransferLotQuantites(context, action, usedLot);
 
             }
@@ -895,7 +895,7 @@ namespace MemorieDeFleurs.Models
                 var arrived = lot.SingleOrDefault(act => act.Action == InventoryActionType.ARRIVED);
                 if (arrived != null)
                 {
-                    throw new ApplicationException($"単品納品済み変更不可： {arrived.PartsCode}.Lot{arrived.InventoryLotNo}, 入荷日 {arrived.ArrivalDate:yyyyMMdd}");
+                    throw new ApplicationException($"単品入荷済み変更不可： {arrived.PartsCode}.Lot{arrived.InventoryLotNo}, 入荷日 {arrived.ArrivalDate:yyyyMMdd}");
                 }
 
                 // コピーを取ってコピー元(データベースの中身)を削除
@@ -943,12 +943,12 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // 発注取消
 
-        #region 納品予定日変更
+        #region 入荷予定日変更
         /// <summary>
-        /// 納品予定日を変更する
+        /// 入荷予定日を変更する
         /// </summary>
         /// <param name="orderNo">発注番号</param>
-        /// <param name="newArrivalDate">変更後の納品予定日</param>
+        /// <param name="newArrivalDate">変更後の入荷予定日</param>
         public void ChangeArrivalDate(string orderNo, DateTime newArrivalDate)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, {newArrivalDate:yyyyMMDD}");
@@ -979,11 +979,11 @@ namespace MemorieDeFleurs.Models
         }
 
         /// <summary>
-        /// 納品予定日を変更する：トランザクション内での呼出用
+        /// 入荷予定日を変更する：トランザクション内での呼出用
         /// </summary>
         /// <param name="context">トランザクション中のDBコンテキスト</param>
         /// <param name="orderNo">発注番号</param>
-        /// <param name="newArrivalDate">変更後の納品予定日</param>
+        /// <param name="newArrivalDate">変更後の入荷予定日</param>
         public void ChangeArrivalDate(MemorieDeFleursDbContext context, string orderNo, DateTime newArrivalDate)
         {
             LogUtil.DEBUGLOG_BeginMethod($"context, {orderNo}, {newArrivalDate.ToString("yyyyMMdd")}");
@@ -1017,13 +1017,13 @@ namespace MemorieDeFleurs.Models
         }
 
         /// <summary>
-        /// 個々の単品について納品予定日を変更する、トランザクション内での呼出用
+        /// 個々の単品について入荷予定日を変更する、トランザクション内での呼出用
         /// </summary>
         /// <param name="context">トランザクション中のDBコンテキスト</param>
         /// <param name="orderDate">発注日：発注日は変更しない</param>
         /// <param name="part">発注対象単品</param>
         /// <param name="lotNo">在庫ロット番号</param>
-        /// <param name="newArrivalDate">変更後の納品予定日</param>
+        /// <param name="newArrivalDate">変更後の入荷予定日</param>
         private void ChangeArrivalDate(MemorieDeFleursDbContext context, DateTime orderDate, BouquetPart part, int lotNo, DateTime newArrivalDate)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{part.Code}, {lotNo}, {newArrivalDate.ToString("yyyyMMdd")}");
@@ -1037,7 +1037,7 @@ namespace MemorieDeFleurs.Models
 
                 if(oldArrivalLot.Action == InventoryActionType.ARRIVED)
                 {
-                    throw new ApplicationException($"単品納品済み変更不可： {part.Code}.Lot{lotNo}, 入荷日={oldArrivalLot.ArrivalDate:yyyyMMdd}");
+                    throw new ApplicationException($"単品入荷済み変更不可： {part.Code}.Lot{lotNo}, 入荷日={oldArrivalLot.ArrivalDate:yyyyMMdd}");
                 }
 
                 var orderParameter = new InventoryAction()
@@ -1061,7 +1061,7 @@ namespace MemorieDeFleurs.Models
                 LogUtil.DEBUGLOG_EndMethod($"{part.Code}, {lotNo}, {newArrivalDate.ToString("yyyyMMdd")}");
             }
         }
-        #endregion // 納品予定日変更
+        #endregion // 入荷予定日変更
 
         #region 単品仕入先の登録改廃
         /// <summary>
@@ -1170,13 +1170,13 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // 単品仕入先の登録改廃
 
-        #region 納品
+        #region 入荷
         /// <summary>
-        /// 指定日に指定された発注が指定数量通り納品されたことを登録する。
+        /// 指定日に指定された発注が指定数量通り入荷されたことを登録する。
         /// </summary>
-        /// <param name="date">納品日</param>
-        /// <param name="orderNo">納品された発注番号</param>
-        /// <param name="otherOrders">納品された発注番号：複数指定した場合の2つめ以降の発注番号</param>
+        /// <param name="date">入荷日</param>
+        /// <param name="orderNo">入荷された発注番号</param>
+        /// <param name="otherOrders">入荷された発注番号：複数指定した場合の2つめ以降の発注番号</param>
         public void OrdersAreArrived(DateTime date, string orderNo, params string[] otherOrders)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -1213,7 +1213,7 @@ namespace MemorieDeFleurs.Models
 
                 if (order.Status == OrderToSupplierStatus.ARRIVED)
                 {
-                    throw new ApplicationException($"納品済み変更不可： {orderNo}");
+                    throw new ApplicationException($"入荷済み変更不可： {orderNo}");
                 }
 
                 var details = context.OrderDetailsToSuppliers
@@ -1256,7 +1256,7 @@ namespace MemorieDeFleurs.Models
                 }
                 else if (arrived.Action == InventoryActionType.ARRIVED)
                 {
-                    throw new ApplicationException($"納品済み変更不可： {orderNo}-{item.OrderIndex}, {item.PartsCode}.Lot{item.InventoryLotNo}");
+                    throw new ApplicationException($"入荷済み変更不可： {orderNo}-{item.OrderIndex}, {item.PartsCode}.Lot{item.InventoryLotNo}");
                 }
 
                 if (arrived.ArrivalDate != date)
@@ -1303,6 +1303,73 @@ namespace MemorieDeFleurs.Models
             }
 
         }
-        #endregion // 納品
+        #endregion // 入荷
+
+        #region 入荷予定数量変更
+        /// <summary>
+        /// 入荷予定数量を変更する
+        /// </summary>
+        /// <param name="orderNo">対象発注番号</param>
+        /// <param name="newQuantites">単品毎の更新後の数量：変更のある単品だけでも良い。</param>
+        public void ChangeArrivedQuantities(string orderNo, ICollection<Tuple<BouquetPart, int>> newQuantites)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    ChangeArrivedQuantities(context, orderNo, newQuantites);
+                    transaction.Commit();
+                    LogUtil.Info($"QuantityChanged: {orderNo}, changed=[{string.Join(", ", newQuantites.Select(item => $"{item.Item1.Code} -> {item.Item2}"))}]");
+                }
+                catch(Exception ex)
+                {
+                    LogUtil.Warn($"{orderNo}: {ex.Message}");
+                    transaction.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 入荷予定数量を変更する、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderNo">対象発注番号</param>
+        /// <param name="newQuantites">単品毎の更新後の数量：ロット数ではなく入荷した数量を指定する。変更のある単品だけでも良い。</param>
+        public void ChangeArrivedQuantities(MemorieDeFleursDbContext context, string orderNo, ICollection<Tuple<BouquetPart, int>> newQuantites)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, [{string.Join(", ", newQuantites.Select(t => $"{t.Item1.Code} x {t.Item2}"))}]");
+            try
+            {
+                foreach (var item in newQuantites)
+                {
+                    ChangeArrivedPartQuantity(context, orderNo, item.Item1, item.Item2);
+                }
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod(orderNo);
+            }
+        }
+
+        private void ChangeArrivedPartQuantity(MemorieDeFleursDbContext context, string orderNo, BouquetPart parts, int quantity)
+        {
+            var orderDetail = context.OrderDetailsToSuppliers
+                .Where(d => d.OrderToSupplierID == orderNo)
+                .SingleOrDefault(d => d.PartsCode == parts.Code);
+            if (orderDetail == null)
+            {
+                throw new NotImplementedException($"注文にない単品： {parts.Code}");
+            }
+
+            Parent.BouquetModel.ChangeArrivalQuantity(context, parts.Code, orderDetail.InventoryLotNo, quantity);
+
+        }
+        #endregion // 入荷予定数量変更
     }
 }
