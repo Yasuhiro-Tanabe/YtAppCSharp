@@ -12,15 +12,31 @@ namespace MemorieDeFleurs.Models
     /// </summary>
     public class MemorieDeFleursModel
     {
+        /// <summary>
+        /// システム内部で使用するデータベース
+        /// </summary>
         internal SqliteConnection DbConnection { get; private set; }
         
+        /// <summary>
+        /// 仕入先モデル：仕入先の登録改廃、単品仕入先の登録、仕入先への発注、納品処理を行う。
+        /// </summary>
         public SupplierModel SupplierModel { get; private set; }
 
+        /// <summary>
+        /// 商品モデル：商品と単品の登録改廃を行う。
+        /// 他に、<see cref="SupplierModel"/> や <see cref="CustomerModel"/> からの単品在庫数量変更要求を受け付ける。
+        /// </summary>
         public BouquetModel BouquetModel { get; private set; }
 
+        /// <summary>
+        /// 得意先モデル：得意先やお届け先の登録改廃、得意先からの商品受注、出荷処理を行う。
+        /// </summary>
         public CustomerModel CustomerModel { get; private set; }
 
-        public SequenceUtil Sequences { get; set; }
+        /// <summary>
+        /// システム内部で使用する連番管理クラス
+        /// </summary>
+        internal SequenceUtil Sequences { get; set; }
 
         /// <summary>
         /// データモデルを生成する。
