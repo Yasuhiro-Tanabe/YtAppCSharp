@@ -64,7 +64,7 @@ namespace MemorieDeFleurs.Models.Entities
         /// 状態
         /// </summary>
         [Column("STATUS")]
-        public int Status { get; set; }
+        public OrderFromCustomerStatus Status { get; set; }
 
 
         [ForeignKey(nameof(BouquetCode))]

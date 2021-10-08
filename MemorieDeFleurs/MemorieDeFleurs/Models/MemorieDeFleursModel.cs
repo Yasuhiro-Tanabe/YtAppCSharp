@@ -36,7 +36,7 @@ namespace MemorieDeFleurs.Models
         /// <summary>
         /// システム内部で使用する連番管理クラス
         /// </summary>
-        internal SequenceUtil Sequences { get; set; }
+        public SequenceUtil Sequences { get; set; }
 
         /// <summary>
         /// データモデルを生成する。

@@ -1131,5 +1131,47 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
         }
         #endregion // 入荷予定数量変更
+
+        #region 出荷数量変更
+        public void ChangeAllScheduledPartsOfTheDayUsed(MemorieDeFleursDbContext context, DateTime date)
+        {
+            LogUtil.DEBUGLOG_BeginMethod(date.ToString("yyyyMMdd"));
+
+            try
+            {
+                foreach (var action in context.InventoryActions
+                    .Where(act => act.ActionDate == date)
+                    .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
+                    .ToList())
+                {
+                    // Action プロパティは InventoryAction テーブルのプライマリキーなので
+                    // UPDATE ではなく DELETE → INSERT する。
+                    var newAction = new InventoryAction()
+                    {
+                        Action = InventoryActionType.USED,
+                        ActionDate = action.ActionDate,
+                        ArrivalDate = action.ArrivalDate,
+                        BouquetPart = action.BouquetPart,
+                        InventoryLotNo = action.InventoryLotNo,
+                        PartsCode = action.PartsCode,
+                        Quantity = action.Quantity,
+                        Remain = action.Remain
+                    };
+                    context.InventoryActions.Remove(action);
+                    context.InventoryActions.Add(newAction);
+                }
+
+                context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod(date.ToString("yyyyMMdd"));
+            }
+        }
+        #endregion // 出荷数量変更
     }
 }

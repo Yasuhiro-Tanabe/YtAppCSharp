@@ -477,6 +477,12 @@ namespace MemorieDeFleurs.Models
                     throw new NotSupportedException($"該当する受注履歴なし：{orderNo}");
                 }
 
+                if(order.Status == OrderFromCustomerStatus.SHIPPED)
+                {
+                    // 出荷済み注文はキャンセル不可
+                    throw new ApplicationException($"出荷済みキャンセル不可：{orderNo}");
+                }
+
                 var partsList = context.PartsList.Where(i => i.BouquetCode == order.BouquetCode);
 
                 LogUtil.Debug($"{LogUtil.Indent}{order.BouquetCode} ({partsList.Count()} part(s)):" +
@@ -539,6 +545,12 @@ namespace MemorieDeFleurs.Models
                 throw new NotImplementedException($"エラー処理未実装：{orderNo} に該当するオーダーがない");
             }
 
+            if(order.Status == OrderFromCustomerStatus.SHIPPED)
+            {
+                // 出荷済み注文はキャンセル不可
+                throw new ApplicationException($"出荷済み出荷日変更不可：{orderNo}");
+            }
+
             var bouquet = Parent.BouquetModel.FindBouquet(order.BouquetCode);
             
             var newShippingDate = newArrivalDate.AddDays(-1);
@@ -554,5 +566,49 @@ namespace MemorieDeFleurs.Models
             }
         }
         #endregion // お届け日変更
+
+        #region 出荷
+        public void ShipAllBouquets(DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                LogUtil.DEBUGLOG_BeginMethod(date.ToString("yyyyMMdd"));
+                try
+                {
+                    ShipAllOrdersFromCustomerInTheDay(context, date);
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod();
+                }
+
+            }
+        }
+
+        private void ShipAllOrdersFromCustomerInTheDay(MemorieDeFleursDbContext context, DateTime date)
+        {
+            foreach(var order in context.OrderFromCustomers.Where(order => order.ShippingDate == date).ToList())
+            {
+                if(order.Status == OrderFromCustomerStatus.SHIPPED)
+                {
+                    // 二重出荷はできない
+                    throw new ApplicationException($"すでに出荷済み：{order.ID}");
+                }
+
+                order.Status = OrderFromCustomerStatus.SHIPPED;
+                context.OrderFromCustomers.Update(order);
+            }
+            context.SaveChanges();
+
+            Parent.BouquetModel.ChangeAllScheduledPartsOfTheDayUsed(context, date);
+        }
+        #endregion // 出荷
     }
 }
