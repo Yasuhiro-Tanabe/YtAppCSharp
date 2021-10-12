@@ -492,25 +492,28 @@ namespace MemorieDeFleurs.Models
                 LogUtil.DEBUGLOG_ComparationOfInventoryQuantityAndPreviousRemain(action, previousRemain);
                 if (previousRemain >= action.Quantity)
                 {
-                    // 全量引き出せる
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, action.Quantity, previousRemain - action.Quantity);
+                    var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain };
 
+                    // 全量引き出せる
                     action.Remain = previousRemain - action.Quantity;
                     context.InventoryActions.Update(action);
+
+                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
 
                     previousRemain -= action.Quantity;
                 }
                 else
                 {
-                    // 前日残の分はこのロットから、それ以外は他のロットから引き出す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, previousRemain, 0);
+                    var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain }; // デバッグログ用
 
+                    // 前日残の分はこのロットから、それ以外は他のロットから引き出す
                     var usedFromThisLot = previousRemain;
                     var useFromOtherLot = action.Quantity - previousRemain;
 
                     action.Quantity = usedFromThisLot;
                     action.Remain = 0;
                     context.InventoryActions.Update(action);
+                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
 
                     try
                     {
@@ -1133,6 +1136,14 @@ namespace MemorieDeFleurs.Models
         #endregion // 入荷予定数量変更
 
         #region 出荷数量変更
+        /// <summary>
+        /// 指定日付の全受注に対し出荷確定処理を行う：
+        /// 
+        /// 受注ステータスを「出荷済(SHIPPED)」に変更する
+        /// 当日分の加工予定在庫アクションを加工済在庫アクションに変更する
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="date">出荷確定処理を行う日</param>
         public void ChangeAllScheduledPartsOfTheDayUsed(MemorieDeFleursDbContext context, DateTime date)
         {
             LogUtil.DEBUGLOG_BeginMethod(date.ToString("yyyyMMdd"));
@@ -1170,6 +1181,122 @@ namespace MemorieDeFleurs.Models
             finally
             {
                 LogUtil.DEBUGLOG_EndMethod(date.ToString("yyyyMMdd"));
+            }
+        }
+
+        /// <summary>
+        /// 指定単品の指定数量分を加工予定から加工済に変更する
+        /// 
+        /// この処理を行うと、同一日の加工予定在庫アクションと加工済在庫アクションが両方並存することになる。
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="date">在庫アクションの状態変更対象日</param>
+        /// <param name="partsQuantity">単品の商品コードと加工済への変更数量</param>
+        public void UpdatePartsUsedQuantity(MemorieDeFleursDbContext context, DateTime date, KeyValuePair<string, int> partsQuantity)
+        {
+            // 指定単品指定日の使用予定・使用在庫アクションをロット毎にグループ化
+            var inventories = context.InventoryActions
+                .Where(act => act.ActionDate == date)
+                .Where(act => act.PartsCode == partsQuantity.Key)
+                .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE || act.Action == InventoryActionType.USED)
+                .AsEnumerable()
+                .GroupBy(act => act.ArrivalDate)
+                .ToDictionary(grp => grp.Key, grp => grp.AsEnumerable().GroupBy(act => act.InventoryLotNo).ToDictionary(grp => grp.Key, grp => grp.ToList()));
+
+            var previousUsed = partsQuantity.Value;
+
+            foreach(var act1 in inventories)
+            {
+                foreach(var act2 in act1.Value)
+                {
+                    // 使用予定在庫アクションから使用在庫アクションに partsQuantity で指定された数量を移し替える
+                    var used = act2.Value.SingleOrDefault(act => act.Action == InventoryActionType.USED);
+                    var scheduled = act2.Value.SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_USE);
+                    if(scheduled == null)
+                    {
+                        // このロットから在庫を移し替えることができない：次のロットにすすむ
+                        continue;
+                    }
+
+                    if(used == null)
+                    {
+                        used = new InventoryAction()
+                        {
+                            Action = InventoryActionType.USED,
+                            ActionDate = scheduled.ActionDate,
+                            ArrivalDate = scheduled.ArrivalDate,
+                            BouquetPart = scheduled.BouquetPart,
+                            InventoryLotNo = scheduled.InventoryLotNo,
+                            PartsCode = scheduled.PartsCode,
+                            Quantity = 0,
+                            Remain = scheduled.Remain
+                        };
+                        UpdateAndAddInventoryActions(context, used, scheduled, ref previousUsed);
+                    }
+                    else
+                    {
+                        UpdateInventoryActions(context, used, scheduled, ref previousUsed);
+                    }
+                }
+            }
+        }
+
+        private void UpdateAndAddInventoryActions(MemorieDeFleursDbContext context, InventoryAction used, InventoryAction scheduled, ref int quantity)
+        {
+            UpdateQuantity(used, scheduled, ref quantity);
+            UpdateScheduledToUseInventoryAction(context, scheduled);
+
+            context.InventoryActions.Add(used);
+            LogUtil.DEBUGLOG_InventoryActionCreated(used);
+        }
+
+        private void UpdateInventoryActions(MemorieDeFleursDbContext context, InventoryAction used, InventoryAction scheduled, ref int quantity)
+        {
+            var oldUsed = new InventoryAction() { Quantity = used.Quantity, Remain = used.Remain }; // デバッグ用、変更前の数量残数
+
+            UpdateQuantity(used, scheduled, ref quantity);
+            UpdateScheduledToUseInventoryAction(context, scheduled);
+
+            context.InventoryActions.Update(used);
+            LogUtil.DEBUGLOG_InventoryActionChanged(used, oldUsed);
+        }
+
+        private void UpdateQuantity(InventoryAction used, InventoryAction scheduled, ref int quantity)
+        {
+            var oldScheduled = new InventoryAction() { Quantity = scheduled.Quantity, Remain = scheduled.Remain }; // デバッグ用、変更前の数量残数
+
+            if(scheduled.Quantity > quantity)
+            {
+                scheduled.Quantity -= quantity;
+                used.Quantity += quantity;
+                quantity = 0;
+
+                if(scheduled.Quantity == 0)
+                {
+                    scheduled.Remain = 0;
+                }
+            }
+            else
+            {
+                quantity -= scheduled.Quantity;
+                used.Quantity += scheduled.Quantity;
+                scheduled.Quantity = 0;
+                scheduled.Remain = 0;
+            }
+
+            LogUtil.DEBUGLOG_InventoryActionChanged(scheduled, oldScheduled);
+        }
+        
+        private void UpdateScheduledToUseInventoryAction(MemorieDeFleursDbContext context, InventoryAction scheduled)
+        {
+            if(scheduled.Quantity == 0 && scheduled.Remain ==0)
+            {
+                context.InventoryActions.Remove(scheduled);
+                LogUtil.Debug($"Removed: {scheduled.ToString("L")}");
+            }
+            else
+            {
+                context.InventoryActions.Update(scheduled);
             }
         }
         #endregion // 出荷数量変更

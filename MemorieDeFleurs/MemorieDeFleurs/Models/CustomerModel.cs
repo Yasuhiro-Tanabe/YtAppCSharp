@@ -609,6 +609,59 @@ namespace MemorieDeFleurs.Models
 
             Parent.BouquetModel.ChangeAllScheduledPartsOfTheDayUsed(context, date);
         }
+
+        /// <summary>
+        /// 得意先からの受注番号指定で出荷処理を行う。
+        /// </summary>
+        /// <param name="date">出荷日</param>
+        /// <param name="orderNumbers">出荷した受注番号</param>
+        public void ShipOrders(DateTime date, params string[] orderNumbers)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, [ {string.Join(", ", orderNumbers)} ]");
+                try
+                {
+                    ShipOrders(context, date, orderNumbers);
+                    transaction.Commit();
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn($"Order shipping failed: {date:yyyyMMdd}, {ex.GetType().Name} : {ex.Message}");
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod();
+                }
+            }
+        }
+
+        private void ShipOrders(MemorieDeFleursDbContext context, DateTime date, params string[] orderNumbers)
+        {
+            var orderList = context.OrderFromCustomers.Where(o => orderNumbers.Contains(o.ID)).ToList();
+            foreach (var order in orderList)
+            {
+                order.ShippingDate = date;
+                order.Status = OrderFromCustomerStatus.SHIPPED;
+                context.OrderFromCustomers.Update(order);
+            }
+            context.SaveChanges();
+            LogUtil.Debug($"{LogUtil.Indent}OrderFromCustomers changed.");
+
+
+            var partsList = orderList
+                .SelectMany(o => context.PartsList.Where(i => i.BouquetCode == o.BouquetCode))
+                .GroupBy(i => i.PartsCode)
+                .ToDictionary(g => g.Key, g => g.Sum(i => i.Quantity));
+            foreach(var item in partsList)
+            {
+                Parent.BouquetModel.UpdatePartsUsedQuantity(context, date, item);
+            }
+            context.SaveChanges();
+        }
         #endregion // 出荷
     }
 }

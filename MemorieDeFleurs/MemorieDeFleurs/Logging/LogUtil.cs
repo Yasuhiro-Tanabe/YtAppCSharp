@@ -83,24 +83,6 @@ namespace MemorieDeFleurs.Logging
         }
 
         /// <summary>
-        /// 在庫アクションの変更ログを出力する
-        /// </summary>
-        /// <param name="oldAction">変更前の在庫アクションオブジェクト</param>
-        /// <param name="newQuantity">変更後の数量</param>
-        /// <param name="newRemain">変更後の残数</param>
-        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
-        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
-        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
-        [Conditional("DEBUG")]
-        public static void DEBUGLOG_InventoryActionQuantityChanged(InventoryAction oldAction, int newQuantity, int newRemain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
-        {
-            var qnew = newQuantity == oldAction.Quantity ? "(same)" : $"-> {newQuantity}";
-            var rnew = newRemain == oldAction.Remain ? $"(same)" : $"-> {newRemain}";
-
-            LogUtil.Debug($"{Indent}Update: {oldAction.ToString("h")}=[quantity={oldAction.Quantity} {qnew}, remain={oldAction.Remain} {rnew}]", caller, path, line);
-        }
-
-        /// <summary>
         /// 変更処理実施前に在庫アクションの変更ログを出力する
         /// 
         /// oldAction.Quantity が oldAction.Quantity から (oldAction.Quantity + used) に、Remain が oldAction.Remain から (oldAction.Remain － used) に
@@ -114,7 +96,13 @@ namespace MemorieDeFleurs.Logging
         [Conditional("DEBUG")]
         public static void DEBUGLOG_InventoryActionQuantityChangingTo(InventoryAction oldAction, int used, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
-            DEBUGLOG_InventoryActionQuantityChanged(oldAction, oldAction.Quantity + used, oldAction.Remain - used, caller, path, line);
+            var newQuantity = oldAction.Quantity + used;
+            var newRemain = oldAction.Remain - used;
+
+            var txtQuantity = oldAction.Quantity == newQuantity ? "(same)" : $"-> {newQuantity}";
+            var txtRemain = oldAction.Remain == newRemain ? "(same)" : $"-> {newRemain}";
+
+            LogUtil.Debug($"{Indent}Update: {oldAction.ToString("h")}=[quantity={oldAction.Quantity} {txtQuantity}, remain={oldAction.Remain} {txtRemain}", caller, path, line);
         }
 
         /// <summary>
@@ -128,6 +116,7 @@ namespace MemorieDeFleurs.Logging
         /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
         /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
         /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
+        [Conditional("DEBUG")]
         public static void DEBUGLOG_InventoryActionQuantityChanged(InventoryAction newAction, int used, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var oldQuantity = newAction.Quantity - used;
@@ -137,6 +126,38 @@ namespace MemorieDeFleurs.Logging
             var txtRemain = oldRemain == newAction.Remain ? "(same)" : $"-> {newAction.Remain}";
 
             LogUtil.Debug($"{Indent}Update: {newAction.ToString("h")}=[quantity={oldQuantity} {txtQuantity}, remain={oldRemain} {txtRemain}", caller, path, line);
+        }
+
+        /// <summary>
+        /// 変更処理実施後に、在庫アクションの変更ログを出力する
+        /// </summary>
+        /// <param name="newAction">変更後の在庫アクションオブジェクト</param>
+        /// <param name="oldRemain">変更前の残数：残数がこの値から newAction.Remain に変わったことをログ出力する。</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
+        [Conditional("DEBUG")]
+        public static void DEBUGLOG_InventoryActionRemainChanged(InventoryAction newAction, int oldRemain, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        {
+            var txtRemain = oldRemain == newAction.Remain ? $"{newAction.Remain} (same)" : $"{oldRemain} -> {newAction.Remain}";
+            LogUtil.Debug($"{Indent}Update: {newAction.ToString("h")}=[quantity={newAction.Quantity} (same), remain={oldRemain} {txtRemain}", caller, path, line);
+        }
+
+        /// <summary>
+        /// 在庫アクションの変更ログを出力する
+        /// </summary>
+        /// <param name="newAction">変更後の在庫アクション</param>
+        /// <param name="oldAction">変更前の数量と残数を参照するための在庫アクション</param>
+        /// <param name="caller">【通常は省略】呼び出し元情報メソッド名。呼び出し元がプロパティの setter/getter の時はそのプロパティ名</param>
+        /// <param name="path">【通常は省略】呼び出し元ファイルのパス</param>
+        /// <param name="line">【通常は省略】このメソッドが呼び出された、path中の行番号</param>
+        [Conditional("DEBUG")]
+        public static void DEBUGLOG_InventoryActionChanged(InventoryAction newAction, InventoryAction oldAction, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        {
+            var txtQuantity = newAction.Quantity == oldAction.Quantity ? $"{newAction.Quantity} (same)" : $"{oldAction.Quantity} -> {newAction.Quantity}";
+            var txtRemain = newAction.Remain == oldAction.Remain ? $"{newAction.Remain} (same)" : $"{oldAction.Remain} -> {newAction.Remain}";
+
+            LogUtil.Debug($"{Indent}Update; {newAction.ToString("h")}=[quantity:={txtQuantity}, remain:={txtRemain}]", caller, path, line);
         }
 
         /// <summary>

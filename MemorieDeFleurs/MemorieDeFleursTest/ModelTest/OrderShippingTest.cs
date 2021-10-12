@@ -159,14 +159,13 @@ namespace MemorieDeFleursTest.ModelTest
             Bouquets.HT001 = Model.BouquetModel.GetBouquetBuilder()
                 .CodeIs("HT001")
                 .NameIs("花束-Aセット")
-                .Uses("BA001", 5)
+                .Uses("BA001", 4)
                 .Create(context);
 
             Bouquets.HT002 = Model.BouquetModel.GetBouquetBuilder()
                 .CodeIs("HT002")
                 .NameIs("花束-Bセット")
                 .Uses("BA001", 3)
-                .Uses("BA002", 5)
                 .Uses("BA003", 3)
                 .Uses("GP001", 6)
                 .Create(context);
@@ -533,6 +532,29 @@ namespace MemorieDeFleursTest.ModelTest
             var order = InitialOrdersFromCustomers[DateConst.April30th][0];
             Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.ChangeArrivalDate(order, DateConst.May1st));
             Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.CancelOrder(order));
+        }
+
+        [TestMethod]
+        public void ShippingOneOrderAtApril30th()
+        {
+            var orderNo = InitialOrdersFromCustomers[DateConst.April30th][0];
+
+            Model.CustomerModel.ShipOrders(DateConst.April30th, orderNo);
+
+            Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.ChangeArrivalDate(orderNo, DateConst.May1st));
+            Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.CancelOrder(orderNo));
+
+            var lotNo = InitialLots["BA001"][DateConst.April30th][0].LotNo;
+            InventoryActionValidator.NewInstance().BouquetPartIs(BouquetParts.BA001).BEGIN
+                .Lot(DateConst.April30th, lotNo).BEGIN
+                    .At(DateConst.April30th).Arrived(200).Used(20, 180)
+                    .At(DateConst.May1st).Used(50, 130)
+                    .At(DateConst.May2nd).Used(80, 50)
+                    .At(DateConst.May3rd).Used(20, 30).Discarded(30)
+                    .END
+                .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
         }
     }
 }
