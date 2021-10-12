@@ -544,23 +544,25 @@ namespace MemorieDeFleurs.Models
             if (today.Remain >= quantity)
             {
                 // 全量引き出せる
-                LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(today, quantity);
-
                 today.Quantity += quantity;
                 today.Remain -= quantity;
                 context.InventoryActions.Update(today);
 
+                LogUtil.DEBUGLOG_InventoryActionChanged(today, quantity);
+
             }
             else
             {
-                // 残数分はこのロットから、それ以外は他のロットから引き出す
-                LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(today, today.Remain);
+                var oldAction = new InventoryAction() { Quantity = today.Quantity, Remain = today.Remain }; // デバッグログ用
 
+                // 残数分はこのロットから、それ以外は他のロットから引き出す
                 var useFromThisLot = today.Remain;
                 var useFromOtherLot = quantity - today.Remain;
                 today.Quantity += useFromThisLot;
                 today.Remain -= useFromThisLot;
                 context.InventoryActions.Update(today);
+
+                LogUtil.DEBUGLOG_InventoryActionChanged(today, oldAction);
 
                 try
                 {
@@ -597,24 +599,27 @@ namespace MemorieDeFleurs.Models
                 // すでに引当対象としたロットは除外：Linq式で usableLots を生成するタイミングでは除外できなかったため。
                 if(usedLot.Contains(action.InventoryLotNo)) { continue; }
 
+                var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain }; // デバッグログ用
+
                 LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, useToThisLot);
                 if(action.Remain >= useToThisLot)
                 {
-                    // このロットから全量引き出す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(action, useToThisLot);
 
+                    // このロットから全量引き出す
                     UseFromThisLot(context, action, quantity, usedLot);
+
+                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
                     LogUtil.DEBUGLOG_EndMethod(msg: $"resolved");
                     return;
                 }
                 else
                 {
                     // 残数分はこのロットから、引き出せなかった分は次のロットから引き出す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(action, action.Remain);
-
                     useToThisLot -= action.Remain;
                     UseFromThisLot(context, action, action.Remain, usedLot);
                     previousLot = action;
+
+                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
                 }
             }
 
@@ -748,7 +753,7 @@ namespace MemorieDeFleurs.Models
                 today.Quantity -= quantityToReturn;
                 today.Remain += quantityToReturn;
                 context.InventoryActions.Update(today);
-                LogUtil.DEBUGLOG_InventoryActionQuantityChanged(today, -quantityToReturn);
+                LogUtil.DEBUGLOG_InventoryActionChanged(today, -quantityToReturn);
             }
             else
             {
@@ -759,7 +764,7 @@ namespace MemorieDeFleurs.Models
                 today.Quantity -= returnToThisLot;
                 today.Remain += returnToThisLot;
                 context.InventoryActions.Update(today);
-                LogUtil.DEBUGLOG_InventoryActionQuantityChanged(today, -returnToThisLot);
+                LogUtil.DEBUGLOG_InventoryActionChanged(today, -returnToThisLot);
 
                 try
                 {
@@ -798,24 +803,26 @@ namespace MemorieDeFleurs.Models
                 // すでに引当対象としたロットは除外：candidates 抽出時の式はSQLに変換されるため
                 if (returnedLot.Contains(action.InventoryLotNo)) { continue; }
 
+                var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain }; // デバッグログ用
+
                 LogUtil.DEBUGLOG_ComparationOfInventoryUsedAndReturns(action, returnToThisLot);
                 if (action.Quantity >= returnToThisLot)
                 {
                     // このロットに全量戻す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(action, returnToThisLot);
-
                     ReturnToThisLot(context, action, quantityToReturn, returnedLot);
+
+                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
                     LogUtil.DEBUGLOG_EndMethod(msg: $"resolved");
                     return;
                 }
                 else
                 {
                     // 加工数量分はこのロットに、戻し残った分は次のロットに戻す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(action, action.Remain);
-
                     returnToThisLot -= action.Quantity;
                     ReturnToThisLot(context, action, action.Remain, returnedLot);
                     previousLot = action;
+
+                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
                 }
             }
 

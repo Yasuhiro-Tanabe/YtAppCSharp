@@ -718,8 +718,8 @@ namespace MemorieDeFleurs.Models
                     Parent.BouquetModel.ReturnToThisLot(context, others, quantity, usedLot);
                     usedLot.Pop();
 
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, quantity);
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(others, -quantity);
+                    LogUtil.DEBUGLOG_InventoryActionChanged(action, quantity);
+                    LogUtil.DEBUGLOG_InventoryActionChanged(others, -quantity);
                 }
                 else
                 {
@@ -732,8 +732,8 @@ namespace MemorieDeFleurs.Models
                     Parent.BouquetModel.ReturnToThisLot(context, others, quantity, usedLot);
                     usedLot.Pop();
 
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, quantity);
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(others, -quantity);
+                    LogUtil.DEBUGLOG_InventoryActionChanged(action, quantity);
+                    LogUtil.DEBUGLOG_InventoryActionChanged(others, -quantity);
                 }
 
                 DEBUGLOG_ShowInventoryActions(context, action.PartsCode, new int[] { 4, 5, 6 });
