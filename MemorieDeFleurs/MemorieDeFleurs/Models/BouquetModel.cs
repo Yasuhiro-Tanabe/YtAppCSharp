@@ -1299,7 +1299,7 @@ namespace MemorieDeFleurs.Models
             if(scheduled.Quantity == 0 && scheduled.Remain ==0)
             {
                 context.InventoryActions.Remove(scheduled);
-                LogUtil.Debug($"Removed: {scheduled.ToString("L")}");
+                LogUtil.DEBUGLOG_InventoryActionRemoved(scheduled);
             }
             else
             {
@@ -1307,5 +1307,216 @@ namespace MemorieDeFleurs.Models
             }
         }
         #endregion // 出荷数量変更
+
+        #region 単品破棄
+        public void DiscardBouquetParts(DateTime date, params Tuple<string, int>[] discardParts)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                var partsString = string.Join(", ", discardParts.Select(p => $"{p.Item1} x {p.Item2}"));
+                LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, [ {partsString} ]");
+
+                try
+                {
+                    DiscardBouquetParts(context, date, discardParts);
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, [ {partsString} ]");
+                }
+            }
+
+        }
+
+        private void DiscardBouquetParts(MemorieDeFleursDbContext context, DateTime date, params Tuple<string, int>[] discardParts)
+        {
+            foreach(var parts in discardParts)
+            {
+                DiscardBouquetParts(context, date, parts.Item1, parts.Item2);
+            }
+        }
+
+        private void DiscardBouquetParts(MemorieDeFleursDbContext context, DateTime date, string partsCode, int discardQuantity)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, {partsCode}, {discardQuantity}");
+            try
+            {
+                var expectedActions = new SortedSet<InventoryActionType>()
+            {
+                InventoryActionType.DISCARDED,
+                InventoryActionType.SCHEDULED_TO_DISCARD,
+                InventoryActionType.SCHEDULED_TO_USE,
+                InventoryActionType.USED
+            };
+                var inventories = context.InventoryActions
+                    .Where(act => act.PartsCode == partsCode)
+                    .Where(act => act.ActionDate == date)
+                    .Where(act => expectedActions.Contains(act.Action))
+                    .OrderBy(act => act.ArrivalDate)
+                    .AsEnumerable()
+                    .GroupBy(act => act.ArrivalDate)
+                    .ToDictionary(grp => grp.Key, grp => grp.AsEnumerable().GroupBy(act => act.InventoryLotNo).ToDictionary(grp => grp.Key, grp => grp.ToList()));
+
+                var remainToDiscard = discardQuantity;
+                InventoryAction previousAction = null;
+                foreach (var lots in inventories.OrderBy(kv => kv.Key))
+                {
+                    if (remainToDiscard == 0) { break; }
+
+                    foreach (var actions in lots.Value.OrderBy(kv => kv.Key))
+                    {
+                        if (remainToDiscard == 0) { break; }
+
+                        var scheduledToUse = actions.Value.SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_USE);
+                        var scheduledToDiscard = actions.Value.SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_DISCARD);
+                        var discarded = actions.Value.SingleOrDefault(act => act.Action == InventoryActionType.DISCARDED);
+                        var isNewCreated = false;
+
+                        if (discarded == null)
+                        {
+                            discarded = new InventoryAction()
+                            {
+                                Action = InventoryActionType.DISCARDED,
+                                ActionDate = scheduledToUse.ActionDate,
+                                ArrivalDate = scheduledToUse.ArrivalDate,
+                                BouquetPart = scheduledToUse.BouquetPart,
+                                InventoryLotNo = scheduledToUse.InventoryLotNo,
+                                PartsCode = scheduledToUse.PartsCode,
+                                Quantity = 0,
+                                Remain = 0
+                            };
+                            isNewCreated = true;
+                        }
+                        var oldDiscarded = new InventoryAction() { Quantity = discarded.Quantity, Remain = discarded.Remain };
+
+
+                        // 破棄可能な予定在庫がこのロットにはない→次のロットから破棄する
+                        if (scheduledToDiscard == null && scheduledToUse == null) { continue; }
+
+                        if (scheduledToDiscard == null)
+                        {
+                            var oldScheduledToUse = new InventoryAction() { Quantity = scheduledToUse.Quantity, Remain = scheduledToUse.Remain };
+
+                            // 加工予定在庫アクションの残数から破棄アクションの破棄数を切り出す
+                            if (scheduledToUse.Remain > remainToDiscard)
+                            {
+                                // 今ある加工残数から破棄済在庫アクションに全量振り替える
+                                // 振り替えた分を翌日以降の払い出し予定に反映する
+                                scheduledToUse.Remain -= remainToDiscard;
+                                discarded.Quantity += remainToDiscard;
+
+                                var usedLot = new Stack<int>();
+                                UseFromPreviousRemain(context, scheduledToUse, scheduledToUse.ActionDate.AddDays(1), usedLot);
+
+                                remainToDiscard = 0;
+                            }
+                            else
+                            {
+                                // 今ある加工残数をすべて破棄済在庫アクションに振り替える
+                                // 振り替えた分を翌日以降の払い出し予定に反映する
+                                // 振り替えできなかった分 (remainToDiscard - used.Remain) は次以降のロットから引く
+                                discarded.Quantity = scheduledToUse.Remain;
+                                remainToDiscard -= scheduledToUse.Remain;
+                                scheduledToUse.Remain = 0;
+
+                                var usedLot = new Stack<int>();
+                                UseFromPreviousRemain(context, scheduledToUse, scheduledToUse.ActionDate.AddDays(1), usedLot);
+                            }
+
+                            context.InventoryActions.Update(scheduledToUse);
+                            LogUtil.DEBUGLOG_InventoryActionChanged(scheduledToUse, oldScheduledToUse);
+                        }
+                        else
+                        {
+                            var oldScheduledToDiscard = new InventoryAction() { Quantity = scheduledToDiscard.Quantity, Remain = scheduledToDiscard.Remain };
+
+                            // 破棄予定在庫アクションの数量から破棄アクションの数量を切り出す
+                            if (scheduledToDiscard.Quantity >= remainToDiscard)
+                            {
+                                // 破棄予定数量から今回破棄対象数量の全量を振り替え可能
+                                discarded.Quantity += remainToDiscard;
+                                scheduledToDiscard.Quantity -= remainToDiscard;
+                                remainToDiscard = 0;
+                            }
+                            else
+                            {
+                                // 破棄数量をこの破棄予定アクションから全量振り替えできない：
+                                // 足りない分(remainToDiscard - scheduledToDiscard.Quantity) は次のロットから引く
+                                remainToDiscard -= scheduledToDiscard.Quantity;
+                                discarded.Quantity += scheduledToDiscard.Quantity;
+                                scheduledToDiscard.Quantity = 0;
+                            }
+
+                            if (scheduledToDiscard.Quantity == 0)
+                            {
+                                context.InventoryActions.Remove(scheduledToDiscard);
+                                LogUtil.DEBUGLOG_InventoryActionRemoved(scheduledToDiscard);
+                            }
+                            else if (IsInventoryQuantityChanged(scheduledToDiscard, oldScheduledToDiscard))
+                            {
+                                context.InventoryActions.Update(scheduledToDiscard);
+                                LogUtil.DEBUGLOG_InventoryActionChanged(scheduledToDiscard, oldScheduledToDiscard);
+                            }
+                        }
+
+                        if (isNewCreated)
+                        {
+                            context.InventoryActions.Add(discarded);
+                            LogUtil.DEBUGLOG_InventoryActionCreated(discarded);
+                        }
+                        else if(IsInventoryQuantityChanged(discarded, oldDiscarded))
+                        {
+                            context.InventoryActions.Update(discarded);
+                            LogUtil.DEBUGLOG_InventoryActionChanged(discarded, oldDiscarded);
+                        }
+                        previousAction = discarded;
+                    }
+                }
+
+                if (remainToDiscard > 0)
+                {
+                    // 破棄残がある：在庫払出の最後のロットへ SHORTAGE アクション追加
+                    var shortage = new InventoryAction()
+                    {
+                        Action = InventoryActionType.SHORTAGE,
+                        ActionDate = previousAction.ActionDate,
+                        ArrivalDate = previousAction.ArrivalDate,
+                        BouquetPart = previousAction.BouquetPart,
+                        InventoryLotNo = previousAction.InventoryLotNo,
+                        PartsCode = previousAction.PartsCode,
+                        Quantity = remainToDiscard,
+                        Remain = -remainToDiscard
+                    };
+                    context.InventoryActions.Add(shortage);
+                    LogUtil.DEBUGLOG_InventoryActionCreated(shortage);
+                }
+                context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                LogUtil.DEBUGLOG_EndMethod(msg: $" failed: {ex.GetType().Name}, {ex.Message}\n{ex.StackTrace}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 数量または残数の変更があったかどうかを確認する
+        /// </summary>
+        /// <param name="lhs">左辺の在庫アクション</param>
+        /// <param name="rhs">右辺の在庫アクション</param>
+        /// <returns>数量と残数のいずれかで 左辺 ！＝ 右辺 だったとき真、そうでないとき偽</returns>
+        private bool IsInventoryQuantityChanged(InventoryAction lhs, InventoryAction rhs)
+        {
+            return (lhs.Quantity != rhs.Quantity)
+                || (lhs.Remain != rhs.Remain);
+        }
+        #endregion // 単品破棄
     }
 }
