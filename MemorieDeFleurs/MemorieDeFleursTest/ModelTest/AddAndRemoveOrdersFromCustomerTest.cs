@@ -626,5 +626,53 @@ namespace MemorieDeFleursTest.ModelTest
 
             LogUtil.DEBUGLOG_EndTest();
         }
+
+        [TestMethod]
+        public void InventoriesWereNotShortedWhenOfBigBouquetWasOrdered()
+        {
+            var orderDate = DateConst.April30th.AddDays(-2);
+            Model.CustomerModel.Order(orderDate, ExpectedBigBouquet, ExpectedShippingAddress, DateConst.May1st);
+
+            DEBUGLOG_ShowInventoryActions(TestDB, "BA001");
+
+            var lot0430 = InitialOrders[DateConst.April30th][0].LotNo;
+            var lot0501 = InitialOrders[DateConst.May1st][0].LotNo;
+            var lot0502 = InitialOrders[DateConst.May2nd][0].LotNo;
+            var lot0503 = InitialOrders[DateConst.May3rd][0].LotNo;
+            var lot0506 = InitialOrders[DateConst.May6th][0].LotNo;
+
+            InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
+                .Lot(DateConst.April30th, lot0430).BEGIN
+                    .At(DateConst.April30th).Arrived(200).Used(170, 30)
+                    .At(DateConst.May1st).Used(30, 0)
+                    .At(DateConst.May2nd).Used(0, 0)
+                    .At(DateConst.May3rd).Used(0, 0).Discarded(0)
+                    .END
+                .Lot(DateConst.May1st, lot0501).BEGIN
+                    .At(DateConst.May1st).Arrived(300).Used(20, 280)
+                    .At(DateConst.May2nd).Used(80, 200)
+                    .At(DateConst.May3rd).Used(20, 180)
+                    .At(DateConst.May4th).Used(180, 0).Discarded(0)
+                    .END
+                .Lot(DateConst.May2nd, lot0502).BEGIN
+                    .At(DateConst.May2nd).Arrived(200).Used(0, 200)
+                    .At(DateConst.May3rd).Used(0, 200)
+                    .At(DateConst.May4th).Used(200, 0)
+                    .At(DateConst.May5th).Used(0, 0).Discarded(0)
+                    .END
+                .Lot(DateConst.May3rd, lot0503).BEGIN
+                    .At(DateConst.May3rd).Arrived(200).Used(0, 200)
+                    .At(DateConst.May4th).Used(20, 180)
+                    .At(DateConst.May5th).Used(170, 10)
+                    .At(DateConst.May6th).Used(10, 0)
+                    .END
+                .Lot(DateConst.May6th, lot0506).BEGIN
+                    .At(DateConst.May6th).Arrived(100).Used(30, 70)
+                    .At(DateConst.May9th).Used(0, 70).Discarded(70)
+                    .END
+                .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
     }
 }

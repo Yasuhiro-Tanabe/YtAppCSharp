@@ -462,7 +462,7 @@ namespace MemorieDeFleurs.Models
 
         public void UseFromThisLot(MemorieDeFleursDbContext context, InventoryAction today, int quantity, Stack<int> usedLot)
         {
-            LogUtil.DEBUGLOG_BeginMethod($"today={today.ToString("s")}, quantity={quantity}, usedLot={string.Join(",", usedLot)}");
+            LogUtil.DEBUGLOG_BeginMethod($"{today.ToString("s")}, {quantity}, [ {string.Join(",", usedLot)} ]");
 
             try
             {
@@ -481,6 +481,7 @@ namespace MemorieDeFleurs.Models
 
         private void UseFromPreviousRemain(MemorieDeFleursDbContext context, InventoryAction today, DateTime startDate, Stack<int> usedLot)
         {
+            LogUtil.DEBUGLOG_BeginMethod($"{today.ToString("s")}, {startDate:yyyyMMdd}, [ {string.Join(", ", usedLot)} ]");
             var previousRemain = today.Remain;
             foreach (var action in context.InventoryActions
                 .Where(act => act.PartsCode == today.PartsCode)
@@ -526,6 +527,7 @@ namespace MemorieDeFleurs.Models
                         context.InventoryActions.Add(eis.InventoryShortageAction);
                         LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
                     }
+                    usedLot.Pop();
                     previousRemain = 0;
                 }
             }
@@ -534,8 +536,12 @@ namespace MemorieDeFleurs.Models
                 .Where(act => act.PartsCode == today.PartsCode)
                 .Where(act => act.InventoryLotNo == today.InventoryLotNo)
                 .Single(act => act.Action == InventoryActionType.SCHEDULED_TO_DISCARD);
+            var oldDiscard = new InventoryAction() { Quantity = discard.Quantity, Remain = discard.Remain };
             discard.Quantity = previousRemain;
             context.InventoryActions.Update(discard);
+            LogUtil.DEBUGLOG_InventoryActionChanged(discard, oldDiscard);
+
+            LogUtil.DEBUGLOG_EndMethod($"{today.ToString("s")}, {startDate:yyyyMMdd}, [ {string.Join(", ", usedLot)} ]");
         }
 
         private void UseFromThisLotToday(MemorieDeFleursDbContext context, InventoryAction today, int quantity, Stack<int> usedLot)
@@ -593,6 +599,8 @@ namespace MemorieDeFleurs.Models
 
             var useToThisLot = quantity;
             var previousLot = inventory;
+
+            LogUtil.Debug($"{LogUtil.Indent}usableLots={string.Join(", ", usableLots.Select(act => act.ToString("s")))}");
 
             foreach(var action in usableLots.OrderBy(act => act.ArrivalDate))
             {
