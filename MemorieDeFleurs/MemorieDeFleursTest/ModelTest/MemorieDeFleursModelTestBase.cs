@@ -43,7 +43,7 @@ namespace MemorieDeFleursTest.ModelTest
         [Conditional("DEBUG")]
         protected void DEBUGLOG_ShowInventoryActions(DbConnection connection, string partsCode, int[] lots = null, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
-            LogUtil.DEBUGLOG_BeginMethod(partsCode, $"in {caller},{Path.GetFileName(path)}:{line}");
+            LogUtil.DEBUGLOG_BeginMethod(partsCode, "", caller, path, line);
             LogUtil.Indent++;
 
             using(var context = new MemorieDeFleursDbContext(connection))
@@ -54,6 +54,7 @@ namespace MemorieDeFleursTest.ModelTest
                         .Where(act => act.PartsCode == partsCode)
                         .OrderBy(act => act.ArrivalDate)
                         .ThenBy(act => act.InventoryLotNo)
+                        .ThenBy(act => act.ActionDate)
                         .ThenBy(act => act.Action))
                     {
                         LogUtil.DebugFormat("{0}{1}", LogUtil.Indent, action.ToString("DB"));
@@ -76,7 +77,7 @@ namespace MemorieDeFleursTest.ModelTest
             }
 
             LogUtil.Indent--;
-            LogUtil.DEBUGLOG_EndMethod(partsCode);
+            LogUtil.DEBUGLOG_EndMethod(partsCode, "", caller, path, line);
         }
     }
 }
