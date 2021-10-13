@@ -49,7 +49,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             DateInventoryActionValidator validator;
             if (!DateValidators.TryGetValue(actionDate, out validator))
             {
-                validator = new DateInventoryActionValidator(this);
+                validator = new DateInventoryActionValidator(this, actionDate);
                 DateValidators.Add(actionDate, validator);
             }
 
