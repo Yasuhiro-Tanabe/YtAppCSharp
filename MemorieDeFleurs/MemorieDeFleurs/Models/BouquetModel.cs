@@ -1329,7 +1329,7 @@ namespace MemorieDeFleurs.Models
                 }
                 finally
                 {
-                    LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, [ {partsString} ]");
+                    LogUtil.DEBUGLOG_EndMethod($"{date:yyyyMMdd}, [ {partsString} ]");
                 }
             }
 
@@ -1349,12 +1349,12 @@ namespace MemorieDeFleurs.Models
             try
             {
                 var expectedActions = new SortedSet<InventoryActionType>()
-            {
-                InventoryActionType.DISCARDED,
-                InventoryActionType.SCHEDULED_TO_DISCARD,
-                InventoryActionType.SCHEDULED_TO_USE,
-                InventoryActionType.USED
-            };
+                {
+                    InventoryActionType.DISCARDED,
+                    InventoryActionType.SCHEDULED_TO_DISCARD,
+                    InventoryActionType.SCHEDULED_TO_USE,
+                    InventoryActionType.USED
+                };
                 var inventories = context.InventoryActions
                     .Where(act => act.PartsCode == partsCode)
                     .Where(act => act.ActionDate == date)
@@ -1498,6 +1498,7 @@ namespace MemorieDeFleurs.Models
                     LogUtil.DEBUGLOG_InventoryActionCreated(shortage);
                 }
                 context.SaveChanges();
+                LogUtil.DEBUGLOG_EndMethod($"{date:yyyyMMdd}, {partsCode}, {discardQuantity}", "Succeeded.");
             }
             catch (Exception ex)
             {
