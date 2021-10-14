@@ -2,6 +2,8 @@
 using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
+using MemorieDeFleursTest.ModelTest;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
@@ -205,10 +207,10 @@ namespace MemorieDeFleursTest.ModelEntityTest
         {
             InventoryAction action = new InventoryAction()
             {
-                ActionDate = new DateTime(2004, 03, 30),
+                ActionDate = new DateTime(DateConst.Year, 03, 30),
                 Action = InventoryActionType.SCHEDULED_TO_ARRIVE,
                 PartsCode = ExpectedPart.Code,
-                ArrivalDate = new DateTime(2004, 03, 30),
+                ArrivalDate = new DateTime(DateConst.Year, 03, 30),
                 InventoryLotNo = lotNo,
                 Quantity = 200,
                 Remain = 200

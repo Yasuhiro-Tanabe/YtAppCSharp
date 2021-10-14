@@ -89,7 +89,7 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareInitialOrders(MemorieDeFleursDbContext context)
         {
-            var OrderDate = new DateTime(2020, 4, 25);
+            var OrderDate = new DateTime(DateConst.Year, 4, 25);
             InitialOrders.Add(DateConst.April30th,
                 Model.SupplierModel.Order(context, OrderDate, ExpectedSupplier, DateConst.April30th, new[] { Tuple.Create(ExpectedPart, 2) }));
             InitialOrders.Add(DateConst.May1st,
@@ -216,7 +216,7 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void EmptyTable()
         {
-            var date = new DateTime(2020, 10, 1); // 当日前後数日の範囲に在庫登録していない日付
+            var date = new DateTime(DateConst.Year, 10, 1); // 当日前後数日の範囲に在庫登録していない日付
             var table = Model.CreateInventoryTransitionTable("BA001", date, 1);
 
             TableValidator.TableIs(table)

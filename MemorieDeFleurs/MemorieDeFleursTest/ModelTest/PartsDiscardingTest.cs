@@ -274,7 +274,7 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareInitialOrderToSupplier(MemorieDeFleursDbContext context)
         {
-            var orderDate = new DateTime(2020, 3, 10);
+            var orderDate = new DateTime(DateConst.Year, 3, 10);
 
             // 仕入先1
             Model.SupplierModel.Order(context, orderDate, Suppliers.Supplier1, DateConst.April30th,
@@ -355,7 +355,7 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareOrdersFromCustomer(MemorieDeFleursDbContext context)
         {
-            var orderDate = new DateTime(2020, 3, 1);
+            var orderDate = new DateTime(DateConst.Year, 3, 1);
             Model.CustomerModel.Order(context, orderDate, Bouquets.HT001, Customers.Customer1.ShippingAddresses[0], DateConst.May1st, "Message1");
             Model.CustomerModel.Order(context, orderDate, Bouquets.HT001, Customers.Customer1.ShippingAddresses[1], DateConst.May1st);
             Model.CustomerModel.Order(context, orderDate, Bouquets.HT001, Customers.Customer1.ShippingAddresses[2], DateConst.May1st);

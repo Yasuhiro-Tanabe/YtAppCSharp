@@ -50,7 +50,7 @@ namespace MemorieDeFleursTest.ModelTest
                     {
                         Supplier = ExpectedSupplier,
                         Part = ExpectedPart,
-                        OrderDate = new DateTime(2020, 4, 25),
+                        OrderDate = new DateTime(DateConst.Year, 4, 25),
                         OrderBody = new List<Tuple<DateTime, int>>() {
                             Tuple.Create(DateConst.April30th, 2),
                             Tuple.Create(DateConst.May1st, 3),
@@ -81,8 +81,8 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void CanAddOneOrderToSingleSupplier()
         {
-            var orderDate = new DateTime(2020, 5, 10);
-            var arrivalDate = new DateTime(2020, 5, 20);
+            var orderDate = new DateTime(DateConst.Year, 5, 10);
+            var arrivalDate = new DateTime(DateConst.Year, 5, 20);
             var discardDate = arrivalDate.AddDays(ExpectedPart.ExpiryDate);
             var numLot = 2;
             var expectedQuantity = numLot * ExpectedPart.QuantitiesPerLot;
