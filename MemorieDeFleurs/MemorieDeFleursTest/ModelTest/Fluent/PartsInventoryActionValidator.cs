@@ -67,10 +67,10 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// このメソッドを呼び出したときは Begin() を呼び出せない。
         /// Lot() で別のロットを割り当てること。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>自分自身</returns>
         public PartsInventoryActionValidator HasNoInventoryActions()
         {
-            CurrentChild.HasInventoryShortageAction = true;
+            CurrentChild.HasNoInventoryActions();
             CurrentChild = null;
             return this;
         }

@@ -23,7 +23,18 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
 
         private DateInventoryActionValidator CurrentChild { get; set; } = null;
 
-        internal bool HasInventoryShortageAction { get; set; } = false;
+        private bool InventoryActionNotExists { get; set; } = false;
+
+        /// <summary>
+        /// このロットが在庫アクション中に存在しないことを指定する
+        /// </summary>
+        /// <returns>自分自身</returns>
+        public LotInventoryActionValidator HasNoInventoryActions()
+        {
+            InventoryActionNotExists = true;
+            return this;
+        }
+
 
         /// <summary>
         /// 検証器を作成する
@@ -59,6 +70,23 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         }
 
         /// <summary>
+        /// 在庫ロット番号の期待値
+        /// </summary>
+        private int CurrentLotNo { get; set; } = 0;
+
+        /// <summary>
+        /// 在庫ロット番号の期待値を指定する
+        /// </summary>
+        /// <param name="lotNo">ロット番号の期待値</param>
+        /// <returns>自分自身</returns>
+        public LotInventoryActionValidator LotNumberIs(int lotNo)
+        {
+            CurrentLotNo = lotNo;
+            return this;
+        }
+
+
+        /// <summary>
         /// 日別在庫検証項目登録終了マーク：
         /// 
         /// 呼び出し元の単品在庫アクション検証器に制御を戻す
@@ -76,7 +104,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="lotNo">対象ロットのロット番号</param>
         public void AssertAll(MemorieDeFleursDbContext context, string partsCode, DateTime arrivedDate, int lotNo)
         {
-            if(HasInventoryShortageAction)
+            if(InventoryActionNotExists)
             {
                 var actual = context.InventoryActions
                     .Where(act => act.PartsCode == partsCode)
