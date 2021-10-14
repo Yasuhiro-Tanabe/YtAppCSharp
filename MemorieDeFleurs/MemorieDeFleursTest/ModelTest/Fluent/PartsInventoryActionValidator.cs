@@ -51,17 +51,6 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         }
 
         /// <summary>
-        /// ロットの在庫アクション検証器を生成する：生成するだけで制御は移さない。
-        /// </summary>
-        /// <param name="arrivalDate">入荷予定日</param>
-        /// <param name="findLotNumber">入荷予定日からロット番号を特定するためのメソッドまたはデレゲート</param>
-        /// <returns>自分自身</returns>
-        public PartsInventoryActionValidator Lot(DateTime arrivalDate, Func<DateTime, int> findLotNumber)
-        {
-            return Lot(arrivalDate, findLotNumber(arrivalDate));
-        }
-
-        /// <summary>
         /// 現在選択中のロットが在庫アクションを持たないことを明示する。
         /// 
         /// このメソッドを呼び出したときは Begin() を呼び出せない。
