@@ -1177,14 +1177,14 @@ namespace MemorieDeFleurs.Models
         /// <param name="date">入荷日</param>
         /// <param name="orderNo">入荷された発注番号</param>
         /// <param name="otherOrders">入荷された発注番号：複数指定した場合の2つめ以降の発注番号</param>
-        public void OrdersAreArrived(DateTime date, string orderNo, params string[] otherOrders)
+        public void OrdersAreArrived(DateTime date, params string[] otherOrders)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    OrdersAreArrived(context, date, orderNo, otherOrders);
+                    OrdersAreArrived(context, date, otherOrders);
                     transaction.Commit();
                 }
                 catch(Exception e)
@@ -1196,9 +1196,8 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        private void OrdersAreArrived(MemorieDeFleursDbContext context, DateTime date, string orderNo, params string[] otherOrders)
+        private void OrdersAreArrived(MemorieDeFleursDbContext context, DateTime date, params string[] otherOrders)
         {
-            OrderIsArrived(context, date, orderNo);
             foreach(var order in otherOrders) { OrderIsArrived(context, date, order); }
             context.SaveChanges();
         }
@@ -1371,5 +1370,19 @@ namespace MemorieDeFleurs.Models
 
         }
         #endregion // 入荷予定数量変更
+
+        #region 発注履歴の取得
+        public IEnumerable<string> FindAllOrdersAt(DateTime arrivalDate)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrdersToSuppliers
+                    .Where(order => order.DeliveryDate == arrivalDate)
+                    .OrderBy(order => order.ID)
+                    .Select(order => order.ID)
+                    .ToList();
+            }
+        }
+        #endregion // 発注履歴取得
     }
 }

@@ -2,6 +2,8 @@
 using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 
+using Microsoft.EntityFrameworkCore;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -313,10 +315,9 @@ namespace MemorieDeFleurs.Models
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                var customer = context.Customers.Find(id);
-
-                // キャッシュにお届け先をロード
-                context.ShippingAddresses.Where(ship => ship.CustomerID == id);
+                var customer = context.Customers
+                    .Include(c => c.ShippingAddresses)
+                    .Single(c => c.ID == id);
 
                 return customer;
             }
