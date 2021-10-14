@@ -187,26 +187,26 @@ namespace MemorieDeFleursTest.ModelTest
 
             InventoryActionValidator.NewInstance()
                 .BouquetPartIs(ba001).BEGIN
-                    .Lot(DateConst.May2nd, 1).BEGIN
+                    .Lot(DateConst.May2nd).BEGIN
                         .At(DateConst.May2nd).Arrived(2 * ba001.QuantitiesPerLot)
                         .END
-                    .Lot(DateConst.May3rd, 3).BEGIN
+                    .Lot(DateConst.May3rd).BEGIN
                         .At(DateConst.May3rd).Arrived(1 * ba001.QuantitiesPerLot)
                         .END
                     .END
                 .BouquetPartIs(gp001).BEGIN
-                    .Lot(DateConst.May2nd, 2).BEGIN
+                    .Lot(DateConst.May2nd, 0).BEGIN
                         .At(DateConst.May2nd).Arrived(2 * gp001.QuantitiesPerLot)
                         .END
-                    .Lot(DateConst.May2nd, 5).BEGIN
+                    .Lot(DateConst.May2nd, 1).BEGIN
                         .At(DateConst.May2nd).Arrived(2 * gp001.QuantitiesPerLot)
                         .END
-                    .Lot(DateConst.May3rd, 4).BEGIN
+                    .Lot(DateConst.May3rd).BEGIN
                         .At(DateConst.May3rd).Arrived(3 * gp001.QuantitiesPerLot)
                         .END
                     .END
                 .BouquetPartIs(cn001).BEGIN
-                    .Lot(DateConst.May2nd, 6).BEGIN
+                    .Lot(DateConst.May2nd).BEGIN
                         .At(DateConst.May2nd).Arrived(2 * cn001.QuantitiesPerLot)
                         .END
                     .END
@@ -250,7 +250,7 @@ namespace MemorieDeFleursTest.ModelTest
             Model.CustomerModel.Order(DateConst.May3rd, ht001, customer.ShippingAddresses[0], DateConst.May6th);
 
             InventoryActionValidator.NewInstance().BouquetPartIs(ba001).BEGIN
-                .Lot(DateConst.May2nd, 1).BEGIN
+                .Lot(DateConst.May2nd).BEGIN
                     .At(DateConst.May2nd).Arrived(200).Used(0, 200)
                     .At(DateConst.May3rd).Used(0, 200)
                     .At(DateConst.May4th).Used(4, 196)

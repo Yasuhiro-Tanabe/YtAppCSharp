@@ -320,11 +320,10 @@ namespace MemorieDeFleursTest.ModelTest
         {
             var order = InitialOrdersToSupplyer[DateConst.April30th][0];
             var part = BouquetParts["GP001"];
-            var lot = InitialLots[part.Code][DateConst.April30th][0];
             Model.SupplierModel.ChangeArrivedQuantities(order, new[] { Tuple.Create(part, 8) });
 
             InventoryActionValidator.NewInstance().BouquetPartIs(part).BEGIN
-                .Lot(DateConst.April30th, lot.LotNo).BEGIN
+                .Lot(DateConst.April30th).BEGIN
                     .At(DateConst.April30th).Arrived(8)
                     .At(DateConst.May2nd).Discarded(8)
                     .END
@@ -339,13 +338,11 @@ namespace MemorieDeFleursTest.ModelTest
             var order = InitialOrdersToSupplyer[DateConst.April30th][0];
             var ba001 = BouquetParts["BA001"];
             var ba002 = BouquetParts["BA002"];
-            var lot1 = InitialLots[ba001.Code][DateConst.April30th][0];
-            var lot2 = InitialLots[ba002.Code][DateConst.April30th][0];
 
             Model.SupplierModel.ChangeArrivedQuantities(order, new[] { Tuple.Create(ba001, 18), Tuple.Create(ba002, 9) });
 
             InventoryActionValidator.NewInstance().BouquetPartIs(ba001).BEGIN
-                .Lot(DateConst.April30th, lot1.LotNo).BEGIN
+                .Lot(DateConst.April30th).BEGIN
                     .At(DateConst.April30th).Arrived(18)
                     .At(DateConst.May2nd).Used(12, 6)
                     .At(DateConst.May3rd).Used(6,0).Shortage(2).Discarded(0)

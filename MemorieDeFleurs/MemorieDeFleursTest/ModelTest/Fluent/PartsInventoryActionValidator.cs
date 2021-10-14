@@ -34,12 +34,12 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// ロットの在庫アクション検証器を生成する：生成するだけで制御は移さない。
         /// </summary>
         /// <param name="arrivedDate">入荷予定日</param>
-        /// <param name="lotNo">ロット番号</param>
+        /// <param name="index">ロット番号</param>
         /// <returns>自分自身</returns>
-        public PartsInventoryActionValidator Lot(DateTime arrivedDate, int lotNo)
+        public PartsInventoryActionValidator Lot(DateTime arrivedDate,  int index = 0)
         {
             LotInventoryActionValidator validator;
-            var key = Tuple.Create(arrivedDate, lotNo);
+            var key = Tuple.Create(arrivedDate, index);
             if (!LotValidators.TryGetValue(key, out validator))
             {
                 validator = new LotInventoryActionValidator(this);

@@ -546,7 +546,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             var lotNo = InitialLots["BA001"][DateConst.April30th][0].LotNo;
             InventoryActionValidator.NewInstance().BouquetPartIs(BouquetParts.BA001).BEGIN
-                .Lot(DateConst.April30th, lotNo).BEGIN
+                .Lot(DateConst.April30th).BEGIN
                     .At(DateConst.April30th).Arrived(200).Used(20, 180)
                     .At(DateConst.May1st).Used(50, 130)
                     .At(DateConst.May2nd).Used(80, 50)

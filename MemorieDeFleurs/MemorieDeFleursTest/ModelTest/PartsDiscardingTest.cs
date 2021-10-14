@@ -533,9 +533,8 @@ namespace MemorieDeFleursTest.ModelTest
 
             DEBUGLOG_ShowInventoryActions(TestDB, "BA001");
 
-            var lot0506 = InitialLots["BA001"][DateConst.May6th][0].LotNo;
             InventoryActionValidator.NewInstance().BouquetPartIs(BouquetParts.BA001).BEGIN
-                .Lot(DateConst.May6th, lot0506).BEGIN
+                .Lot(DateConst.May6th).BEGIN
                     .At(DateConst.May6th).Arrived(100).Used(0, 100)
                     .At(DateConst.May7th).Used(0, 100)
                     .At(DateConst.May8th).Used(0, 100)
@@ -557,9 +556,8 @@ namespace MemorieDeFleursTest.ModelTest
 
             DEBUGLOG_ShowInventoryActions(TestDB, "BA001");
 
-            var lot0506 = InitialLots["BA001"][DateConst.May6th][0].LotNo;
             InventoryActionValidator.NewInstance().BouquetPartIs(BouquetParts.BA001).BEGIN
-                .Lot(DateConst.May6th, lot0506).BEGIN
+                .Lot(DateConst.May6th).BEGIN
                     .At(DateConst.May6th).Arrived(100).Used(0, 100)
                     .At(DateConst.May7th).Used(0, 80).Discarded(20)
                         .ContainsActionType(InventoryActionType.DISCARDED)
@@ -582,9 +580,8 @@ namespace MemorieDeFleursTest.ModelTest
 
             DEBUGLOG_ShowInventoryActions(TestDB, "BA001");
 
-            var lot0506 = InitialLots["BA001"][DateConst.May6th][0].LotNo;
             InventoryActionValidator.NewInstance().BouquetPartIs(BouquetParts.BA001).BEGIN
-                .Lot(DateConst.May6th, lot0506).BEGIN
+                .Lot(DateConst.May6th).BEGIN
                     .At(DateConst.May6th).Arrived(100).Used(0, 100)
                     .At(DateConst.May7th).Used(0, 100)
                     .At(DateConst.May8th).Used(0, 100)
@@ -606,13 +603,11 @@ namespace MemorieDeFleursTest.ModelTest
 
             DEBUGLOG_ShowInventoryActions(TestDB, "BA001");
 
-            var lot0503 = InitialLots["BA001"][DateConst.May3rd][0].LotNo;
-            var lot0506 = InitialLots["BA001"][DateConst.May6th][0].LotNo;
             InventoryActionValidator.NewInstance().BouquetPartIs(BouquetParts.BA001).BEGIN
-                .Lot(DateConst.May3rd, lot0503).BEGIN
+                .Lot(DateConst.May3rd).BEGIN
                     .At(DateConst.May6th).Used(40, 90).Discarded(90)
                     .END
-                .Lot(DateConst.May6th, lot0506).BEGIN
+                .Lot(DateConst.May6th).BEGIN
                     .At(DateConst.May6th).Arrived(100).Used(0, 40).Discarded(60)
                     .At(DateConst.May9th).Used(0, 40).Discarded(40)
                     .END
@@ -638,31 +633,31 @@ namespace MemorieDeFleursTest.ModelTest
             var lot0503 = InitialLots["BA001"][DateConst.May3rd][0].LotNo;
             var lot0506 = InitialLots["BA001"][DateConst.May6th][0].LotNo;
             InventoryActionValidator.NewInstance().BouquetPartIs(BouquetParts.BA001).BEGIN
-                .Lot(DateConst.April30th, lot0430).BEGIN
+                .Lot(DateConst.April30th).BEGIN
                     .At(DateConst.April30th).Arrived(200).Used(20, 30).Discarded(150)
                     .At(DateConst.May1st).Used(30, 0)
                     .At(DateConst.May2nd).Used(0, 0)
                     .At(DateConst.May3rd).Used(0, 0).Discarded(0)
                     .END
-                .Lot(DateConst.May1st, lot0501).BEGIN
+                .Lot(DateConst.May1st).BEGIN
                     .At(DateConst.May1st).Arrived(300).Used(20, 230).Discarded(50)
                     .At(DateConst.May2nd).Used(80, 150)
                     .At(DateConst.May3rd).Used(20, 130)
                     .At(DateConst.May4th).Used(130, 0).Discarded(0)
                     .END
-                .Lot(DateConst.May2nd, lot0502).BEGIN
+                .Lot(DateConst.May2nd).BEGIN
                     .At(DateConst.May2nd).Arrived(200).Used(0, 200)
                     .At(DateConst.May3rd).Used(0, 200)
                     .At(DateConst.May4th).Used(200, 0)
                     .At(DateConst.May5th).Used(0, 0).Discarded(0)
                     .END
-                .Lot(DateConst.May3rd, lot0503).BEGIN
+                .Lot(DateConst.May3rd).BEGIN
                     .At(DateConst.May3rd).Arrived(200).Used(0, 200)
                     .At(DateConst.May4th).Used(70, 130)
                     .At(DateConst.May5th).Used(130, 0).Shortage(40)
                     .At(DateConst.May6th).Used(0, 0)
                     .END
-                .Lot(DateConst.May6th, lot0506).BEGIN
+                .Lot(DateConst.May6th).BEGIN
                     .At(DateConst.May6th).Arrived(100).Used(40, 60)
                     .At(DateConst.May9th).Used(0, 60).Discarded(60)
                     .END
