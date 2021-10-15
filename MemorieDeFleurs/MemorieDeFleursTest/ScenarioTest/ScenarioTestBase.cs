@@ -349,12 +349,14 @@ namespace MemorieDeFleursTest.ScenarioTest
 
             model.SupplierModel.Order(context, orderDate, supplier1, DateConst.May3rd,
                 new[] {
+                    /* 同一日の発注が単品毎に分かれているパターン */
                     Tuple.Create(ba002, 1),
                     Tuple.Create(ba003, 2),
                 });
 
             model.SupplierModel.Order(context, orderDate, supplier1, DateConst.May3rd,
                 new[] {
+                    /* 同一商品を同日複数回発注 : 在庫ロットが1日2ロットある状態を作る */
                     Tuple.Create(ba002, 1),
                 });
 

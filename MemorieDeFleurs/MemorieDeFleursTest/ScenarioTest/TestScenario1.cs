@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.Models;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 
 using MemorieDeFleursTest.ModelTest;
 using MemorieDeFleursTest.ModelTest.Fluent;
@@ -7,10 +6,7 @@ using MemorieDeFleursTest.ModelTest.Fluent;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MemorieDeFleursTest.ScenarioTest
 {
@@ -305,7 +301,14 @@ namespace MemorieDeFleursTest.ScenarioTest
                             .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
                             .NotContainsActionType(InventoryActionType.SCHEDULED_TO_DISCARD)
                         .END
-                    .Lot(DateConst.May3rd).BEGIN
+                    .Lot(DateConst.May3rd, 0).BEGIN
+                        .At(DateConst.May3rd).Arrived(100).Used(0, 100)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .ContainsActionType(InventoryActionType.ARRIVED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_ARRIVE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May3rd, 1).BEGIN
                         .At(DateConst.May3rd).Arrived(100).Used(0, 100)
                             .ContainsActionType(InventoryActionType.USED)
                             .ContainsActionType(InventoryActionType.ARRIVED)
@@ -364,6 +367,278 @@ namespace MemorieDeFleursTest.ScenarioTest
                             .ContainsActionType(InventoryActionType.USED)
                             .ContainsActionType(InventoryActionType.ARRIVED)
                             .NotContainsActionType(InventoryActionType.SCHEDULED_TO_ARRIVE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void AtMay4th()
+        {
+            var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May4th);
+
+            Model.SupplierModel.OrdersAreArrived(DateConst.May4th, orders.ToArray());
+            Model.CustomerModel.ShipAllBouquets(DateConst.May4th);
+            Model.BouquetModel.DiscardBouquetParts(DateConst.May4th, Tuple.Create("GP001", 10));
+
+            DEBUGLOG_ShowInventoryActions(TestDB, "GP001");
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA001")).BEGIN
+                    .Lot(DateConst.May1st).BEGIN
+                        .At(DateConst.May4th).Used(300, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May2nd).BEGIN
+                        .At(DateConst.May4th).Used(100, 100)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May4th).Used(0, 200)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA002")).BEGIN
+                    .Lot(DateConst.May3rd, 0).BEGIN
+                        .At(DateConst.May4th).Used(100, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May3rd, 1).BEGIN
+                        .At(DateConst.May4th).Used(0, 100)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA003")).BEGIN
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May4th).Used(103, 90)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("GP001")).BEGIN
+                    .Lot(DateConst.May2nd).BEGIN
+                        .At(DateConst.May4th).Used(0, 10).Discarded(10)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .ContainsActionType(InventoryActionType.DISCARDED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_DISCARD)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("CN001")).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.May4th).Used(0, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May2nd).BEGIN
+                        .At(DateConst.May4th).Used(0, 24)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("CN002")).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.May4th).Used(0, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May1st).BEGIN
+                        .At(DateConst.May4th).Used(0, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May4th).Used(0, 20)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void AtMay5th()
+        {
+            var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May5th);
+
+            Model.SupplierModel.OrdersAreArrived(DateConst.May5th, orders.ToArray());
+            Model.CustomerModel.ShipAllBouquets(DateConst.May5th);
+            Model.BouquetModel.DiscardBouquetParts(DateConst.May5th, Tuple.Create("BA001",0), Tuple.Create("CN001", 0), Tuple.Create("CN002", 0));
+
+            DEBUGLOG_ShowInventoryActions(TestDB, "CN002");
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA001")).BEGIN
+                    .Lot(DateConst.May2nd).BEGIN
+                        .At(DateConst.May5th).Used(100, 0).Discarded(0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .ContainsActionType(InventoryActionType.DISCARDED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_DISCARD)
+                        .END
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May5th).Used(70, 130)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA002")).BEGIN
+                    .Lot(DateConst.May3rd, 0).BEGIN
+                        .At(DateConst.May5th).Used(0, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May3rd, 1).BEGIN
+                        .At(DateConst.May5th).Used(50, 50)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA003")).BEGIN
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May5th).Used(45, 45)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("GP001")).BEGIN
+                    .Lot(DateConst.May5th).BEGIN
+                        .At(DateConst.May5th).Arrived(50).Used(15,35)
+                            .ContainsActionType(InventoryActionType.ARRIVED)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_ARRIVE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("CN001")).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.May5th).Used(0, 0).Discarded(0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .ContainsActionType(InventoryActionType.DISCARDED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_DISCARD)
+                        .END
+                    .Lot(DateConst.May2nd).BEGIN
+                        .At(DateConst.May5th).Used(10, 14)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("CN002")).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.May5th).Used(0, 0).Discarded(0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .ContainsActionType(InventoryActionType.DISCARDED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_DISCARD)
+                        .END
+                    .Lot(DateConst.May1st).BEGIN
+                        .At(DateConst.May5th).Used(0, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May5th).Used(20, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May5th).BEGIN
+                        .At(DateConst.May5th).Arrived(50).Used(5, 45)
+                            .ContainsActionType(InventoryActionType.ARRIVED)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_ARRIVE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void AtMay6th()
+        {
+            var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May6th);
+
+            Model.SupplierModel.OrdersAreArrived(DateConst.May6th, orders.ToArray());
+            Model.CustomerModel.ShipAllBouquets(DateConst.May6th);
+            Model.BouquetModel.DiscardBouquetParts(DateConst.May6th, Tuple.Create("BA001", 90), Tuple.Create("CN002", 0));
+
+            DEBUGLOG_ShowInventoryActions(TestDB, "CN002");
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA001")).BEGIN
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May6th).Used(40, 90).Discarded(90)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .ContainsActionType(InventoryActionType.DISCARDED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_DISCARD)
+                        .END
+                    .Lot(DateConst.May6th).BEGIN
+                        .At(DateConst.May6th).Arrived(100).Used(0, 100)
+                            .ContainsActionType(InventoryActionType.ARRIVED)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_ARRIVE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA002")).BEGIN
+                    .Lot(DateConst.May3rd, 0).BEGIN
+                        .At(DateConst.May6th).Used(0, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May3rd, 1).BEGIN
+                        .At(DateConst.May6th).Used(34, 16)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA003")).BEGIN
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May6th).Used(42, 3)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("GP001")).BEGIN
+                    .Lot(DateConst.May5th).BEGIN
+                        .At(DateConst.May6th).Used(30, 5)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("CN001")).BEGIN
+                    .Lot(DateConst.May2nd).BEGIN
+                        .At(DateConst.May6th).Used(8, 6)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("CN002")).BEGIN
+                    .Lot(DateConst.May1st).BEGIN
+                        .At(DateConst.May6th).Used(0, 0).Discarded(0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .ContainsActionType(InventoryActionType.DISCARDED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_DISCARD)
+                        .END
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May6th).Used(0, 0)
+                            .ContainsActionType(InventoryActionType.USED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
+                        .END
+                    .Lot(DateConst.May5th).BEGIN
+                        .At(DateConst.May6th).Used(38, 7)
+                            .ContainsActionType(InventoryActionType.USED)
                             .NotContainsActionType(InventoryActionType.SCHEDULED_TO_USE)
                         .END
                     .END

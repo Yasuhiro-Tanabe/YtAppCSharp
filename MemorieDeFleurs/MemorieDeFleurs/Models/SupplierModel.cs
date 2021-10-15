@@ -1182,6 +1182,7 @@ namespace MemorieDeFleurs.Models
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
+                LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, {string.Join(", ", otherOrders)}");
                 try
                 {
                     OrdersAreArrived(context, date, otherOrders);
@@ -1192,6 +1193,10 @@ namespace MemorieDeFleurs.Models
                     LogUtil.Warn($"{e.GetType().Name}: {e.Message}");
                     transaction.Rollback();
                     throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod();
                 }
             }
         }
