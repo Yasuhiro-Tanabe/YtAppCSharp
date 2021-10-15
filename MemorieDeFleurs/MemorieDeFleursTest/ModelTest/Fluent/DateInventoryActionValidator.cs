@@ -173,7 +173,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
                         .Where(act => act.ArrivalDate == arrivedDate)
                         .Where(act => act.ActionDate == actionDate)
                         .Count(act => act.Action == type);
-                    Assert.AreEqual(1, actual, $"在庫アクションは1件だけ存在するはず：ActionDate={actionDate:yyyyMMdd}, {set}, {partsCode}.Lot{lotNo}, ArrivalDate={arrivedDate:yyyyMMdd}");
+                    Assert.AreEqual(1, actual, $"在庫アクションは1件だけ存在するはず：ActionDate={actionDate:yyyyMMdd}, {type}, {partsCode}.Lot{lotNo}, ArrivalDate={arrivedDate:yyyyMMdd}");
                 }
             }
 
