@@ -619,7 +619,7 @@ namespace MemorieDeFleursTest.ModelTest
         /// <summary>
         /// 4/30 に BA001を100本破棄→ 5/5 に在庫不足発生
         /// </summary>
-        [TestMethod,TestCategory("RED")]
+        [TestMethod]
         public void InentoryShortageCausedToDiscard()
         {
             Model.BouquetModel.DiscardBouquetParts(DateConst.April30th, Tuple.Create("BA001", 150));
