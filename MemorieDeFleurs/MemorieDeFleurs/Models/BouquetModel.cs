@@ -1376,27 +1376,29 @@ namespace MemorieDeFleurs.Models
                 InventoryAction previousAction = null;
                 foreach (var lots in inventories.OrderBy(kv => kv.Key))
                 {
-                    if (remainToDiscard == 0) { break; }
-
                     foreach (var actions in lots.Value.OrderBy(kv => kv.Key))
                     {
-                        if (remainToDiscard == 0) { break; }
 
                         var scheduledToUse = actions.Value.SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_USE);
                         var scheduledToDiscard = actions.Value.SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_DISCARD);
                         var discarded = actions.Value.SingleOrDefault(act => act.Action == InventoryActionType.DISCARDED);
                         var isNewCreated = false;
 
+                        // 破棄可能な予定在庫がこのロットにはない→次のロットから破棄する
+                        if (scheduledToDiscard == null && scheduledToUse == null) { continue; }
+
                         if (discarded == null)
                         {
+                            var action = scheduledToUse == null ? scheduledToDiscard : scheduledToUse;
+
                             discarded = new InventoryAction()
                             {
                                 Action = InventoryActionType.DISCARDED,
-                                ActionDate = scheduledToUse.ActionDate,
-                                ArrivalDate = scheduledToUse.ArrivalDate,
-                                BouquetPart = scheduledToUse.BouquetPart,
-                                InventoryLotNo = scheduledToUse.InventoryLotNo,
-                                PartsCode = scheduledToUse.PartsCode,
+                                ActionDate = action.ActionDate,
+                                ArrivalDate = action.ArrivalDate,
+                                BouquetPart = action.BouquetPart,
+                                InventoryLotNo = action.InventoryLotNo,
+                                PartsCode = action.PartsCode,
                                 Quantity = 0,
                                 Remain = 0
                             };
@@ -1404,9 +1406,6 @@ namespace MemorieDeFleurs.Models
                         }
                         var oldDiscarded = new InventoryAction() { Quantity = discarded.Quantity, Remain = discarded.Remain };
 
-
-                        // 破棄可能な予定在庫がこのロットにはない→次のロットから破棄する
-                        if (scheduledToDiscard == null && scheduledToUse == null) { continue; }
 
                         if (scheduledToDiscard == null)
                         {
@@ -1485,8 +1484,13 @@ namespace MemorieDeFleurs.Models
                             LogUtil.DEBUGLOG_InventoryActionChanged(discarded, oldDiscarded);
                         }
                         previousAction = discarded;
+
+                        if (remainToDiscard == 0) { break; }
                     }
+
+                    if (remainToDiscard == 0) { break; }
                 }
+
 
                 if (remainToDiscard > 0)
                 {
