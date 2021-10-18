@@ -1,8 +1,10 @@
-﻿using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models;
+using MemorieDeFleurs.Models.Entities;
 
 using MemorieDeFleursTest.ModelTest;
 using MemorieDeFleursTest.ModelTest.Fluent;
 
+using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
@@ -16,17 +18,36 @@ namespace MemorieDeFleursTest.ScenarioTest
     [TestClass]
     public class TestScenario1 : ScenarioTestBase
     {
+        private static SqliteConnection TestDB { get; set; }
+        private MemorieDeFleursModel Model { get; set; }
+
+
+        #region テストの初期化終了
         [ClassInitialize]
         public static void ClassInitialize(TestContext unused)
         {
-            OpenDatabase();
+            TestDB = OpenDatabase();
         }
 
         [ClassCleanup]
         public static void ClassCleanup()
         {
-            CloseDatabase();
+            CloseDatabase(TestDB);
         }
+
+        [TestInitialize]
+        public void CreateModel()
+        {
+            Model = new MemorieDeFleursModel(TestDB);
+        }
+
+        [TestCleanup]
+        public void ReleaseModel()
+        {
+            Model = null;
+        }
+        #endregion // テストの初期化終了
+
 
         [TestMethod]
         public void AtApril30th()

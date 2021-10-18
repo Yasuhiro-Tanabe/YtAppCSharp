@@ -25,46 +25,31 @@ namespace MemorieDeFleursTest.ScenarioTest
     [TestClass]
     public class ScenarioTestBase
     {
-        /// <summary>
-        /// シナリオテストで使用するデータベースとの接続オブジェクト。
-        /// 
-        /// 各シナリオの検証で使用できるよう公開する。
-        /// </summary>
-        protected static SqliteConnection TestDB { get; private set; }
-
+        #region SQL
         private static string TableDefinitionFile = "./testdata/db/TableDefinitions.sql";
         private static IList<Tuple<string, string>> TableDefinitions = new List<Tuple<string, string>>();
 
-        /// <summary>
-        /// 各テストの開始イベント：
-        /// 各シナリオの各テストケース毎に、テストケース実行開始前に実施する前処理を呼び出す。
-        /// </summary>
-        protected event EventHandler AfterTestBaseInitializing;
-
-        /// <summary>
-        /// 各テストの終了イベント：
-        /// 各シナリオの各テストケース毎に、テストケース実行後に実施する後処理を呼び出す。
-        /// </summary>
-        protected event EventHandler BeforeTestBaseCleaningUp;
-
-
-        protected MemorieDeFleursModel Model { get; set; }
+        static ScenarioTestBase()
+        {
+            LoadTableDefinitionsFile();
+        }
+        #endregion // SQL
 
         #region ClassInitialize
         /// <summary>
         /// サブクラスの TestInitializeAttribute を付与したメソッドで呼び出す、
         /// 共通のデータベース初期化メソッド
         /// </summary>
-        protected static void OpenDatabase()
+        protected static SqliteConnection OpenDatabase()
         {
             LogUtil.DEBUGLOG_BeginMethod();
 
-            TestDB = CreateInmeoryDBConnection();
-            LoadTableDefinitionsFile();
-            OpenDatabase(TestDB);
-            CreateTestBaseData();
+            var db = CreateInmeoryDBConnection();
+            OpenDatabase(db);
+            CreateTestBaseData(db);
 
             LogUtil.DEBUGLOG_EndMethod();
+            return db;
         }
 
         private static SqliteConnection CreateInmeoryDBConnection()
@@ -117,14 +102,14 @@ namespace MemorieDeFleursTest.ScenarioTest
             }
         }
 
-        private static void CreateTestBaseData()
+        private static void CreateTestBaseData(SqliteConnection db)
         {
-            using (var context = new MemorieDeFleursDbContext(TestDB))
+            using (var context = new MemorieDeFleursDbContext(db))
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    var model = new MemorieDeFleursModel(TestDB);
+                    var model = new MemorieDeFleursModel(db);
                     PrepareParts(model, context);
                     PrepareBouquets(model, context);
                     PrepareCustomers(model, context);
@@ -525,11 +510,11 @@ namespace MemorieDeFleursTest.ScenarioTest
         #endregion // TestInitialize
 
         #region ClassCleanup
-        protected static void CloseDatabase()
+        protected static void CloseDatabase(SqliteConnection db)
         {
-            ClearModelData(TestDB);
-            TestDB.Close();
-            TestDB.Dispose();
+            ClearModelData(db);
+            db.Close();
+            db.Dispose();
         }
         public static void ClearModelData(DbConnection connection)
         {
@@ -563,35 +548,6 @@ namespace MemorieDeFleursTest.ScenarioTest
 
         }
         #endregion // ClassCleanup
-
-        #region TestInitialize
-        [TestInitialize]
-        public void CreateModel()
-        {
-            Model = new MemorieDeFleursModel(TestDB);
-
-            AfterTestBaseInitializing?.Invoke(this, null);
-        }
-        #endregion // TestInitialize
-
-        #region TestCleanup
-        [TestCleanup]
-        public void ReleaseModel()
-        {
-            // 登録したイベントハンドラを、登録したときと逆順に呼び出す。
-            // IList<>.ForEach() は使用しない：イベントハンドラオブジェクトのコピーが発生するため。
-            if (BeforeTestBaseCleaningUp != null)
-            {
-                foreach (var handler in BeforeTestBaseCleaningUp.GetInvocationList().Reverse().Cast<EventHandler>())
-                {
-                    handler(this, null);
-                }
-            }
-
-            Model = null;
-        }
-        #endregion
-
 
         #region DEBUGLOG
         /// <summary>

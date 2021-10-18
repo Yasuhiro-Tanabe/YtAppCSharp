@@ -54,8 +54,8 @@ namespace MemorieDeFleurs.Databese.SQLite
             if(Connection is SqliteConnection)
             {
                 builder.UseSqlite(Connection);
-                builder.EnableSensitiveDataLogging(true); // for Debug
-                builder.LogTo(Console.WriteLine); // for Debug
+                //builder.EnableSensitiveDataLogging(true); // for Debug
+                //builder.LogTo(Console.WriteLine); // for Debug
             }
         }
 
