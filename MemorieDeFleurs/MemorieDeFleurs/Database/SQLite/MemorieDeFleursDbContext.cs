@@ -4,6 +4,7 @@ using MemorieDeFleurs.Models.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
+using System;
 using System.Data.Common;
 
 namespace MemorieDeFleurs.Databese.SQLite
@@ -54,6 +55,7 @@ namespace MemorieDeFleurs.Databese.SQLite
             {
                 builder.UseSqlite(Connection);
                 builder.EnableSensitiveDataLogging(true); // for Debug
+                builder.LogTo(Console.WriteLine); // for Debug
             }
         }
 
@@ -87,10 +89,10 @@ namespace MemorieDeFleurs.Databese.SQLite
                     ent.HasOne(a => a.Customer).WithMany(c => c.ShippingAddresses).HasForeignKey(a => a.CustomerID);
                 });
 
-            modelBuilder
-                .Entity<OrderFromCustomer>()
-                .Property(o => o.OrderDate)
-                .HasConversion(converter);
+            modelBuilder.Entity<OrderFromCustomer>(order => {
+                order.Property(o => o.OrderDate).HasConversion(converter);
+                order.Property(o => o.ShippingDate).HasConversion(converter);
+            });
 
             modelBuilder
                 .Entity<OrdersToSupplier>(order =>
