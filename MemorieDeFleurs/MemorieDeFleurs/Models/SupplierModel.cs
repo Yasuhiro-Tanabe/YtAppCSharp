@@ -460,6 +460,41 @@ namespace MemorieDeFleurs.Models
         /// 発注する
         /// </summary>
         /// <param name="orderDate">発注日</param>
+        /// <param name="supplierID">発注先ID</param>
+        /// <param name="derivalyDate">入荷予定日</param>
+        /// <param name="orderParts">発注明細:花コードと注文ロット数のタプルを必要個数列挙する</param>
+        /// <returns>発注番号</returns>
+        public string Order(DateTime orderDate, int supplierID, DateTime derivalyDate, params Tuple<string, int>[] orderParts)
+        {
+            Supplier supplier;
+            Tuple<BouquetPart, int>[] parts;
+
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                supplier = context.Suppliers.Find(supplierID);
+                if (supplier == null)
+                {
+                    throw new ApplicationException($"仕入先未登録またはID入力ミス： {supplierID}");
+                }
+
+                var expectedParts = orderParts.Select(item => Tuple.Create(context.BouquetParts.Find(item.Item1), item.Item2));
+
+                var notFound = orderParts.Zip(expectedParts, (p1, p2) => Tuple.Create(p1.Item1, p2.Item1, p2.Item2)).Where(item => item.Item2 == null);
+                if (notFound.Count() > 0)
+                {
+                    throw new ApplicationException($"単品未登録または花コード入力ミス： {string.Join(", ", notFound.Select(item => item.Item1))}");
+                }
+
+                parts = expectedParts.Where(p => p.Item1 != null).ToArray();
+            }
+
+            return Order(orderDate, supplier, derivalyDate, parts);
+        }
+
+        /// <summary>
+        /// 発注する
+        /// </summary>
+        /// <param name="orderDate">発注日</param>
         /// <param name="supplier">発注先</param>
         /// <param name="derivalyDate">入荷予定日</param>
         /// <param name="orderParts">発注明細</param>

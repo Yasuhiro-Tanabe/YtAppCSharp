@@ -28,7 +28,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             return new InventoryActionValidator();
         }
 
-        private BouquetPart CurrentPart { get; set; } = null;
+        private string CurrentPartsCode { get; set; } = null;
 
         private PartsInventoryActionValidator CurrentChild { get; set; } = null;
 
@@ -43,14 +43,19 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <returns>単品在庫アクション検証器</returns>
         public InventoryActionValidator BouquetPartIs(BouquetPart part)
         {
+            return BouquetPartIs(part.Code);
+        }
+
+        public InventoryActionValidator BouquetPartIs(string partsCode)
+        {
             PartsInventoryActionValidator validator;
-            if (!PartsValidators.TryGetValue(part.Code, out validator))
+            if (!PartsValidators.TryGetValue(partsCode, out validator))
             {
                 validator = new PartsInventoryActionValidator(this);
-                PartsValidators.Add(part.Code, validator);
+                PartsValidators.Add(partsCode, validator);
             }
-            CurrentPart = part;
             CurrentChild = validator;
+
             return this;
         }
 

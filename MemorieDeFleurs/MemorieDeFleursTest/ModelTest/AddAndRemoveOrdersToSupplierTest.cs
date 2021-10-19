@@ -82,6 +82,13 @@ namespace MemorieDeFleursTest.ModelTest
                 .QauntityParLotIs(100)
                 .ExpiryDateIs(3)
                 .Create(context);
+            Model.BouquetModel.GetBouquetPartBuilder()
+                .PartCodeIs("BA002")
+                .PartNameIs("薔薇(白)")
+                .LeadTimeIs(1)
+                .QauntityParLotIs(100)
+                .ExpiryDateIs(3)
+                .Create(context);
         }
 
         private void PrepareInitialUsed(MemorieDeFleursDbContext context)
@@ -782,6 +789,35 @@ namespace MemorieDeFleursTest.ModelTest
         public void OrderBouquetParts_CloserThanLeadTime()
         {
             Model.SupplierModel.Order(DateConst.April30th, ExpectedSupplier, DateConst.April30th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ExpectedPart, 1) });
+        }
+
+        [TestMethod]
+        public void OrderAtMay7th()
+        {
+            Model.SupplierModel.Order(DateConst.April30th, 1, DateConst.May7th, Tuple.Create("BA001", 1), Tuple.Create("BA002", 3));
+
+            DEBUGLOG_ShowInventoryActions(TestDB, "BA001");
+            DEBUGLOG_ShowInventoryActions(TestDB, "BA002");
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs("BA001").BEGIN
+                    .Lot(DateConst.May7th).BEGIN
+                        .At(DateConst.May7th).Arrived(100)
+                        .END
+                    .END
+                .BouquetPartIs("BA002").BEGIN
+                    .Lot(DateConst.May7th).BEGIN
+                        .At(DateConst.May7th).Arrived(300)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod,ExpectedException(typeof(ApplicationException))]
+        public void Order_InvalidBouquetPartsCode()
+        {
+            Model.SupplierModel.Order(DateConst.April30th, 1, DateConst.May7th, Tuple.Create("BA001", 1), Tuple.Create("XY123", 3));
         }
     }
 }
