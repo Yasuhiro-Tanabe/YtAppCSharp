@@ -655,5 +655,22 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
+
+        [TestMethod]
+        public void FindAllOrdersShippingAt_NoOrdersFound()
+        {
+            var orders = Model.CustomerModel.FindAllOrdersShippingAt(DateConst.April30th);
+            Assert.AreEqual(0, orders.Count());
+        }
+
+        [TestMethod]
+        public void FindAllOrdersShippingAt()
+        {
+            var orderNo = Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May3rd);
+            var orders = Model.CustomerModel.FindAllOrdersShippingAt(DateConst.May2nd).ToArray();
+
+            Assert.AreEqual(1, orders.Length);
+            Assert.AreEqual(orderNo, orders[0]);
+        }
     }
 }

@@ -51,11 +51,11 @@ namespace MemorieDeFleurs.Models
             string _password;
             string _cardNo;
 
-            IDictionary<string, Tuple<string, string>> _shipping = new SortedDictionary<string, Tuple<string, string>>();            
+            IDictionary<string, Tuple<string, string>> _shipping = new SortedDictionary<string, Tuple<string, string>>();
 
             internal static CustomerBuilder GetInstance(CustomerModel parent)
             {
-                return new CustomerBuilder(parent);   
+                return new CustomerBuilder(parent);
             }
 
             private CustomerBuilder(CustomerModel model)
@@ -139,7 +139,7 @@ namespace MemorieDeFleurs.Models
                         transaction.Commit();
                         return customer;
                     }
-                    catch(Exception)
+                    catch (Exception)
                     {
                         transaction.Rollback();
                         throw;
@@ -168,7 +168,7 @@ namespace MemorieDeFleurs.Models
 
                 context.Customers.Add(c);
 
-                if(_shipping.Count > 0)
+                if (_shipping.Count > 0)
                 {
                     var builder = _model.GetShippingAddressBuilder();
                     foreach (var addr in _shipping)
@@ -204,7 +204,7 @@ namespace MemorieDeFleurs.Models
             private string _name;
 
             private Customer _sendFrom;
-            
+
             public static ShippingAddressBuilder GetInstance(CustomerModel parent)
             {
                 return new ShippingAddressBuilder(parent);
@@ -243,7 +243,7 @@ namespace MemorieDeFleurs.Models
             /// <param name="address1">お届け先住所1 (入力必須)</param>
             /// <param name="address2">お届け先住所2</param>
             /// <returns>お届け先住所を変更したお届け先オブジェクト生成器(自分自身)</returns>
-            public ShippingAddressBuilder AddressIs(string address1, string address2="")
+            public ShippingAddressBuilder AddressIs(string address1, string address2 = "")
             {
                 _address1 = address1;
                 _address2 = address2;
@@ -362,7 +362,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="sendTo">花束の送り先：贈り主はここから参照して取得する</param>
         /// <param name="arrivalDate">お届け日：花束の作成は前日なので、在庫は arrivalDate - 1 日の分が消費される</param>
         /// <param name="message">（省略可能）お届けメッセージ</param>
-        public string Order(DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "" )
+        public string Order(DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "")
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -484,7 +484,7 @@ namespace MemorieDeFleurs.Models
                     throw new NotSupportedException($"該当する受注履歴なし：{orderNo}");
                 }
 
-                if(order.Status == OrderFromCustomerStatus.SHIPPED)
+                if (order.Status == OrderFromCustomerStatus.SHIPPED)
                 {
                     // 出荷済み注文はキャンセル不可
                     throw new ApplicationException($"出荷済みキャンセル不可：{orderNo}");
@@ -528,7 +528,7 @@ namespace MemorieDeFleurs.Models
                     LogUtil.DEBUGLOG_EndMethod($"{orderNo}", "succeeded.");
                     LogUtil.Info($"Shipping Date changed; order={orderNo}, from {oldShippingDate:yyyyMMdd} to {newArrivalDate.AddDays(-1):yyyyMMdd}");
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     transaction.Rollback();
                     LogUtil.Warn($"ChangeArrivalDate({orderNo},{newArrivalDate.ToString("yyyyMMdd")}) failed, cause={e.GetType().Name}: {e.Message}");
@@ -552,7 +552,7 @@ namespace MemorieDeFleurs.Models
                 throw new NotImplementedException($"エラー処理未実装：{orderNo} に該当するオーダーがない");
             }
 
-            if(order.Status == OrderFromCustomerStatus.SHIPPED)
+            if (order.Status == OrderFromCustomerStatus.SHIPPED)
             {
                 // 出荷済み注文はキャンセル不可
                 throw new ApplicationException($"出荷済み出荷日変更不可：{orderNo}");
@@ -560,7 +560,7 @@ namespace MemorieDeFleurs.Models
 
             var bouquet = Parent.BouquetModel.FindBouquet(order.BouquetCode);
             var minimalArrivalDate = orderChangeDate.AddDays(bouquet.LeadTime);
-            if(newArrivalDate <= minimalArrivalDate)
+            if (newArrivalDate <= minimalArrivalDate)
             {
                 // リードタイムより近い日付への移動はできない
                 // 等号を含む：当日受け付けた注文変更に伴う在庫不足があると、仕入先への単品発注が間に合わないため。
@@ -573,7 +573,7 @@ namespace MemorieDeFleurs.Models
                 $", Shipping={order.ShippingDate.ToString("yyyyMMdd")}->{newShippingDate.ToString("yyyyMMdd")}" +
                 $", Bouquet({bouquet.PartsList.Count()} part(s))=[{string.Join(", ", partsList).Trim()}]");
 
-            foreach(var item in bouquet.PartsList)
+            foreach (var item in bouquet.PartsList)
             {
                 Parent.BouquetModel.ReturnToInventory(context, item.Part, order.ShippingDate, item.Quantity);
                 Parent.BouquetModel.UseFromInventory(context, item.Part, newShippingDate, item.Quantity);
@@ -593,7 +593,7 @@ namespace MemorieDeFleurs.Models
                     ShipAllOrdersFromCustomerInTheDay(context, date);
                     transaction.Commit();
                 }
-                catch(Exception)
+                catch (Exception)
                 {
                     transaction.Rollback();
                     throw;
@@ -608,9 +608,9 @@ namespace MemorieDeFleurs.Models
 
         private void ShipAllOrdersFromCustomerInTheDay(MemorieDeFleursDbContext context, DateTime date)
         {
-            foreach(var order in context.OrderFromCustomers.Where(order => order.ShippingDate == date).ToList())
+            foreach (var order in context.OrderFromCustomers.Where(order => order.ShippingDate == date).ToList())
             {
-                if(order.Status == OrderFromCustomerStatus.SHIPPED)
+                if (order.Status == OrderFromCustomerStatus.SHIPPED)
                 {
                     // 二重出荷はできない
                     throw new ApplicationException($"すでに出荷済み：{order.ID}");
@@ -640,7 +640,7 @@ namespace MemorieDeFleurs.Models
                     ShipOrders(context, date, orderNumbers);
                     transaction.Commit();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     transaction.Rollback();
                     LogUtil.Warn($"Order shipping failed: {date:yyyyMMdd}, {ex.GetType().Name} : {ex.Message}");
@@ -670,12 +670,26 @@ namespace MemorieDeFleurs.Models
                 .SelectMany(o => context.PartsList.Where(i => i.BouquetCode == o.BouquetCode))
                 .GroupBy(i => i.PartsCode)
                 .ToDictionary(g => g.Key, g => g.Sum(i => i.Quantity));
-            foreach(var item in partsList)
+            foreach (var item in partsList)
             {
                 Parent.BouquetModel.UpdatePartsUsedQuantity(context, date, item);
             }
             context.SaveChanges();
         }
         #endregion // 出荷
+
+        #region 受注履歴の取得
+        public IEnumerable<string> FindAllOrdersShippingAt(DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrderFromCustomers
+                    .Where(order => order.ShippingDate == date)
+                    .OrderBy(order => order.ID)
+                    .Select(order => order.ID)
+                    .ToList();
+            }
+        }
+        #endregion // 受注履歴の取得
     }
 }
