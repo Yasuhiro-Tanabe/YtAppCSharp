@@ -225,7 +225,7 @@ namespace MemorieDeFleursTest.ModelTest
             Model.CustomerModel.ShipAllBouquets(DateConst.April30th);
 
             var order = InitialOrdersFromCustomers[DateConst.April30th][0];
-            Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.ChangeArrivalDate(order, DateConst.May1st));
+            Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.ChangeArrivalDate(DateConst.April30th.AddDays(-5), order, DateConst.May1st));
             Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.CancelOrder(order));
         }
 
@@ -236,7 +236,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             Model.CustomerModel.ShipOrders(DateConst.April30th, orderNo);
 
-            Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.ChangeArrivalDate(orderNo, DateConst.May1st));
+            Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.ChangeArrivalDate(DateConst.April30th, orderNo, DateConst.May5th));
             Assert.ThrowsException<ApplicationException>(() => Model.CustomerModel.CancelOrder(orderNo));
 
             var lotNo = InitialLots["BA001"][DateConst.April30th][0].LotNo;

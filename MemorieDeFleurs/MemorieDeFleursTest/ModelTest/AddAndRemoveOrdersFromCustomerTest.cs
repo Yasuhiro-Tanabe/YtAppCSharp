@@ -508,7 +508,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             // 同一ロット内で変更
             var May10th = DateConst.May9th.AddDays(1);
-            Model.CustomerModel.ChangeArrivalDate(order, May10th);
+            Model.CustomerModel.ChangeArrivalDate(DateConst.May3rd, order, May10th);
             LogUtil.Debug($"{LogUtil.Indent}After ordered...");
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.May6th).BEGIN
@@ -551,7 +551,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            Model.CustomerModel.ChangeArrivalDate(order, DateConst.May9th);
+            Model.CustomerModel.ChangeArrivalDate(DateConst.May3rd, order, DateConst.May9th);
 
             LogUtil.Debug($"{LogUtil.Indent}After ordered...");
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
@@ -594,7 +594,7 @@ namespace MemorieDeFleursTest.ModelTest
             using(var context = new MemorieDeFleursDbContext(TestDB))
             using (var transaction = context.Database.BeginTransaction())
             {
-                Model.CustomerModel.ChangeArrivalDate(context, order, DateConst.May9th);
+                Model.CustomerModel.ChangeArrivalDate(context, DateConst.May2nd, order, DateConst.May9th);
                 transaction.Rollback();
             }
 

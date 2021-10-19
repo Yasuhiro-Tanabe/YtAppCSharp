@@ -265,6 +265,15 @@ namespace MemorieDeFleurs.Models
 
                 foreach (var p in _partsList)
                 {
+                    var parts = context.BouquetParts.Find(p.Key);
+                    if(parts == null)
+                    {
+                        throw new ApplicationException($"該当単品なし：{p.Key}");
+                    }
+                    if(ret.LeadTime < parts.LeadTime)
+                    {
+                        ret.LeadTime = parts.LeadTime;
+                    }
                     var item = new BouquetPartsList() { BouquetCode = _code, PartsCode = p.Key, Quantity = p.Value };
                     ret.PartsList.Add(item);
                 }
@@ -879,16 +888,24 @@ namespace MemorieDeFleurs.Models
         /// <param name="quantity">数量</param>
         private void AppendPartsTo(MemorieDeFleursDbContext context, string bouquetCode, string partsCode, int quantity)
         {
-            if (context.Bouquets.Find(bouquetCode) == null)
+            var bouquet = context.Bouquets.Find(bouquetCode);
+            var parts = context.BouquetParts.Find(partsCode);
+            if ( bouquet == null)
             {
                 throw new ArgumentException($"花束未登録： {bouquetCode}");
             }
-            if (context.BouquetParts.Find(partsCode) == null)
+            if ( parts == null)
             {
                 throw new ArgumentException($"単品未登録： {partsCode}");
             }
 
             CreateOrUpdatePartsList(context, bouquetCode, partsCode, quantity);
+
+            if (bouquet.LeadTime < parts.LeadTime)
+            {
+                bouquet.LeadTime = parts.LeadTime;
+                context.Bouquets.Update(bouquet);
+            }
         }
 
         private void CreateOrUpdatePartsList(MemorieDeFleursDbContext context, string bouquetCode, string partsCode, int quantity)

@@ -405,6 +405,12 @@ namespace MemorieDeFleurs.Models
                     throw new InvalidOperationException($"当日受注数が想定外に多い：受注日={orderDate.ToString("yyyyMMdd")}, 受注数={countOfOrdersToday}");
                 }
 
+                var minmalArrivalDate = orderDate.AddDays(bouquet.LeadTime);
+                if (arrivalDate < minmalArrivalDate)
+                {
+                    throw new ApplicationException($"注文不可：お届け日 {arrivalDate:yyyyMMdd} が最短お届け可能日 {minmalArrivalDate:yyyyMMdd} より近い");
+                }
+
                 var usedDate = arrivalDate.AddDays(-1);
                 foreach (var item in bouquet.PartsList)
                 {
@@ -507,7 +513,7 @@ namespace MemorieDeFleurs.Models
         #endregion // 注文取消
 
         #region お届け日変更
-        public void ChangeArrivalDate(string orderNo, DateTime newArrivalDate)
+        public void ChangeArrivalDate(DateTime orderChangeDate, string orderNo, DateTime newArrivalDate)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -517,7 +523,7 @@ namespace MemorieDeFleurs.Models
                     var oldShippingDate = context.OrderFromCustomers.Find(orderNo).ShippingDate;
 
                     LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, {newArrivalDate:yyyyMMdd}");
-                    ChangeArrivalDate(context, orderNo, newArrivalDate);
+                    ChangeArrivalDate(context, orderChangeDate, orderNo, newArrivalDate);
                     transaction.Commit();
                     LogUtil.DEBUGLOG_EndMethod($"{orderNo}", "succeeded.");
                     LogUtil.Info($"Shipping Date changed; order={orderNo}, from {oldShippingDate:yyyyMMdd} to {newArrivalDate.AddDays(-1):yyyyMMdd}");
@@ -532,7 +538,7 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        public void ChangeArrivalDate(MemorieDeFleursDbContext context, string orderNo, DateTime newArrivalDate)
+        public void ChangeArrivalDate(MemorieDeFleursDbContext context, DateTime orderChangeDate, string orderNo, DateTime newArrivalDate)
         {
 
             if (string.IsNullOrWhiteSpace(orderNo))
@@ -553,7 +559,14 @@ namespace MemorieDeFleurs.Models
             }
 
             var bouquet = Parent.BouquetModel.FindBouquet(order.BouquetCode);
-            
+            var minimalArrivalDate = orderChangeDate.AddDays(bouquet.LeadTime);
+            if(newArrivalDate <= minimalArrivalDate)
+            {
+                // リードタイムより近い日付への移動はできない
+                // 等号を含む：当日受け付けた注文変更に伴う在庫不足があると、仕入先への単品発注が間に合わないため。
+                throw new ApplicationException($"注文変更不可：お届け日 {newArrivalDate:yyyyMMdd} が最短お届け可能日 {minimalArrivalDate:yyyyMMdd} より近い");
+            }
+
             var newShippingDate = newArrivalDate.AddDays(-1);
             var partsList = bouquet.PartsList.Select(i => $"{i.PartsCode} x{i.Quantity}");
             LogUtil.Debug($"{LogUtil.Indent}Order={orderNo}" +

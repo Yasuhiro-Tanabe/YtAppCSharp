@@ -356,8 +356,9 @@ namespace MemorieDeFleursTest.ModelTest
         {
             LogUtil.DEBUGLOG_BeginTest();
 
-            Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd, "メッセージ");
-            Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT004"], Customers[2].ShippingAddresses[1], DateConst.May1st);
+            var orderDate = DateConst.April30th.AddDays(-5);
+            Model.CustomerModel.Order(orderDate, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd, "メッセージ");
+            Model.CustomerModel.Order(orderDate, Bouquets["HT004"], Customers[2].ShippingAddresses[1], DateConst.May1st);
 
             InventoryActionValidator.NewInstance()
                 .BouquetPartIs(BouquetParts["BA001"]).BEGIN
@@ -499,8 +500,9 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void ChangeArrivalDate()
         {
-            var orderNo = Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT004"], Customers[1].ShippingAddresses[0], DateConst.May1st);
-            Model.CustomerModel.ChangeArrivalDate(orderNo, DateConst.May3rd);
+            var orderDate = DateConst.April30th.AddDays(-5);
+            var orderNo = Model.CustomerModel.Order(orderDate, Bouquets["HT004"], Customers[1].ShippingAddresses[0], DateConst.May1st);
+            Model.CustomerModel.ChangeArrivalDate(orderDate, orderNo, DateConst.May3rd);
 
             InventoryActionValidator.NewInstance()
                 .BouquetPartIs(BouquetParts["BA002"]).BEGIN
@@ -538,6 +540,20 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
+        }
+
+        [TestMethod,ExpectedException(typeof(ApplicationException))]
+        public void ArrivalDateIsCloserThanLeadTime()
+        {
+            // HT004のリードタイムは3日 (構成単品 CN002 の発注リードタイム) なので、4/30発注の場合お届け日は最短で5/3
+            var orderNo = Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT004"], Customers[1].ShippingAddresses[0], DateConst.May1st);
+        }
+
+        [TestMethod,ExpectedException(typeof(ApplicationException))]
+        public void ChangeArrivalDate_NewArrivalDateIsCloserThanLeadTime()
+        {
+            var orderNo = Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT004"], Customers[1].ShippingAddresses[0], DateConst.May3rd);
+            Model.CustomerModel.ChangeArrivalDate(DateConst.April30th, orderNo, DateConst.May1st);
         }
     }
 }
