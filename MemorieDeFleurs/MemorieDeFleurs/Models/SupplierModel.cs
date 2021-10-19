@@ -516,8 +516,13 @@ namespace MemorieDeFleurs.Models
             foreach(var item in orderParts)
             {
                 var part = item.Item1;
-                var lotcount = item.Item2; 
-
+                var lotcount = item.Item2;
+                var nearestArrivalDate = orderDate.AddDays(part.LeadTime);
+                if (derivalyDate < nearestArrivalDate)
+                {
+                    throw new ApplicationException($"納品日は発注日+{part.LeadTime}日以降でなければならない：" +
+                        $"納品予定日{derivalyDate:yyyyMMdd} < {nearestArrivalDate:yyyyMMdd} = {orderDate:yyyyMMdd}+{part.LeadTime}日");
+                }
                 var lotNo = Order(context, orderDate, part, lotcount, derivalyDate);
                 builder.Order(part, lotcount, lotNo);
             }

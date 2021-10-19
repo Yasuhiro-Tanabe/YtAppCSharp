@@ -169,13 +169,13 @@ namespace MemorieDeFleursTest.ModelTest
 
             var orders = new List<string>()
             {
-                Model.SupplierModel.Order(DateConst.April30th, supplier1, DateConst.May2nd, new [] { Tuple.Create(ba001, 2), Tuple.Create(gp001, 2) }),
-                Model.SupplierModel.Order(DateConst.April30th, supplier1, DateConst.May3rd, new [] { Tuple.Create(ba001, 1), Tuple.Create(gp001, 3) }),
-                Model.SupplierModel.Order(DateConst.April30th, supplier2, DateConst.May2nd, new [] { Tuple.Create(gp001, 2), Tuple.Create(cn001, 2) }),
+                Model.SupplierModel.Order(DateConst.April30th, supplier1, DateConst.May3rd, new [] { Tuple.Create(ba001, 2), Tuple.Create(gp001, 2) }),
+                Model.SupplierModel.Order(DateConst.April30th, supplier1, DateConst.May4th, new [] { Tuple.Create(ba001, 1), Tuple.Create(gp001, 3) }),
+                Model.SupplierModel.Order(DateConst.April30th, supplier2, DateConst.May3rd, new [] { Tuple.Create(gp001, 2), Tuple.Create(cn001, 2) }),
             };
 
-            Model.SupplierModel.OrdersAreArrived(DateConst.May2nd, orders[0], orders[2]);
-            Model.SupplierModel.OrdersAreArrived(DateConst.May3rd, orders[1]);
+            Model.SupplierModel.OrdersAreArrived(DateConst.May3rd, orders[0], orders[2]);
+            Model.SupplierModel.OrdersAreArrived(DateConst.May4th, orders[1]);
 
             Assert.ThrowsException<ApplicationException>(() => Model.SupplierModel.CancelOrder(orders[0]));
             Assert.ThrowsException<ApplicationException>(() => Model.SupplierModel.CancelOrder(orders[1]));
@@ -187,27 +187,27 @@ namespace MemorieDeFleursTest.ModelTest
 
             InventoryActionValidator.NewInstance()
                 .BouquetPartIs(ba001).BEGIN
-                    .Lot(DateConst.May2nd).BEGIN
-                        .At(DateConst.May2nd).Arrived(2 * ba001.QuantitiesPerLot)
-                        .END
                     .Lot(DateConst.May3rd).BEGIN
-                        .At(DateConst.May3rd).Arrived(1 * ba001.QuantitiesPerLot)
+                        .At(DateConst.May3rd).Arrived(2 * ba001.QuantitiesPerLot)
+                        .END
+                    .Lot(DateConst.May4th).BEGIN
+                        .At(DateConst.May4th).Arrived(1 * ba001.QuantitiesPerLot)
                         .END
                     .END
                 .BouquetPartIs(gp001).BEGIN
-                    .Lot(DateConst.May2nd, 0).BEGIN
-                        .At(DateConst.May2nd).Arrived(2 * gp001.QuantitiesPerLot)
+                    .Lot(DateConst.May3rd, 0).BEGIN
+                        .At(DateConst.May3rd).Arrived(2 * gp001.QuantitiesPerLot)
                         .END
-                    .Lot(DateConst.May2nd, 1).BEGIN
-                        .At(DateConst.May2nd).Arrived(2 * gp001.QuantitiesPerLot)
+                    .Lot(DateConst.May3rd, 1).BEGIN
+                        .At(DateConst.May3rd).Arrived(2 * gp001.QuantitiesPerLot)
                         .END
-                    .Lot(DateConst.May3rd).BEGIN
-                        .At(DateConst.May3rd).Arrived(3 * gp001.QuantitiesPerLot)
+                    .Lot(DateConst.May4th).BEGIN
+                        .At(DateConst.May4th).Arrived(3 * gp001.QuantitiesPerLot)
                         .END
                     .END
                 .BouquetPartIs(cn001).BEGIN
-                    .Lot(DateConst.May2nd).BEGIN
-                        .At(DateConst.May2nd).Arrived(2 * cn001.QuantitiesPerLot)
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May3rd).Arrived(2 * cn001.QuantitiesPerLot)
                         .END
                     .END
                 .TargetDBIs(TestDB)

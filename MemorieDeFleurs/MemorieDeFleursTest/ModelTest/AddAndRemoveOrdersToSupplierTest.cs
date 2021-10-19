@@ -777,5 +777,11 @@ namespace MemorieDeFleursTest.ModelTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
         }
+
+        [TestMethod, ExpectedException(typeof(ApplicationException))]
+        public void OrderBouquetParts_CloserThanLeadTime()
+        {
+            Model.SupplierModel.Order(DateConst.April30th, ExpectedSupplier, DateConst.April30th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ExpectedPart, 1) });
+        }
     }
 }
