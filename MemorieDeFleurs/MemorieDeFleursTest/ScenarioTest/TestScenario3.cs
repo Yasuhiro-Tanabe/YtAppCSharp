@@ -52,7 +52,7 @@ namespace MemorieDeFleursTest.ScenarioTest
         #endregion // テストの初期化終了
 
         [TestMethod]
-        public void AtApril30_DiscardedBA001_and_BA002()
+        public void AtApril30_BA001AndBA002Discarded()
         {
             var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.April30th);
 
@@ -84,7 +84,7 @@ namespace MemorieDeFleursTest.ScenarioTest
         /// 発注リードタイムが長い(3日)ので、本来なら少し多めに在庫を確保するはず。
         /// </summary>
         [TestMethod]
-        public void AtMay1st_DiscardedManyParts()
+        public void AtMay1st_ManyPartsDiscarded()
         {
             var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May1st);
 
@@ -178,6 +178,101 @@ namespace MemorieDeFleursTest.ScenarioTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
+        }
+
+        [TestMethod]
+        public void AtMay2nd_GP001Discarded()
+        {
+            var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May2nd);
+
+            Model.SupplierModel.OrdersAreArrived(DateConst.May2nd, orders.ToArray());
+            Model.BouquetModel.DiscardBouquetParts(DateConst.May2nd, Tuple.Create("GP001", 2));
+            Model.CustomerModel.ShipAllBouquets(DateConst.May2nd);
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("GP001")).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.May2nd).Used(22, 0).Discarded(0)
+                            .ContainsActionType(InventoryActionType.DISCARDED)
+                            .NotContainsActionType(InventoryActionType.SCHEDULED_TO_DISCARD)
+                        .END
+                    .Lot(DateConst.May2nd).BEGIN
+                        .At(DateConst.May2nd).Arrived(50).Used(11, 37).Discarded(2)
+                            .ContainsActionType(InventoryActionType.DISCARDED)
+                        .At(DateConst.May4th).Discarded(7)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void AtMay3rd_CN002Discarded()
+        {
+            var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May3rd);
+
+            Model.SupplierModel.OrdersAreArrived(DateConst.May3rd, orders.ToArray());
+            Model.BouquetModel.DiscardBouquetParts(DateConst.May3rd, Tuple.Create("CN001", 3), Tuple.Create("CN002", 7));
+            Model.CustomerModel.ShipAllBouquets(DateConst.May3rd);
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("CN001")).BEGIN
+                    .Lot(DateConst.May2nd).BEGIN
+                        .At(DateConst.May3rd).Used(24, 18).Discarded(3)
+                        .At(DateConst.May5th).Used(10, 8)
+                        .At(DateConst.May6th).Used(8, 0)
+                        .At(DateConst.May7th).Discarded(0)
+                        .END
+                    .END
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("CN002")).BEGIN
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May3rd).Arrived(50).Used(30, 13).Discarded(7)
+                        .At(DateConst.May5th).Used(13, 0)
+                        .At(DateConst.May8th).Discarded(0)
+                        .END
+                    .Lot(DateConst.May5th).BEGIN
+                        .At(DateConst.May5th).Arrived(50).Used(12, 38)
+                        .At(DateConst.May6th).Used(38, 0)
+                        .At(DateConst.May5th.AddDays(5)).Discarded(0)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void AtMay4th_BA003Discarded()
+        {
+            var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May4th);
+
+            Model.SupplierModel.OrdersAreArrived(DateConst.May4th, orders.ToArray());
+            Model.BouquetModel.DiscardBouquetParts(DateConst.May4th, Tuple.Create("BA003", 15));
+            Model.CustomerModel.ShipAllBouquets(DateConst.May4th);
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(Model.BouquetModel.FindBouquetPart("BA003")).BEGIN
+                    .Lot(DateConst.May3rd).BEGIN
+                        .At(DateConst.May4th).Used(103, 68).Discarded(15)
+                        .At(DateConst.May5th).Used(45, 23)
+                        .At(DateConst.May6th).Used(23, 0).Discarded(0)
+                        .END
+                    .Lot(DateConst.May5th).BEGIN
+                        .At(DateConst.May5th).Arrived(100)
+                        .At(DateConst.May6th).Used(19, 81)
+                        .At(DateConst.May8th).Discarded(81)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void AtMay5th_NoPartsDiscarded()
+        {
+            var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May5th);
+
+            Model.SupplierModel.OrdersAreArrived(DateConst.May5th, orders.ToArray());
+            Model.CustomerModel.ShipAllBouquets(DateConst.May5th);
         }
     }
 }

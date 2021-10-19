@@ -381,13 +381,13 @@ insert into INVENTORY_ACTIONS values ( 20200508, 3, 'CN002', 20200503, 17,   0, 
 insert into INVENTORY_ACTIONS values ( 20200508, 6, 'CN002', 20200503, 17,   0,   0 );
 
 insert into INVENTORY_ACTIONS values ( 20200505, 1, 'CN002', 20200505, 19,  50,  50 );
-insert into INVENTORY_ACTIONS values ( 20200505, 3, 'CN002', 20200505, 19,  10,  40 );
-insert into INVENTORY_ACTIONS values ( 20200506, 3, 'CN002', 20200505, 19,   0,  40 );
-insert into INVENTORY_ACTIONS values ( 20200507, 3, 'CN002', 20200505, 19,   0,  40 );
-insert into INVENTORY_ACTIONS values ( 20200508, 3, 'CN002', 20200505, 19,   0,  40 );
-insert into INVENTORY_ACTIONS values ( 20200509, 3, 'CN002', 20200505, 19,   0,  40 );
-insert into INVENTORY_ACTIONS values ( 20200510, 3, 'CN002', 20200505, 19,   0,  40 );
-insert into INVENTORY_ACTIONS values ( 20200510, 6, 'CN002', 20200505, 19,  40,   0 );
+insert into INVENTORY_ACTIONS values ( 20200505, 3, 'CN002', 20200505, 19,   5,  45 );
+insert into INVENTORY_ACTIONS values ( 20200506, 3, 'CN002', 20200505, 19,  38,   7 );
+insert into INVENTORY_ACTIONS values ( 20200507, 3, 'CN002', 20200505, 19,   0,   7 );
+insert into INVENTORY_ACTIONS values ( 20200508, 3, 'CN002', 20200505, 19,   0,   7 );
+insert into INVENTORY_ACTIONS values ( 20200509, 3, 'CN002', 20200505, 19,   0,   7 );
+insert into INVENTORY_ACTIONS values ( 20200510, 3, 'CN002', 20200505, 19,   0,   7 );
+insert into INVENTORY_ACTIONS values ( 20200510, 6, 'CN002', 20200505, 19,   7,   0 );
 
 
 commit;
