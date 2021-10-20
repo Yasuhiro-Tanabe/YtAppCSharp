@@ -1,6 +1,7 @@
 ﻿using MemorieDeFleurs.UI.WPF.Commands;
 
 using System.Collections.ObjectModel;
+using System.Data.Common;
 using System.Linq;
 using System.Windows.Input;
 
@@ -38,11 +39,22 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// 現在選択中のタブアイテム
         /// </summary>
         public ITabItemControlViewModel CurrentItem { get; set; }
+
+        /// <summary>
+        /// 接続中のデータベース
+        /// </summary>
+        public DbConnection DbConnection
+        {
+            get { return _conn; }
+            set { SetProperty(ref _conn, value); }
+        }
+        private DbConnection _conn;
         #endregion // プロパティ
 
         #region コマンド
         public ICommand Exit { get; } = new ExitCommand();
         public ICommand OpenPartsDetailView { get; } = new OpenPartsDetailViewCommand();
+        public ICommand ConnectoToSQLiteDatabase { get; } = new ConnectToSQLiteDatabaseCommand();
         #endregion // コマンド
 
         #region ビューの生成・切替

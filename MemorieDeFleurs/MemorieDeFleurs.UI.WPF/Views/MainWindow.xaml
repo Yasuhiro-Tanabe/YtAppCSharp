@@ -19,6 +19,9 @@
 
         <Menu Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <MenuItem Header="画面" HorizontalAlignment="Left">
+                <MenuItem Header="DB接続...">
+                    <MenuItem Header="SQLite (ファイル)" Command="{Binding ConnectoToSQLiteDatabase}" CommandParameter="{Binding}"/>
+                </MenuItem>
                 <MenuItem Header="終了" Command="{Binding Exit}"/>
             </MenuItem>
             <MenuItem Header="仕入先"/>
@@ -28,18 +31,35 @@
             <MenuItem Header="得意先"/>
         </Menu>
 
-        <TabControl Grid.Row="1" x:Name="Views" ItemsSource="{Binding TabItemControlCollection}" SelectedItem="{Binding CurrentIndex}">
+        <TabControl Grid.Row="1" x:Name="Views" ItemsSource="{Binding TabItemControlCollection}" SelectedItem="{Binding CurrentItem}">
             <TabControl.Resources>
                 <!-- 選択した ViewModel 毎に対応する View (UserControl) を使い分ける -->
                 <DataTemplate DataType="{x:Type vm:BouquetPartsDetailViewModel}">
                     <view:BouquetPartsDetailControl/>
                 </DataTemplate>
             </TabControl.Resources>
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch"
+                                   Text="{Binding Header}"/>
+                        <Button Grid.Column="1" Content="x" Command="{Binding }" CommandParameter="{Binding}"/>
+                    </Grid>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+            <!--
             <TabControl.ItemContainerStyle>
                 <Style TargetType="TabItem">
                     <Setter Property="Header" Value="{Binding Header}"/>
                 </Style>
             </TabControl.ItemContainerStyle>
+            -->
         </TabControl>
 
         <TextBlock Grid.Row="2"

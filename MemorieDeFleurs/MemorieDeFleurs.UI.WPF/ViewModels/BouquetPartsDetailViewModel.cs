@@ -1,14 +1,16 @@
 ﻿using MemorieDeFleurs.Models.Entities;
 
+using System.Windows.Input;
+
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetPartsDetailViewModel : ViewModelBase, ITabItemControlViewModel
     {
-        public string Header { get; } = "単品詳細";
-
         private BouquetPart Part { get; set; } = new BouquetPart();
 
         #region プロパティ
+        public string Header { get; } = "単品詳細";
+
         public string PartsCode { get { return Part.Code; } }
 
 
@@ -36,6 +38,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(() => Part.ExpiryDate = value); }
         }
 
+
         #endregion // プロパティ
+
     }
 }
