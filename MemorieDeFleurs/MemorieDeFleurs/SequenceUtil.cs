@@ -2,9 +2,7 @@
 using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
-using Microsoft.Data.Sqlite;
-
-using System.Linq;
+using System.Data.Common;
 
 namespace MemorieDeFleurs
 {
@@ -13,7 +11,7 @@ namespace MemorieDeFleurs
     /// </summary>
     public class SequenceUtil
     {
-        private SqliteConnection Connection { get; set; }
+        private DbConnection Connection { get; set; }
 
         public class SequenceValueManager
         {
