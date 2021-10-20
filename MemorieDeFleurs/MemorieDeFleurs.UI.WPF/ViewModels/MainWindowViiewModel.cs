@@ -1,5 +1,7 @@
 ﻿using MemorieDeFleurs.UI.WPF.Commands;
 
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
@@ -26,10 +28,35 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _message, value); }
         }
         private string _message;
+
+        /// <summary>
+        /// タブコントロール内に現在表示されているビューに対応するビューモデルの一覧
+        /// </summary>
+        public ObservableCollection<ITabItemControlViewModel> TabItemControlCollection { get; } = new ObservableCollection<ITabItemControlViewModel>();
+
+        /// <summary>
+        /// 現在選択中のタブアイテム
+        /// </summary>
+        public ITabItemControlViewModel CurrentItem { get; set; }
         #endregion // プロパティ
 
         #region コマンド
         public ICommand Exit { get; } = new ExitCommand();
+        public ICommand OpenPartsDetailView { get; } = new OpenPartsDetailViewCommand();
         #endregion // コマンド
+
+        #region ビューの生成・切替
+        public void AddViewModel(ITabItemControlViewModel vm)
+        {
+            var found = TabItemControlCollection.SingleOrDefault(item => item.Header == vm.Header);
+            if(found == null)
+            {
+                TabItemControlCollection.Add(vm);
+            }
+            CurrentItem = vm;
+            RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
+        }
+
+        #endregion // ビューの生成・切替
     }
 }
