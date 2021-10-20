@@ -10,6 +10,19 @@
         <vm:MainWindowViiewModel/>
     </Window.DataContext>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="15pt"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="25pt"/>
+        </Grid.RowDefinitions>
 
+        <Menu Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <MenuItem Header="画面" HorizontalAlignment="Left">
+                <MenuItem Header="終了" Command="{Binding Exit}"/>
+            </MenuItem>
+            <MenuItem Header="発注"/>
+            <MenuItem Header="受注"/>
+        </Menu>
+        
     </Grid>
 </Window>
