@@ -1,0 +1,7 @@
+<svg width="300px" height="300px" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+ <line x1="20" y1="50" x2="20" y2="170" style="stroke-width: 4; stroke: yellow;" />
+ <line x1="100" y1="50" x2="100" y2="170" style="stroke-width: 4; stroke: yellow;" />
+ <path d="M 20, 170 A 40 20 0 1 0 100 170" fill="none" stroke="yellow" stroke-width="4" />
+ <path d="M 20, 50 A 40 20 0 1 0 100 50" fill="none" stroke="yellow" />
+ <line x1="35" y1="62" x2="35" y2="171" style="stroke-width: 2; stroke: yellow;" />
+</svg>
