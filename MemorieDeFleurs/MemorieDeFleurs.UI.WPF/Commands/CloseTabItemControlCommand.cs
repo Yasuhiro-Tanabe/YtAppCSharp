@@ -2,14 +2,14 @@
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class OpenPartsDetailViewCommand : CommandBase
+    internal class CloseTabItemControlCommand :CommandBase
     {
         public override void Execute(object parameter)
         {
-            if(parameter is MainWindowViiewModel)
+            var vm = parameter as ITabItemControlViewModel;
+            if(vm != null)
             {
-                var vm = parameter as MainWindowViiewModel;
-                vm.OpenTabItem(new BouquetPartsDetailViewModel());
+                vm.ParentViewModel.CloseTabItem(vm);
             }
             else
             {

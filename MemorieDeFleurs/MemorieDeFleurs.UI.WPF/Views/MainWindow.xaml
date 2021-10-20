@@ -49,7 +49,7 @@
                                    VerticalAlignment="Center"
                                    HorizontalAlignment="Stretch"
                                    Text="{Binding Header}"/>
-                        <Button Grid.Column="1" Content="x" Command="{Binding }" CommandParameter="{Binding}"/>
+                        <Button Grid.Column="1" Content="x" Command="{Binding Close}" CommandParameter="{Binding}"/>
                     </Grid>
                 </DataTemplate>
             </TabControl.ItemTemplate>

@@ -58,17 +58,29 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // コマンド
 
         #region ビューの生成・切替
-        public void AddViewModel(ITabItemControlViewModel vm)
+        public void OpenTabItem(ITabItemControlViewModel vm)
         {
             var found = TabItemControlCollection.SingleOrDefault(item => item.Header == vm.Header);
             if(found == null)
             {
+                vm.ParentViewModel = this;
                 TabItemControlCollection.Add(vm);
+                found = vm;
             }
-            CurrentItem = vm;
+            CurrentItem = found;
             RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
         }
 
+        public void CloseTabItem(ITabItemControlViewModel vm)
+        {
+            var found = TabItemControlCollection.SingleOrDefault(item => item.Header == vm.Header);
+            if(found != null)
+            {
+                TabItemControlCollection.Remove(found);
+            }
+            CurrentItem = TabItemControlCollection.FirstOrDefault();
+            RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
+        }
         #endregion // ビューの生成・切替
     }
 }
