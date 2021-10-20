@@ -1,9 +1,6 @@
-﻿using MemorieDeFleurs.Databese.SQLite;
-
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
-
+﻿
 using System;
+using System.Data.Common;
 
 namespace MemorieDeFleurs.Models
 {
@@ -15,7 +12,7 @@ namespace MemorieDeFleurs.Models
         /// <summary>
         /// システム内部で使用するデータベース
         /// </summary>
-        internal SqliteConnection DbConnection { get; private set; }
+        internal DbConnection DbConnection { get; private set; }
         
         /// <summary>
         /// 仕入先モデル：仕入先の登録改廃、単品仕入先の登録、仕入先への発注、納品処理を行う。
@@ -45,7 +42,7 @@ namespace MemorieDeFleurs.Models
         /// 外部から指定できるようにしている。
         /// </summary>
         /// <param name="db"></param>
-        public MemorieDeFleursModel(SqliteConnection connection)
+        public MemorieDeFleursModel(DbConnection connection)
         {
             DbConnection = connection;
 
