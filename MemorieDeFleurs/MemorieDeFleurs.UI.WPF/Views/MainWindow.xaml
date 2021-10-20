@@ -23,6 +23,13 @@
             <MenuItem Header="発注"/>
             <MenuItem Header="受注"/>
         </Menu>
-        
+
+        <TextBlock Grid.Row="2"
+                   Margin="5, 1"
+                   HorizontalAlignment="Stretch"
+                   VerticalAlignment="Stretch"
+                   Text="{Binding Message}"
+                   FontSize="20pt"
+                   FontWeight="Bold"/>
     </Grid>
 </Window>
