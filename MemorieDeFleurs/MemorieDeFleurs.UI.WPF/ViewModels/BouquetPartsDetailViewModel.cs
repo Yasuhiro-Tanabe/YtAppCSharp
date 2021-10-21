@@ -10,26 +10,8 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetPartsDetailViewModel : ViewModelBase, ITabItemControlViewModel
+    public class BouquetPartsDetailViewModel : TabItemControlViewModelBase
     {
-        #region ITabItemControlViewModel
-        #region プロパティ
-        public string Header { get; } = "単品詳細";
-        public MainWindowViiewModel ParentViewModel { get; set; }
-        public bool IsDirty
-        {
-            get { return _dirty; }
-            set { SetProperty(ref _dirty, value); }
-        }
-        private bool _dirty;
-        #endregion // プロパティ
-        #region コマンド
-        public ICommand Close { get; } = new CloseTabItemControlCommand();
-        public ICommand Register { get; private set; }
-        #endregion // コマンド
-        #endregion // ITabItemControlViewModel
-
-        #region ビュー固有のプロパティ
         /// <summary>
         /// 花コード
         /// </summary>
@@ -79,21 +61,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _expriy, value); }
         }
         private int _expriy;
-        #endregion // ビュー固有のプロパティ
 
-        public BouquetPartsDetailViewModel()
-        {
-            Register = new RegisterCommand(this);
-            PropertyChanged += SetDirtyFlag;
-        }
+        public BouquetPartsDetailViewModel() : base("単品詳細") { }
 
-        private void SetDirtyFlag(object sender, PropertyChangedEventArgs args)
-        {
-            if(args.PropertyName != nameof(IsDirty))
-            {
-                IsDirty = true;
-            }
-        }
 
         public void Update(BouquetPart part)
         {

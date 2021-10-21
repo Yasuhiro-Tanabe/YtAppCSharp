@@ -16,21 +16,14 @@ namespace MemorieDeFleurs.UI.WPF.Commands
     {
         public override bool CanExecute(object parameter)
         {
-            if(parameter == null)
+            if(parameter is TabItemControlViewModelBase)
             {
-                //throw new ArgumentNullException($"{typeof(RegisterCommand).Name}: parameter is null");
-                return false;
-            }
-
-            var vm = parameter as ITabItemControlViewModel;
-            if(vm == null)
-            {
-                //throw new NotImplementedException($"想定外の呼び出し元：{parameter.GetType().Name}");
-                return false;
+                var vm = parameter as TabItemControlViewModelBase;
+                return vm.IsDirty;
             }
             else
             {
-                return vm.IsDirty;
+                return base.CanExecute(parameter);
             }
         }
 
@@ -41,7 +34,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 try
                 {
                     var vm = parameter as BouquetPartsDetailViewModel;
-                    var model = new MemorieDeFleursModel(vm.ParentViewModel.DbConnection);
+                    var model = new MemorieDeFleursModel(null);
                     var builder = model.BouquetModel.GetBouquetPartBuilder();
 
                     vm.Validate();
@@ -76,7 +69,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
         public void CheckDirtyFlag(object sender, PropertyChangedEventArgs args)
         {
-            var vm = sender as ITabItemControlViewModel;
+            var vm = sender as TabItemControlViewModelBase;
             if (args.PropertyName == nameof(vm.IsDirty))
             {
                 RaiseStatusChanged();

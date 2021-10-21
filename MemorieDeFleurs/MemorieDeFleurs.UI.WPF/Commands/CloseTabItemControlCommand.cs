@@ -6,10 +6,10 @@ namespace MemorieDeFleurs.UI.WPF.Commands
     {
         public override void Execute(object parameter)
         {
-            var vm = parameter as ITabItemControlViewModel;
+            var vm = parameter as TabItemControlViewModelBase;
             if(vm != null)
             {
-                vm.ParentViewModel.CloseTabItem(vm);
+                vm.CloseControl();
             }
             else
             {

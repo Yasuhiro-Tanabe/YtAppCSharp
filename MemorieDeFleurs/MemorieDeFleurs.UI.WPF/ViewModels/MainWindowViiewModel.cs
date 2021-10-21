@@ -1,5 +1,6 @@
 ﻿using MemorieDeFleurs.UI.WPF.Commands;
 
+using System;
 using System.Collections.ObjectModel;
 using System.Data.Common;
 using System.Linq;
@@ -33,12 +34,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// タブコントロール内に現在表示されているビューに対応するビューモデルの一覧
         /// </summary>
-        public ObservableCollection<ITabItemControlViewModel> TabItemControlCollection { get; } = new ObservableCollection<ITabItemControlViewModel>();
+        public ObservableCollection<TabItemControlViewModelBase> TabItemControlCollection { get; } = new ObservableCollection<TabItemControlViewModelBase>();
 
         /// <summary>
         /// 現在選択中のタブアイテム
         /// </summary>
-        public ITabItemControlViewModel CurrentItem { get; set; }
+        public TabItemControlViewModelBase CurrentItem { get; set; }
 
         /// <summary>
         /// 接続中のデータベース
@@ -58,28 +59,33 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // コマンド
 
         #region ビューの生成・切替
-        public void OpenTabItem(ITabItemControlViewModel vm)
+        public void OpenTabItem(TabItemControlViewModelBase vm)
         {
             var found = TabItemControlCollection.SingleOrDefault(item => item.Header == vm.Header);
             if(found == null)
             {
-                vm.ParentViewModel = this;
                 TabItemControlCollection.Add(vm);
                 found = vm;
+                found.TabItemControlClosing += CloseTabItem;
             }
             CurrentItem = found;
             RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
         }
 
-        public void CloseTabItem(ITabItemControlViewModel vm)
+        public void CloseTabItem(object sender, EventArgs unused)
         {
-            var found = TabItemControlCollection.SingleOrDefault(item => item.Header == vm.Header);
-            if(found != null)
+            var vm = sender as TabItemControlViewModelBase;
+            if(vm != null)
             {
-                TabItemControlCollection.Remove(found);
+                var found = TabItemControlCollection.SingleOrDefault(item => item.Header == vm.Header);
+                if (found != null)
+                {
+                    TabItemControlCollection.Remove(found);
+                }
+                CurrentItem = TabItemControlCollection.FirstOrDefault();
+                RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
+                vm.TabItemControlClosing -= CloseTabItem;
             }
-            CurrentItem = TabItemControlCollection.FirstOrDefault();
-            RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
         }
         #endregion // ビューの生成・切替
     }
