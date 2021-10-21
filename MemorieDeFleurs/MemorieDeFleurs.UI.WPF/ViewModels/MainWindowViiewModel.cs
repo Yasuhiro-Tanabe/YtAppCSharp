@@ -8,7 +8,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class MainWindowViiewModel : ViewModelBase
+    public class MainWindowViiewModel : NotificationObject
     {
         #region プロパティ
         /// <summary>
@@ -40,7 +40,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// 現在選択中のタブアイテム
         /// </summary>
         public TabItemControlViewModelBase CurrentItem { get; set; }
-
+        
         /// <summary>
         /// 接続中のデータベース
         /// </summary>

@@ -6,7 +6,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class TabItemControlViewModelBase : ViewModelBase
+    public class TabItemControlViewModelBase : NotificationObject
     {
         public event EventHandler TabItemControlClosing;
 

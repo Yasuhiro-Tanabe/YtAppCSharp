@@ -62,7 +62,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             }
         }
 
-        public RegisterCommand(ViewModelBase vm)
+        public RegisterCommand(NotificationObject vm)
         {
             vm.PropertyChanged += CheckDirtyFlag;
         }

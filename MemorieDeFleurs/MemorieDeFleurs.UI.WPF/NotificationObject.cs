@@ -2,9 +2,9 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace MemorieDeFleurs.UI.WPF.ViewModels
+namespace MemorieDeFleurs.UI.WPF
 {
-    public class ViewModelBase : INotifyPropertyChanged
+    public class NotificationObject : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
