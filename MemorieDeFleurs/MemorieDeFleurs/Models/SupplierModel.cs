@@ -391,7 +391,7 @@ namespace MemorieDeFleurs.Models
                         Remain = _quantity
                     };
                     context.InventoryActions.Add(toUse);
-                    LogUtil.DEBUGLOG_InventoryActionCreated(toUse);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionCreated(toUse);
                     list.Add(toUse);
                 }
             }
@@ -409,7 +409,7 @@ namespace MemorieDeFleurs.Models
                     Remain = 0
                 };
                 context.InventoryActions.Add(discard);
-                LogUtil.DEBUGLOG_InventoryActionCreated(discard);
+                InventoryActionLogger.DEBUGLOG_InventoryActionCreated(discard);
             }
 
             private void AddScheduledToArriveInventoryAction(MemorieDeFleursDbContext context)
@@ -425,7 +425,7 @@ namespace MemorieDeFleurs.Models
                     Remain = _quantity
                 };
                 context.InventoryActions.Add(arrive);
-                LogUtil.DEBUGLOG_InventoryActionCreated(arrive);
+                InventoryActionLogger.DEBUGLOG_InventoryActionCreated(arrive);
             }
 
         }
@@ -698,7 +698,7 @@ namespace MemorieDeFleurs.Models
                 }
                 target = next;
             } while (target != null);
- 
+
             LogUtil.DEBUGLOG_EndMethod($"context, {orderDate.ToString("yyyyMMdd")}, {orderParam.ToString("o")}");
         }
 
@@ -746,7 +746,7 @@ namespace MemorieDeFleurs.Models
                     .Where(act => act.Quantity > 0)
                     .OrderBy(act => act.ArrivalDate))
             {
-                LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, others.Quantity);
+                InventoryActionLogger.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, others.Quantity);
                 if (action.Remain >= others.Quantity)
                 {
                     // 全量をこの在庫ロットに振り替える
@@ -758,8 +758,8 @@ namespace MemorieDeFleurs.Models
                     Parent.BouquetModel.ReturnToThisLot(context, others, quantity, usedLot);
                     usedLot.Pop();
 
-                    LogUtil.DEBUGLOG_InventoryActionChanged(action, quantity);
-                    LogUtil.DEBUGLOG_InventoryActionChanged(others, -quantity);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, quantity);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(others, -quantity);
                 }
                 else
                 {
@@ -772,8 +772,8 @@ namespace MemorieDeFleurs.Models
                     Parent.BouquetModel.ReturnToThisLot(context, others, quantity, usedLot);
                     usedLot.Pop();
 
-                    LogUtil.DEBUGLOG_InventoryActionChanged(action, quantity);
-                    LogUtil.DEBUGLOG_InventoryActionChanged(others, -quantity);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, quantity);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(others, -quantity);
                 }
 
                 DEBUGLOG_ShowInventoryActions(context, action.PartsCode, new int[] { 4, 5, 6 });
@@ -828,7 +828,6 @@ namespace MemorieDeFleurs.Models
         private void DEBUGLOG_ShowInventoryActions(MemorieDeFleursDbContext context, string partsCode, int[] lots, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             LogUtil.DEBUGLOG_BeginMethod(partsCode, $"in {caller},{Path.GetFileName(path)}:{line}");
-            LogUtil.Indent++;
            
             foreach(var action in context.InventoryActions
                 .Where(act => act.PartsCode == partsCode)
@@ -838,11 +837,10 @@ namespace MemorieDeFleurs.Models
             {
                 if (lots.Contains(action.InventoryLotNo))
                 {
-                    LogUtil.DebugFormat("{0}{1}", LogUtil.Indent, action.ToString("DB"));
+                    LogUtil.Debug(action.ToString("DB"));
                 }
             }
 
-            LogUtil.Indent--;
             LogUtil.DEBUGLOG_EndMethod(partsCode);
         }
         #endregion // 発注
@@ -965,7 +963,7 @@ namespace MemorieDeFleurs.Models
                     catch (InventoryShortageException eis)
                     {
                         context.InventoryActions.Add(eis.InventoryShortageAction);
-                        LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
+                        InventoryActionLogger.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
                     }
                 }
 
@@ -1002,7 +1000,7 @@ namespace MemorieDeFleurs.Models
 
                     ChangeArrivalDate(context, orderNo, newArrivalDate);
                     transaction.Commit();
-                    
+
                     LogUtil.Info($"Arrival date changed: {orderNo}, from {oldArrivalDate:yyyyMMdd} to {newArrivalDate:yyyyMMdd}");
                 }
                 catch (Exception)

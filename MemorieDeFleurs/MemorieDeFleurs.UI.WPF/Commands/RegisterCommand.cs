@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels;
@@ -54,6 +55,14 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 }
                 catch(Exception ex)
                 {
+                    if(ex.InnerException==null)
+                    {
+                        LogUtil.Warn($"Exception thrown: {ex.GetType().Name}, {ex.Message}\n{ex.StackTrace}");
+                    }
+                    else
+                    {
+                        LogUtil.Warn($"Exception thrown: {ex.GetType().Name}, {ex.Message} => {ex.InnerException.GetType()}, {ex.InnerException.Message}\n{ex.StackTrace}");
+                    }
                     MessageBox.Show(ex.Message, "システムエラー", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }

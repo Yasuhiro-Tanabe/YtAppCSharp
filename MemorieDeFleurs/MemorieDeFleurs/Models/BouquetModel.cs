@@ -499,7 +499,7 @@ namespace MemorieDeFleurs.Models
                 .Where(act => act.ActionDate >= startDate)
                 .OrderBy(act => act.ActionDate))
             {
-                LogUtil.DEBUGLOG_ComparationOfInventoryQuantityAndPreviousRemain(action, previousRemain);
+                InventoryActionLogger.DEBUGLOG_ComparationOfInventoryQuantityAndPreviousRemain(action, previousRemain);
                 if (previousRemain >= action.Quantity)
                 {
                     var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain };
@@ -508,7 +508,7 @@ namespace MemorieDeFleurs.Models
                     action.Remain = previousRemain - action.Quantity;
                     context.InventoryActions.Update(action);
 
-                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
 
                     previousRemain -= action.Quantity;
                 }
@@ -523,7 +523,7 @@ namespace MemorieDeFleurs.Models
                     action.Quantity = usedFromThisLot;
                     action.Remain = 0;
                     context.InventoryActions.Update(action);
-                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
 
                     try
                     {
@@ -534,7 +534,7 @@ namespace MemorieDeFleurs.Models
                     {
                         ShortageInventories.Add(eis.InventoryShortageAction);
                         context.InventoryActions.Add(eis.InventoryShortageAction);
-                        LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
+                        InventoryActionLogger.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
                     }
                     usedLot.Pop();
                     previousRemain = 0;
@@ -548,14 +548,14 @@ namespace MemorieDeFleurs.Models
             var oldDiscard = new InventoryAction() { Quantity = discard.Quantity, Remain = discard.Remain };
             discard.Quantity = previousRemain;
             context.InventoryActions.Update(discard);
-            LogUtil.DEBUGLOG_InventoryActionChanged(discard, oldDiscard);
+            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(discard, oldDiscard);
 
             LogUtil.DEBUGLOG_EndMethod($"{today.ToString("s")}, {startDate:yyyyMMdd}, [ {string.Join(", ", usedLot)} ]");
         }
 
         private void UseFromThisLotToday(MemorieDeFleursDbContext context, InventoryAction today, int quantity, Stack<int> usedLot)
         {
-            LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(today, quantity);
+            InventoryActionLogger.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(today, quantity);
             if (today.Remain >= quantity)
             {
                 // 全量引き出せる
@@ -563,7 +563,7 @@ namespace MemorieDeFleurs.Models
                 today.Remain -= quantity;
                 context.InventoryActions.Update(today);
 
-                LogUtil.DEBUGLOG_InventoryActionChanged(today, quantity);
+                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(today, quantity);
 
             }
             else
@@ -577,7 +577,7 @@ namespace MemorieDeFleurs.Models
                 today.Remain -= useFromThisLot;
                 context.InventoryActions.Update(today);
 
-                LogUtil.DEBUGLOG_InventoryActionChanged(today, oldAction);
+                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(today, oldAction);
 
                 try
                 {
@@ -588,7 +588,7 @@ namespace MemorieDeFleurs.Models
                 {
                     ShortageInventories.Add(eis.InventoryShortageAction);
                     context.InventoryActions.Add(eis.InventoryShortageAction);
-                    LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
                 }
                 usedLot.Pop();
             }
@@ -609,7 +609,7 @@ namespace MemorieDeFleurs.Models
             var useToThisLot = quantity;
             var previousLot = inventory;
 
-            LogUtil.Debug($"{LogUtil.Indent}usableLots={string.Join(", ", usableLots.Select(act => act.ToString("s")))}");
+            LogUtil.Debug($"usableLots={string.Join(", ", usableLots.Select(act => act.ToString("s")))}");
 
             foreach(var action in usableLots.OrderBy(act => act.ArrivalDate))
             {
@@ -618,14 +618,14 @@ namespace MemorieDeFleurs.Models
 
                 var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain }; // デバッグログ用
 
-                LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, useToThisLot);
+                InventoryActionLogger.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, useToThisLot);
                 if(action.Remain >= useToThisLot)
                 {
 
                     // このロットから全量引き出す
                     UseFromThisLot(context, action, quantity, usedLot);
 
-                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
                     LogUtil.DEBUGLOG_EndMethod(msg: $"resolved");
                     return;
                 }
@@ -636,7 +636,7 @@ namespace MemorieDeFleurs.Models
                     UseFromThisLot(context, action, action.Remain, usedLot);
                     previousLot = action;
 
-                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
                 }
             }
 
@@ -763,14 +763,14 @@ namespace MemorieDeFleurs.Models
 
         private void ReturnToThisLotToday(MemorieDeFleursDbContext context, InventoryAction today, int quantityToReturn, Stack<int> returnedLot)
         {
-            LogUtil.DEBUGLOG_ComparationOfInventoryUsedAndReturns(today, quantityToReturn);
+            InventoryActionLogger.DEBUGLOG_ComparationOfInventoryUsedAndReturns(today, quantityToReturn);
             if (today.Quantity >= quantityToReturn)
             {
                 // 全量戻せる
                 today.Quantity -= quantityToReturn;
                 today.Remain += quantityToReturn;
                 context.InventoryActions.Update(today);
-                LogUtil.DEBUGLOG_InventoryActionChanged(today, -quantityToReturn);
+                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(today, -quantityToReturn);
             }
             else
             {
@@ -781,7 +781,7 @@ namespace MemorieDeFleurs.Models
                 today.Quantity -= returnToThisLot;
                 today.Remain += returnToThisLot;
                 context.InventoryActions.Update(today);
-                LogUtil.DEBUGLOG_InventoryActionChanged(today, -returnToThisLot);
+                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(today, -returnToThisLot);
 
                 try
                 {
@@ -822,13 +822,13 @@ namespace MemorieDeFleurs.Models
 
                 var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain }; // デバッグログ用
 
-                LogUtil.DEBUGLOG_ComparationOfInventoryUsedAndReturns(action, returnToThisLot);
+                InventoryActionLogger.DEBUGLOG_ComparationOfInventoryUsedAndReturns(action, returnToThisLot);
                 if (action.Quantity >= returnToThisLot)
                 {
                     // このロットに全量戻す
                     ReturnToThisLot(context, action, quantityToReturn, returnedLot);
 
-                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
                     LogUtil.DEBUGLOG_EndMethod(msg: $"resolved");
                     return;
                 }
@@ -839,7 +839,7 @@ namespace MemorieDeFleurs.Models
                     ReturnToThisLot(context, action, action.Remain, returnedLot);
                     previousLot = action;
 
-                    LogUtil.DEBUGLOG_InventoryActionChanged(action, oldAction);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
                 }
             }
 
@@ -1279,7 +1279,7 @@ namespace MemorieDeFleurs.Models
             UpdateScheduledToUseInventoryAction(context, scheduled);
 
             context.InventoryActions.Add(used);
-            LogUtil.DEBUGLOG_InventoryActionCreated(used);
+            InventoryActionLogger.DEBUGLOG_InventoryActionCreated(used);
         }
 
         private void UpdateInventoryActions(MemorieDeFleursDbContext context, InventoryAction used, InventoryAction scheduled, ref int quantity)
@@ -1290,7 +1290,7 @@ namespace MemorieDeFleurs.Models
             UpdateScheduledToUseInventoryAction(context, scheduled);
 
             context.InventoryActions.Update(used);
-            LogUtil.DEBUGLOG_InventoryActionChanged(used, oldUsed);
+            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(used, oldUsed);
         }
 
         private void UpdateQuantity(InventoryAction used, InventoryAction scheduled, ref int quantity)
@@ -1316,7 +1316,7 @@ namespace MemorieDeFleurs.Models
                 scheduled.Remain = 0;
             }
 
-            LogUtil.DEBUGLOG_InventoryActionChanged(scheduled, oldScheduled);
+            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(scheduled, oldScheduled);
         }
         
         private void UpdateScheduledToUseInventoryAction(MemorieDeFleursDbContext context, InventoryAction scheduled)
@@ -1324,7 +1324,7 @@ namespace MemorieDeFleurs.Models
             if(scheduled.Quantity == 0 && scheduled.Remain ==0)
             {
                 context.InventoryActions.Remove(scheduled);
-                LogUtil.DEBUGLOG_InventoryActionRemoved(scheduled);
+                InventoryActionLogger.DEBUGLOG_InventoryActionRemoved(scheduled);
             }
             else
             {
@@ -1455,7 +1455,7 @@ namespace MemorieDeFleurs.Models
                             }
 
                             context.InventoryActions.Update(scheduledToUse);
-                            LogUtil.DEBUGLOG_InventoryActionChanged(scheduledToUse, oldScheduledToUse);
+                            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(scheduledToUse, oldScheduledToUse);
                         }
                         else
                         {
@@ -1481,24 +1481,24 @@ namespace MemorieDeFleurs.Models
                             if (scheduledToDiscard.Quantity == 0)
                             {
                                 context.InventoryActions.Remove(scheduledToDiscard);
-                                LogUtil.DEBUGLOG_InventoryActionRemoved(scheduledToDiscard);
+                                InventoryActionLogger.DEBUGLOG_InventoryActionRemoved(scheduledToDiscard);
                             }
                             else if (IsInventoryQuantityChanged(scheduledToDiscard, oldScheduledToDiscard))
                             {
                                 context.InventoryActions.Update(scheduledToDiscard);
-                                LogUtil.DEBUGLOG_InventoryActionChanged(scheduledToDiscard, oldScheduledToDiscard);
+                                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(scheduledToDiscard, oldScheduledToDiscard);
                             }
                         }
 
                         if (isNewCreated)
                         {
                             context.InventoryActions.Add(discarded);
-                            LogUtil.DEBUGLOG_InventoryActionCreated(discarded);
+                            InventoryActionLogger.DEBUGLOG_InventoryActionCreated(discarded);
                         }
                         else if(IsInventoryQuantityChanged(discarded, oldDiscarded))
                         {
                             context.InventoryActions.Update(discarded);
-                            LogUtil.DEBUGLOG_InventoryActionChanged(discarded, oldDiscarded);
+                            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(discarded, oldDiscarded);
                         }
                         previousAction = discarded;
 
@@ -1524,7 +1524,7 @@ namespace MemorieDeFleurs.Models
                         Remain = -remainToDiscard
                     };
                     context.InventoryActions.Add(shortage);
-                    LogUtil.DEBUGLOG_InventoryActionCreated(shortage);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionCreated(shortage);
                 }
                 context.SaveChanges();
                 LogUtil.DEBUGLOG_EndMethod($"{date:yyyyMMdd}, {partsCode}, {discardQuantity}", "Succeeded.");

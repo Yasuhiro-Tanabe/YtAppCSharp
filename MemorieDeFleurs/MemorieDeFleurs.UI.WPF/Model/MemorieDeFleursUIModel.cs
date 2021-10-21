@@ -1,5 +1,7 @@
 ﻿using MemorieDeFleurs.Database.SQLite;
+using MemorieDeFleurs.Logging;
 
+using System;
 using System.Data.Common;
 
 namespace MemorieDeFleurs.UI.WPF.Model
@@ -24,7 +26,20 @@ namespace MemorieDeFleurs.UI.WPF.Model
 
         public void OpenSQLiteDatabaseFile(string path)
         {
-            DbConnection = MemorieDeFleursDatabaseFacade.OpenDatabase(path);
+            LogUtil.DEBUGLOG_BeginMethod(path);
+            try
+            {
+                DbConnection = MemorieDeFleursDatabaseFacade.OpenDatabase(path);
+                LogUtil.Info($"Database opened: {path}");
+            }
+            catch (Exception ex)
+            {
+                LogUtil.Warn($"{ex.GetType().Name}: {ex.Message}");
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod(path);
+            }
         }
     }
 }

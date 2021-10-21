@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace MemorieDeFleurs.Models
 {
@@ -492,7 +491,7 @@ namespace MemorieDeFleurs.Models
 
                 var partsList = context.PartsList.Where(i => i.BouquetCode == order.BouquetCode);
 
-                LogUtil.Debug($"{LogUtil.Indent}{order.BouquetCode} ({partsList.Count()} part(s)):" +
+                LogUtil.Debug($"{order.BouquetCode} ({partsList.Count()} part(s)):" +
                     $" {string.Join(", ", partsList.Select(p => $"({p.PartsCode} x {p.Quantity})"))}");
 
                 foreach (var item in partsList)
@@ -569,8 +568,7 @@ namespace MemorieDeFleurs.Models
 
             var newShippingDate = newArrivalDate.AddDays(-1);
             var partsList = bouquet.PartsList.Select(i => $"{i.PartsCode} x{i.Quantity}");
-            LogUtil.Debug($"{LogUtil.Indent}Order={orderNo}" +
-                $", Shipping={order.ShippingDate.ToString("yyyyMMdd")}->{newShippingDate.ToString("yyyyMMdd")}" +
+            LogUtil.Debug($"Order={orderNo}, Shipping={order.ShippingDate.ToString("yyyyMMdd")}->{newShippingDate.ToString("yyyyMMdd")}" +
                 $", Bouquet({bouquet.PartsList.Count()} part(s))=[{string.Join(", ", partsList).Trim()}]");
 
             foreach (var item in bouquet.PartsList)
@@ -663,7 +661,7 @@ namespace MemorieDeFleurs.Models
                 context.OrderFromCustomers.Update(order);
             }
             context.SaveChanges();
-            LogUtil.Debug($"{LogUtil.Indent}OrderFromCustomers changed.");
+            LogUtil.Debug("OrderFromCustomers changed.");
 
 
             var partsList = orderList
