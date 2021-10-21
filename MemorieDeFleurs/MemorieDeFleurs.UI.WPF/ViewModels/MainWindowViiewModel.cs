@@ -40,16 +40,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// 現在選択中のタブアイテム
         /// </summary>
         public TabItemControlViewModelBase CurrentItem { get; set; }
-        
-        /// <summary>
-        /// 接続中のデータベース
-        /// </summary>
-        public DbConnection DbConnection
-        {
-            get { return _conn; }
-            set { SetProperty(ref _conn, value); }
-        }
-        private DbConnection _conn;
         #endregion // プロパティ
 
         #region コマンド

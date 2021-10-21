@@ -1,10 +1,12 @@
 ﻿using MemorieDeFleurs.Database.SQLite;
+using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels;
 
 using Microsoft.Win32;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,7 +29,8 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 var result = dialog.ShowDialog();
                 if(result.HasValue && result.Value)
                 {
-                    vm.DbConnection = MemorieDeFleursDatabaseFacade.OpenDatabase(dialog.FileName);
+                    MemorieDeFleursUIModel.Instance.OpenSQLiteDatabaseFile(dialog.FileName);
+                    vm.Message = $"データベースファイルを開きました。： {Path.GetFileName(dialog.FileName)}";
                 }
             }
         }

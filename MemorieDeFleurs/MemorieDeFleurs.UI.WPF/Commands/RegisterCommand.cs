@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Models;
+using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels;
 
@@ -34,10 +35,10 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 try
                 {
                     var vm = parameter as BouquetPartsDetailViewModel;
-                    var model = new MemorieDeFleursModel(null);
-                    var builder = model.BouquetModel.GetBouquetPartBuilder();
-
                     vm.Validate();
+
+                    var model = new MemorieDeFleursModel(MemorieDeFleursUIModel.Instance.DbConnection);
+                    var builder = model.BouquetModel.GetBouquetPartBuilder();
                     builder.PartCodeIs(vm.PartsCode)
                         .PartNameIs(vm.PartsName)
                         .QauntityParLotIs(vm.QuantitiesParLot)
