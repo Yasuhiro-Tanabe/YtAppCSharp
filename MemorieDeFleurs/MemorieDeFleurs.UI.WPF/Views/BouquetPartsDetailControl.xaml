@@ -11,42 +11,64 @@
     </UserControl.DataContext>
     <Grid Margin="15, 5">
         <Grid.RowDefinitions>
-            <RowDefinition Height="15pt"/>
-            <RowDefinition Height="15pt"/>
-            <RowDefinition Height="15pt"/>
-            <RowDefinition Height="15pt"/>
-            <RowDefinition Height="15pt"/>
-            <RowDefinition Height="15pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="150px"/>
-            <ColumnDefinition Width="150px"/>
-            <ColumnDefinition Width="150px"/>
-            <ColumnDefinition Width="150px"/>
+            <ColumnDefinition Width="120px"/>
+            <ColumnDefinition Width="120px"/>
+            <ColumnDefinition Width="120px"/>
+            <ColumnDefinition Width="120px"/>
+            <ColumnDefinition Width="120px"/>
         </Grid.ColumnDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0"
-                   Text="花コード"/>
-        <TextBlock Grid.Row="0" Grid.Column="1"
-                   Text="{Binding PartsCode}"/>
+                   VerticalAlignment="Center"
+                   Text="花コード:"/>
+        <TextBox Grid.Row="0" Grid.Column="1"
+                 Margin="5,1"
+                 VerticalAlignment="Center" VerticalContentAlignment="Center"
+                 Text="{Binding PartsCode}"/>
+        <Button Grid.Row="0" Grid.Column="3"
+                Margin="5, 1"
+                HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                VerticalAlignment="Center" VerticalContentAlignment="Center"
+                Content="登録"
+                Command="{Binding Register}" CommandParameter="{Binding}"/>
+
 
         <TextBlock Grid.Row="1" Grid.Column="0"
-                   Text="名称"/>
+                   VerticalAlignment="Center"
+                   Text="名称:"/>
         <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+                 Margin="5,1"
+                 VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding PartsName}"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0"
-                   Text="リードタイム"/>
+                   VerticalAlignment="Center"
+                   Text="リードタイム:"/>
         <TextBox Grid.Row="2" Grid.Column="1"
+                 Margin="5,1"
+                 VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding LeadTime}"/>
         <TextBlock Grid.Row="2" Grid.Column="2"
+                   VerticalAlignment="Center"
                    Text="日"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0"
-                   Text="品質維持可能日数"/>
+                   VerticalAlignment="Center"
+                   Text="品質維持可能日数:"/>
         <TextBox Grid.Row="3" Grid.Column="1"
+                 Margin="5,1"
+                 VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding ExpiryDate}"/>
         <TextBlock Grid.Row="3" Grid.Column="2"
+                   VerticalAlignment="Center"
                    Text="日"/>
 
     </Grid>

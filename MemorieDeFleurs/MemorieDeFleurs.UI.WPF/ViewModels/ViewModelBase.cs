@@ -24,11 +24,5 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
-
-        protected void SetProperty(Action action, [CallerMemberName] string name="")
-        {
-            action();
-            RaisePropertyChanged(name);
-        }
     }
 }
