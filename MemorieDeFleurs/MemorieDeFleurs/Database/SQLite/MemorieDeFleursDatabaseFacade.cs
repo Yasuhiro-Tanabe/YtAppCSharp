@@ -12,7 +12,7 @@ namespace MemorieDeFleurs.Database.SQLite
     /// 
     /// データベースとの依存関係は極力ユーザインタフェースから切り離したい
     /// </summary>
-    public class MemorieDeFleursDatabseFacade
+    public class MemorieDeFleursDatabaseFacade
     {
         /// <summary>
         /// データベース接続オブジェクトを生成する

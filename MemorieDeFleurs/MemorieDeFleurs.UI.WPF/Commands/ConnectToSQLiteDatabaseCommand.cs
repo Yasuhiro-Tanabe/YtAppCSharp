@@ -27,7 +27,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 var result = dialog.ShowDialog();
                 if(result.HasValue && result.Value)
                 {
-                    vm.DbConnection = MemorieDeFleursDatabseFacade.OpenDatabase(dialog.FileName);
+                    vm.DbConnection = MemorieDeFleursDatabaseFacade.OpenDatabase(dialog.FileName);
                 }
             }
         }
