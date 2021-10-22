@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs.UI.WPF.Commands;
 
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetPartsSummaryViewModel : NotificationObject
     {
+        #region プロパティ
         public BouquetPartsSummaryViewModel(BouquetPart part) : base()
         {
             Update(part);
@@ -37,5 +39,31 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _name, value); }
         }
         private string _name;
+
+        public Visibility ActionVisivility { get { return _isVisible ? Visibility.Visible : Visibility.Collapsed; } }
+        private bool _isVisible = false;
+        #endregion // プロパティ
+
+        #region コマンド
+        public ICommand Remove { get; } = new RemoveListItemCommand();
+        public ICommand OpenDetailVew { get; }
+        #endregion // コマンド
+
+        public void ShowCommandButtons()
+        {
+            _isVisible = true;
+            RaisePropertyChanged(nameof(ActionVisivility));
+        }
+
+        public void HideCommandButtons()
+        {
+            _isVisible = false;
+            RaisePropertyChanged(nameof(ActionVisivility));
+        }
+
+        public void RemoveMe()
+        {
+            RaisePropertyChanged(nameof(RemoveMe));
+        }
     }
 }

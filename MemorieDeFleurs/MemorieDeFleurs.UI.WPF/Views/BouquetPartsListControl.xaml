@@ -37,6 +37,11 @@
                   BorderBrush="LightBlue" BorderThickness="1"
                   ItemsSource="{Binding BouquetParts}" SelectedItem="{Binding CurrentParts}"
                   SelectionMode="Single">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectionChanged">
+                    <i:InvokeCommandAction Command="{Binding Selected}" PassEventArgsToCommand="True"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -44,8 +49,8 @@
                             <ColumnDefinition Width="80"/>
                             <ColumnDefinition Width="200"/>
                             <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="50"/>
-                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="80"/>
                         </Grid.ColumnDefinitions>
                         
                         <TextBlock Grid.Column="0"
@@ -57,6 +62,23 @@
                                    Margin="5,1"
                                    VerticalAlignment="Center" HorizontalAlignment="Left"
                                    Text="{Binding PartsName}"/>
+
+                        <Button Grid.Column="3"
+                                Margin="5,1"
+                                VerticalAlignment="Center" VerticalContentAlignment="Center"
+                                HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                                Content="詳細..."
+                                Visibility="{Binding ActionVisivility}"
+                                Command="{Binding OpenDetailVew}" CommandParameter="{Binding}"/>
+                        
+                        <Button Grid.Column="4"
+                                Margin="5,1,20,1"
+                                VerticalAlignment="Center" VerticalContentAlignment="Center"
+                                HorizontalAlignment="Right" HorizontalContentAlignment="Center"
+                                Content="削除"
+                                Visibility="{Binding ActionVisivility}"
+                                Command="{Binding Remove}" CommandParameter="{Binding}"/>
+
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

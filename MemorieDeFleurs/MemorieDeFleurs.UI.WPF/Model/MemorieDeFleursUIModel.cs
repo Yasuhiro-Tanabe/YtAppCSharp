@@ -53,5 +53,10 @@ namespace MemorieDeFleurs.UI.WPF.Model
         {
             return Model.BouquetModel.FindAllBoueuqtParts();
         }
+
+        public void RemoveBouquetParts(string partsCode)
+        {
+            Model.BouquetModel.RemoveBouquetParts(partsCode);
+        }
     }
 }
