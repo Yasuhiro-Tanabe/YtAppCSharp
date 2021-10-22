@@ -334,6 +334,18 @@ namespace MemorieDeFleurs.Models
                 return context.BouquetParts.Find(partCode);
             }
         }
+
+        /// <summary>
+        /// 登録されている単品オブジェクトをすべて取得する
+        /// </summary>
+        /// <returns>登録されている単品オブジェクトの一覧。何も登録されていないときは空の一覧を返す。</returns>
+        public IEnumerable<BouquetPart> FindAllBoueuqtParts()
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.BouquetParts.ToList().AsEnumerable();
+            }
+        }
         #endregion // 単品の登録改廃
 
         #region 商品の登録改廃
@@ -367,6 +379,14 @@ namespace MemorieDeFleurs.Models
                     parts.Part = context.BouquetParts.Find(parts.PartsCode);
                 }
                 return bouquet;
+            }
+        }
+
+        public IEnumerable<Bouquet> FindAllBouquets()
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.Bouquets.ToList().AsEnumerable();
             }
         }
         #endregion // 商品の登録改廃

@@ -1,4 +1,6 @@
 ﻿
+using MemorieDeFleurs.Models.Entities;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System.Collections.Generic;
@@ -110,6 +112,45 @@ namespace MemorieDeFleursTest.ModelTest
                 Assert.AreEqual(kv.Value, actual.Quantity, $"商品構成の数が合わない：{kv.Key}");
             }
 
+        }
+
+        [TestMethod]
+        public void NoBouquetPartsFound()
+        {
+            Assert.AreEqual(0, Model.BouquetModel.FindAllBoueuqtParts().Count());
+        }
+
+        [TestMethod]
+        public void NoBouquetsFound()
+        {
+            Assert.AreEqual(0, Model.BouquetModel.FindAllBouquets().Count());
+        }
+
+        [TestMethod]
+        public void FindAllBouquetsAndParts()
+        {
+            var expectedParts = new Dictionary<string, BouquetPart>()
+            {
+                {"BA001", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA001").PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create() },
+                {"BA002", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA002").PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create() },
+                {"BA003", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA003").PartNameIs("薔薇(ピンク)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create() },
+                {"GP001", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("GP001").PartNameIs("かすみ草").LeadTimeIs(2).QauntityParLotIs(50).ExpiryDateIs(2).Create() },
+            };
+            var expectedBouquets = new Dictionary<string, Bouquet>()
+            {
+                {"HT001", Model.BouquetModel.GetBouquetBuilder().CodeIs("HT001").NameIs("花束-Aセット").Uses("BA001", 4).Create() },
+                {"HT002", Model.BouquetModel.GetBouquetBuilder().CodeIs("HT002").NameIs("花束-Aセット").Uses("BA001", 3).Uses("BA002", 5).Uses("BA003", 3).Uses("GP001", 6).Create() }
+            };
+
+            var actualParts = Model.BouquetModel.FindAllBoueuqtParts();
+            Assert.AreEqual(expectedParts.Count(), actualParts.Count(), "登録した単品数量が一致しない");
+            foreach (var parts in expectedParts) { Assert.IsTrue(actualParts.Any(p => p.Code == parts.Key), $"単品が登録されていない：{parts.Value.Name}"); }
+            foreach (var parts in actualParts) { Assert.IsTrue(expectedParts.ContainsKey(parts.Code), $"登録されていないはずの単品がある：{parts.Name}"); }
+
+            var actualBouquets = Model.BouquetModel.FindAllBouquets();
+            Assert.AreEqual(expectedBouquets.Count(), actualBouquets.Count(), "登録した商品数量が一致しない");
+            foreach (var bouquet in expectedBouquets) { Assert.IsTrue(actualBouquets.Any(b => b.Code == bouquet.Key), $"商品が登録されていない：{bouquet.Value.Name}"); }
+            foreach (var bouquet in actualBouquets) { Assert.IsTrue(expectedBouquets.ContainsKey(bouquet.Code), $"登録されていないはずの商品がある：{bouquet.Name}"); }
         }
     }
 }
