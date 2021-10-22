@@ -346,6 +346,42 @@ namespace MemorieDeFleurs.Models
                 return context.BouquetParts.ToList().AsEnumerable();
             }
         }
+
+        public void RemoveBouquetParts(string partsCode)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    RemoveBouquetParts(context, partsCode);
+                    transaction.Commit();
+                    LogUtil.Info($"Bouquet parts {partsCode} removed.");
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn($"Cannot remove bouquet parts, {partsCode}: {ex.GetType().Name}: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+        private void RemoveBouquetParts(MemorieDeFleursDbContext context, string partsCode)
+        {
+            var parts = context.BouquetParts.Find(partsCode);
+            if(parts != null)
+            {
+                // チェックなしで削除しても商品構成の外部キー制約で SQLException がスローされるが、
+                // メッセージがわかりづらいので「使用している商品」がわかるようなエラーメッセージを出す
+                var used = context.PartsList.Where(i => i.PartsCode == partsCode).ToList();
+                if (used.Count > 0)
+                {
+                    throw new ApplicationException($"単品 {partsCode} は以下の商品で使用中です： {string.Join(", ", used.Select(i => i.BouquetCode))}");
+                }
+                context.BouquetParts.Remove(parts);
+                context.SaveChanges();
+            }
+        }
         #endregion // 単品の登録改廃
 
         #region 商品の登録改廃

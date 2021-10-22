@@ -3,6 +3,7 @@ using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -151,6 +152,51 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(expectedBouquets.Count(), actualBouquets.Count(), "登録した商品数量が一致しない");
             foreach (var bouquet in expectedBouquets) { Assert.IsTrue(actualBouquets.Any(b => b.Code == bouquet.Key), $"商品が登録されていない：{bouquet.Value.Name}"); }
             foreach (var bouquet in actualBouquets) { Assert.IsTrue(expectedBouquets.ContainsKey(bouquet.Code), $"登録されていないはずの商品がある：{bouquet.Name}"); }
+        }
+
+        [TestMethod]
+        public void RemoveBouquetParts_UnusedPartsAreRemovable()
+        {
+            var expectedParts = new Dictionary<string, BouquetPart>()
+            {
+                {"BA001", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA001").PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create() },
+                {"BA002", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA002").PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create() },
+                {"BA003", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA003").PartNameIs("薔薇(ピンク)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create() },
+                {"GP001", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("GP001").PartNameIs("かすみ草").LeadTimeIs(2).QauntityParLotIs(50).ExpiryDateIs(2).Create() },
+            };
+            var expectedBouquets = new Dictionary<string, Bouquet>()
+            {
+                {"HT001", Model.BouquetModel.GetBouquetBuilder().CodeIs("HT001").NameIs("花束-Aセット").Uses("BA001", 4).Create() },
+            };
+
+            Model.BouquetModel.RemoveBouquetParts("BA002");
+            var actualParts = Model.BouquetModel.FindAllBoueuqtParts();
+
+            Assert.AreEqual(expectedParts.Count - 1, actualParts.Count());
+            Assert.AreEqual(0, actualParts.Count(p => p.Code == "BA002"));
+        }
+
+        [TestMethod]
+        public void RemoveBouquetParts_UsedPartsAreNotRemovable()
+        {
+            var expectedParts = new Dictionary<string, BouquetPart>()
+            {
+                {"BA001", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA001").PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create() },
+                {"BA002", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA002").PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create() },
+                {"BA003", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA003").PartNameIs("薔薇(ピンク)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create() },
+                {"GP001", Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("GP001").PartNameIs("かすみ草").LeadTimeIs(2).QauntityParLotIs(50).ExpiryDateIs(2).Create() },
+            };
+            var expectedBouquets = new Dictionary<string, Bouquet>()
+            {
+                {"HT001", Model.BouquetModel.GetBouquetBuilder().CodeIs("HT001").NameIs("花束-Aセット").Uses("BA001", 4).Create() },
+            };
+
+            Assert.ThrowsException<ApplicationException>(() => Model.BouquetModel.RemoveBouquetParts("BA001"));
+
+            // 削除処理が行われていないことを確認する
+            var actualParts = Model.BouquetModel.FindAllBoueuqtParts();
+            Assert.AreEqual(expectedParts.Count, actualParts.Count());
+            Assert.AreEqual(1, actualParts.Count(p => p.Code == "BA001"));
         }
     }
 }
