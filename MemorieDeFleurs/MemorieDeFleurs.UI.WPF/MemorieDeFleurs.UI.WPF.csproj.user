@@ -10,9 +10,15 @@
     <Compile Update="Views\BouquetPartsDetailControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\BouquetPartsListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="Views\BouquetPartsDetailControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\BouquetPartsListControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\MainWindow.xaml">

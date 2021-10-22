@@ -27,6 +27,7 @@
             <MenuItem Header="仕入先"/>
             <MenuItem Header="商品">
                 <MenuItem Header="単品登録" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="単品一覧" Command="{Binding OpenPartsListView}" CommandParameter="{Binding}"/>
             </MenuItem>
             <MenuItem Header="得意先"/>
         </Menu>
@@ -36,6 +37,9 @@
                 <!-- 選択した ViewModel 毎に対応する View (UserControl) を使い分ける -->
                 <DataTemplate DataType="{x:Type vm:BouquetPartsDetailViewModel}">
                     <view:BouquetPartsDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:BouquetPartsListViewModel}">
+                    <view:BouquetPartsListControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>
@@ -53,13 +57,6 @@
                     </Grid>
                 </DataTemplate>
             </TabControl.ItemTemplate>
-            <!--
-            <TabControl.ItemContainerStyle>
-                <Style TargetType="TabItem">
-                    <Setter Property="Header" Value="{Binding Header}"/>
-                </Style>
-            </TabControl.ItemContainerStyle>
-            -->
         </TabControl>
 
         <TextBlock Grid.Row="2"

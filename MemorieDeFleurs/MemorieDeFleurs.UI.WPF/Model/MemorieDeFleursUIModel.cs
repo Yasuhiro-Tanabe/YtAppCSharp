@@ -1,7 +1,10 @@
 ﻿using MemorieDeFleurs.Database.SQLite;
 using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models;
+using MemorieDeFleurs.Models.Entities;
 
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 
 namespace MemorieDeFleurs.UI.WPF.Model
@@ -24,13 +27,17 @@ namespace MemorieDeFleurs.UI.WPF.Model
         }
         private DbConnection _conn;
 
+        private MemorieDeFleursModel Model { get; set; }
+
         public void OpenSQLiteDatabaseFile(string path)
         {
             LogUtil.DEBUGLOG_BeginMethod(path);
             try
             {
+                if(DbConnection != null) { DbConnection.Dispose(); }
                 DbConnection = MemorieDeFleursDatabaseFacade.OpenDatabase(path);
                 LogUtil.Info($"Database opened: {path}");
+                Model = new MemorieDeFleursModel(DbConnection);
             }
             catch (Exception ex)
             {
@@ -40,6 +47,11 @@ namespace MemorieDeFleurs.UI.WPF.Model
             {
                 LogUtil.DEBUGLOG_EndMethod(path);
             }
+        }
+
+        public IEnumerable<BouquetPart> FindAllBouquetParts()
+        {
+            return Model.BouquetModel.FindAllBoueuqtParts();
         }
     }
 }

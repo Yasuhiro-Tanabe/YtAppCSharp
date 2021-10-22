@@ -45,6 +45,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #region コマンド
         public ICommand Exit { get; } = new ExitCommand();
         public ICommand OpenPartsDetailView { get; } = new OpenPartsDetailViewCommand();
+        public ICommand OpenPartsListView { get; } = new OpenPartListViewCommand();
         public ICommand ConnectoToSQLiteDatabase { get; } = new ConnectToSQLiteDatabaseCommand();
         #endregion // コマンド
 
