@@ -4,19 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SVGEditor"
-        xmlns:bh="http://schemas.microsoft.com/xaml/behaviors"
-        xmlns:svg="clr-namespace:Svg;assembly=Svg"
+        xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle, Mode=OneWay}" Height="450" Width="800">
+        Title="{Binding WindowTitle, Mode=OneWay}" Height="600" Width="800">
     <Window.DataContext>
         <local:MainWindowViewModel/>
     </Window.DataContext>
-    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="300"/>
+            <RowDefinition Height="200"/>
         </Grid.RowDefinitions>
         <Menu Grid.Row="0" VerticalAlignment="Top">
             <MenuItem Header="File">
@@ -29,32 +27,27 @@
             </MenuItem>
         </Menu>
 
-        <ScrollViewer Grid.Row="1"
+
+        <Border Grid.Row="1"
+                Margin="5"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                BorderBrush="LightGray" BorderThickness="1">
+            <ScrollViewer Grid.Row="1"
                       Margin="5"
                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                      HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                      HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                       HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <Border BorderBrush="LightGray" BorderThickness="1">
                 <Image x:Name="SvgImage" Source="{Binding ImageSource, Mode=OneWay}" />
-            </Border>
-        </ScrollViewer>
+            </ScrollViewer>
+        </Border>
 
-
-        <TextBox Grid.Row="2" x:Name="Source"
-                 Margin="5"
-                 HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
-                 HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                 TextAlignment="Left"
-                 FontFamily="Consolas" FontSize="11"
-                 Text="{Binding SourceCode}"
-                 AcceptsReturn="True"
-                 TextWrapping="Wrap">
-            <TextBox.InputBindings>
-                <KeyBinding Key="O" Modifiers="Ctrl" Command="{Binding Open}" CommandParameter="{Binding}"/>
-                <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding Save}" CommandParameter="{Binding}"/>
-                <KeyBinding Key="F5" Command="{Binding Render}" CommandParameter="{Binding}"/>
-            </TextBox.InputBindings>
-        </TextBox>
+        <avalon:TextEditor x:Name="Source"
+                            Margin="5"
+                            HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+                            HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                            FontFamily="Consolas" FontSize="11"
+                            BorderBrush="LightGray" BorderThickness="1">
+        </avalon:TextEditor>
     </Grid>
 </Window>
