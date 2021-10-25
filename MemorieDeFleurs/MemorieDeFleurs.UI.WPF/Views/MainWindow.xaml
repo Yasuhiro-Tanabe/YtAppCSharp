@@ -4,7 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
-        xmlns:view="clr-namespace:MemorieDeFleurs.UI.WPF.Views"
+        xmlns:v="clr-namespace:MemorieDeFleurs.UI.WPF.Views"
+        xmlns:vh="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Height="450" Width="800">
     <Window.DataContext>
@@ -13,8 +14,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
-            <RowDefinition Height="200"/>
-            <RowDefinition Height="160"/>
+            <RowDefinition Height="250"/>
+            <RowDefinition Height="180"/>
         </Grid.RowDefinitions>
 
         <Menu Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -36,10 +37,10 @@
             <TabControl.Resources>
                 <!-- 選択した ViewModel 毎に対応する View (UserControl) を使い分ける -->
                 <DataTemplate DataType="{x:Type vm:BouquetPartsDetailViewModel}">
-                    <view:BouquetPartsDetailControl/>
+                    <v:BouquetPartsDetailControl/>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:BouquetPartsListViewModel}">
-                    <view:BouquetPartsListControl/>
+                    <v:BouquetPartsListControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>
@@ -59,11 +60,14 @@
             </TabControl.ItemTemplate>
         </TabControl>
 
-        <TextBlock Grid.Row="2"
-                   Margin="5, 1"
-                   HorizontalAlignment="Stretch"
-                   VerticalAlignment="Stretch"
-                   Text="{Binding Message, Mode=OneWay}"
-                   FontWeight="Bold"/>
+        <ScrollViewer Grid.Row="2"
+                      Margin="2" Padding="3"
+                      HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                      VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Visible"
+                      vh:ScrollViewerHelper.AutoScrollToBottom="True">
+            <TextBlock Text="{Binding Message, Mode=OneWay}" TextWrapping="NoWrap"/>
+        </ScrollViewer>
     </Grid>
 </Window>
