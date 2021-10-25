@@ -31,10 +31,12 @@
                    Text="花コード:"/>
         <TextBox Grid.Row="0" Grid.Column="1"
                  Margin="5,1"
+                 TabIndex="1"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding PartsCode}"/>
         <Button Grid.Row="0" Grid.Column="3"
                 Margin="5, 1"
+                TabIndex="999"
                 HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                 VerticalAlignment="Center" VerticalContentAlignment="Center"
                 Content="登録"
@@ -46,6 +48,7 @@
                    Text="名称:"/>
         <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                  Margin="5,1"
+                 TabIndex="2"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding PartsName}"/>
 
@@ -54,6 +57,7 @@
                    Text="購入単位数:"/>
         <TextBox Grid.Row="2" Grid.Column="1"
                  Margin="5,1"
+                 TabIndex="3"
                  VerticalAlignment="Center"
                  Text="{Binding QuantitiesParLot}"/>
         <TextBlock Grid.Row="2" Grid.Column="2"
@@ -65,6 +69,7 @@
                    Text="リードタイム:"/>
         <TextBox Grid.Row="3" Grid.Column="1"
                  Margin="5,1"
+                 TabIndex="4"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding LeadTime}"/>
         <TextBlock Grid.Row="3" Grid.Column="2"
@@ -76,6 +81,7 @@
                    Text="品質維持可能日数:"/>
         <TextBox Grid.Row="4" Grid.Column="1"
                  Margin="5,1"
+                 TabIndex="5"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding ExpiryDate}"/>
         <TextBlock Grid.Row="4" Grid.Column="2"

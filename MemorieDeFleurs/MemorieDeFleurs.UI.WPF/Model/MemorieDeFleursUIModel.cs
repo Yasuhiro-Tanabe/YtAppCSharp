@@ -75,5 +75,21 @@ namespace MemorieDeFleurs.UI.WPF.Model
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             Model.BouquetModel.RemoveBouquet(bouquetCode);
         }
+
+        public Bouquet FindBouquet(string bouquetCode)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.BouquetModel.FindBouquet(bouquetCode);
+        }
+
+        public void UpdatePartsList(string bouquetCode, IEnumerable<KeyValuePair<string, int>> partsList)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.BouquetModel.RemoveAllPartsFrom(bouquetCode);
+            foreach(var kv in partsList)
+            {
+                Model.BouquetModel.UpdateQuantityOf(bouquetCode, kv.Key, kv.Value);
+            }
+        }
     }
 }

@@ -31,44 +31,65 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
         public override void Execute(object parameter)
         {
-            if(parameter is BouquetPartsDetailViewModel)
+            try
             {
-                try
+                if (parameter is BouquetPartsDetailViewModel)
                 {
                     var vm = parameter as BouquetPartsDetailViewModel;
                     vm.Validate();
 
                     var model = new MemorieDeFleursModel(MemorieDeFleursUIModel.Instance.DbConnection);
                     var builder = model.BouquetModel.GetBouquetPartBuilder();
+
                     builder.PartCodeIs(vm.PartsCode)
                         .PartNameIs(vm.PartsName)
                         .QauntityParLotIs(vm.QuantitiesParLot)
                         .LeadTimeIs(vm.LeadTime)
                         .ExpiryDateIs(vm.ExpiryDate);
+
                     vm.Update(builder.Create());
                     vm.IsDirty = false;
+                }
+                else if (parameter is BouquetDetailViewModel)
+                {
+                    var vm = parameter as BouquetDetailViewModel;
+                    vm.Validate();
 
+                    var model = new MemorieDeFleursModel(MemorieDeFleursUIModel.Instance.DbConnection);
+                    var builder = model.BouquetModel.GetBouquetBuilder();
+
+                    builder.CodeIs(vm.BouquetCode)
+                        .NameIs(vm.BouquetName)
+                        .ImageIs(vm.ImageFileName);
+                    foreach (var p in vm.PartsList) { builder.Uses(p.Key, p.Value); }
+
+                    vm.Update(builder.Create());
+                    vm.IsDirty = false;
                 }
-                catch (ValidateFailedException ex)
+                else
                 {
-                    MessageBox.Show($"{string.Join("\n", ex.ValidationErrors)}", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-                catch(Exception ex)
-                {
-                    if(ex.InnerException==null)
-                    {
-                        LogUtil.Warn($"Exception thrown: {ex.GetType().Name}, {ex.Message}\n{ex.StackTrace}");
-                    }
-                    else
-                    {
-                        LogUtil.Warn($"Exception thrown: {ex.GetType().Name}, {ex.Message} => {ex.InnerException.GetType()}, {ex.InnerException.Message}\n{ex.StackTrace}");
-                    }
-                    MessageBox.Show(ex.Message, "システムエラー", MessageBoxButton.OK, MessageBoxImage.Error);
+                    base.Execute(parameter);
                 }
             }
-            else
+            catch (ValidateFailedException ex)
             {
-                base.Execute(parameter);
+                MessageBox.Show($"{string.Join("\n", ex.ValidationErrors)}", ex.Message, MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (NotConnectedToDatabaseException ex)
+            {
+                MessageBox.Show(ex.Message, $"DB未接続", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException == null)
+                {
+                    LogUtil.Warn($"Exception thrown: {ex.GetType().Name}, {ex.Message}\n{ex.StackTrace}");
+                }
+                else
+                {
+                    LogUtil.Warn($"Exception thrown: {ex.GetType().Name}, {ex.Message} => {ex.InnerException.GetType()}, {ex.InnerException.Message}\n{ex.StackTrace}");
+                }
+                MessageBox.Show(ex.Message, "システムエラー", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
