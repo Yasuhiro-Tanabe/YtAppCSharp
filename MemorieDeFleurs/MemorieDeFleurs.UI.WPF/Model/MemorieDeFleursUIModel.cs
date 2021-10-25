@@ -2,6 +2,7 @@
 using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 
 using System;
 using System.Collections.Generic;
@@ -51,12 +52,26 @@ namespace MemorieDeFleurs.UI.WPF.Model
 
         public IEnumerable<BouquetPart> FindAllBouquetParts()
         {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             return Model.BouquetModel.FindAllBoueuqtParts();
         }
 
         public void RemoveBouquetParts(string partsCode)
         {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             Model.BouquetModel.RemoveBouquetParts(partsCode);
+        }
+
+        public IEnumerable<Bouquet> FindAllBouquets()
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.BouquetModel.FindAllBouquets();
+        }
+
+        public void RemoveBouquet(string bouquetCode)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.BouquetModel.RemoveBouquet(bouquetCode);
         }
     }
 }
