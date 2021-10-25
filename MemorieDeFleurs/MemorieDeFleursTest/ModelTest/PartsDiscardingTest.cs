@@ -171,7 +171,7 @@ namespace MemorieDeFleursTest.ModelTest
                     order.Append(act.ArrivalDate, act.InventoryLotNo, act.Quantity);
                 }
                 InitialLots.Add(grp.Key, order);
-                LogUtil.DebugFormat($"{LogUtil.Indent}{grp.Key}=[{order.ToString()}]");
+                LogUtil.DebugWithoutLineNumber($"{grp.Key}=[{order.ToString()}]");
             }
             LogUtil.DEBUGLOG_EndMethod();
         }
@@ -193,7 +193,7 @@ namespace MemorieDeFleursTest.ModelTest
                     }
 
                     InitialOrdersToSupplyer.Add(grp.Key, list.ToList());
-                    LogUtil.DebugFormat($"{LogUtil.Indent}{grp.Key:yyyyMMdd}: {string.Join(", ", list)}");
+                    LogUtil.DebugWithoutLineNumber($"{grp.Key:yyyyMMdd}: {string.Join(", ", list)}");
                 }
             }
             catch (Exception)
@@ -210,7 +210,7 @@ namespace MemorieDeFleursTest.ModelTest
         {
             foreach (var grp in context.OrderFromCustomers.AsEnumerable().GroupBy(order => order.ShippingDate))
             {
-                LogUtil.Debug($"{LogUtil.Indent}grp=[Key={grp.Key}, Values=[ {string.Join(", ", grp.Select(order => $"{order.ID}, {order.Bouquet}, {order.OrderDate}"))} ]");
+                LogUtil.Debug($"grp=[Key={grp.Key}, Values=[ {string.Join(", ", grp.Select(order => $"{order.ID}, {order.Bouquet}, {order.OrderDate}"))} ]");
                 InitialOrdersFromCustomers.Add(grp.Key, grp.Select(order => order.ID).ToList());
             }
         }

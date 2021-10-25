@@ -44,7 +44,6 @@ namespace MemorieDeFleursTest.ModelTest
         protected void DEBUGLOG_ShowInventoryActions(DbConnection connection, string partsCode, int[] lots = null, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             LogUtil.DEBUGLOG_BeginMethod(partsCode, "", caller, path, line);
-            LogUtil.Indent++;
 
             using(var context = new MemorieDeFleursDbContext(connection))
             {
@@ -57,7 +56,7 @@ namespace MemorieDeFleursTest.ModelTest
                         .ThenBy(act => act.ActionDate)
                         .ThenBy(act => act.Action))
                     {
-                        LogUtil.DebugFormat("{0}{1}", LogUtil.Indent, action.ToString("DB"));
+                        LogUtil.DebugWithoutLineNumber(action.ToString("DB"));
                     }
                 }
                 else
@@ -70,13 +69,12 @@ namespace MemorieDeFleursTest.ModelTest
                     {
                         if (lots.Contains(action.InventoryLotNo))
                         {
-                            LogUtil.DebugFormat("{0}{1}", LogUtil.Indent, action.ToString("DB"));
+                            LogUtil.DebugWithoutLineNumber(action.ToString("DB"));
                         }
                     }
                 }
             }
 
-            LogUtil.Indent--;
             LogUtil.DEBUGLOG_EndMethod(partsCode, "", caller, path, line);
         }
     }

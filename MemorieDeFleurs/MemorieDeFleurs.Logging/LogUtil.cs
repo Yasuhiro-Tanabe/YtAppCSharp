@@ -12,7 +12,7 @@ namespace MemorieDeFleurs.Logging
     {
         private static ILog _logger;
 
-        public static IndentString Indent { get; set; } = new IndentString();
+        private static IndentString Indent { get; set; } = new IndentString();
 
         static string ConfigFileName { get; } = "./log4net.config";
 
@@ -43,6 +43,7 @@ namespace MemorieDeFleurs.Logging
         #endregion
 
         #region デバッグ用の拡張ログ出力
+        public static void DebugWithoutLineNumber(string msg) => _logger.Debug($"{Indent}{msg}");
         /// <summary>
         /// メソッド開始ログを出力する
         /// </summary>

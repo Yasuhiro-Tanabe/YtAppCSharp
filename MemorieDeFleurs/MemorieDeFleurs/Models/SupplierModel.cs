@@ -837,7 +837,7 @@ namespace MemorieDeFleurs.Models
             {
                 if (lots.Contains(action.InventoryLotNo))
                 {
-                    LogUtil.Debug(action.ToString("DB"));
+                    LogUtil.DebugWithoutLineNumber(action.ToString("DB"));
                 }
             }
 

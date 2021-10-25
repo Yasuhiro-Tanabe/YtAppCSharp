@@ -416,7 +416,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .AssertAll();
 
             Model.CustomerModel.CancelOrder(order);
-            LogUtil.Debug($"{LogUtil.Indent}After ordered...");
+            LogUtil.Debug($"After ordered...");
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.May3rd).BEGIN
                     .At(DateConst.May6th).Used(40, 90).Discarded(90)
@@ -464,7 +464,7 @@ namespace MemorieDeFleursTest.ModelTest
                 Model.CustomerModel.CancelOrder(context, order);
                 transaction.Rollback();
             }
-            LogUtil.Debug($"{LogUtil.Indent}After ordered...");
+            LogUtil.Debug($"After ordered...");
 
             // CancelOrder() はロールバックされたので、在庫は Order() 実施後の状態と変わらないはず
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
@@ -509,7 +509,7 @@ namespace MemorieDeFleursTest.ModelTest
             // 同一ロット内で変更
             var May10th = DateConst.May9th.AddDays(1);
             Model.CustomerModel.ChangeArrivalDate(DateConst.May3rd, order, May10th);
-            LogUtil.Debug($"{LogUtil.Indent}After ordered...");
+            LogUtil.Debug($"After ordered...");
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.May6th).BEGIN
                     .At(DateConst.May6th).Used(0, 100)
@@ -553,7 +553,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             Model.CustomerModel.ChangeArrivalDate(DateConst.May3rd, order, DateConst.May9th);
 
-            LogUtil.Debug($"{LogUtil.Indent}After ordered...");
+            LogUtil.Debug($"After ordered...");
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.May3rd).BEGIN
                     .At(DateConst.May5th).Used(70, 130)
@@ -599,7 +599,7 @@ namespace MemorieDeFleursTest.ModelTest
             }
 
             // ロールバックしたので在庫推移は日付変更前の状態を保っているはず
-            LogUtil.Debug($"{LogUtil.Indent}After ordered...");
+            LogUtil.Debug($"After ordered...");
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.May6th).BEGIN
                     .At(DateConst.May6th).Used(0, 100)

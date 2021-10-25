@@ -287,7 +287,7 @@ namespace MemorieDeFleursTest.ModelTest
                     order.Append(act.ArrivalDate, act.InventoryLotNo, act.Quantity);
                 }
                 InitialLots.Add(grp.Key, order);
-                LogUtil.DebugFormat($"{LogUtil.Indent}{grp.Key}=[{order.ToString()}]");
+                LogUtil.DebugWithoutLineNumber($"{grp.Key}=[{order.ToString()}]");
             }
             LogUtil.DEBUGLOG_EndMethod();
         }
@@ -308,7 +308,7 @@ namespace MemorieDeFleursTest.ModelTest
                 }
 
                 InitialOrdersToSupplyer.Add(grp.Key, list.ToList());
-                LogUtil.DebugFormat($"{LogUtil.Indent}{grp.Key:yyyyMMdd}: {string.Join(", ", list)}");
+                LogUtil.DebugWithoutLineNumber($"{grp.Key:yyyyMMdd}: {string.Join(", ", list)}");
             }
 
             LogUtil.DEBUGLOG_EndMethod();
