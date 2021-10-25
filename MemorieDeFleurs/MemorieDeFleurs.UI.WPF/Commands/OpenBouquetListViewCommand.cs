@@ -8,17 +8,14 @@ using System.Threading.Tasks;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class ReloadListCommand : CommandBase
+    internal class OpenBouquetListViewCommand : CommandBase
     {
         public override void Execute(object parameter)
         {
-            if(parameter is BouquetPartsListViewModel)
+            if(parameter is MainWindowViiewModel)
             {
-                (parameter as BouquetPartsListViewModel).LoadBouquetParts();
-            }
-            else if(parameter is BouquetListViewModel)
-            {
-                (parameter as BouquetListViewModel).LoadBouquets();
+                var vm = parameter as MainWindowViiewModel;
+                vm.OpenTabItem(new BouquetListViewModel());
             }
             else
             {

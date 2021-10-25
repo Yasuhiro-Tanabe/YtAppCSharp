@@ -8,6 +8,8 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 
+using static MemorieDeFleurs.Models.BouquetModel;
+
 namespace MemorieDeFleurs.UI.WPF.Model
 {
     public class MemorieDeFleursUIModel : NotificationObject

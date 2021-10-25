@@ -14,8 +14,11 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         {
             if(parameter is BouquetPartsSummaryViewModel)
             {
-                var vm = parameter as BouquetPartsSummaryViewModel;
-                vm.RemoveMe();
+                (parameter as BouquetPartsSummaryViewModel).RemoveMe();
+            }
+            else if(parameter is BouquetSummaryViewModel)
+            {
+                (parameter as BouquetSummaryViewModel).RemoveMe();
             }
         }
     }

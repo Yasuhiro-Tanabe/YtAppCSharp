@@ -28,6 +28,7 @@
             </MenuItem>
             <MenuItem Header="仕入先"/>
             <MenuItem Header="商品">
+                <MenuItem Header="商品一覧" Command="{Binding OpenBouquetListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="単品登録" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="単品一覧" Command="{Binding OpenPartsListView}" CommandParameter="{Binding}"/>
             </MenuItem>
@@ -42,6 +43,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:BouquetPartsListViewModel}">
                     <v:BouquetPartsListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:BouquetListViewModel}">
+                    <v:BouquetListControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>
