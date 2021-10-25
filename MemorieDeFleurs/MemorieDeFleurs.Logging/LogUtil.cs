@@ -3,6 +3,7 @@ using log4net.Config;
 
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace MemorieDeFleurs.Logging
@@ -21,6 +22,20 @@ namespace MemorieDeFleurs.Logging
             var stream = new FileStream(ConfigFileName, FileMode.Open, FileAccess.Read);
             XmlConfigurator.Configure(stream);
             _logger = LogManager.GetLogger(typeof(LogUtil).Name);
+        }
+
+        /// <summary>
+        /// WPFコントロールにログ出力を通知するためのアペンダ
+        /// </summary>
+        public static NotifyAppender Appender
+        {
+            get
+            {
+                return LogManager.GetCurrentLoggers()
+                    .SelectMany(log => log.Logger.Repository.GetAppenders())
+                    .FirstOrDefault(a => a is NotifyAppender)
+                    as NotifyAppender;
+            }
         }
 
         #region 基本のログ出力メソッド

@@ -1,7 +1,9 @@
-﻿using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.UI.WPF.Commands;
 
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data.Common;
 using System.Linq;
 using System.Windows.Input;
@@ -24,12 +26,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// システムメッセージ表示領域に表示する文言
         /// </summary>
-        public string Message
-        {
-            get { return _message; }
-            set { SetProperty(ref _message, value); }
-        }
-        private string _message;
+        public string Message { get { return LogUtil.Appender?.Notification; } }
 
         /// <summary>
         /// タブコントロール内に現在表示されているビューに対応するビューモデルの一覧
@@ -79,5 +76,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
         #endregion // ビューの生成・切替
+
+        public MainWindowViiewModel() : base()
+        {
+            LogUtil.Appender.PropertyChanged += RefreshLogMessage;
+        }
+
+        private void RefreshLogMessage(object unused1, PropertyChangedEventArgs args)
+        {
+            if (args.PropertyName.Equals(nameof(LogUtil.Appender.Notification)))
+            {
+                RaisePropertyChanged(nameof(Message));
+            }
+        }
     }
 }

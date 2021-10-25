@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Database.SQLite;
+using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels;
 
@@ -30,7 +31,6 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 if(result.HasValue && result.Value)
                 {
                     MemorieDeFleursUIModel.Instance.OpenSQLiteDatabaseFile(dialog.FileName);
-                    vm.Message = $"データベースファイルを開きました。： {Path.GetFileName(dialog.FileName)}";
                 }
             }
         }

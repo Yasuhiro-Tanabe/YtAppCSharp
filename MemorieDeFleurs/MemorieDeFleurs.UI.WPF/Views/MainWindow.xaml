@@ -12,9 +12,9 @@
     </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="15pt"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="25pt"/>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="200"/>
+            <RowDefinition Height="160"/>
         </Grid.RowDefinitions>
 
         <Menu Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
@@ -63,8 +63,7 @@
                    Margin="5, 1"
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch"
-                   Text="{Binding Message}"
-                   FontSize="20pt"
+                   Text="{Binding Message, Mode=OneWay}"
                    FontWeight="Bold"/>
     </Grid>
 </Window>
