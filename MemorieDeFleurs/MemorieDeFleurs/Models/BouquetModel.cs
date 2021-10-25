@@ -347,6 +347,10 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 指定サラ多花コードを持つ単品を削除する
+        /// </summary>
+        /// <param name="partsCode"></param>
         public void RemoveBouquetParts(string partsCode)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -418,12 +422,52 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 登録されている全商品を取得する
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<Bouquet> FindAllBouquets()
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
                 return context.Bouquets.ToList().AsEnumerable();
             }
+        }
+
+        public void RemoveBouquet(string bouquetCode)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    RemoveBouquet(context, bouquetCode);
+                    transaction.Commit();
+                    LogUtil.Info($"Bouquet {bouquetCode} removed.");
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn($"Cannot remove bouquet, {bouquetCode}: {ex.GetType().Name}: {ex.Message}");
+                    throw;
+                }
+            }
+        }
+
+        private void RemoveBouquet(MemorieDeFleursDbContext context, string bouquetCode)
+        {
+            var partsList = context.PartsList.Where(i => i.BouquetCode == bouquetCode);
+            if(partsList.Count() > 0)
+            {
+                context.PartsList.RemoveRange(partsList);
+            }
+            var bouquet = context.Bouquets.Find(bouquetCode);
+            if(bouquet != null)
+            {
+                context.Bouquets.Remove(bouquet);
+            }
+
+            context.SaveChanges();
         }
         #endregion // 商品の登録改廃
 
