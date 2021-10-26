@@ -238,7 +238,15 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
             else
             {
-                Update(MemorieDeFleursUIModel.Instance.FindBouquet(BouquetCode));
+                var bouquet = MemorieDeFleursUIModel.Instance.FindBouquet(BouquetCode);
+                if(bouquet == null)
+                {
+                    MessageBox.Show($"花コードに該当する商品がありません：{BouquetCode}");
+                }
+                else
+                {
+                    Update(bouquet);
+                }
             }
         }
     }
