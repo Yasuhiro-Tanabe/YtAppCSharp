@@ -58,7 +58,13 @@ namespace MemorieDeFleurs.Logging
         #endregion
 
         #region デバッグ用の拡張ログ出力
+        /// <summary>
+        /// 呼び出し元情報を含まないデバッグログを出力する。
+        /// </summary>
+        /// <param name="msg">ログ出力メッセージ</param>
+        [Conditional("DEBUGLOG")]
         public static void DebugWithoutLineNumber(string msg) => _logger.Debug($"{Indent}{msg}");
+
         /// <summary>
         /// メソッド開始ログを出力する
         /// </summary>
@@ -79,6 +85,8 @@ namespace MemorieDeFleurs.Logging
 
         /// <summary>
         /// メソッド終了ログを出力する
+        /// 
+        /// このメソッドを呼び出すとインデントレベルが一つ下がる(左に移動する)。
         /// </summary>
         /// <param name="args">【省略可】メソッドの引数をログ出力したい場合、その文字列を適宜整形したもの</param>
         /// <param name="msg">【省略可】メソッド引数ではない追加文言をログ出力したい場合、その文字列</param>
@@ -93,6 +101,25 @@ namespace MemorieDeFleurs.Logging
 
             Indent--;
             LogUtil.DebugFormat($"{Indent}[END] {caller}{argument}{message} ({Path.GetFileName(path)}:{line})");
+        }
+
+        /// <summary>
+        /// メソッド呼出ログを実行する：メソッド開始終了ログを両方出力するのは冗長になりすぎる場合の大体メソッド
+        /// 
+        /// このメソッドを呼び出してもインデントレベルは変動しない。
+        /// </summary>
+        /// <param name="args"></param>
+        /// <param name="msg"></param>
+        /// <param name="caller"></param>
+        /// <param name="path"></param>
+        /// <param name="line"></param>
+        [Conditional("DEBUG")]
+        public static void DEBULOG_MethodCalled(string args="", string msg="", [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        {
+            var argument = string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )";
+            var message = string.IsNullOrWhiteSpace(msg) ? "" : $" {msg}";
+
+            LogUtil.DebugFormat($"{Indent}[CALLED] {caller}{argument}{message} ({Path.GetFileName(path)}:{line})");
         }
 
         /// <summary>
