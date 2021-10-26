@@ -113,6 +113,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Fix { get; } = new FixPartsListCommand();
         public ICommand Append { get; } = new AppendBouquetPartsToPartsListCommand();
         public ICommand Remove { get; } = new RemoveBouquetPartsFromPartsListCommand();
+        public ICommand Reload { get; } = new ReloadDetailCommand();
         #endregion // コマンド
 
         /// <summary>
@@ -226,6 +227,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             RaisePropertyChanged(nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
                  nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
+        }
+
+        public void Update()
+        {
+            if(string.IsNullOrWhiteSpace(BouquetCode))
+            {
+                MessageBox.Show("花束コードが指定されていません。");
+            }
+            else
+            {
+                Update(MemorieDeFleursUIModel.Instance.FindBouquet(BouquetCode));
+            }
         }
     }
 }

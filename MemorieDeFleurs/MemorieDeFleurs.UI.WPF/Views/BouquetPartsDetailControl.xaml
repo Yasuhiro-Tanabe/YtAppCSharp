@@ -34,6 +34,19 @@
                  TabIndex="1"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding PartsCode}"/>
+        <StackPanel Grid.Row="0" Grid.Column="4" Orientation="Horizontal"
+                    HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Button Margin="5, 1"
+                    TabIndex="999"
+                    Content="検索..."
+                    Command="{Binding Reload}" CommandParameter="{Binding}"/>
+            <Button Margin="5, 1"
+                    TabIndex="1000"
+                    Content="登録"
+                    Command="{Binding Register}" CommandParameter="{Binding}"/>
+        </StackPanel>
+
+        <!--
         <Button Grid.Row="0" Grid.Column="3"
                 Margin="5, 1"
                 TabIndex="999"
@@ -41,6 +54,7 @@
                 VerticalAlignment="Center" VerticalContentAlignment="Center"
                 Content="登録"
                 Command="{Binding Register}" CommandParameter="{Binding}"/>
+        -->
 
 
         <TextBlock Grid.Row="1" Grid.Column="0"

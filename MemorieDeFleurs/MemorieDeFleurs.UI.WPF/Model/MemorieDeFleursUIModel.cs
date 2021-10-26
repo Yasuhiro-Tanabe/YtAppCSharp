@@ -91,5 +91,11 @@ namespace MemorieDeFleurs.UI.WPF.Model
                 Model.BouquetModel.UpdateQuantityOf(bouquetCode, kv.Key, kv.Value);
             }
         }
+
+        public BouquetPart FindBouquetParts(string partsCode)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.BouquetModel.FindBouquetPart(partsCode);
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
+using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 
 using System;
@@ -12,6 +13,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetPartsDetailViewModel : TabItemControlViewModelBase
     {
+        public static string Name { get; } = "単品詳細";
+        public BouquetPartsDetailViewModel() : base(Name) { }
+
+        #region プロパティ
         /// <summary>
         /// 花コード
         /// </summary>
@@ -61,9 +66,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _expriy, value); }
         }
         private int _expriy;
+        #endregion // プロパティ
 
-        public BouquetPartsDetailViewModel() : base("単品詳細") { }
-
+        #region コマンド
+        public ICommand Reload { get; } = new ReloadDetailCommand();
+        #endregion // コマンド
 
         public void Update(BouquetPart part)
         {
@@ -106,6 +113,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
 
             if(result.ValidationErrors.Count > 0) { throw result; }
+        }
+
+        public void Update()
+        {
+            if(string.IsNullOrWhiteSpace(PartsCode))
+            {
+                MessageBox.Show("花コードが指定されていません。", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                Update(MemorieDeFleursUIModel.Instance.FindBouquetParts(PartsCode));
+            }
         }
     }
 }
