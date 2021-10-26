@@ -22,7 +22,6 @@
             <ColumnDefinition Width="120px"/>
             <ColumnDefinition Width="120px"/>
             <ColumnDefinition Width="120px"/>
-            <ColumnDefinition Width="120px"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -34,7 +33,7 @@
                  TabIndex="1"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding PartsCode}"/>
-        <StackPanel Grid.Row="0" Grid.Column="4" Orientation="Horizontal"
+        <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal"
                     HorizontalAlignment="Right" VerticalAlignment="Center">
             <Button Margin="5, 1"
                     TabIndex="999"
@@ -45,17 +44,6 @@
                     Content="登録"
                     Command="{Binding Register}" CommandParameter="{Binding}"/>
         </StackPanel>
-
-        <!--
-        <Button Grid.Row="0" Grid.Column="3"
-                Margin="5, 1"
-                TabIndex="999"
-                HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                Content="登録"
-                Command="{Binding Register}" CommandParameter="{Binding}"/>
-        -->
-
 
         <TextBlock Grid.Row="1" Grid.Column="0"
                    VerticalAlignment="Center"

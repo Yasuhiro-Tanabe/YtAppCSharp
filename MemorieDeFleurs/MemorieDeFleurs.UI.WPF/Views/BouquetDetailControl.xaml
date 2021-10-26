@@ -22,7 +22,6 @@
             <ColumnDefinition Width="120px"/>
             <ColumnDefinition Width="120px"/>
             <ColumnDefinition Width="120px"/>
-            <ColumnDefinition Width="120px"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
@@ -34,33 +33,18 @@
                  TabIndex="1"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding BouquetCode}"/>
-        <StackPanel Grid.Row="0" Grid.Column="4" Orientation="Horizontal"
-                    Margin="5, 1, 10, 1"
+        <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3" Orientation="Horizontal"
+                    Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Grid.Row="0" Grid.Column="3"
-                Margin="5, 0"
-                TabIndex="999"
-                HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                Content="検索..."
-                Command="{Binding Reload}" CommandParameter="{Binding}"/>
-            <Button Grid.Row="0" Grid.Column="3"
-                Margin="5, 0"
-                TabIndex="1000"
-                HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                Content="登録"
-                Command="{Binding Register}" CommandParameter="{Binding}"/>
+            <Button Margin="5, 1"
+                    TabIndex="999"
+                    Content="検索..."
+                    Command="{Binding Reload}" CommandParameter="{Binding}"/>
+            <Button Margin="5, 1"
+                    TabIndex="1000"
+                    Content="登録"
+                    Command="{Binding Register}" CommandParameter="{Binding}"/>
         </StackPanel>
-        <!--
-        <Button Grid.Row="0" Grid.Column="3"
-                Margin="5, 1"
-                TabIndex="1000"
-                HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                Content="登録"
-                Command="{Binding Register}" CommandParameter="{Binding}"/>
-        -->
 
         <TextBlock Grid.Row="1" Grid.Column="0"
                    VerticalAlignment="Center"
@@ -102,23 +86,25 @@
         <TextBlock Grid.Row="4" Grid.Column="0"
                    VerticalAlignment="Center"
                    Text="商品構成："/>
-        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3"
+        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
                    VerticalAlignment="Center"
                    Text="{Binding PartsListString}" TextWrapping="Wrap"/>
-        <Button Grid.Row="4" Grid.Column="4"
+        <Button Grid.Row="4" Grid.Column="3"
+                Margin="5, 1, 15,1"
                 HorizontalAlignment="Right" HorizontalContentAlignment="Center"
                 VerticalAlignment="Center" VerticalContentAlignment="Center"
                 Visibility="{Binding EditingModeVisivility}"
                 Content="確定"
                 Command="{Binding Fix}" CommandParameter="{Binding}"/>
-        <Button Grid.Row="4" Grid.Column="4"
+        <Button Grid.Row="4" Grid.Column="3"
+                Margin="5, 1, 15, 1"
                 HorizontalAlignment="Right" HorizontalContentAlignment="Center"
                 VerticalAlignment="Center" VerticalContentAlignment="Center"
                 Visibility="{Binding ViewModeVisivility}"
                 Content="編集"
                 Command="{Binding Edit}" CommandParameter="{Binding}"/>
 
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5"
+        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4"
               Margin="10"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
               Visibility="{Binding EditingModeVisivility}">
@@ -168,12 +154,12 @@
             <StackPanel Grid.Row="1" Grid.Column="1"
                         Orientation="Vertical" Margin="20,50">
                 <Button HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                            VerticalAlignment="Center" VerticalContentAlignment="Center"
-                            Content="＜"
+                        VerticalAlignment="Center" VerticalContentAlignment="Center"
+                        Content="＜"
                         Command="{Binding Append}" CommandParameter="{Binding}"/>
                 <Button HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                            VerticalAlignment="Center" VerticalContentAlignment="Center"
-                            Content="＞"
+                        VerticalAlignment="Center" VerticalContentAlignment="Center"
+                        Content="＞"
                         Command="{Binding Remove}" CommandParameter="{Binding}"/>
             </StackPanel>
             <ListView Grid.Row="1" Grid.Column="2"
