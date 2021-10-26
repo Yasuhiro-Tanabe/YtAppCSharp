@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 
 using System;
@@ -13,6 +14,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetSummaryViewModel : NotificationObject
     {
+        public event EventHandler DetailViewOpening;
+
         public BouquetSummaryViewModel(Bouquet bouquet)
         {
             Update(bouquet);
@@ -52,7 +55,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region コマンド
         public ICommand Remove { get; } = new RemoveListItemCommand();
-        public ICommand OpenDetailVew { get; }
+        public ICommand Detail { get; } = new OpenBouquetDetailViewCommand();
         #endregion // コマンド
 
         public void ShowCommandButtons()
@@ -84,6 +87,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void RemoveMe()
         {
             RaisePropertyChanged(nameof(RemoveMe));
+        }
+
+        public void OpenDetailView()
+        {
+            LogUtil.DEBULOG_MethodCalled();
+            DetailViewOpening?.Invoke(this, null);
         }
     }
 }

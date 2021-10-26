@@ -4,7 +4,6 @@ using MemorieDeFleurs.UI.WPF.Commands;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data.Common;
 using System.Linq;
 using System.Windows.Input;
 
@@ -57,6 +56,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 TabItemControlCollection.Add(vm);
                 found = vm;
                 found.TabItemControlClosing += CloseTabItem;
+
+                if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening += OpenDetailView; }
             }
             CurrentItem = found;
             RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
@@ -67,15 +68,22 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             var vm = sender as TabItemControlViewModelBase;
             if(vm != null)
             {
-                var found = TabItemControlCollection.SingleOrDefault(item => item.Header == vm.Header);
+                var found = FindTabItem(vm.Header);
                 if (found != null)
                 {
                     TabItemControlCollection.Remove(found);
+
+                    if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening -= OpenDetailView; }
                 }
                 CurrentItem = TabItemControlCollection.FirstOrDefault();
                 RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
                 vm.TabItemControlClosing -= CloseTabItem;
             }
+        }
+
+        private TabItemControlViewModelBase FindTabItem(string header)
+        {
+            return TabItemControlCollection.SingleOrDefault(item => item.Header == header);
         }
         #endregion // ビューの生成・切替
 
@@ -90,6 +98,27 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 RaisePropertyChanged(nameof(Message));
             }
+        }
+
+        private void OpenDetailView(object sender, EventArgs unused)
+        {
+            LogUtil.DEBUGLOG_BeginMethod(sender.GetType().Name);
+            if(sender is BouquetListViewModel)
+            {
+                var vm = sender as BouquetListViewModel;
+                var detail = FindTabItem(BouquetDetailViewModel.Name) as BouquetDetailViewModel;
+
+                if(detail == null)
+                {
+                    detail = new BouquetDetailViewModel();
+                    OpenTabItem(detail);
+                }
+
+                detail.BouquetCode = vm.CurrentBouquet.BouquetCode;
+                detail.Update();
+            }
+            RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
+            LogUtil.DEBUGLOG_EndMethod(sender.GetType().Name);
         }
     }
 }

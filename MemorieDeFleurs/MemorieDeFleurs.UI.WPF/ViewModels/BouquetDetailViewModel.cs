@@ -16,7 +16,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetDetailViewModel : TabItemControlViewModelBase
     {
-        public BouquetDetailViewModel() : base("商品詳細") { }
+        public static string Name { get; } = "商品詳細";
+        public BouquetDetailViewModel() : base(Name) { }
 
         #region プロパティ
         /// <summary>

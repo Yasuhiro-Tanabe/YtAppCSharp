@@ -15,6 +15,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetListViewModel : TabItemControlViewModelBase
     {
+        public event EventHandler DetailViewOpening;
+
         public BouquetListViewModel() : base("商品一覧") { }
 
         #region プロパティ
@@ -35,6 +37,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 var vm = new BouquetSummaryViewModel(b);
                 vm.PropertyChanged += SummaryViewModelChanged;
+                vm.DetailViewOpening += OpenDetailView;
                 Bouquets.Add(vm);
             }
             CurrentBouquet = null;
@@ -50,6 +53,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 LogUtil.Debug($"{vm.BouquetCode} removed.");
                 LoadBouquets();
             }
+        }
+
+        private void OpenDetailView(object sender, EventArgs unused)
+        {
+            LogUtil.DEBULOG_MethodCalled(sender.GetType().Name);
+            DetailViewOpening?.Invoke(this, null);
         }
     }
 }
