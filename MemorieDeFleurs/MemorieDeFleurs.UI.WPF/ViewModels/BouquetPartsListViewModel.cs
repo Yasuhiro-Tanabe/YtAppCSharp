@@ -1,12 +1,10 @@
 ﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels

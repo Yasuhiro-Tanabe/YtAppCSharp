@@ -10,8 +10,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
-using static MemorieDeFleurs.Models.BouquetModel;
-
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetDetailViewModel : TabItemControlViewModelBase

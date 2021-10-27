@@ -3,9 +3,6 @@ using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 

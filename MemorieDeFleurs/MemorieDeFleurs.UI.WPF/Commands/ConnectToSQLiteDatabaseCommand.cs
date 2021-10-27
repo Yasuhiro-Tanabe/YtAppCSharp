@@ -1,16 +1,7 @@
-﻿using MemorieDeFleurs.Database.SQLite;
-using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Model;
+﻿using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels;
 
 using Microsoft.Win32;
-
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
