@@ -124,7 +124,8 @@
             
             <ListView Grid.Row="1" Grid.Column="0"
                       ItemsSource="{Binding SelectedPartListItem}" SelectedItem="{Binding CurrentSelectedInPartsList}"
-                      Height="220">
+                      Height="220"
+                      SelectionMode="Single">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>

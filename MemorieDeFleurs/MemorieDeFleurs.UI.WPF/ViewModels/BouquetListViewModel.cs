@@ -23,7 +23,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region コマンド
         public ICommand Reload { get; } = new ReloadListCommand();
-        public ICommand Selected { get; } = new SelectedListItemCommand();
+        public ICommand Selected { get; } = new SelectionChangedEventCommand();
         #endregion // コマンド
 
         public void LoadBouquets()

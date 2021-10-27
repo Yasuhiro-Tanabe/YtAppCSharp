@@ -5,9 +5,9 @@ using System.Windows.Controls;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class SelectedListItemCommand : CommandBase
+    internal class SelectionChangedEventCommand : CommandBase
     {
-        public SelectedListItemCommand() : base(typeof(SelectionChangedEventArgs), ChangeCommandButtonVisibility) { }
+        public SelectionChangedEventCommand() : base(typeof(SelectionChangedEventArgs), ChangeCommandButtonVisibility) { }
         private static void ChangeCommandButtonVisibility(object parameter)
         {
             LogUtil.DEBUGLOG_BeginMethod(parameter == null ? "parameter=null" : $"parameter={parameter.GetType().Name}");
