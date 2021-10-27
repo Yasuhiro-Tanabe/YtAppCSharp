@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="100">
     <Grid Margin="15, 5">
@@ -72,6 +71,7 @@
                    VerticalAlignment="Center"
                    Text="受注リードタイム"/>
         <TextBlock Grid.Row="3" Grid.Column="1"
+                   Margin="0,0,5,0"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Right"
                    Text="{Binding LeadTime}"/>
@@ -107,11 +107,11 @@
               Visibility="{Binding EditingModeVisivility}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20px"/>
-                <RowDefinition Height="180px"/>
+                <RowDefinition Height="220px"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200pt"/>
-                <ColumnDefinition Width="120pt"/>
+                <ColumnDefinition Width="80pt"/>
                 <ColumnDefinition Width="200pt"/>
             </Grid.ColumnDefinitions>
 
@@ -123,8 +123,9 @@
                        Text="単品リスト"/>
             
             <ListView Grid.Row="1" Grid.Column="0"
+                      Margin="5"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                       ItemsSource="{Binding SelectedPartListItem}" SelectedItem="{Binding CurrentSelectedInPartsList}"
-                      Height="220"
                       SelectionMode="Single">
                 <ListView.ItemTemplate>
                     <DataTemplate>
@@ -161,8 +162,10 @@
                         Command="{Binding Remove}" CommandParameter="{Binding}"/>
             </StackPanel>
             <ListView Grid.Row="1" Grid.Column="2"
+                      Margin="5"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                       ItemsSource="{Binding SelectableParts}" SelectedItem="{Binding CurrentSelectedInSelectablePartsList}"
-                      Height="220">
+                      SelectionMode="Single">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding PartsCode}" />
