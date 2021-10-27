@@ -11,6 +11,10 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 var vm = parameter as MainWindowViiewModel;
                 vm.OpenTabItem(new BouquetPartsDetailViewModel());
             }
+            else if(parameter is BouquetPartsSummaryViewModel)
+            {
+                (parameter as BouquetPartsSummaryViewModel).OpenDetailView();
+            }
             else
             {
                 base.Execute(parameter);

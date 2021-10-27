@@ -6,9 +6,6 @@
              xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="100">
-    <UserControl.DataContext>
-        <vm:BouquetPartsDetailViewModel/>
-    </UserControl.DataContext>
     <Grid Margin="15, 5">
         <Grid.RowDefinitions>
             <RowDefinition Height="20pt"/>

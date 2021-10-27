@@ -123,7 +123,15 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
             else
             {
-                Update(MemorieDeFleursUIModel.Instance.FindBouquetParts(PartsCode));
+                var parts = MemorieDeFleursUIModel.Instance.FindBouquetParts(PartsCode);
+                if(parts == null)
+                {
+                    MessageBox.Show($"花コードに該当する単品が登録されていません：{PartsCode}", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                else
+                {
+                    Update(parts);
+                }
             }
         }
     }

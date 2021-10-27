@@ -58,6 +58,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 found.TabItemControlClosing += CloseTabItem;
 
                 if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening += OpenDetailView; }
+                if (found is BouquetPartsListViewModel) { (found as BouquetPartsListViewModel).DetailViewOpening += OpenDetailView; }
             }
             CurrentItem = found;
             RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
@@ -74,6 +75,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     TabItemControlCollection.Remove(found);
 
                     if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening -= OpenDetailView; }
+                    if (found is BouquetPartsListViewModel) { (found as BouquetPartsListViewModel).DetailViewOpening -= OpenDetailView; }
                 }
                 CurrentItem = TabItemControlCollection.FirstOrDefault();
                 RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
@@ -115,6 +117,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
 
                 detail.BouquetCode = vm.CurrentBouquet.BouquetCode;
+                detail.Update();
+            }
+            else if(sender is BouquetPartsListViewModel)
+            {
+                var vm = sender as BouquetPartsListViewModel;
+                var detail = FindTabItem(BouquetPartsDetailViewModel.Name) as BouquetPartsDetailViewModel;
+                if(detail == null)
+                {
+                    detail = new BouquetPartsDetailViewModel();
+                    OpenTabItem(detail);
+                }
+                detail.PartsCode = vm.CurrentParts.PartsCode;
                 detail.Update();
             }
             RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));

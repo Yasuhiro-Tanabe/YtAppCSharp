@@ -12,9 +12,6 @@
             <i:InvokeCommandAction Command="{Binding Reload}" CommandParameter="{Binding}"/>
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <UserControl.DataContext>
-        <vm:BouquetPartsListViewModel/>
-    </UserControl.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="25pt"/>
@@ -69,7 +66,7 @@
                                 HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                                 Content="詳細..."
                                 Visibility="{Binding ActionVisivility}"
-                                Command="{Binding OpenDetailVew}" CommandParameter="{Binding}"/>
+                                Command="{Binding Detail}" CommandParameter="{Binding}"/>
                         
                         <Button Grid.Column="4"
                                 Margin="5,1,20,1"
