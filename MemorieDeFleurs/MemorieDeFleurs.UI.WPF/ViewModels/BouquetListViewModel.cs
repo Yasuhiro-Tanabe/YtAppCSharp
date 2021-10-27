@@ -46,7 +46,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if (args.PropertyName == nameof(BouquetSummaryViewModel.RemoveMe))
             {
                 MemorieDeFleursUIModel.Instance.RemoveBouquet(vm.BouquetCode);
-                LogUtil.Debug($"{vm.BouquetCode} removed.");
+                LogUtil.Debug($"{vm.BouquetCode} deleted.");
                 LoadBouquets();
             }
         }

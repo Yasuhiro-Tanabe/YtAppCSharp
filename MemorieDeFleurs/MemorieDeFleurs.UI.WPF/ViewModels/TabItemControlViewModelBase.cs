@@ -42,7 +42,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         protected TabItemControlViewModelBase(string header)
         {
             Header = header;
-            Register = new RegisterCommand(this);
+            Register = new SaveToDatabaseCommand(this);
             PropertyChanged += SetDirtyFlag;
         }
 

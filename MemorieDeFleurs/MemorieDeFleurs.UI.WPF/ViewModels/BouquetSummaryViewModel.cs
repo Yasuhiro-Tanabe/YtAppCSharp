@@ -51,7 +51,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Remove { get; } = new RemoveListItemCommand();
+        public ICommand Remove { get; } = new DeleteFromDatabase();
         public ICommand Detail { get; } = new OpenBouquetDetailViewCommand();
         #endregion // コマンド
 

@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels;
 
@@ -6,9 +7,9 @@ using System.ComponentModel;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class RegisterCommand : CommandBase
+    internal class SaveToDatabaseCommand : CommandBase
     {
-        public RegisterCommand(NotificationObject vm) : base()
+        public SaveToDatabaseCommand(NotificationObject vm) : base()
         {
             AddChecker(typeof(TabItemControlViewModelBase), IsDirty);
             AddAction(typeof(BouquetPartsDetailViewModel), CreateBouquetParts);
@@ -35,6 +36,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
             vm.Update(builder.Create());
             vm.IsDirty = false;
+            LogUtil.Info($"Bouquet parts {vm.PartsCode} is saved.");
         }
 
         private static void CreateBouquet(object parameter)
@@ -52,6 +54,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
             vm.Update(builder.Create());
             vm.IsDirty = false;
+            LogUtil.Info($"Bouquet {vm.BouquetCode} is saved.");
         }
 
 

@@ -2,9 +2,9 @@
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class RemoveListItemCommand : CommandBase
+    internal class DeleteFromDatabase : CommandBase
     {
-        public RemoveListItemCommand() : base()
+        public DeleteFromDatabase() : base()
         {
             AddAction(typeof(BouquetPartsSummaryViewModel), RemoveBouquetParts);
             AddAction(typeof(BouquetSummaryViewModel), RemoveBouquet);
