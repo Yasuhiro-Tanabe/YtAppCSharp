@@ -4,16 +4,8 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class FixPartsListCommand : CommandBase
     {
-        public override void Execute(object parameter)
-        {
-            if(parameter is BouquetDetailViewModel)
-            {
-                (parameter as BouquetDetailViewModel).FixPartsList();
-            }
-            else
-            {
-                base.Execute(parameter);
-            }
-        }
+        public FixPartsListCommand() : base(typeof(BouquetDetailViewModel), FixPartsList) { }
+
+        private static void FixPartsList(object parameter) => (parameter as BouquetDetailViewModel).FixPartsList();
     }
 }

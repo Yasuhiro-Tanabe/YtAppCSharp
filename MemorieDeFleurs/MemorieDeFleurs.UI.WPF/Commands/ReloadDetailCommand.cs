@@ -4,20 +4,13 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class ReloadDetailCommand : CommandBase
     {
-        public override void Execute(object parameter)
+        public ReloadDetailCommand() : base()
         {
-            if(parameter is BouquetPartsDetailViewModel)
-            {
-                (parameter as BouquetPartsDetailViewModel).Update();
-            }
-            else if(parameter is BouquetDetailViewModel)
-            {
-                (parameter as BouquetDetailViewModel).Update();
-            }
-            else
-            {
-                base.Execute(parameter);
-            }
+            AddAction(typeof(BouquetPartsDetailViewModel), UpdateBouquetPartsDetailView);
+            AddAction(typeof(BouquetDetailViewModel), UpdateBouquetDetailView);
         }
+
+        private static void UpdateBouquetPartsDetailView(object parameter) => (parameter as BouquetPartsDetailViewModel).Update();
+        private static void UpdateBouquetDetailView(object parameter) => (parameter as BouquetDetailViewModel).Update();
     }
 }

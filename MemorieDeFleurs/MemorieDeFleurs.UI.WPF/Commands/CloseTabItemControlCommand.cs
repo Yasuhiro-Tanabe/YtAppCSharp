@@ -4,17 +4,8 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class CloseTabItemControlCommand :CommandBase
     {
-        public override void Execute(object parameter)
-        {
-            var vm = parameter as TabItemControlViewModelBase;
-            if(vm != null)
-            {
-                vm.CloseControl();
-            }
-            else
-            {
-                base.Execute(parameter);
-            }
-        }
+        public CloseTabItemControlCommand() : base(typeof(TabItemControlViewModelBase), CloseControl) { }
+
+        private static void CloseControl(object parameter) => (parameter as TabItemControlViewModelBase).CloseControl();
     }
 }

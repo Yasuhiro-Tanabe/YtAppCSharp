@@ -4,16 +4,8 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class AppendBouquetPartsToPartsListCommand : CommandBase
     {
-        public override void Execute(object parameter)
-        {
-            if (parameter is BouquetDetailViewModel)
-            {
-                (parameter as BouquetDetailViewModel).AppendToPartsList();
-            }
-            else
-            {
-                base.Execute(parameter);
-            }
-        }
+        public AppendBouquetPartsToPartsListCommand() : base(typeof(BouquetDetailViewModel), AppendToPartsList) { }
+
+        private static void AppendToPartsList(object parameter) => (parameter as BouquetDetailViewModel).AppendToPartsList();
     }
 }

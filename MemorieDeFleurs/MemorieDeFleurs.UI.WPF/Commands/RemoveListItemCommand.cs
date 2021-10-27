@@ -4,16 +4,13 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class RemoveListItemCommand : CommandBase
     {
-        public override void Execute(object parameter)
+        public RemoveListItemCommand() : base()
         {
-            if(parameter is BouquetPartsSummaryViewModel)
-            {
-                (parameter as BouquetPartsSummaryViewModel).RemoveMe();
-            }
-            else if(parameter is BouquetSummaryViewModel)
-            {
-                (parameter as BouquetSummaryViewModel).RemoveMe();
-            }
+            AddAction(typeof(BouquetPartsSummaryViewModel), RemoveBouquetParts);
+            AddAction(typeof(BouquetSummaryViewModel), RemoveBouquet);
         }
+
+        private static void RemoveBouquetParts(object parameter) => (parameter as BouquetPartsSummaryViewModel).RemoveMe();
+        private static void RemoveBouquet(object parameter) => (parameter as BouquetSummaryViewModel).RemoveMe();
     }
 }

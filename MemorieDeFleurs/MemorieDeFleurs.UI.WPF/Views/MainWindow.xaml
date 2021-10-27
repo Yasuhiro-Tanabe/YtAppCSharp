@@ -24,7 +24,7 @@
                 <MenuItem Header="DB接続...">
                     <MenuItem Header="SQLite (ファイル)" Command="{Binding ConnectoToSQLiteDatabase}" CommandParameter="{Binding}"/>
                 </MenuItem>
-                <MenuItem Header="終了" Command="{Binding Exit}"/>
+                <MenuItem Header="終了" Command="{Binding Exit}" CommandParameter="{Binding}"/>
             </MenuItem>
             <MenuItem Header="仕入先"/>
             <MenuItem Header="商品">
