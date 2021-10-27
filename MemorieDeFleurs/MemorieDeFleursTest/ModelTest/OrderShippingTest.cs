@@ -146,9 +146,9 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareCustomers(MemorieDeFleursDbContext context)
         {
-            Customers.Customer1 = Model.CustomerModel.Find(1);
-            Customers.Customer2 = Model.CustomerModel.Find(2);
-            Customers.Customer3 = Model.CustomerModel.Find(3);
+            Customers.Customer1 = Model.CustomerModel.FindCustomer(1);
+            Customers.Customer2 = Model.CustomerModel.FindCustomer(2);
+            Customers.Customer3 = Model.CustomerModel.FindCustomer(3);
         }
 
         private void PrepareSuppliers(MemorieDeFleursDbContext context)

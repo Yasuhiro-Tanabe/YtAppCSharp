@@ -400,9 +400,9 @@ namespace MemorieDeFleursTest.ScenarioTest
             var ht006 = model.BouquetModel.FindBouquet("HT006");
             var ht007 = model.BouquetModel.FindBouquet("HT007");
 
-            var customer1 = model.CustomerModel.Find(1);
-            var customer2 = model.CustomerModel.Find(2);
-            var customer3 = model.CustomerModel.Find(3);
+            var customer1 = model.CustomerModel.FindCustomer(1);
+            var customer2 = model.CustomerModel.FindCustomer(2);
+            var customer3 = model.CustomerModel.FindCustomer(3);
 
             model.CustomerModel.Order(context, orderDates[rnd.Next(0, 10)], ht001, customer1.ShippingAddresses[0], DateConst.May1st, "Message1");
             model.CustomerModel.Order(context, orderDates[rnd.Next(0, 10)], ht001, customer1.ShippingAddresses[1], DateConst.May1st);

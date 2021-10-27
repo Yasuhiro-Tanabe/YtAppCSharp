@@ -22,7 +22,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .CardNoIs("9876543210123210")
                 .Create();
 
-            var actual = model.CustomerModel.Find(expected.ID);
+            var actual = model.CustomerModel.FindCustomer(expected.ID);
 
             Assert.AreEqual(expected.ID, actual.ID);
             Assert.AreEqual(expected.Name, actual.Name);

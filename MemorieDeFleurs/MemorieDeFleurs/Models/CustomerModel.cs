@@ -310,7 +310,7 @@ namespace MemorieDeFleurs.Models
         #endregion // ShippingAddressBuilder
 
         #region 仕入先の登録改廃
-        public Customer Find(int id)
+        public Customer FindCustomer(int id)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
