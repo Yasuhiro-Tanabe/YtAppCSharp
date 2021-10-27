@@ -309,7 +309,7 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // ShippingAddressBuilder
 
-        #region 仕入先の登録改廃
+        #region 得意先の登録改廃
         public Customer FindCustomer(int id)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -321,7 +321,72 @@ namespace MemorieDeFleurs.Models
                 return customer;
             }
         }
-        #endregion // 仕入先の登録改廃
+
+        public IEnumerable<Customer> FindAllCustomers()
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.Customers
+                    .Include(c => c.ShippingAddresses)
+                    .ToList().AsEnumerable();
+            }
+        }
+        public void RemoveCustomer(int customerID)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using(var transaction = context.Database.BeginTransaction())
+            {
+                LogUtil.DEBUGLOG_BeginMethod(customerID.ToString());
+                try
+                {
+                    RemoveCustomer(context, customerID);
+                    LogUtil.Info($"Customer {customerID} removed.");
+                    transaction.Commit();
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    string message;
+                    if(ex.InnerException == null)
+                    {
+                        message = $"Cannot removed customer {customerID}, {ex.GetType().Name}: {ex.Message}";
+                    }
+                    else
+                    {
+                        message = $"Cannot removed customer {customerID}, {ex.GetType().Name}: {ex.Message} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
+                    }
+                    LogUtil.Info(message);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(customerID.ToString());
+                }
+            }
+        }
+
+        private void RemoveCustomer(MemorieDeFleursDbContext context, int customerID)
+        {
+            var customer = context.Customers.Find(customerID);
+            if(customer == null)
+            {
+                throw new ApplicationException($"IDに該当する得意先なし：{customerID}");
+            }
+            else
+            {
+                if(context.OrderFromCustomers.Count(o => o.CustomerID == customerID) > 0)
+                {
+                    throw new ApplicationException("受注実績のある得意先は削除できない");
+                }
+
+                var shipping = context.ShippingAddresses.Where(a => a.CustomerID == customerID);
+                if (shipping.Count() > 0) { context.ShippingAddresses.RemoveRange(shipping); }
+                context.Customers.Remove(customer);
+
+                context.SaveChanges();
+            }
+        }
+        #endregion // 得意先の登録改廃
 
         #region 受注履歴の登録改廃
         public OrderFromCustomer FindOrder(string orderID)
