@@ -131,8 +131,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 _parts.Add(p.PartsCode, p.Quantity);
             }
+            _editing = false;
 
-            RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(LeadTime), nameof(PartsListString));
+            RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(LeadTime),
+                nameof(PartsListString), nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
+                 nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
         }
 
         /// <summary>
