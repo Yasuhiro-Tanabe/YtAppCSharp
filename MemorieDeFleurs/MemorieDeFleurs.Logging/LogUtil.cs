@@ -1,6 +1,7 @@
 ﻿using log4net;
 using log4net.Config;
 
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -41,13 +42,18 @@ namespace MemorieDeFleurs.Logging
         #region 基本のログ出力メソッド
         public static void Debug(string msg, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0) => _logger.DebugFormat("{0}{1} ({2},{3}:{4})", Indent, msg, caller, Path.GetFileName(path), line);
         public static void DebugFormat(string fmt, params object[] args) => _logger.DebugFormat(fmt, args);
+        public static void Debug(Exception ex, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0) => Debug(ex.ToString(), caller, path, line);
         public static void Info(string msg) => _logger.Info(msg);
+        public static void Info(Exception ex) => Info(ex.ToString());
         public static void InfoFormat(string fmt, params object[] args) => _logger.InfoFormat(fmt, args);
         public static void Warn(string msg) => _logger.Warn(msg);
+        public static void Warn(Exception ex) => Warn(ex.ToString());
         public static void WarnFormat(string fmt, params object[] args) => _logger.WarnFormat(fmt, args);
         public static void Error(string msg) => _logger.Error(msg);
+        public static void Error(Exception ex) => Error(ex.ToString());
         public static void ErrorFormat(string fmt, params object[] args) => _logger.ErrorFormat(fmt, args);
         public static void Fatal(string msg) => _logger.Fatal(msg);
+        public static void Fatal(Exception ex) => Fatal(ex.ToString());
         public static void FatalFormat(string fmt, params object[] args) => _logger.FatalFormat(fmt, args);
 
         public static bool IsDebugEnabled { get { return _logger.IsDebugEnabled; } }

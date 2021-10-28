@@ -486,9 +486,9 @@ namespace MemorieDeFleurs.Models
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
-                LogUtil.DEBUGLOG_BeginMethod(supplierCode.ToString());
                 try
                 {
+                    LogUtil.DEBUGLOG_BeginMethod(supplierCode.ToString());
                     RemoveSupplier(context, supplierCode);
                     transaction.Commit();
                     LogUtil.Info($"Supplier {supplierCode} is removed.");
@@ -496,14 +496,7 @@ namespace MemorieDeFleurs.Models
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    if (ex.InnerException == null)
-                    {
-                        LogUtil.Warn($"{ex.GetType().Name}: {ex.Message}");
-                    }
-                    else
-                    {
-                        LogUtil.Warn($"{ex.GetType().Name}: {ex.Message} -> {ex.InnerException.GetType()}: {ex.InnerException.Message}");
-                    }
+                    LogUtil.Warn(ex);
                     throw;
                 }
                 finally

@@ -336,9 +336,9 @@ namespace MemorieDeFleurs.Models
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using(var transaction = context.Database.BeginTransaction())
             {
-                LogUtil.DEBUGLOG_BeginMethod(customerID.ToString());
                 try
                 {
+                    LogUtil.DEBUGLOG_BeginMethod(customerID.ToString());
                     RemoveCustomer(context, customerID);
                     LogUtil.Info($"Customer {customerID} removed.");
                     transaction.Commit();
@@ -346,16 +346,7 @@ namespace MemorieDeFleurs.Models
                 catch(Exception ex)
                 {
                     transaction.Rollback();
-                    string message;
-                    if(ex.InnerException == null)
-                    {
-                        message = $"Cannot removed customer {customerID}, {ex.GetType().Name}: {ex.Message}";
-                    }
-                    else
-                    {
-                        message = $"Cannot removed customer {customerID}, {ex.GetType().Name}: {ex.Message} => {ex.InnerException.GetType().Name}: {ex.InnerException.Message}";
-                    }
-                    LogUtil.Info(message);
+                    LogUtil.Warn(ex);
                     throw;
                 }
                 finally
@@ -370,13 +361,13 @@ namespace MemorieDeFleurs.Models
             var customer = context.Customers.Find(customerID);
             if(customer == null)
             {
-                throw new ApplicationException($"IDに該当する得意先なし：{customerID}");
+                throw new ApplicationException($"IDに該当する得意先なし：得意先ID={customerID}");
             }
             else
             {
                 if(context.OrderFromCustomers.Count(o => o.CustomerID == customerID) > 0)
                 {
-                    throw new ApplicationException("受注実績のある得意先は削除できない");
+                    throw new ApplicationException($"受注実績のある得意先は削除できない：得意先ID={customerID}");
                 }
 
                 var shipping = context.ShippingAddresses.Where(a => a.CustomerID == customerID);

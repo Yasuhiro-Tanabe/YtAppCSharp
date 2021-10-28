@@ -367,6 +367,7 @@ namespace MemorieDeFleurs.Models
             {
                 try
                 {
+                    LogUtil.DEBUGLOG_BeginMethod(partsCode);
                     RemoveBouquetParts(context, partsCode);
                     transaction.Commit();
                     LogUtil.Info($"Bouquet parts {partsCode} removed.");
@@ -374,8 +375,12 @@ namespace MemorieDeFleurs.Models
                 catch(Exception ex)
                 {
                     transaction.Rollback();
-                    LogUtil.Warn($"Cannot remove bouquet parts, {partsCode}: {ex.GetType().Name}: {ex.Message}");
+                    LogUtil.Warn(ex);
                     throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(partsCode);
                 }
             }
         }
@@ -441,6 +446,7 @@ namespace MemorieDeFleurs.Models
             {
                 try
                 {
+                    LogUtil.DEBUGLOG_BeginMethod(bouquetCode);
                     RemoveBouquet(context, bouquetCode);
                     transaction.Commit();
                     LogUtil.Info($"Bouquet {bouquetCode} removed.");
@@ -448,8 +454,12 @@ namespace MemorieDeFleurs.Models
                 catch(Exception ex)
                 {
                     transaction.Rollback();
-                    LogUtil.Warn($"Cannot remove bouquet, {bouquetCode}: {ex.GetType().Name}: {ex.Message}");
+                    LogUtil.Warn(ex);
                     throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(bouquetCode);
                 }
             }
         }
