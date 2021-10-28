@@ -2,6 +2,8 @@
 using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 
+using Microsoft.EntityFrameworkCore;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -331,7 +333,10 @@ namespace MemorieDeFleurs.Models
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return context.BouquetParts.Find(partCode);
+                return context.BouquetParts
+                    .Include(p => p.Suppliers)
+                    .ThenInclude(i => i.Supplier)
+                    .SingleOrDefault(p => p.Code == partCode);
             }
         }
 
@@ -343,12 +348,16 @@ namespace MemorieDeFleurs.Models
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return context.BouquetParts.ToList().AsEnumerable();
+                return context.BouquetParts
+                    .Include(p => p.Suppliers)
+                    .ThenInclude(i => i.Supplier)
+                    .ToList()
+                    .AsEnumerable();
             }
         }
 
         /// <summary>
-        /// 指定サラ多花コードを持つ単品を削除する
+        /// 指定された花コードを持つ単品を削除する
         /// </summary>
         /// <param name="partsCode"></param>
         public void RemoveBouquetParts(string partsCode)
@@ -398,42 +407,33 @@ namespace MemorieDeFleurs.Models
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                var bouquet = context.Bouquets.Find(bouquetCode);
-
-                // [NOTE]
-                // 以下の２点を追加しても、Bouquet.PartsList[i].Parts が正しくセットされない状況は変わらない。
-                // （いずれにせよ商品を構成する単品を Find() でキャッシュに登録する必要がある）
-                // 
-                // 1) BouquetParts:
-                //        public IList<BouquetPartsList> Bouquets {get;} = new List<BouquetPartsList>();
-                //
-                // 2) DbContext.OnModelCreating(modelBuilder):
-                //        modelBuilder.Entity<BouquetPartsList>()
-                //            .HasOne(i => i.Parts)
-                //            .WithMany(b => b.Bouquets)
-                //            .HasForeginKye(i => i.PartsCode)
-                //
-                // 3) 単品をキャッシュに読み込む
-                foreach (var parts in context.PartsList.Where(i => i.BouquetCode == bouquetCode))
-                {
-                    parts.Part = context.BouquetParts.Find(parts.PartsCode);
-                }
-                return bouquet;
+                return context.Bouquets
+                    .Include(b => b.PartsList)
+                    .ThenInclude(p => p.Part)
+                    .SingleOrDefault(b => b.Code == bouquetCode);
             }
         }
 
         /// <summary>
         /// 登録されている全商品を取得する
         /// </summary>
-        /// <returns></returns>
+        /// <returns>登録されている商品オブジェクトの一覧、商品が登録されていないときは空のリスト</returns>
         public IEnumerable<Bouquet> FindAllBouquets()
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return context.Bouquets.ToList().AsEnumerable();
+                return context.Bouquets
+                    .Include(b => b.PartsList)
+                    .ThenInclude(p => p.Part)
+                    .ToList()
+                    .AsEnumerable();
             }
         }
 
+        /// <summary>
+        /// 指定された商品オブジェクトを削除する
+        /// </summary>
+        /// <param name="bouquetCode">削除対象商品の花束コード</param>
         public void RemoveBouquet(string bouquetCode)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))

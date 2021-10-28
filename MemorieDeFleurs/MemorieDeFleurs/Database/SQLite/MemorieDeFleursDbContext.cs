@@ -71,10 +71,14 @@ namespace MemorieDeFleurs.Databese.SQLite
                     ent.Property(act => act.ArrivalDate).HasConversion(converter);
                 });
 
-
             modelBuilder
-                .Entity<PartSupplier>()
-                .HasKey("SupplierCode", "PartCode");
+                .Entity<PartSupplier>(item =>
+                {
+                    item.HasKey("SupplierCode", "PartCode");
+                    item.HasKey(nameof(PartSupplier.SupplierCode), nameof(PartSupplier.PartCode));
+                    item.HasOne(i => i.Supplier).WithMany(s => s.SupplyParts).HasForeignKey(i => i.SupplierCode);
+                    item.HasOne(i => i.Part).WithMany(p => p.Suppliers).HasForeignKey(i => i.PartCode);
+                });
 
             modelBuilder.Entity<BouquetPartsList>(ent =>
                 {
@@ -106,14 +110,6 @@ namespace MemorieDeFleurs.Databese.SQLite
                 {
                     detail.HasKey(nameof(OrderDetailsToSupplier.OrderToSupplierID), nameof(OrderDetailsToSupplier.OrderIndex));
                     detail.HasOne(d => d.Order).WithMany(o => o.Details).HasForeignKey(d => d.OrderToSupplierID);
-                });
-
-            modelBuilder
-                .Entity<PartSupplier>(item =>
-                {
-                    item.HasKey(nameof(PartSupplier.SupplierCode), nameof(PartSupplier.PartCode));
-                    item.HasOne(i => i.Supplier).WithMany(s => s.SupplyParts).HasForeignKey(i => i.SupplierCode);
-                    item.HasOne(i => i.Part).WithMany(p => p.Suppliers).HasForeignKey(i => i.PartCode);
                 });
         }
 

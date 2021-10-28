@@ -2,6 +2,8 @@
 using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 
+using Microsoft.EntityFrameworkCore;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -451,7 +453,10 @@ namespace MemorieDeFleurs.Models
         }
         private Supplier Find(MemorieDeFleursDbContext context, int supplierCode)
         {
-            return context.Suppliers.Find(supplierCode);
+            return context.Suppliers
+                .Include(s => s.SupplyParts)
+                .ThenInclude(p => p.Part)
+                .SingleOrDefault(s => s.Code == supplierCode);
         }
         #endregion // Supplier の生成・更新・削除
 
