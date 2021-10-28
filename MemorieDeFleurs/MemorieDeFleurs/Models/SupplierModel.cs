@@ -444,19 +444,88 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <param name="supplierCode">仕入先コード</param>
         /// <returns>仕入先オブジェクト、仕入先コードに該当する仕入先が存在しないときはnull。</returns>
-        public Supplier Find(int supplierCode)
+        public Supplier FindSupplier(int supplierCode)
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return Find(context, supplierCode);
+                return FindSupplier(context, supplierCode);
             }
         }
-        private Supplier Find(MemorieDeFleursDbContext context, int supplierCode)
+        private Supplier FindSupplier(MemorieDeFleursDbContext context, int supplierCode)
         {
             return context.Suppliers
                 .Include(s => s.SupplyParts)
                 .ThenInclude(p => p.Part)
                 .SingleOrDefault(s => s.Code == supplierCode);
+        }
+
+        /// <summary>
+        /// 登録されている全仕入先オブジェクトを取得する
+        /// </summary>
+        /// <returns>登録されている仕入先オブジェクトの一覧。仕入先が登録されていないときは空の一覧</returns>
+        public IEnumerable<Supplier> FindAllSuppliers()
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.Suppliers
+                    .Include(s => s.SupplyParts)
+                    .ThenInclude(p => p.Part)
+                    .ToList()
+                    .AsEnumerable();
+            }
+        }
+
+        /// <summary>
+        /// 仕入先オブジェクトを削除する。
+        /// 
+        /// 仕入先への発注実績があると削除できない。
+        /// </summary>
+        /// <param name="supplierCode">仕入先コード</param>
+        public void RemoveSupplier(int supplierCode)
+        {
+            using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                LogUtil.DEBUGLOG_BeginMethod(supplierCode.ToString());
+                try
+                {
+                    RemoveSupplier(context, supplierCode);
+                    transaction.Commit();
+                    LogUtil.Info($"Supplier {supplierCode} is removed.");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    if (ex.InnerException == null)
+                    {
+                        LogUtil.Warn($"{ex.GetType().Name}: {ex.Message}");
+                    }
+                    else
+                    {
+                        LogUtil.Warn($"{ex.GetType().Name}: {ex.Message} -> {ex.InnerException.GetType()}: {ex.InnerException.Message}");
+                    }
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(supplierCode.ToString());
+                }
+            }
+        }
+
+        public void RemoveSupplier(MemorieDeFleursDbContext context, int supplierCode)
+        {
+            if(context.OrdersToSuppliers.Count(o => o.Supplier == supplierCode) > 0)
+            {
+                throw new ApplicationException($"発注実績のある仕入先は削除できない:仕入先ID={supplierCode}");
+            }
+            else
+            {
+                var supplier = FindSupplier(context, supplierCode);
+                context.PartsSuppliers.RemoveRange(supplier.SupplyParts);
+                context.Suppliers.Remove(supplier);
+                context.SaveChanges();
+            }
         }
         #endregion // Supplier の生成・更新・削除
 

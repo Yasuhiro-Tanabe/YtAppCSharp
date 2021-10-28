@@ -108,7 +108,7 @@ namespace MemorieDeFleursTest.ScenarioTest
                 .AssertAll();
 
             // 追加発注
-            var supplier = Model.SupplierModel.Find(1);
+            var supplier = Model.SupplierModel.FindSupplier(1);
             var orderNo = Model.SupplierModel.Order(DateConst.May1st, supplier, DateConst.May3rd, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ba001, 2) });
             Assert.AreEqual("20200501-000001", orderNo);
 

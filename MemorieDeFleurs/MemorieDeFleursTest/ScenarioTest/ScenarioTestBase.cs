@@ -299,8 +299,8 @@ namespace MemorieDeFleursTest.ScenarioTest
         private static void PrepareInitialOrderToSupplier(MemorieDeFleursModel model, MemorieDeFleursDbContext context)
         {
             var orderDate = new DateTime(DateConst.Year, 3, 10);
-            var supplier1 = model.SupplierModel.Find(1);
-            var supplier2 = model.SupplierModel.Find(2);
+            var supplier1 = model.SupplierModel.FindSupplier(1);
+            var supplier2 = model.SupplierModel.FindSupplier(2);
             var ba001 = model.BouquetModel.FindBouquetPart("BA001");
             var ba002 = model.BouquetModel.FindBouquetPart("BA002");
             var ba003 = model.BouquetModel.FindBouquetPart("BA003");

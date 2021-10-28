@@ -150,8 +150,8 @@ namespace MemorieDeFleursTest.ModelTest
 
         private void PrepareSuppliers(MemorieDeFleursDbContext context)
         {
-            Suppliers.Supplier1 = Model.SupplierModel.Find(1);
-            Suppliers.Supplier2 = Model.SupplierModel.Find(1);
+            Suppliers.Supplier1 = Model.SupplierModel.FindSupplier(1);
+            Suppliers.Supplier2 = Model.SupplierModel.FindSupplier(1);
         }
         private void GetInitialLotNumbers(MemorieDeFleursDbContext context)
         {

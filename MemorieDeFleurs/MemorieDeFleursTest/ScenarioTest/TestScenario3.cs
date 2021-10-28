@@ -149,7 +149,7 @@ namespace MemorieDeFleursTest.ScenarioTest
                 .TargetDBIs(TestDB)
                 .AssertAll();
 
-            var supplier1 = Model.SupplierModel.Find(1);
+            var supplier1 = Model.SupplierModel.FindSupplier(1);
             var ba003 = Model.BouquetModel.FindBouquetPart("BA003");
             Model.SupplierModel.Order(DateConst.May1st, supplier1, DateConst.May5th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ba003, 1) });
 

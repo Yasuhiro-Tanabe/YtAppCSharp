@@ -26,7 +26,7 @@ namespace MemorieDeFleursTest.ModelTest
                 .AddressIs(expectedAddress)
                 .Create();
 
-            var found = Model.SupplierModel.Find(created.Code);
+            var found = Model.SupplierModel.FindSupplier(created.Code);
             Assert.IsNotNull(found);
             Assert.AreEqual(expectedName, found.Name);
             Assert.AreEqual(expectedAddress, found.Address1);
@@ -36,7 +36,7 @@ namespace MemorieDeFleursTest.ModelTest
         public void CannotAbortWhenNoSuppliersFoundFromDb()
         {
             // キーに負数は入れない仕様なので、負数のキーは常に見つからないはず。
-            Assert.IsNull(Model.SupplierModel.Find(-1));
+            Assert.IsNull(Model.SupplierModel.FindSupplier(-1));
         }
 
         [TestMethod]
@@ -263,7 +263,7 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         [TestMethod]
-        void FindSupplier_GetSupplyPartsCompletedly()
+        public void FindSupplier_GetSupplyPartsCompletedly()
         {
             Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA001").PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
             Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA002").PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
@@ -274,11 +274,96 @@ namespace MemorieDeFleursTest.ModelTest
 
             Model.SupplierModel.GetSupplierBuilder().NameIs(expectedName).AddressIs(expectedAddress).SupplyParts("BA001", "BA002", "BA003", "GP001").Create();
 
-            var supplier = Model.SupplierModel.Find(1);
+            var supplier = Model.SupplierModel.FindSupplier(1);
             Assert.AreEqual(4, supplier.SupplyParts.Count, "単品仕入先の登録数が一致しない");
             foreach(var code in new [] { "BA001", "BA002", "BA003", "GP001"})
             {
                 Assert.AreEqual(1, supplier.SupplyParts.Count(p => p.PartCode == code), $"単品 {code} の登録数が一致しない");
+            }
+        }
+
+        [TestMethod]
+        public void FindAllSuppliers()
+        {
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA001").PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA002").PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA003").PartNameIs("薔薇(ピンク)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("GP001").PartNameIs("かすみ草").LeadTimeIs(2).QauntityParLotIs(5).ExpiryDateIs(2).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("CN001").PartNameIs("カーネーション(赤)").LeadTimeIs(3).QauntityParLotIs(20).ExpiryDateIs(5).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("CN002").PartNameIs("カーネーション(ピンク)").LeadTimeIs(3).QauntityParLotIs(20).ExpiryDateIs(5).Create();
+
+            var expectedSuppliers = new List<Supplier>() {
+                Model.SupplierModel.GetSupplierBuilder().NameIs(expectedName).AddressIs(expectedAddress).SupplyParts("BA001", "BA002", "BA003", "GP001").Create(),
+                Model.SupplierModel.GetSupplierBuilder().NameIs("木挽町花壇").AddressIs("東京都中央区銀座四丁目121-5").SupplyParts("GP001", "CN001", "CN002").Create(),
+            };
+
+            var actualSuppliers = Model.SupplierModel.FindAllSuppliers();
+
+            Assert.AreEqual(expectedSuppliers.Count, actualSuppliers.Count(), "仕入先の登録数が一致しない");
+            foreach(var supplier in expectedSuppliers)
+            {
+                Assert.AreEqual(1, actualSuppliers.Count(s => s.Code == supplier.Code), $"仕入先{supplier.Code} の登録数が一致しない");
+            }
+        }
+
+        [TestMethod]
+        public void RmoveSupplier_NoPartsOrdersYet()
+        {
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA001").PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA002").PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA003").PartNameIs("薔薇(ピンク)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("GP001").PartNameIs("かすみ草").LeadTimeIs(2).QauntityParLotIs(5).ExpiryDateIs(2).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("CN001").PartNameIs("カーネーション(赤)").LeadTimeIs(3).QauntityParLotIs(20).ExpiryDateIs(5).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("CN002").PartNameIs("カーネーション(ピンク)").LeadTimeIs(3).QauntityParLotIs(20).ExpiryDateIs(5).Create();
+
+            var expectedSuppliers = new List<Supplier>() {
+                Model.SupplierModel.GetSupplierBuilder().NameIs(expectedName).AddressIs(expectedAddress).SupplyParts("BA001", "BA002", "BA003", "GP001").Create(),
+                Model.SupplierModel.GetSupplierBuilder().NameIs("木挽町花壇").AddressIs("東京都中央区銀座四丁目121-5").SupplyParts("GP001", "CN001", "CN002").Create(),
+            };
+
+            var targetSupplier = Model.SupplierModel.GetSupplierBuilder()
+                .NameIs("仕入先3").AddressIs("住所3").SupplyParts("GP001").Create();
+
+            Model.SupplierModel.Order(DateConst.April20th, expectedSuppliers[0].Code, DateConst.May1st, Tuple.Create("BA001", 2));
+            Model.SupplierModel.Order(DateConst.April20th, expectedSuppliers[1].Code, DateConst.May1st, Tuple.Create("GP001", 2));
+
+            Assert.AreEqual(1, Model.SupplierModel.FindAllSuppliers().Count(s => s.Code == targetSupplier.Code));
+            Model.SupplierModel.RemoveSupplier(targetSupplier.Code);
+            Assert.AreEqual(0, Model.SupplierModel.FindAllSuppliers().Count(s => s.Code == targetSupplier.Code));
+
+            var actualSuppliers = Model.SupplierModel.FindAllSuppliers();
+            Assert.AreEqual(expectedSuppliers.Count, actualSuppliers.Count(), "仕入先の登録数が一致しない");
+            foreach (var supplier in expectedSuppliers)
+            {
+                Assert.AreEqual(1, actualSuppliers.Count(s => s.Code == supplier.Code), $"仕入先{supplier.Code} の登録数が一致しない");
+            }
+        }
+
+        [TestMethod]
+        public void RemoveSupplier_SomePartsOrdered()
+        {
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA001").PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA002").PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("BA003").PartNameIs("薔薇(ピンク)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("GP001").PartNameIs("かすみ草").LeadTimeIs(2).QauntityParLotIs(5).ExpiryDateIs(2).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("CN001").PartNameIs("カーネーション(赤)").LeadTimeIs(3).QauntityParLotIs(20).ExpiryDateIs(5).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs("CN002").PartNameIs("カーネーション(ピンク)").LeadTimeIs(3).QauntityParLotIs(20).ExpiryDateIs(5).Create();
+
+            var expectedSuppliers = new List<Supplier>() {
+                Model.SupplierModel.GetSupplierBuilder().NameIs(expectedName).AddressIs(expectedAddress).SupplyParts("BA001", "BA002", "BA003", "GP001").Create(),
+                Model.SupplierModel.GetSupplierBuilder().NameIs("木挽町花壇").AddressIs("東京都中央区銀座四丁目121-5").SupplyParts("GP001", "CN001", "CN002").Create(),
+            };
+
+            Model.SupplierModel.Order(DateConst.April20th, expectedSuppliers[0].Code, DateConst.May1st, Tuple.Create("BA001", 2));
+            Model.SupplierModel.Order(DateConst.April20th, expectedSuppliers[1].Code, DateConst.May1st, Tuple.Create("GP001", 2));
+
+            Assert.ThrowsException<ApplicationException>(() => Model.SupplierModel.RemoveSupplier(expectedSuppliers[0].Code));
+
+            var actualSuppliers = Model.SupplierModel.FindAllSuppliers();
+            Assert.AreEqual(expectedSuppliers.Count, actualSuppliers.Count(), "仕入先の登録数が一致しない");
+            foreach (var supplier in expectedSuppliers)
+            {
+                Assert.AreEqual(1, actualSuppliers.Count(s => s.Code == supplier.Code), $"仕入先{supplier.Code} の登録数が一致しない");
             }
         }
     }
