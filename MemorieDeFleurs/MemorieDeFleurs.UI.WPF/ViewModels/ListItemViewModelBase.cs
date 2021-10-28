@@ -16,7 +16,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public event EventHandler DetailViewOpening;
         public event EventHandler SelectedItemRemoving;
 
-        protected ListItemViewModelBase() : base() { }
+        protected ListItemViewModelBase(ICommand openDetailView) : base()
+        {
+            Detail = openDetailView;
+        }
 
         #region プロパティ
         /// <summary>
@@ -40,7 +43,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region コマンド
         public ICommand Remove { get; } = new DeleteFromDatabase();
-        public ICommand Detail { get; } = new OpenBouquetDetailViewCommand();
+        public ICommand Detail { get; private set; }
         #endregion // コマンド
 
         public void ShowCommandButtons()

@@ -106,11 +106,12 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         {
             if(Actions.ContainsKey(type))
             {
-                LogUtil.WarnFormat("Action overwritten: [{0}]={1}({2}) -> {3}({4})",
+                LogUtil.WarnFormat("[{0}] Action overwritten: view={1}, {2}({3}) -> {4}({5})",
+                    GetType().Name,
                     type.Name,
-                    Actions[type].Method.Name, 
+                    Actions[type].Method.Name,
                     string.Join(", ", Actions[type].Method.GetParameters().Select(p => p.ParameterType.Name)),
-                    action.Method.Name, 
+                    action.Method.Name,
                     string.Join(", ", action.Method.GetParameters().Select(p => p.ParameterType.Name)));
 
                 Actions[type] = action;
@@ -125,7 +126,8 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         {
             if (Checkers.ContainsKey(type))
             {
-                LogUtil.WarnFormat("Validator overwritten: [{0}]={1}({2}) -> {3}({4})",
+                LogUtil.WarnFormat("[{0}] Validator overwritten: view={1}, {2}({3}) -> {4}({5})",
+                    GetType().Name,
                     type.Name,
                     Checkers[type].Method.Name,
                     string.Join(", ", Checkers[type].Method.GetParameters().Select(p => p.ParameterType.Name)),

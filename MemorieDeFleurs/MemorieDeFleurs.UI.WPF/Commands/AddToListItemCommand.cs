@@ -4,8 +4,13 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class AddToListItemCommand : CommandBase
     {
-        public AddToListItemCommand() : base(typeof(BouquetDetailViewModel), AppendToPartsList) { }
+        public AddToListItemCommand() : base()
+        {
+            AddAction(typeof(BouquetDetailViewModel), AppendToBouquetPartsList);
+            AddAction(typeof(SupplierDetailViewModel), AppendToSupplierPartsList);
+        }
 
-        private static void AppendToPartsList(object parameter) => (parameter as BouquetDetailViewModel).AppendToPartsList();
+        private static void AppendToBouquetPartsList(object parameter) => (parameter as BouquetDetailViewModel).AppendToPartsList();
+        private static void AppendToSupplierPartsList(object parameter) => (parameter as SupplierDetailViewModel).AppnedToSupplingParts();
     }
 }

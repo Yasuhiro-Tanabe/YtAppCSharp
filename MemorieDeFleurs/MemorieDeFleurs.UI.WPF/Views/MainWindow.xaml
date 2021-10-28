@@ -28,6 +28,7 @@
             </MenuItem>
             <MenuItem Header="仕入先">
                 <MenuItem Header="仕入先一覧" Command="{Binding OpenSupplierListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="仕入先登録" Command="{Binding OpenSupplierDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
             <MenuItem Header="商品">
                 <MenuItem Header="商品一覧" Command="{Binding OpenBouquetListView}" CommandParameter="{Binding}"/>
@@ -55,6 +56,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:SupplierListViewModel}">
                     <v:SupplierListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:SupplierDetailViewModel}">
+                    <v:SupplierDetailControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>

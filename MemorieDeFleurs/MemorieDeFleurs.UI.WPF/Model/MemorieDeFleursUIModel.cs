@@ -118,6 +118,12 @@ namespace MemorieDeFleurs.UI.WPF.Model
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             Model.SupplierModel.RemoveSupplier(supplierCode);
         }
+
+        public void UpdateSupplingParts(int supplierCode, IEnumerable<string> parts)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            throw new NotImplementedException();
+        }
         #endregion // 仕入先と単品仕入先の操作
 
     }

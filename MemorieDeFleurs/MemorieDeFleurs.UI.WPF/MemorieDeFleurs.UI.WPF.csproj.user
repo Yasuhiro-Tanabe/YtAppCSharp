@@ -19,6 +19,9 @@
     <Compile Update="Views\BouquetPartsListControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\SupplierDetailControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\SupplierListControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -37,6 +40,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\SupplierDetailControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\SupplierListControl.xaml">
