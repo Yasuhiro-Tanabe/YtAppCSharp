@@ -27,6 +27,10 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                         var vm = item as BouquetSummaryViewModel;
                         vm.HideCommandButtons();
                     }
+                    else if(item is ListItemViewModelBase)
+                    {
+                        (item as ListItemViewModelBase).HideCommandButtons();
+                    }
                 }
             }
 
@@ -45,6 +49,12 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                         var vm = item as BouquetSummaryViewModel;
                         vm.ShowCommandButtons();
                         LogUtil.Debug($"{vm.BouquetCode} selected.");
+                    }
+                    else if(item is ListItemViewModelBase)
+                    {
+                        var vm = item as ListItemViewModelBase;
+                        vm.ShowCommandButtons();
+                        LogUtil.Debug($"[{vm.GetType().Name}] {vm.Key} selected.");
                     }
                 }
             }

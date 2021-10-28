@@ -28,23 +28,26 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
         public bool CanExecute(object parameter)
         {
-            if(parameter != null)
-            {
-                var type = parameter.GetType();
-                Func<object, bool> checker;
-                if (Checkers.TryGetValue(type, out checker))
-                {
-                    return checker(parameter);
-                }
-                else
-                {
-                    return true;
-                }
-            }
-            else
+            if(parameter == null) { return true; }
+
+            var checker = FindChecker(parameter.GetType());
+            if (checker == null)
             {
                 return true;
             }
+            else
+            {
+                return checker(parameter);
+            }
+        }
+        private Func<object, bool> FindChecker(Type type)
+        {
+            if(type == null) { return null; }
+
+            Func<object, bool> checker;
+            if (Checkers.TryGetValue(type, out checker)) { return checker; }
+
+            return FindChecker(type.BaseType);
         }
 
         public void Execute(object parameter)
@@ -53,19 +56,14 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             {
                 if (parameter == null) { throw new NullReferenceException("parameter is null"); }
 
-                var type = parameter.GetType();
-                Action<object> action;
-                if(Actions.TryGetValue(type, out action))
+                var action = FindAction(parameter.GetType());
+                if(action == null)
                 {
-                    action(parameter);
-                }
-                else if(Actions.TryGetValue(type.BaseType, out action))
-                {
-                    action(parameter);
+                    throw new NotImplementedException(GetType().Name);
                 }
                 else
                 {
-                    throw new NotImplementedException(GetType().Name);
+                    action(parameter);
                 }
             }
             catch (ValidateFailedException ex)
@@ -78,20 +76,19 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             }
             catch(Exception ex)
             {
-                var message = string.Empty;
-                if (ex.InnerException == null)
-                {
-                    message = $"{ex.GetType().Name}, {ex.Message}";
-                    LogUtil.Warn($"Exception thrown: {message}\n{ex.StackTrace}");
-                }
-                else
-                {
-                    message = $"{ex.GetType().Name}, {ex.Message} => {ex.InnerException.GetType()}, {ex.InnerException.Message}";
-                    LogUtil.Warn($"Exception thrown: {message}\n{ex.StackTrace}");
-                }
-
-                PopupErrorDialog(message, "システムエラー");
+                LogUtil.Warn(ex);
+                PopupErrorDialog(ex.InnerException == null ? ex.Message : ex.InnerException.Message, "システムエラー");
             }
+        }
+
+        private Action<object> FindAction(Type type)
+        {
+            if(type == null) { return null; }
+
+            Action<object> action;
+            if(Actions.TryGetValue(type, out action)) { return action; }
+
+            return FindAction(type.BaseType);
         }
 
         private void PopupWarningDialog(string message, string header = "")

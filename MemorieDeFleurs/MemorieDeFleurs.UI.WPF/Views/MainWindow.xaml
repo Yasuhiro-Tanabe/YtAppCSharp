@@ -26,12 +26,14 @@
                 </MenuItem>
                 <MenuItem Header="終了" Command="{Binding Exit}" CommandParameter="{Binding}"/>
             </MenuItem>
-            <MenuItem Header="仕入先"/>
+            <MenuItem Header="仕入先">
+                <MenuItem Header="仕入先一覧" Command="{Binding OpenSupplierListView}" CommandParameter="{Binding}"/>
+            </MenuItem>
             <MenuItem Header="商品">
                 <MenuItem Header="商品一覧" Command="{Binding OpenBouquetListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="商品登録" Command="{Binding OpenBouquetDetailView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="単品登録" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="単品一覧" Command="{Binding OpenPartsListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="単品登録" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
             <MenuItem Header="得意先"/>
         </Menu>
@@ -50,6 +52,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:BouquetDetailViewModel}">
                     <v:BouquetDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:SupplierListViewModel}">
+                    <v:SupplierListControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>

@@ -45,6 +45,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand OpenBouquetDetailView { get; } = new OpenBouquetDetailViewCommand();
         public ICommand OpenBouquetListView { get; } = new OpenBouquetListViewCommand();
         public ICommand ConnectoToSQLiteDatabase { get; } = new ConnectToSQLiteDatabaseCommand();
+
+        public ICommand OpenSupplierListView { get; } = new OpenSupplierListViewCommand();
         #endregion // コマンド
 
         #region ビューの生成・切替

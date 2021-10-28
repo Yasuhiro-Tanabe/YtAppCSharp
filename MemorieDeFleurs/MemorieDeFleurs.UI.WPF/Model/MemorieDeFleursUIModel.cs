@@ -50,10 +50,17 @@ namespace MemorieDeFleurs.UI.WPF.Model
             }
         }
 
+        #region 単品の操作
         public IEnumerable<BouquetPart> FindAllBouquetParts()
         {
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             return Model.BouquetModel.FindAllBoueuqtParts();
+        }
+
+        public BouquetPart FindBouquetParts(string partsCode)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.BouquetModel.FindBouquetPart(partsCode);
         }
 
         public void RemoveBouquetParts(string partsCode)
@@ -61,7 +68,9 @@ namespace MemorieDeFleurs.UI.WPF.Model
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             Model.BouquetModel.RemoveBouquetParts(partsCode);
         }
+        #endregion // 単品の操作
 
+        #region 商品と商品構成の操作
         public IEnumerable<Bouquet> FindAllBouquets()
         {
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
@@ -89,11 +98,27 @@ namespace MemorieDeFleurs.UI.WPF.Model
                 Model.BouquetModel.UpdateQuantityOf(bouquetCode, kv.Key, kv.Value);
             }
         }
+        #endregion // 商品と商品構成の操作
 
-        public BouquetPart FindBouquetParts(string partsCode)
+        #region 仕入先と単品仕入先の操作
+        public IEnumerable<Supplier> FindAllSuppliers()
         {
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
-            return Model.BouquetModel.FindBouquetPart(partsCode);
+            return Model.SupplierModel.FindAllSuppliers();
         }
+
+        public Supplier FindSupplier(int supplierCode)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.SupplierModel.FindSupplier(supplierCode);
+        }
+
+        public void RemoveSupplier(int supplierCode)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.SupplierModel.RemoveSupplier(supplierCode);
+        }
+        #endregion // 仕入先と単品仕入先の操作
+
     }
 }
