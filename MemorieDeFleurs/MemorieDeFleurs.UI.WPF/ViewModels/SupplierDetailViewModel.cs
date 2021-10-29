@@ -169,7 +169,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 nameof(EditingModeVisivility), nameof(ViewModeVisivility));
         }
 
-        public void Update()
+        public override void Update()
         {
             if(_code == 0)
             {

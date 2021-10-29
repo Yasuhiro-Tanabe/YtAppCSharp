@@ -1,6 +1,7 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
+using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
 using System.Collections.ObjectModel;
@@ -9,9 +10,8 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetListViewModel : TabItemControlViewModelBase
+    public class BouquetListViewModel : ListViewModelBase
     {
-        public event EventHandler DetailViewOpening;
 
         public BouquetListViewModel() : base("商品一覧") { }
 
@@ -21,19 +21,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public BouquetSummaryViewModel CurrentBouquet { get; set; }
         #endregion // プロパティ
 
-        #region コマンド
-        public ICommand Reload { get; } = new ReloadListCommand();
-        public ICommand Selected { get; } = new SelectionChangedEventCommand();
-        #endregion // コマンド
-
-        public void LoadBouquets()
+        public override void LoadItems()
         {
             Bouquets.Clear();
             foreach(var b in MemorieDeFleursUIModel.Instance.FindAllBouquets())
             {
                 var vm = new BouquetSummaryViewModel(b);
-                vm.PropertyChanged += SummaryViewModelChanged;
-                vm.DetailViewOpening += OpenDetailView;
+                Subscribe(vm);
                 Bouquets.Add(vm);
             }
             CurrentBouquet = null;
@@ -47,14 +41,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 MemorieDeFleursUIModel.Instance.RemoveBouquet(vm.BouquetCode);
                 LogUtil.Debug($"{vm.BouquetCode} deleted.");
-                LoadBouquets();
+                LoadItems();
             }
-        }
-
-        private void OpenDetailView(object sender, EventArgs unused)
-        {
-            LogUtil.DEBULOG_MethodCalled(sender.GetType().Name);
-            DetailViewOpening?.Invoke(this, null);
         }
     }
 }

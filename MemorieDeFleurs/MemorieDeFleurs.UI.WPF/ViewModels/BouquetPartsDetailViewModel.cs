@@ -2,13 +2,14 @@
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
+using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System.Windows;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetPartsDetailViewModel : TabItemControlViewModelBase
+    public class BouquetPartsDetailViewModel : DetailViewModelBase
     {
         public static string Name { get; } = "単品詳細";
         public BouquetPartsDetailViewModel() : base(Name) { }
@@ -84,7 +85,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// 
         /// 検証で何も問題なければ正常終了、何らかの不正値があるときは例外 <see cref="ValidateFailedException"/> がスローされる。
         /// </summary>
-        public void Validate()
+        public override void Validate()
         {
             var result = new ValidateFailedException();
 
@@ -112,7 +113,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if(result.ValidationErrors.Count > 0) { throw result; }
         }
 
-        public void Update()
+        public override void Update()
         {
             if(string.IsNullOrWhiteSpace(PartsCode))
             {

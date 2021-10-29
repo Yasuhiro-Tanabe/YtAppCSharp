@@ -1,6 +1,7 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
+using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
 using System.Linq;
@@ -9,14 +10,13 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetSummaryViewModel : NotificationObject
+    public class BouquetSummaryViewModel : ListItemViewModelBase
     {
-        public event EventHandler DetailViewOpening;
-
-        public BouquetSummaryViewModel(Bouquet bouquet)
+        public BouquetSummaryViewModel(Bouquet bouquet) : base(new OpenBouquetDetailViewCommand())
         {
             Update(bouquet);
         }
+
         #region プロパティ
         public string BouquetCode
         {
@@ -31,9 +31,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _name, value); }
         }
         private string _name;
-
-        public Visibility ActionVisivility { get { return _isVisible ? Visibility.Visible : Visibility.Collapsed; } }
-        private bool _isVisible = false;
 
         public string ImageFileName
         {
@@ -50,23 +47,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private string _parts;
         #endregion // プロパティ
 
-        #region コマンド
-        public ICommand Remove { get; } = new DeleteFromDatabase();
-        public ICommand Detail { get; } = new OpenBouquetDetailViewCommand();
-        #endregion // コマンド
-
-        public void ShowCommandButtons()
-        {
-            _isVisible = true;
-            RaisePropertyChanged(nameof(ActionVisivility));
-        }
-
-        public void HideCommandButtons()
-        {
-            _isVisible = false;
-            RaisePropertyChanged(nameof(ActionVisivility));
-        }
-
         public void Update(Bouquet bouquet)
         {
             BouquetCode = bouquet.Code;
@@ -79,17 +59,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
 
             RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(PartsList));
-        }
-
-        public void RemoveMe()
-        {
-            RaisePropertyChanged(nameof(RemoveMe));
-        }
-
-        public void OpenDetailView()
-        {
-            LogUtil.DEBULOG_MethodCalled();
-            DetailViewOpening?.Invoke(this, null);
         }
     }
 }

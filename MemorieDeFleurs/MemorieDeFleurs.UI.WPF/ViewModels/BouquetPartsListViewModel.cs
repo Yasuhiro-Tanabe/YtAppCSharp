@@ -1,6 +1,7 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
+using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
 using System.Collections.ObjectModel;
@@ -9,10 +10,8 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetPartsListViewModel : TabItemControlViewModelBase
+    public class BouquetPartsListViewModel : ListViewModelBase
     {
-        public event EventHandler DetailViewOpening;
-
         public BouquetPartsListViewModel() : base("単品一覧") { }
 
         #region プロパティ
@@ -21,40 +20,28 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public BouquetPartsSummaryViewModel CurrentParts { get; set; }
         #endregion // プロパティ
 
-        #region Command
-        public ICommand Reload { get; } = new ReloadListCommand();
-        public ICommand Selected { get; } = new SelectionChangedEventCommand();
-        #endregion // Command
-
-        public void LoadBouquetParts()
+        public override void LoadItems()
         {
             BouquetParts.Clear();
             foreach(var p in MemorieDeFleursUIModel.Instance.FindAllBouquetParts())
             {
                 var vm = new BouquetPartsSummaryViewModel(p);
-                vm.PropertyChanged += SummaryViewModelChanged;
-                vm.DetailViewOpening += OpenDetailView;
+                Subscribe(vm);
                 BouquetParts.Add(vm);
             }
             CurrentParts = null;
             RaisePropertyChanged(nameof(BouquetParts), nameof(CurrentParts));
         }
 
-        private void SummaryViewModelChanged(object sender, PropertyChangedEventArgs args)
-        {
-            var vm = sender as BouquetPartsSummaryViewModel;
-            if(args.PropertyName == nameof(BouquetPartsSummaryViewModel.RemoveMe))
-            {
-                MemorieDeFleursUIModel.Instance.RemoveBouquetParts(vm.PartsCode);
-                LogUtil.Debug($"{vm.PartsCode} deleted.");
-                LoadBouquetParts();
-            }
-        }
-
-        private void OpenDetailView(object sender, EventArgs unused)
-        {
-            LogUtil.DEBULOG_MethodCalled(sender.GetType().Name);
-            DetailViewOpening?.Invoke(this, null);
-        }
+        //private void SummaryViewModelChanged(object sender, PropertyChangedEventArgs args)
+        //{
+        //    var vm = sender as BouquetPartsSummaryViewModel;
+        //    if(args.PropertyName == nameof(BouquetPartsSummaryViewModel.RemoveMe))
+        //    {
+        //        MemorieDeFleursUIModel.Instance.RemoveBouquetParts(vm.PartsCode);
+        //        LogUtil.Debug($"{vm.PartsCode} deleted.");
+        //        LoadItems();
+        //    }
+        //}
     }
 }
