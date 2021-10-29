@@ -1,17 +1,11 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
-
-using System;
-using System.Windows;
-using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetPartsSummaryViewModel : ListItemViewModelBase
     {
-        #region プロパティ
         public BouquetPartsSummaryViewModel(BouquetPart part) : base(new OpenPartsDetailViewCommand())
         {
             Update(part);
@@ -24,6 +18,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(PartsCode), nameof(PartsName));
         }
 
+        #region プロパティ
         public string PartsCode
         {
             get { return _code; }

@@ -50,7 +50,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             builder.CodeIs(vm.BouquetCode)
                 .NameIs(vm.BouquetName)
                 .ImageIs(vm.ImageFileName);
-            foreach (var p in vm.PartsList) { builder.Uses(p.Key, p.Value); }
+            foreach (var p in vm.SelectedPartListItem) { builder.Uses(p.PartsCode, p.Quantity); }
 
             vm.Update(builder.Create());
             vm.IsDirty = false;

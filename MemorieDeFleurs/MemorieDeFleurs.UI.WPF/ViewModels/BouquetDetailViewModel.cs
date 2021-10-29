@@ -4,7 +4,6 @@ using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -58,15 +57,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private int _leadTime;
 
         /// <summary>
-        /// 商品構成(表示用)
+        /// 商品構成
         /// </summary>
-        public string PartsListString { get { return string.Join(", ", _parts.Select(i => $"{i.Key} x{i.Value}")); } }
-
-        /// <summary>
-        /// 商品構成(データベース登録用)
-        /// </summary>
-        public IDictionary<string, int> PartsList { get { return _parts; } }
-        private IDictionary<string, int> _parts = new Dictionary<string, int>();
+        public string PartsListString { get { return string.Join(", ", SelectedPartListItem.Select(i => $"{i.PartsName} x{i.Quantity}")); } }
 
         /// <summary>
         /// 商品構成編集中に表示するコントロールの可視性
@@ -127,10 +120,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _image = bouquet.Image;
             _leadTime = bouquet.LeadTime;
 
-            _parts.Clear();
+            SelectedPartListItem.Clear();
             foreach(var p in bouquet.PartsList)
             {
-                _parts.Add(p.PartsCode, p.Quantity);
+                SelectedPartListItem.Add(new PartsListItemViewModel(p));
             }
             _editing = false;
 
@@ -160,7 +153,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 result.Append($"イメージファイルが見つかりません: {_image}");
             }
-            if(_parts.Count == 0)
+            if(SelectedPartListItem.Count == 0)
             {
                 result.Append("商品構成が指定されていません。");
             }
@@ -171,19 +164,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void EditPartsList()
         {
             _editing = true;
-            var allParts = MemorieDeFleursUIModel.Instance.FindAllBouquetParts().Where(p => !_parts.ContainsKey(p.Code));
+            var allParts = MemorieDeFleursUIModel.Instance.FindAllBouquetParts();
 
-            SelectedPartListItem.Clear();
-            foreach (var p in _parts)
-            {
-                SelectedPartListItem.Add(new PartsListItemViewModel() { PartsCode = p.Key, Quantity = p.Value });
-            }
             CurrentSelectedInPartsList = null;
 
             SelectableParts.Clear();
             foreach (var p in allParts)
             {
-                SelectableParts.Add(new PartsListItemViewModel() { PartsCode = p.Code, Quantity = 0 });
+                if(SelectedPartListItem.SingleOrDefault(i => i.PartsCode == p.Code) == null)
+                {
+                    // 選択中の仕入可能な単品一覧にない単品が対象
+                    SelectableParts.Add(new PartsListItemViewModel(p));
+                }
             }
             CurrentSelectedInSelectablePartsList = null;
 
@@ -194,13 +186,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void FixPartsList()
         {
             _editing = false;
-
-            _parts.Clear();
-            foreach (var i in SelectedPartListItem)
-            {
-                _parts.Add(i.PartsCode, i.Quantity);
-            }
-
             RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsListString));
         }
 

@@ -110,7 +110,7 @@
                 <RowDefinition Height="220px"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200pt"/>
+                <ColumnDefinition Width="250pt"/>
                 <ColumnDefinition Width="80pt"/>
                 <ColumnDefinition Width="200pt"/>
             </Grid.ColumnDefinitions>
@@ -133,7 +133,8 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="40pt"/>
                                 <ColumnDefinition Width="40pt"/>
-                                <ColumnDefinition Width="40pt"/>
+                                <ColumnDefinition Width="20pt"/>
+                                <ColumnDefinition Width="120pt"/>
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0"
@@ -146,17 +147,22 @@
                             <TextBlock Grid.Column="2"
                                        VerticalAlignment="Center"
                                        Text="本"/>
+                            <TextBlock Grid.Column="3"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding PartsName}"/>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
             <StackPanel Grid.Row="1" Grid.Column="1"
-                        Orientation="Vertical" Margin="20,50">
-                <Button HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                        Orientation="Vertical">
+                <Button Margin="20,50,20,0"
+                        HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                         VerticalAlignment="Center" VerticalContentAlignment="Center"
                         Content="＜"
                         Command="{Binding Append}" CommandParameter="{Binding}"/>
-                <Button HorizontalAlignment="Center" HorizontalContentAlignment="Center"
+                <Button Margin="20,10,20,0"
+                        HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                         VerticalAlignment="Center" VerticalContentAlignment="Center"
                         Content="＞"
                         Command="{Binding Remove}" CommandParameter="{Binding}"/>
@@ -168,7 +174,20 @@
                       SelectionMode="Single">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding PartsCode}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40px"/>
+                                <ColumnDefinition Width="120px"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding PartsCode}"/>
+                            <TextBlock Grid.Column="1"
+                                       Margin="10,0,0,0"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding PartsName}"/>
+                        </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
