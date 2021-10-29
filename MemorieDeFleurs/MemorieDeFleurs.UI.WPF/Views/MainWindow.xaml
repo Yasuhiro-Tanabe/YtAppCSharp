@@ -22,7 +22,10 @@
         <Menu Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <MenuItem Header="画面" HorizontalAlignment="Left">
                 <MenuItem Header="DB接続...">
-                    <MenuItem Header="SQLite (ファイル)" Command="{Binding ConnectoToSQLiteDatabase}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="SQLite">
+                        <MenuItem Header="読込..." Command="{Binding SQLiteLoad}" CommandParameter="{Binding}"/>
+                        <MenuItem Header="保存..." Command="{Binding SQLiteSave}" CommandParameter="{Binding}"/>
+                    </MenuItem>
                 </MenuItem>
                 <MenuItem Header="終了" Command="{Binding Exit}" CommandParameter="{Binding}"/>
             </MenuItem>

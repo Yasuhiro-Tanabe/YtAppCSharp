@@ -59,7 +59,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 var action = FindAction(parameter.GetType());
                 if(action == null)
                 {
-                    throw new NotImplementedException(GetType().Name);
+                    throw new NotImplementedException($"{GetType().Name}.Execute({parameter.GetType().Name})");
                 }
                 else
                 {

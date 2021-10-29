@@ -4,6 +4,8 @@ using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 
+using Microsoft.Data.Sqlite;
+
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
@@ -30,6 +32,7 @@ namespace MemorieDeFleurs.UI.WPF.Model
 
         private MemorieDeFleursModel Model { get; set; }
 
+        #region データベースの操作
         public void OpenSQLiteDatabaseFile(string path)
         {
             LogUtil.DEBUGLOG_BeginMethod(path);
@@ -42,13 +45,47 @@ namespace MemorieDeFleurs.UI.WPF.Model
             }
             catch (Exception ex)
             {
-                LogUtil.Warn($"{ex.GetType().Name}: {ex.Message}");
+                LogUtil.Warn(ex);
             }
             finally
             {
                 LogUtil.DEBUGLOG_EndMethod(path);
             }
         }
+
+        public void SaveSQLiteConnectinToFile(string path)
+        {
+            LogUtil.DEBUGLOG_BeginMethod(path);
+            try
+            {
+                if(DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+                if(DbConnection is SqliteConnection)
+                {
+                    var builder = new SqliteConnectionStringBuilder();
+                    builder.DataSource = path;
+                    builder.Mode = SqliteOpenMode.ReadWriteCreate;
+                    builder.ForeignKeys = true;
+
+                    var backupDb = new SqliteConnection(builder.ToString());
+                    (DbConnection as SqliteConnection).BackupDatabase(backupDb);
+                    LogUtil.Info($"Database saved to: {path}");
+                }
+                else
+                {
+                    throw new ApplicationException($"SQLite データベースに接続されていません：現在の接続オブジェクト：{DbConnection.GetType().Name}");
+                }
+            }
+            catch(Exception ex)
+            {
+                LogUtil.Warn(ex);
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod(path);
+            }
+        }
+
+        #endregion // データベースの操作
 
         #region 単品の操作
         public IEnumerable<BouquetPart> FindAllBouquetParts()
