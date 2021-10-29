@@ -5,6 +5,7 @@ using MemorieDeFleurs.UI.WPF.ViewModels;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System.ComponentModel;
+using System.Linq;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
@@ -15,6 +16,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             AddChecker(typeof(TabItemControlViewModelBase), IsDirty);
             AddAction(typeof(BouquetPartsDetailViewModel), CreateBouquetParts);
             AddAction(typeof(BouquetDetailViewModel), CreateBouquet);
+            AddAction(typeof(SupplierDetailViewModel), CreateSupplier);
 
             vm.PropertyChanged += CheckDirtyFlag;
         }
@@ -58,6 +60,26 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             LogUtil.Info($"Bouquet {vm.BouquetCode} is saved.");
         }
 
+        private static void CreateSupplier(object parameter)
+        {
+            var vm = parameter as SupplierDetailViewModel;
+            vm.Validate();
+
+            var model = new MemorieDeFleursModel(MemorieDeFleursUIModel.Instance.DbConnection);
+            var builder = model.SupplierModel.GetSupplierBuilder();
+
+            builder.NameIs(vm.SupplierName)
+                .AddressIs(vm.Address1, vm.Address2)
+                .EmailIs(vm.EmailAddress)
+                .PhoneNumberIs(vm.TelephoneNumber)
+                .FaxNumberIs(vm.FaxNumber)
+                .SupplyParts(vm.SupplingParts.Select(p => p.PartsCode).ToArray());
+
+            vm.Update(builder.Create());
+            vm.IsDirty = false;
+            LogUtil.Info($"Supplier {vm.SupplierCode} is saved.");
+ 
+        }
 
         public void CheckDirtyFlag(object sender, PropertyChangedEventArgs args)
         {
