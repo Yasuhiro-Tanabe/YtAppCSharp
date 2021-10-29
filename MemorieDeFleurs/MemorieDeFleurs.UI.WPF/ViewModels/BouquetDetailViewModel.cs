@@ -101,7 +101,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand SelectImage { get; }
+        public ICommand FindImageSource { get; } = new FindImageSourceFileCommand();
         public ICommand Edit { get; } = new EditPartsListCommand();
         public ICommand Fix { get; } = new FixPartsListCommand();
         public ICommand Append { get; } = new AddToListItemCommand();

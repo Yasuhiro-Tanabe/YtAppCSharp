@@ -65,7 +65,7 @@
                 HorizontalAlignment="Center" HorizontalContentAlignment="Center"
                 VerticalAlignment="Center" VerticalContentAlignment="Center"
                 Content="..."
-                Command="{Binding SelectImage}" CommandParameter="{Binding}"/>
+                Command="{Binding FindImageSource}" CommandParameter="{Binding}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0"
                    VerticalAlignment="Center"
