@@ -2,14 +2,10 @@
 using MemorieDeFleurs.UI.WPF.Commands;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
-namespace MemorieDeFleurs.UI.WPF.ViewModels
+namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
 {
     public class ListItemViewModelBase : NotificationObject
     {

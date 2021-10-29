@@ -1,5 +1,6 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.UI.WPF.Model;
+using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System.Collections.ObjectModel;
 

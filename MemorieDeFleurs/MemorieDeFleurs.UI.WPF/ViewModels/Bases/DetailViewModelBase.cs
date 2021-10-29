@@ -1,6 +1,7 @@
 ﻿using System;
 
-namespace MemorieDeFleurs.UI.WPF.ViewModels
+namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
+
 {
     public class DetailViewModelBase : TabItemControlViewModelBase
     {

@@ -68,10 +68,12 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             }
             catch (ValidateFailedException ex)
             {
+                LogUtil.Warn(ex);
                 PopupWarningDialog($"{string.Join("\n", ex.ValidationErrors)}", ex.Message);
             }
             catch (NotConnectedToDatabaseException ex)
             {
+                LogUtil.Warn(ex);
                 PopupWarningDialog(ex.Message, $"DB未接続");
             }
             catch(Exception ex)
