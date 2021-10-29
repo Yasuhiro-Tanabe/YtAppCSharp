@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.UI.WPF.Model;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.UI.WPF.Model;
 
 using System.Collections.ObjectModel;
 
@@ -32,6 +33,21 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             var vm = sender as SupplierSummaryViewModel;
             MemorieDeFleursUIModel.Instance.RemoveSupplier(vm.SupplierCode);
             LoadItems();
+        }
+
+        public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
+        {
+            LogUtil.DEBUGLOG_BeginMethod(mainVM.GetType().Name);
+            var detail = mainVM.FindTabItem(SupplierDetailViewModel.Name) as SupplierDetailViewModel;
+            if(detail == null)
+            {
+                detail = new SupplierDetailViewModel();
+                mainVM.OpenTabItem(detail);
+            }
+            detail.SupplierCode = CurrentSupplier.SupplierCode;
+            detail.Update();
+            LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name, $"{detail.GetType().Name} opened.");
+            return detail;
         }
     }
 }

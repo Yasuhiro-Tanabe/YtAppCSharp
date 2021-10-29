@@ -47,5 +47,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public virtual void LoadItems() { throw new NotImplementedException($"{this.GetType().Name}.{nameof(LoadItems)}()"); }
         protected virtual void RemoveSelectedItem(object sender) { throw new NotImplementedException($"{this.GetType().Name}.{nameof(RemoveSelectedItem)}({sender?.GetType()?.Name})"); }
+
+        public virtual DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM) { throw new NotImplementedException($"{GetType().Name}.{nameof(OpenDetailView)}({mainVM.GetType().Name})"); }
     }
 }

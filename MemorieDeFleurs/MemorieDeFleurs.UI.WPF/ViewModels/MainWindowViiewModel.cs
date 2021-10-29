@@ -61,6 +61,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
                 if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening += OpenDetailView; }
                 if (found is BouquetPartsListViewModel) { (found as BouquetPartsListViewModel).DetailViewOpening += OpenDetailView; }
+                if (found is ListViewModelBase) { (found as ListViewModelBase).DetailViewOpening += OpenDetailView; }
             }
             CurrentItem = found;
             RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
@@ -78,6 +79,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
                     if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening -= OpenDetailView; }
                     if (found is BouquetPartsListViewModel) { (found as BouquetPartsListViewModel).DetailViewOpening -= OpenDetailView; }
+                    if (found is ListViewModelBase) { (found as ListViewModelBase).DetailViewOpening -= OpenDetailView; }
                 }
                 CurrentItem = TabItemControlCollection.FirstOrDefault();
                 RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
@@ -85,7 +87,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
-        private TabItemControlViewModelBase FindTabItem(string header)
+        public TabItemControlViewModelBase FindTabItem(string header)
         {
             return TabItemControlCollection.SingleOrDefault(item => item.Header == header);
         }
@@ -120,6 +122,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
                 detail.BouquetCode = vm.CurrentBouquet.BouquetCode;
                 detail.Update();
+                CurrentItem = detail;
             }
             else if(sender is BouquetPartsListViewModel)
             {
@@ -132,6 +135,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
                 detail.PartsCode = vm.CurrentParts.PartsCode;
                 detail.Update();
+                CurrentItem = detail;
+            }
+            else if(sender is SupplierListViewModel)
+            {
+                CurrentItem = (sender as SupplierListViewModel).OpenDetailTabItem(this);
             }
             RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
             LogUtil.DEBUGLOG_EndMethod(sender.GetType().Name);

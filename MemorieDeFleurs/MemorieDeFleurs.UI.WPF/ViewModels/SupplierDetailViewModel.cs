@@ -20,11 +20,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region プロパティ
         /// <summary>
-        /// 仕入先コード：表示専用
+        /// 仕入先コード
         /// </summary>
         public int SupplierCode
         {
             get { return _code; }
+            set { SetProperty(ref _code, value); }
         }
         private int _code;
 
