@@ -186,7 +186,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void FixPartsList()
         {
             _editing = false;
-            RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsListString));
+            _leadTime = SelectedPartListItem.Max(p => p.LeadTime);
+            RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsListString), nameof(LeadTime));
         }
 
         public void AppendToPartsList()

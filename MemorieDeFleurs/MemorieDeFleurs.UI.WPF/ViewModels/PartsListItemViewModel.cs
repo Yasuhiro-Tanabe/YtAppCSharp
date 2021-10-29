@@ -25,6 +25,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _quantity, value); }
         }
         private int _quantity;
+
+        public int LeadTime
+        {
+            get { return _leadtime; }
+            set { SetProperty(ref _leadtime, value); }
+        }
+        private int _leadtime;
         #endregion // プロパティ
 
         public PartsListItemViewModel(BouquetPartsList item)
@@ -32,7 +39,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _code = item.BouquetCode;
             _name = item.Part.Name;
             _quantity = item.Quantity;
-            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(Quantity));
+            _leadtime = item.Part.LeadTime;
+            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(Quantity), nameof(LeadTime));
         }
 
         public PartsListItemViewModel(BouquetPart parts)
@@ -40,7 +48,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _code = parts.Code;
             _name = parts.Name;
             _quantity = 0;
-            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(Quantity));
+            _leadtime = parts.LeadTime;
+            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(Quantity), nameof(LeadTime));
         }
     }
 }
