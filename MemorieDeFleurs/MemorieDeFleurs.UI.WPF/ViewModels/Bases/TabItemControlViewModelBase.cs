@@ -4,7 +4,7 @@ using System;
 using System.ComponentModel;
 using System.Windows.Input;
 
-namespace MemorieDeFleurs.UI.WPF.ViewModels
+namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
 {
     public class TabItemControlViewModelBase : NotificationObject
     {

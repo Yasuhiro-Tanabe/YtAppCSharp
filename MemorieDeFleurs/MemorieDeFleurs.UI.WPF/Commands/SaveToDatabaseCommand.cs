@@ -2,6 +2,7 @@
 using MemorieDeFleurs.Models;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels;
+using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System.ComponentModel;
 
