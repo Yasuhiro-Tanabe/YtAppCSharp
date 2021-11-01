@@ -39,17 +39,20 @@
                 <MenuItem Header="単品一覧" Command="{Binding OpenPartsListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="単品登録" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
-            <MenuItem Header="得意先"/>
+            <MenuItem Header="得意先">
+                <MenuItem Header="得意先一覧" Command="{Binding OpenCustomerListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="得意先登録" Command="{Binding OpenCustomerDetailView}" CommandParameter="{Binding}"/>
+            </MenuItem>
         </Menu>
 
         <TabControl Grid.Row="1" x:Name="Views" ItemsSource="{Binding TabItemControlCollection}" SelectedItem="{Binding CurrentItem}">
             <TabControl.Resources>
                 <!-- 選択した ViewModel 毎に対応する View (UserControl) を使い分ける -->
-                <DataTemplate DataType="{x:Type vm:BouquetPartsDetailViewModel}">
-                    <v:BouquetPartsDetailControl/>
-                </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:BouquetPartsListViewModel}">
                     <v:BouquetPartsListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:BouquetPartsDetailViewModel}">
+                    <v:BouquetPartsDetailControl/>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:BouquetListViewModel}">
                     <v:BouquetListControl/>
@@ -62,6 +65,12 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:SupplierDetailViewModel}">
                     <v:SupplierDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:CustomerListViewModel}">
+                    <v:CustomerListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:CustomerDetailViewModel}">
+                    <v:CustomerDetailControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>

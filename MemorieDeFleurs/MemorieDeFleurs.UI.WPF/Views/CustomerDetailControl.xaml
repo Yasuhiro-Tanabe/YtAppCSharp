@@ -1,0 +1,112 @@
+﻿<UserControl x:Class="MemorieDeFleurs.UI.WPF.Views.CustomerDetailControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Margin="15,5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="120px"/>
+            <ColumnDefinition Width="200px"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0"
+                   Margin="5,0"
+                   VerticalAlignment="Center"
+                   Text="得意先ID："/>
+        <TextBox Grid.Row="0" Grid.Column="1"
+                 Margin="5,0"
+                 VerticalAlignment="Center"
+                 Text="{Binding ID}"/>
+        <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
+                    VerticalAlignment="Center" HorizontalAlignment="Right">
+            <Button Margin="5, 1"
+                    TabIndex="999"
+                    Content="検索..."
+                    Command="{Binding Reload}" CommandParameter="{Binding}"/>
+            <Button Margin="5, 1"
+                    TabIndex="1000"
+                    Content="登録"
+                    Command="{Binding Register}" CommandParameter="{Binding}"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="1" Grid.Column="0"
+                   Margin="5,0"
+                   VerticalAlignment="Center"
+                   Text="名前："/>
+        <TextBox Grid.Row="1" Grid.Column="1"
+                 Margin="5,0"
+                 VerticalAlignment="Center"
+                 Text="{Binding CustomerName}"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0"
+                   Margin="5,0"
+                   VerticalAlignment="Center"
+                   Text="e-メールアドレス："/>
+        <TextBox Grid.Row="2" Grid.Column="1"
+                 Margin="5,0"
+                 VerticalAlignment="Center"
+                 Text="{Binding EmailAddress}"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0"
+                   Margin="5,0"
+                   VerticalAlignment="Center"
+                   Text="パスワード："/>
+        <TextBox Grid.Row="3" Grid.Column="1"
+                 Margin="5,0"
+                 VerticalAlignment="Center"
+                 Text="{Binding Password}"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0"
+                   Margin="5,0"
+                   VerticalAlignment="Center"
+                   Text="カード番号"/>
+        <TextBox Grid.Row="4" Grid.Column="1"
+                 Margin="5,0"
+                 VerticalAlignment="Center"
+                 Text="{Binding CardNo}"/>
+
+        <TextBlock Grid.Row="5" Grid.Column="0"
+                   Margin="5,0"
+                   VerticalAlignment="Center"
+                   Text="登録済みのお届け先："/>
+
+        <ScrollViewer Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3"
+                      VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto">
+            <ListView Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3"
+                  Margin="10,5"
+                  ItemsSource="{Binding ShippingAddresses}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="5">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120px"/>
+                                <ColumnDefinition Width="60px"/>
+                                <ColumnDefinition Width="200px"/>
+                                <ColumnDefinition Width="150px"/>
+                                <ColumnDefinition Width="100px"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Margin="5,0" VerticalAlignment="Center" Text="{Binding Name, Mode=OneWay}"/>
+                            <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="様、"/>
+                            <TextBlock Grid.Column="2" Margin="5,0" VerticalAlignment="Center" Text="{Binding AddressText, Mode=OneWay}" TextWrapping="Wrap"/>
+                            <TextBlock Grid.Column="3" Margin="5,0" VerticalAlignment="Center" Text="、前回お届け日："/>
+                            <TextBlock Grid.Column="4" Margin="5,0" VerticalAlignment="Center" Text="{Binding LatestOrderDate, Mode=OneWay}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

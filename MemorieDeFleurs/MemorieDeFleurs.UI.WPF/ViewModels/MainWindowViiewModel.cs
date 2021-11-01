@@ -47,6 +47,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand OpenBouquetListView { get; } = new OpenBouquetListViewCommand();
         public ICommand OpenSupplierListView { get; } = new OpenSupplierListViewCommand();
         public ICommand OpenSupplierDetailView { get; } = new OpenSupplierDetailViewCommand();
+        public ICommand OpenCustomerListView { get; } = new OpenCustomerListViewCommand();
+        public ICommand OpenCustomerDetailView { get; } = new OpenCustomerDetailViewCommand();
         public ICommand SQLiteLoad { get; } = new SQLiteOpenDbFileCommand();
         public ICommand SQLiteSave { get; } = new SQLiteSaveToDbFileCommand();
         #endregion // コマンド
@@ -142,6 +144,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             else if(sender is SupplierListViewModel)
             {
                 CurrentItem = (sender as SupplierListViewModel).OpenDetailTabItem(this);
+            }
+            else if(sender is CustomerListViewModel)
+            {
+                CurrentItem = (sender as CustomerListViewModel).OpenDetailTabItem(this);
             }
             RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
             LogUtil.DEBUGLOG_EndMethod(sender.GetType().Name);

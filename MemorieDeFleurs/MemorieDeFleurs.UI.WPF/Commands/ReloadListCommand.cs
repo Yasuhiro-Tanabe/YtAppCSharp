@@ -10,6 +10,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             AddAction(typeof(BouquetPartsListViewModel), LoadItems);
             AddAction(typeof(BouquetListViewModel), LoadItems);
             AddAction(typeof(SupplierListViewModel), LoadItems);
+            AddAction(typeof(CustomerListViewModel), LoadItems);
         }
 
         private static void LoadItems(object parameter) => (parameter as ListViewModelBase).LoadItems();

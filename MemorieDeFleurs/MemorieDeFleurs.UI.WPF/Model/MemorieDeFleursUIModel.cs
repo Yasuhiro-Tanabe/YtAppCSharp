@@ -197,5 +197,25 @@ namespace MemorieDeFleurs.UI.WPF.Model
         }
         #endregion // 仕入先と単品仕入先の操作
 
+        #region 得意先の操作
+        public Customer FindCustomer(int id)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.FindCustomer(id);
+        }
+
+        public IEnumerable<Customer> FindAllCustomers()
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.FindAllCustomers();
+        }
+
+        public void RemoveCustomer(int id)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.CustomerModel.RemoveCustomer(id);
+        }
+        #endregion // 得意先の操作
+
     }
 }
