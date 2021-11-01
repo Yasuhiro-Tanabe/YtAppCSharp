@@ -215,6 +215,12 @@ namespace MemorieDeFleurs.UI.WPF.Model
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             Model.CustomerModel.RemoveCustomer(id);
         }
+
+        public void SaveCustomer(Customer customer)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            MemorieDeFleursUIModel.Instance.SaveCustomer(customer);
+        }
         #endregion // 得意先の操作
 
     }

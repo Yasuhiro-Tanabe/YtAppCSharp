@@ -17,6 +17,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             AddAction(typeof(BouquetPartsDetailViewModel), CreateBouquetParts);
             AddAction(typeof(BouquetDetailViewModel), CreateBouquet);
             AddAction(typeof(SupplierDetailViewModel), CreateSupplier);
+            AddAction(typeof(CustomerDetailViewModel), CreateEntity);
 
             vm.PropertyChanged += CheckDirtyFlag;
         }
@@ -80,6 +81,8 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             LogUtil.Info($"Supplier {vm.SupplierCode} is saved.");
  
         }
+
+        private static void CreateEntity(object parameter) => (parameter as DetailViewModelBase).SaveToDatabase();
 
         public void CheckDirtyFlag(object sender, PropertyChangedEventArgs args)
         {

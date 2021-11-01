@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
@@ -123,6 +124,40 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     Update(customer);
                 }
             }
+        }
+
+        public override void SaveToDatabase()
+        {
+            LogUtil.DEBUGLOG_BeginMethod();
+            var customer = new Customer()
+            {
+                ID = ID,
+                Name = CustomerName,
+                EmailAddress = EmailAddress,
+                Password = Password,
+                CardNo = CardNo
+            };
+
+            if (ShippingAddresses.Count > 0)
+            {
+                foreach (var vm in ShippingAddresses)
+                {
+                    var sa = new ShippingAddress()
+                    {
+                        CustomerID = ID,
+                        ID = vm.ID,
+                        Name = vm.Name,
+                        Address1 = vm.Address1,
+                        Address2 = vm.Address2,
+                        LatestOrderDate = vm.LatestOrderDate
+                    };
+                    customer.ShippingAddresses.Add(sa);
+                }
+            }
+
+            MemorieDeFleursUIModel.Instance.SaveCustomer(customer);
+            LogUtil.Info($"Customer {ID} saved.");
+            LogUtil.DEBUGLOG_EndMethod();
         }
     }
 }
