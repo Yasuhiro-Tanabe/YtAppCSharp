@@ -197,5 +197,190 @@ namespace MemorieDeFleursTest.ModelTest
                 Assert.AreEqual(1, actualCustomers.Count(c => c.ID == expected.ID), $"得意先{expected.ID}({expected.Name}) の登録数が合わない");
             }
         }
+
+        [TestMethod]
+        public void UpdateCastomer_NewCustomer()
+        {
+            var expected = new Customer()
+            {
+                ID = 10,
+                Name = "テスト",
+                EmailAddress = "test@localdomain",
+                CardNo = "1234123412341234",
+            };
+
+            expected.ShippingAddresses.Add(new ShippingAddress() { CustomerID = expected.ID, ID = 1, Name = "お届け先1", Address1 = "住所1", LatestOrderDate = DateConst.April20th });
+            expected.ShippingAddresses.Add(new ShippingAddress() { CustomerID = expected.ID, ID = 2, Name = "お届け先2", Address1 = "住所2", LatestOrderDate = DateConst.April20th });
+            expected.ShippingAddresses.Add(new ShippingAddress() { CustomerID = expected.ID, ID = 3, Name = "お届け先3", Address1 = "住所3", LatestOrderDate = DateConst.April20th });
+
+            Assert.IsNull(Model.CustomerModel.FindCustomer(expected.ID), $"得意先ID {expected.ID} が未使用ではない");
+
+            Model.CustomerModel.SaveCustomer(expected);
+            var actual = Model.CustomerModel.FindCustomer(expected.ID);
+
+            Assert.AreEqual(expected.Name, actual.Name, "得意先名称が一致しない");
+            Assert.AreEqual(expected.ShippingAddresses.Count, actual.ShippingAddresses.Count, "お届け先登録数が一致しない");
+            foreach(var address in expected.ShippingAddresses)
+            {
+                var found = actual.ShippingAddresses.SingleOrDefault(a => a.CustomerID == address.CustomerID && a.ID == address.ID);
+                Assert.IsNotNull(found, $"お届け先 {address.ID} が登録されていない");
+                Assert.AreEqual(address.Name, found.Name, $"お届け先 {address.ID} の名前が一致しない");
+            }
+            foreach(var address in actual.ShippingAddresses)
+            {
+                var found = expected.ShippingAddresses.SingleOrDefault(a => a.CustomerID == address.CustomerID && a.ID == address.ID);
+                Assert.IsNotNull(found, $"登録していないはずの {address.ID} が登録されている");
+                Assert.AreEqual(found.Name, address.Name, $"お届け先 {address.ID} の名前が一致しない");
+            }
+        }
+
+        [TestMethod]
+        public void UpdateCustomer_CustomerNameChanged()
+        {
+            var email = "test@localdomain";
+            var cardNo = "1234123412341234";
+            var name = new[] { "お届け先1", "お届け先2", "お届け先3" };
+            var address = new[] { "住所1", "住所2", "住所3" };
+            var id = new[] { 1, 2, 3 };
+            var EXPECTED_NAME = "変更した名前";
+
+            var initial = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs("変更前の名前").EmailAddressIs(email).CardNoIs(cardNo)
+                .SendTo(name[0], address[0])
+                .SendTo(name[1], address[1])
+                .SendTo(name[2], address[2])
+                .Create();
+
+            var modified = new Customer()
+            {
+                ID = initial.ID,
+                Name = EXPECTED_NAME,
+                EmailAddress = email,
+                CardNo = cardNo
+            };
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = id[0], Name = name[0], Address1 = address[0], LatestOrderDate = DateTime.Now });
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = id[1], Name = name[1], Address1 = address[1], LatestOrderDate = DateTime.Now });
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = id[2], Name = name[2], Address1 = address[2], LatestOrderDate = DateTime.Now });
+
+            Model.CustomerModel.SaveCustomer(modified);
+            var actual = Model.CustomerModel.FindCustomer(initial.ID);
+
+            Assert.AreEqual(EXPECTED_NAME, actual.Name, "得意先名称が一致しない");
+            Assert.AreEqual(name.Length, actual.ShippingAddresses.Count, "お届け先登録数が一致しない");
+            for(int i = 0; i < name.Length; i++)
+            {
+                var found = actual.ShippingAddresses.SingleOrDefault(a => a.CustomerID == initial.ID && a.ID == id[i]);
+                Assert.IsNotNull(found, $"お届け先 {id[i]} が登録されていない");
+                Assert.AreEqual(name[i], found.Name, $"お届け先 {id[i]} の名前が一致しない");
+            }
+            foreach (var shipping in actual.ShippingAddresses)
+            {
+                Assert.IsTrue(id.Contains(shipping.ID), $"登録していないはずの {shipping.ID} が登録されている:Name={shipping.Name}");
+            }
+        }
+
+        [TestMethod]
+        public void UpdateCustomer_ShippingAddressAdded()
+        {
+            var name = "得意先1";
+            var email = "test@localdomain";
+            var cardNo = "1234123412341234";
+            var shipName = new[] { "お届け先1", "お届け先2", "お届け先3", "お届け先4" };
+            var shipAddr = new[] { "住所1", "住所2", "住所3", "住所4" };
+            var shipID = new[] { 1, 2, 3, 4 };
+            var MODIFIED_NAME = "変更後の名前";
+
+            var initial = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs(name).EmailAddressIs(email).CardNoIs(cardNo)
+                .SendTo(shipName[0], shipAddr[0])
+                .SendTo(shipName[1], shipAddr[1])
+                .SendTo(shipName[2], shipAddr[2])
+                .Create();
+
+            var modified = new Customer()
+            {
+                ID = initial.ID,
+                Name = MODIFIED_NAME,
+                EmailAddress = email,
+                CardNo = cardNo
+            };
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = shipID[0], Name = shipName[0], Address1 = shipName[0], LatestOrderDate = DateTime.Now });
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = shipID[1], Name = shipName[1], Address1 = shipName[1], LatestOrderDate = DateTime.Now });
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = shipID[2], Name = shipName[2], Address1 = shipName[2], LatestOrderDate = DateTime.Now });
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = shipID[3], Name = shipName[3], Address1 = shipAddr[3], LatestOrderDate = DateTime.Now });
+
+            Model.CustomerModel.SaveCustomer(modified);
+            var actual = Model.CustomerModel.FindCustomer(initial.ID);
+
+            Assert.AreEqual(MODIFIED_NAME, actual.Name, "得意先名称が一致しない");
+            Assert.AreEqual(shipName.Length, actual.ShippingAddresses.Count, "お届け先登録数が一致しない");
+            for (int i = 0; i < shipName.Length; i++)
+            {
+                var found = actual.ShippingAddresses.SingleOrDefault(a => a.CustomerID == initial.ID && a.ID == shipID[i]);
+                Assert.IsNotNull(found, $"お届け先 {shipID[i]} が登録されていない");
+                Assert.AreEqual(shipName[i], found.Name, $"お届け先 {shipID[i]} の名前が一致しない");
+            }
+            foreach (var shipping in actual.ShippingAddresses)
+            {
+                Assert.IsTrue(shipID.Contains(shipping.ID), $"登録していないはずの {shipping.ID} が登録されている:Name={shipping.Name}");
+            }
+        }
+
+        [TestMethod]
+        public void UpdateCustomer_ShippingAddressRemoved()
+        {
+            var name = "得意先1";
+            var email = "test@localdomain";
+            var cardNo = "1234123412341234";
+            var MODIFIED_NAME = "変更後の名前";
+            var initialID = 0;
+
+            // 初期登録するお届け先
+            var shipName = new[] { "お届け先1", "お届け先2", "お届け先3", "お届け先4" };
+            var shipAddr = new[] { "住所1", "住所2", "住所3", "住所4" };
+            var shipID = new[] { 1, 2, 3, 4 };
+
+            // お届け先確認用：初期登録から「お届け先3」を除いたもの
+            var newShipName = new[] { "お届け先1", "お届け先2", "お届け先4" };
+            var newShipID = new[] { 1, 2, 4 };
+
+            var initial = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs(name).EmailAddressIs(email).CardNoIs(cardNo)
+                .SendTo(shipName[0], shipAddr[0])
+                .SendTo(shipName[1], shipAddr[1])
+                .SendTo(shipName[2], shipAddr[2])
+                .SendTo(shipName[3], shipAddr[3])
+                .Create();
+            initialID = initial.ID;
+
+            var modified = new Customer()
+            {
+                ID = initial.ID,
+                Name = MODIFIED_NAME,
+                EmailAddress = email,
+                CardNo = cardNo
+            };
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initialID, ID = shipID[0], Name = shipName[0], Address1 = shipName[0], LatestOrderDate = DateTime.Now });
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initialID, ID = shipID[1], Name = shipName[1], Address1 = shipName[1], LatestOrderDate = DateTime.Now });
+            modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initialID, ID = shipID[3], Name = shipName[3], Address1 = shipAddr[3], LatestOrderDate = DateTime.Now });
+
+            Model.CustomerModel.SaveCustomer(modified);
+
+            var actual = Model.CustomerModel.FindCustomer(initialID);
+
+
+            Assert.AreEqual(MODIFIED_NAME, actual.Name, "得意先名称が一致しない");
+            Assert.AreEqual(newShipID.Length, actual.ShippingAddresses.Count, "お届け先登録数が一致しない");
+            for (int i = 0; i < newShipID.Length; i++)
+            {
+                var found = actual.ShippingAddresses.SingleOrDefault(a => a.CustomerID == initialID && a.ID == newShipID[i]);
+                Assert.IsNotNull(found, $"お届け先 {newShipID[i]} が登録されていない");
+                Assert.AreEqual(newShipName[i], found.Name, $"お届け先 {newShipID[i]} の名前が一致しない");
+            }
+            foreach (var shipping in actual.ShippingAddresses)
+            {
+                Assert.IsTrue(newShipID.Contains(shipping.ID), $"登録していないはずの {shipping.ID} が登録されている:Name={shipping.Name}");
+            }
+        }
     }
 }

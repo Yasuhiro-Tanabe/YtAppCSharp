@@ -314,12 +314,14 @@ namespace MemorieDeFleurs.Models
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                var customer = context.Customers
-                    .Include(c => c.ShippingAddresses)
-                    .Single(c => c.ID == id);
-
-                return customer;
+                return FindCustomer(context, id);
             }
+        }
+        private Customer FindCustomer(MemorieDeFleursDbContext context, int id)
+        {
+            return context.Customers
+                .Include(c => c.ShippingAddresses)
+                .SingleOrDefault(c => c.ID == id);
         }
 
         public IEnumerable<Customer> FindAllCustomers()
@@ -331,6 +333,7 @@ namespace MemorieDeFleurs.Models
                     .ToList().AsEnumerable();
             }
         }
+
         public void RemoveCustomer(int customerID)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -377,6 +380,106 @@ namespace MemorieDeFleurs.Models
                 context.SaveChanges();
             }
         }
+
+        public void SaveCustomer(Customer customer)
+        {
+            using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(customer.ID.ToString());
+                    SaveCustomer(context, customer);
+                    transaction.Commit();
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(customer.ID.ToString());
+                }
+            }
+        }
+        public void SaveCustomer(MemorieDeFleursDbContext context, Customer customer)
+        {
+            var found = FindCustomer(context, customer.ID);
+            if(found == null)
+            {
+                context.Customers.Add(customer);
+            }
+            else
+            {
+                if(CheckAndModify(() => found.Name != customer.Name, () => found.Name = customer.Name)
+                    || CheckAndModify(() => found.EmailAddress != customer.EmailAddress, () => found.EmailAddress = customer.EmailAddress)
+                    || CheckAndModify(() => found.Password != customer.Password, () => found.Password = customer.Password)
+                    || CheckAndModify(() => found.CardNo != customer.CardNo, () => found.CardNo = customer.CardNo))
+                {
+                    context.Customers.Update(found);
+                }
+
+
+                // found にあって customer にないお届け先を削除
+                foreach(var addr in found.ShippingAddresses)
+                {
+                    var foundShipping = customer.ShippingAddresses
+                        .Where(a => a.CustomerID == addr.CustomerID)
+                        .Where(a => a.ID == addr.ID)
+                        .SingleOrDefault();
+                    if (foundShipping == null)
+                    {
+                        context.ShippingAddresses.Remove(addr);
+                    }
+                    else
+                    {
+                        // 両方に存在するお届け先は、名称等変更があったらそれを反映する
+                        if (CheckAndModify(() => addr.Name != foundShipping.Name, () => addr.Name = foundShipping.Name)
+                            || CheckAndModify(() => addr.Address1 != foundShipping.Address1, () => addr.Address1 = foundShipping.Address1)
+                            || CheckAndModify(() => addr.Address2 != foundShipping.Address2, () => addr.Address2 = foundShipping.Address2)
+                            || CheckAndModify(() => addr.LatestOrderDate != foundShipping.LatestOrderDate, () => addr.LatestOrderDate = foundShipping.LatestOrderDate))
+                        {
+                            context.ShippingAddresses.Update(addr);
+                        }
+                    }
+                }
+
+                // customer にあって found にないお届け先を追加
+                foreach (var addr in customer.ShippingAddresses)
+                {
+                    if(found.ShippingAddresses
+                        .Where(a => a.CustomerID == addr.CustomerID)
+                        .Where(a => a.ID == addr.ID)
+                        .SingleOrDefault() == null)
+                    {
+                        context.ShippingAddresses.Add(addr);
+                    }
+                }
+            }
+            context.SaveChanges();
+        }
+
+        /// <summary>
+        /// 変更チェック：同じロジックが大量発生するのでメソッド化
+        /// </summary>
+        /// <param name="check">判定文</param>
+        /// <param name="modify">値の変更文</param>
+        /// <returns>判定結果：modify() が実行されたかどうか</returns>
+        private bool CheckAndModify(Func<bool> check, Action modify)
+        {
+            if(check())
+            {
+                modify();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         #endregion // 得意先の登録改廃
 
         #region 受注履歴の登録改廃
