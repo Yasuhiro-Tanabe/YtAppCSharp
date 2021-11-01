@@ -106,7 +106,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Fix { get; } = new FixPartsListCommand();
         public ICommand Append { get; } = new AddToListItemCommand();
         public ICommand Remove { get; } = new RemoveFromListItemCommand();
-        public ICommand Reload { get; } = new ReloadDetailCommand();
         #endregion // コマンド
 
         /// <summary>

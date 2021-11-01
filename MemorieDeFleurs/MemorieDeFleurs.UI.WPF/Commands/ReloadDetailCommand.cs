@@ -7,10 +7,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
     {
         public ReloadDetailCommand() : base()
         {
-            AddAction(typeof(BouquetPartsDetailViewModel), UpdateDetailView);
-            AddAction(typeof(BouquetDetailViewModel), UpdateDetailView);
-            AddAction(typeof(SupplierDetailViewModel), UpdateDetailView);
-            AddAction(typeof(CustomerDetailViewModel), UpdateDetailView);
+            AddAction(typeof(DetailViewModelBase), UpdateDetailView);
         }
 
         public static void UpdateDetailView(object parameter) => (parameter as DetailViewModelBase).Update();

@@ -66,10 +66,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private int _expriy;
         #endregion // プロパティ
 
-        #region コマンド
-        public ICommand Reload { get; } = new ReloadDetailCommand();
-        #endregion // コマンド
-
         public void Update(BouquetPart part)
         {
             _code = part.Code;

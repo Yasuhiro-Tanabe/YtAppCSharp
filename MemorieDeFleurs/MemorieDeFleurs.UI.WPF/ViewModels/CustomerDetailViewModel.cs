@@ -73,10 +73,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ObservableCollection<ShippingAddressViewModel> ShippingAddresses { get; } = new ObservableCollection<ShippingAddressViewModel>();
         #endregion // プロパティ
 
-        #region コマンド
-        public ICommand Reload { get; } = new ReloadDetailCommand();
-        #endregion // コマンド
-
         public void Update(Customer c)
         {
             _id = c.ID;

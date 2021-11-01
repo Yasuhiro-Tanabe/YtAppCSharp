@@ -27,9 +27,12 @@
         <TextBlock Grid.Row="0" Grid.Column="0"
                    VerticalAlignment="Center"
                    Text="仕入先コード："/>
-        <TextBlock Grid.Row="0" Grid.Column="1"
-                   VerticalAlignment="Center"
-                   Text="{Binding SupplierCode, Mode=OneWay}"/>
+        <TextBox Grid.Row="0" Grid.Column="1"
+                 VerticalAlignment="Center"
+                 HorizontalContentAlignment="Right"
+                 Margin="5,1"
+                 TabIndex="1"
+                 Text="{Binding SupplierCode}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
                     Orientation="Horizontal"
                     Margin="5, 0, 10, 0"
@@ -50,7 +53,7 @@
                    Text="仕入先名称："/>
         <TextBox Grid.Row="1" Grid.Column="1"
                  Margin="5,1"
-                 TabIndex="1"
+                 TabIndex="2"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding SupplierName}"/>
 
@@ -59,7 +62,7 @@
                    Text="仕入先住所1："/>
         <TextBox Grid.Row="2" Grid.Column="1"
                  Margin="5,1"
-                 TabIndex="2"
+                 TabIndex="3"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding Address1}"/>
 
@@ -68,7 +71,7 @@
                    Text="仕入先住所2："/>
         <TextBox Grid.Row="3" Grid.Column="1"
                  Margin="5,1"
-                 TabIndex="3"
+                 TabIndex="4"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding Address2}"/>
 
@@ -77,7 +80,7 @@
                    Text="e-メールアドレス："/>
         <TextBox Grid.Row="4" Grid.Column="1"
                  Margin="5,1"
-                 TabIndex="4"
+                 TabIndex="5"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding EmailAddress}"/>
 
@@ -86,7 +89,7 @@
                    Text="電話番号："/>
         <TextBox Grid.Row="5" Grid.Column="1"
                  Margin="5,1"
-                 TabIndex="5"
+                 TabIndex="6"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding TelephoneNumber}"/>
 
@@ -95,7 +98,7 @@
                    Text="FAX 番号："/>
         <TextBox Grid.Row="6" Grid.Column="1"
                  Margin="5,1"
-                 TabIndex="6"
+                 TabIndex="7"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding FaxNumber}"/>
 
