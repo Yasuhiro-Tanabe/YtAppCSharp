@@ -253,7 +253,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 {
                     Code = BouquetCode,
                     Name = BouquetName,
-                    Image = ImageFileName
+                    Image = ImageFileName,
+                    LeadTime = LeadTime
                 };
                 foreach(var parts in SelectedPartListItem)
                 {
