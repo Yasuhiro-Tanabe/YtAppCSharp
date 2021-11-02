@@ -1,9 +1,11 @@
-﻿using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -59,7 +61,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 商品構成
         /// </summary>
-        public string PartsListString { get { return string.Join(", ", SelectedPartListItem.Select(i => $"{i.PartsName} x{i.Quantity}")); } }
+        public string PartsListString { get { return string.Join(", ", SelectedPartListItem.Select(i => $"{i.PartsCode} x{i.Quantity}")); } }
 
         /// <summary>
         /// 商品構成編集中に表示するコントロールの可視性
@@ -129,6 +131,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(LeadTime),
                 nameof(PartsListString), nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
                  nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
+
+            IsDirty = false;
         }
 
         /// <summary>
@@ -234,6 +238,40 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 {
                     Update(bouquet);
                 }
+            }
+        }
+
+        public override void SaveToDatabase()
+        {
+            try
+            {
+                LogUtil.DEBUGLOG_BeginMethod();
+
+                Validate();
+
+                var bouquet = new Bouquet()
+                {
+                    Code = BouquetCode,
+                    Name = BouquetName,
+                    Image = ImageFileName
+                };
+                foreach(var parts in SelectedPartListItem)
+                {
+                    bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = bouquet.Code, PartsCode = parts.PartsCode, Quantity = parts.Quantity });
+                }
+
+                var saved = MemorieDeFleursUIModel.Instance.Save(bouquet);
+
+                Update(saved);
+                LogUtil.Info($"Bouquet {BouquetCode} is saved.");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
             }
         }
     }

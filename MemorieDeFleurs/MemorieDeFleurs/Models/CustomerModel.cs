@@ -381,7 +381,7 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        public void Save(Customer customer)
+        public Customer Save(Customer customer)
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -389,8 +389,10 @@ namespace MemorieDeFleurs.Models
                 try
                 {
                     LogUtil.DEBUGLOG_BeginMethod(customer.ID.ToString());
-                    Save(context, customer);
+                    var saved = Save(context, customer);
                     transaction.Commit();
+                    LogUtil.Info($"Customer {saved.ID} saved.");
+                    return saved;
                 }
                 catch(Exception ex)
                 {
@@ -404,12 +406,12 @@ namespace MemorieDeFleurs.Models
                 }
             }
         }
-        public void Save(MemorieDeFleursDbContext context, Customer customer)
+        public Customer Save(MemorieDeFleursDbContext context, Customer customer)
         {
             var found = FindCustomer(context, customer.ID);
             if(found == null)
             {
-                context.Customers.Add(customer);
+                found = context.Customers.Add(customer).Entity;
             }
             else
             {
@@ -444,6 +446,8 @@ namespace MemorieDeFleurs.Models
                 }
             }
             context.SaveChanges();
+
+            return FindCustomer(found.ID);
         }
         #endregion // 得意先の登録改廃
 

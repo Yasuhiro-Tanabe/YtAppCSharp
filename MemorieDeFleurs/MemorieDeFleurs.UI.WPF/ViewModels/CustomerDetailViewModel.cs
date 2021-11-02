@@ -1,13 +1,11 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
-using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -89,6 +87,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
 
             RaisePropertyChanged(nameof(ID), nameof(EmailAddress), nameof(CustomerName), nameof(Password), nameof(CardNo), nameof(ShippingAddresses));
+
+            IsDirty = false;
         }
 
         public override void Validate()
@@ -128,36 +128,51 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public override void SaveToDatabase()
         {
-            LogUtil.DEBUGLOG_BeginMethod();
-            var customer = new Customer()
+            try
             {
-                ID = ID,
-                Name = CustomerName,
-                EmailAddress = EmailAddress,
-                Password = Password,
-                CardNo = CardNo
-            };
+                LogUtil.DEBUGLOG_BeginMethod();
 
-            if (ShippingAddresses.Count > 0)
-            {
-                foreach (var vm in ShippingAddresses)
+                Validate();
+
+                var customer = new Customer()
                 {
-                    var sa = new ShippingAddress()
-                    {
-                        CustomerID = ID,
-                        ID = vm.ID,
-                        Name = vm.Name,
-                        Address1 = vm.Address1,
-                        Address2 = vm.Address2,
-                        LatestOrderDate = vm.LatestOrderDate
-                    };
-                    customer.ShippingAddresses.Add(sa);
-                }
-            }
+                    ID = ID,
+                    Name = CustomerName,
+                    EmailAddress = EmailAddress,
+                    Password = Password,
+                    CardNo = CardNo
+                };
 
-            MemorieDeFleursUIModel.Instance.SaveCustomer(customer);
-            LogUtil.Info($"Customer {ID} saved.");
-            LogUtil.DEBUGLOG_EndMethod();
+                if (ShippingAddresses.Count > 0)
+                {
+                    foreach (var vm in ShippingAddresses)
+                    {
+                        var sa = new ShippingAddress()
+                        {
+                            CustomerID = ID,
+                            ID = vm.ID,
+                            Name = vm.Name,
+                            Address1 = vm.Address1,
+                            Address2 = vm.Address2,
+                            LatestOrderDate = vm.LatestOrderDate
+                        };
+                        customer.ShippingAddresses.Add(sa);
+                    }
+                }
+
+                var saved = MemorieDeFleursUIModel.Instance.Save(customer);
+                Update(saved);
+
+                LogUtil.Info($"Customer {ID} saved.");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
         }
     }
 }

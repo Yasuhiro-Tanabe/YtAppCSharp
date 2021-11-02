@@ -129,6 +129,16 @@ namespace MemorieDeFleurs.UI.WPF.Model
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             Model.BouquetModel.RemoveBouquetParts(partsCode);
         }
+
+        /// <summary>
+        /// 単品をデータベースに保存する
+        /// </summary>
+        /// <param name="part">単品エンティティオブジェクト</param>
+        public BouquetPart Save(BouquetPart part)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.BouquetModel.Save(part);
+        }
         #endregion // 単品の操作
 
         #region 商品と商品構成の操作
@@ -161,6 +171,16 @@ namespace MemorieDeFleurs.UI.WPF.Model
         {
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             return Model.BouquetModel.FindBouquet(bouquetCode);
+        }
+
+        /// <summary>
+        /// 商品をデータベースに保存する
+        /// </summary>
+        /// <param name="bouquet">商品エンティティオブジェクト</param>
+        public Bouquet Save(Bouquet bouquet)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.BouquetModel.Save(bouquet);
         }
         #endregion // 商品と商品構成の操作
 
@@ -195,6 +215,16 @@ namespace MemorieDeFleurs.UI.WPF.Model
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             Model.SupplierModel.RemoveSupplier(supplierCode);
         }
+
+        /// <summary>
+        /// 得意先をデータベースに保存する
+        /// </summary>
+        /// <param name="supplier">得意先エンティティオブジェクト</param>
+        public Supplier Save(Supplier supplier)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.SupplierModel.Save(supplier);
+        }
         #endregion // 仕入先と単品仕入先の操作
 
         #region 得意先の操作
@@ -216,10 +246,10 @@ namespace MemorieDeFleurs.UI.WPF.Model
             Model.CustomerModel.RemoveCustomer(id);
         }
 
-        public void SaveCustomer(Customer customer)
+        public Customer Save(Customer customer)
         {
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
-            MemorieDeFleursUIModel.Instance.SaveCustomer(customer);
+            return Model.CustomerModel.Save(customer);
         }
         #endregion // 得意先の操作
 

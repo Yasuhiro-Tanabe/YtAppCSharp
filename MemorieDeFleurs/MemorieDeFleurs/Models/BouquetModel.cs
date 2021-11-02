@@ -405,7 +405,7 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        public void Save(BouquetPart parts)
+        public BouquetPart Save(BouquetPart parts)
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -413,9 +413,10 @@ namespace MemorieDeFleurs.Models
                 try
                 {
                     LogUtil.DEBUGLOG_BeginMethod(parts.Code);
-                    Save(context, parts);
+                    var saved = Save(context, parts);
                     transaction.Commit();
-                    LogUtil.Info($"Bouquet parts {parts.Code} saved.");
+                    LogUtil.Info($"Bouquet parts {saved.Code} saved.");
+                    return saved;
                 }
                 catch(Exception ex)
                 {
@@ -429,12 +430,12 @@ namespace MemorieDeFleurs.Models
                 }
             }
         }
-        private void Save(MemorieDeFleursDbContext context, BouquetPart parts)
+        private BouquetPart Save(MemorieDeFleursDbContext context, BouquetPart parts)
         {
             var found = FindBouquetPart(context, parts.Code);
             if(found == null)
             {
-                context.BouquetParts.Add(parts);
+                found = context.BouquetParts.Add(parts).Entity;
             }
             else
             {
@@ -466,6 +467,8 @@ namespace MemorieDeFleurs.Models
                 }
             }
             context.SaveChanges();
+
+            return FindBouquetPart(context, found.Code);
         }
         #endregion // 単品の登録改廃
 
@@ -551,7 +554,7 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
         }
 
-        public void Save(Bouquet bouquet)
+        public Bouquet Save(Bouquet bouquet)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -559,9 +562,10 @@ namespace MemorieDeFleurs.Models
                 try
                 {
                     LogUtil.DEBUGLOG_BeginMethod(bouquet.Code);
-                    Save(context, bouquet);
+                    var saved = Save(context, bouquet);
                     transaction.Commit();
-                    LogUtil.Info($"Bouquet {bouquet.Code} saved.");
+                    LogUtil.Info($"Bouquet {saved.Code} saved.");
+                    return saved;
                 }
                 catch(Exception ex)
                 {
@@ -575,12 +579,12 @@ namespace MemorieDeFleurs.Models
                 }
             }
         }
-        private void Save(MemorieDeFleursDbContext context, Bouquet bouquet)
+        private Bouquet Save(MemorieDeFleursDbContext context, Bouquet bouquet)
         {
             var found = FindBouquet(context, bouquet.Code);
             if(found == null)
             {
-                context.Bouquets.Add(bouquet);
+                found = context.Bouquets.Add(bouquet).Entity;
             }
             else
             {
@@ -614,6 +618,8 @@ namespace MemorieDeFleurs.Models
                 }
             }
             context.SaveChanges();
+
+            return FindBouquet(context, found.Code);
         }
         #endregion // 商品の登録改廃
 

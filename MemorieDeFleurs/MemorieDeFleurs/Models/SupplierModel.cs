@@ -521,7 +521,7 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        public void Save(Supplier supplier)
+        public Supplier Save(Supplier supplier)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -529,9 +529,10 @@ namespace MemorieDeFleurs.Models
                 try
                 {
                     LogUtil.DEBUGLOG_BeginMethod(supplier.Code.ToString());
-                    Save(context, supplier);
+                    var saved = Save(context, supplier);
                     transaction.Commit();
-                    LogUtil.Info($"Supplier {supplier.Code} saved.");
+                    LogUtil.Info($"Supplier {saved.Code} saved.");
+                    return saved;
                 }
                 catch(Exception ex)
                 {
@@ -546,12 +547,12 @@ namespace MemorieDeFleurs.Models
             }
 
         }
-        private void Save(MemorieDeFleursDbContext context, Supplier supplier)
+        private Supplier Save(MemorieDeFleursDbContext context, Supplier supplier)
         {
             var found = FindSupplier(supplier.Code);
             if(found == null)
             {
-                context.Suppliers.Add(supplier);
+                found = context.Suppliers.Add(supplier).Entity;
             }
             else
             {
@@ -583,6 +584,8 @@ namespace MemorieDeFleurs.Models
                 }
             }
             context.SaveChanges();
+
+            return FindSupplier(context, found.Code);
         }
         #endregion // Supplier の生成・更新・削除
 

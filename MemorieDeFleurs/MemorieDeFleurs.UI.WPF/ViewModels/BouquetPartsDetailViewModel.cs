@@ -1,11 +1,11 @@
-﻿using MemorieDeFleurs.Models.Entities;
-using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
+using System;
 using System.Windows;
-using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -74,6 +74,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _leadTime = part.LeadTime;
             _expriy = part.ExpiryDate;
             RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(QuantitiesParLot), nameof(LeadTime), nameof(ExpiryDate));
+
+            IsDirty = false;
         }
 
         /// <summary>
@@ -126,6 +128,39 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 {
                     Update(parts);
                 }
+            }
+        }
+
+        public override void SaveToDatabase()
+        {
+            try
+            {
+                LogUtil.DEBUGLOG_BeginMethod();
+
+                Validate();
+
+                var parts = new BouquetPart()
+                {
+                    Code = PartsCode,
+                    Name = PartsName,
+                    QuantitiesPerLot = QuantitiesParLot,
+                    LeadTime = LeadTime,
+                    ExpiryDate = ExpiryDate
+                };
+
+                var saved = MemorieDeFleursUIModel.Instance.Save(parts);
+
+                Update(saved);
+
+                LogUtil.Info($"Bouquet parts {PartsCode} is saved.");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
             }
         }
     }

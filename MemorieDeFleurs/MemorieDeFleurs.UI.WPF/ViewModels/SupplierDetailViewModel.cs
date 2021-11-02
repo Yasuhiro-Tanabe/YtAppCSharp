@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
@@ -163,9 +164,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedCandidate = null;
 
             _editing = false;
+
             RaisePropertyChanged(nameof(SupplierCode), nameof(SupplierName), nameof(Address1), nameof(Address2),
                 nameof(EmailAddress), nameof(TelephoneNumber), nameof(FaxNumber), nameof(PartsText),
                 nameof(EditingModeVisivility), nameof(ViewModeVisivility));
+
+            IsDirty = false;
         }
 
         public override void Update()
@@ -260,6 +264,45 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             RaisePropertyChanged(nameof(SupplingParts), nameof(SelectedSuppling), nameof(PartsCandidate), nameof(SelectedCandidate),
                 nameof(EditingModeVisivility), nameof(ViewModeVisivility));
+        }
+
+        public override void SaveToDatabase()
+        {
+            try
+            {
+                LogUtil.DEBUGLOG_BeginMethod();
+
+                Validate();
+
+                var supplier = new Supplier()
+                {
+                    Code = SupplierCode,
+                    Name = SupplierName,
+                    Address1 = Address1,
+                    Address2 = Address2,
+                    EmailAddress = EmailAddress,
+                    Telephone = TelephoneNumber,
+                    Fax = FaxNumber
+                };
+                foreach(var parts in SupplingParts)
+                {
+                    supplier.SupplyParts.Add(new PartSupplier() { SupplierCode = supplier.Code, PartCode = parts.PartsCode });
+                }
+
+                var saved = MemorieDeFleursUIModel.Instance.Save(supplier);
+
+                Update(saved);
+
+                LogUtil.Info($"Supplier {SupplierCode} is saved.");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
         }
     }
 }

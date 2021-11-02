@@ -36,7 +36,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public PartsListItemViewModel(BouquetPartsList item)
         {
-            _code = item.BouquetCode;
+            _code = item.PartsCode;
             _name = item.Part.Name;
             _quantity = item.Quantity;
             _leadtime = item.Part.LeadTime;

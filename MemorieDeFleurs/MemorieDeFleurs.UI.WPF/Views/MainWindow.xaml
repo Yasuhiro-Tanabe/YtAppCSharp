@@ -7,7 +7,7 @@
         xmlns:v="clr-namespace:MemorieDeFleurs.UI.WPF.Views"
         xmlns:vh="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}" Height="450" Width="800">
+        Title="{Binding WindowTitle}" Height="650" Width="800">
     <Window.DataContext>
         <vm:MainWindowViiewModel/>
     </Window.DataContext>
@@ -16,7 +16,7 @@
             <RowDefinition Height="20"/>
             <RowDefinition Height="*" MinHeight="50"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*" MinHeight="50"/>
+            <RowDefinition Height="100" MinHeight="50"/>
         </Grid.RowDefinitions>
 
         <Menu Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
