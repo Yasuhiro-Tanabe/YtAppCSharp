@@ -199,7 +199,7 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         [TestMethod]
-        public void UpdateCastomer_NewCustomer()
+        public void Save_NewCustomer()
         {
             var expected = new Customer()
             {
@@ -215,7 +215,7 @@ namespace MemorieDeFleursTest.ModelTest
 
             Assert.IsNull(Model.CustomerModel.FindCustomer(expected.ID), $"得意先ID {expected.ID} が未使用ではない");
 
-            Model.CustomerModel.SaveCustomer(expected);
+            Model.CustomerModel.Save(expected);
             var actual = Model.CustomerModel.FindCustomer(expected.ID);
 
             Assert.AreEqual(expected.Name, actual.Name, "得意先名称が一致しない");
@@ -235,7 +235,7 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         [TestMethod]
-        public void UpdateCustomer_CustomerNameChanged()
+        public void Save_CustomerNameChanged()
         {
             var email = "test@localdomain";
             var cardNo = "1234123412341234";
@@ -262,7 +262,7 @@ namespace MemorieDeFleursTest.ModelTest
             modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = id[1], Name = name[1], Address1 = address[1], LatestOrderDate = DateTime.Now });
             modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = id[2], Name = name[2], Address1 = address[2], LatestOrderDate = DateTime.Now });
 
-            Model.CustomerModel.SaveCustomer(modified);
+            Model.CustomerModel.Save(modified);
             var actual = Model.CustomerModel.FindCustomer(initial.ID);
 
             Assert.AreEqual(EXPECTED_NAME, actual.Name, "得意先名称が一致しない");
@@ -280,7 +280,7 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         [TestMethod]
-        public void UpdateCustomer_ShippingAddressAdded()
+        public void Save_ShippingAddressAdded()
         {
             var name = "得意先1";
             var email = "test@localdomain";
@@ -309,7 +309,7 @@ namespace MemorieDeFleursTest.ModelTest
             modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = shipID[2], Name = shipName[2], Address1 = shipName[2], LatestOrderDate = DateTime.Now });
             modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initial.ID, ID = shipID[3], Name = shipName[3], Address1 = shipAddr[3], LatestOrderDate = DateTime.Now });
 
-            Model.CustomerModel.SaveCustomer(modified);
+            Model.CustomerModel.Save(modified);
             var actual = Model.CustomerModel.FindCustomer(initial.ID);
 
             Assert.AreEqual(MODIFIED_NAME, actual.Name, "得意先名称が一致しない");
@@ -327,7 +327,7 @@ namespace MemorieDeFleursTest.ModelTest
         }
 
         [TestMethod]
-        public void UpdateCustomer_ShippingAddressRemoved()
+        public void Save_ShippingAddressRemoved()
         {
             var name = "得意先1";
             var email = "test@localdomain";
@@ -364,7 +364,7 @@ namespace MemorieDeFleursTest.ModelTest
             modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initialID, ID = shipID[1], Name = shipName[1], Address1 = shipName[1], LatestOrderDate = DateTime.Now });
             modified.ShippingAddresses.Add(new ShippingAddress() { CustomerID = initialID, ID = shipID[3], Name = shipName[3], Address1 = shipAddr[3], LatestOrderDate = DateTime.Now });
 
-            Model.CustomerModel.SaveCustomer(modified);
+            Model.CustomerModel.Save(modified);
 
             var actual = Model.CustomerModel.FindCustomer(initialID);
 

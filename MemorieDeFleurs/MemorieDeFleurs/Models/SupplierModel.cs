@@ -520,6 +520,70 @@ namespace MemorieDeFleurs.Models
                 context.SaveChanges();
             }
         }
+
+        public void Save(Supplier supplier)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(supplier.Code.ToString());
+                    Save(context, supplier);
+                    transaction.Commit();
+                    LogUtil.Info($"Supplier {supplier.Code} saved.");
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(supplier.Code.ToString());
+                }
+            }
+
+        }
+        private void Save(MemorieDeFleursDbContext context, Supplier supplier)
+        {
+            var found = FindSupplier(supplier.Code);
+            if(found == null)
+            {
+                context.Suppliers.Add(supplier);
+            }
+            else
+            {
+                if(found.CheckAndModify(supplier))
+                {
+                    context.Suppliers.Update(found);
+                }
+
+                foreach(var parts in found.SupplyParts)
+                {
+                    if(supplier.SupplyParts.SingleOrDefault(p => p.PartCode == parts.PartCode) == null)
+                    {
+                        // found にあって supplier にない SupplyParts を削除
+                        context.PartsSuppliers.Remove(parts);
+                    }
+                    else
+                    {
+                        // 何もしない：2つのキー(仕入先コードと花束コード)以外にDB上のカラムがないので、更新は発生しない。
+                    }
+                }
+
+                foreach(var parts in supplier.SupplyParts)
+                {
+                    if(found.SupplyParts.SingleOrDefault(p => p.PartCode == parts.PartCode) == null)
+                    {
+                        // supplier にあって found にない SupplyParts を追加
+                        context.PartsSuppliers.Add(parts);
+                    }
+                }
+            }
+            context.SaveChanges();
+        }
         #endregion // Supplier の生成・更新・削除
 
         #region 発注

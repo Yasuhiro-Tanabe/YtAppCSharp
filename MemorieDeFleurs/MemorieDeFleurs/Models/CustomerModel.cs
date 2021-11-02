@@ -381,7 +381,7 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        public void SaveCustomer(Customer customer)
+        public void Save(Customer customer)
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -389,7 +389,7 @@ namespace MemorieDeFleurs.Models
                 try
                 {
                     LogUtil.DEBUGLOG_BeginMethod(customer.ID.ToString());
-                    SaveCustomer(context, customer);
+                    Save(context, customer);
                     transaction.Commit();
                 }
                 catch(Exception ex)
@@ -404,7 +404,7 @@ namespace MemorieDeFleurs.Models
                 }
             }
         }
-        public void SaveCustomer(MemorieDeFleursDbContext context, Customer customer)
+        public void Save(MemorieDeFleursDbContext context, Customer customer)
         {
             var found = FindCustomer(context, customer.ID);
             if(found == null)
@@ -413,73 +413,38 @@ namespace MemorieDeFleurs.Models
             }
             else
             {
-                if(CheckAndModify(() => found.Name != customer.Name, () => found.Name = customer.Name)
-                    || CheckAndModify(() => found.EmailAddress != customer.EmailAddress, () => found.EmailAddress = customer.EmailAddress)
-                    || CheckAndModify(() => found.Password != customer.Password, () => found.Password = customer.Password)
-                    || CheckAndModify(() => found.CardNo != customer.CardNo, () => found.CardNo = customer.CardNo))
+                if(found.CheckAndModify(customer))
                 {
                     context.Customers.Update(found);
                 }
 
 
-                // found にあって customer にないお届け先を削除
                 foreach(var addr in found.ShippingAddresses)
                 {
-                    var foundShipping = customer.ShippingAddresses
-                        .Where(a => a.CustomerID == addr.CustomerID)
-                        .Where(a => a.ID == addr.ID)
-                        .SingleOrDefault();
+                    var foundShipping = customer.ShippingAddresses.SingleOrDefault(a => a.ID == addr.ID);
                     if (foundShipping == null)
                     {
+                        // found にあって customer にないお届け先を削除
                         context.ShippingAddresses.Remove(addr);
                     }
-                    else
+                    else if (addr.CheckAndModify(foundShipping))
                     {
                         // 両方に存在するお届け先は、名称等変更があったらそれを反映する
-                        if (CheckAndModify(() => addr.Name != foundShipping.Name, () => addr.Name = foundShipping.Name)
-                            || CheckAndModify(() => addr.Address1 != foundShipping.Address1, () => addr.Address1 = foundShipping.Address1)
-                            || CheckAndModify(() => addr.Address2 != foundShipping.Address2, () => addr.Address2 = foundShipping.Address2)
-                            || CheckAndModify(() => addr.LatestOrderDate != foundShipping.LatestOrderDate, () => addr.LatestOrderDate = foundShipping.LatestOrderDate))
-                        {
-                            context.ShippingAddresses.Update(addr);
-                        }
+                        context.ShippingAddresses.Update(addr);
                     }
                 }
 
-                // customer にあって found にないお届け先を追加
                 foreach (var addr in customer.ShippingAddresses)
                 {
-                    if(found.ShippingAddresses
-                        .Where(a => a.CustomerID == addr.CustomerID)
-                        .Where(a => a.ID == addr.ID)
-                        .SingleOrDefault() == null)
+                    if(found.ShippingAddresses.SingleOrDefault(a => a.ID == addr.ID) == null)
                     {
+                        // customer にあって found にないお届け先を追加
                         context.ShippingAddresses.Add(addr);
                     }
                 }
             }
             context.SaveChanges();
         }
-
-        /// <summary>
-        /// 変更チェック：同じロジックが大量発生するのでメソッド化
-        /// </summary>
-        /// <param name="check">判定文</param>
-        /// <param name="modify">値の変更文</param>
-        /// <returns>判定結果：modify() が実行されたかどうか</returns>
-        private bool CheckAndModify(Func<bool> check, Action modify)
-        {
-            if(check())
-            {
-                modify();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         #endregion // 得意先の登録改廃
 
         #region 受注履歴の登録改廃

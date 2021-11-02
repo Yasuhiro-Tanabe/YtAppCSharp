@@ -333,11 +333,15 @@ namespace MemorieDeFleurs.Models
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return context.BouquetParts
-                    .Include(p => p.Suppliers)
-                    .ThenInclude(i => i.Supplier)
-                    .SingleOrDefault(p => p.Code == partCode);
+                return FindBouquetPart(context, partCode);
             }
+        }
+        private BouquetPart FindBouquetPart(MemorieDeFleursDbContext context, string partCode)
+        {
+            return context.BouquetParts
+                .Include(p => p.Suppliers)
+                .ThenInclude(i => i.Supplier)
+                .SingleOrDefault(p => p.Code == partCode);
         }
 
         /// <summary>
@@ -400,6 +404,69 @@ namespace MemorieDeFleurs.Models
                 context.SaveChanges();
             }
         }
+
+        public void Save(BouquetPart parts)
+        {
+            using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(parts.Code);
+                    Save(context, parts);
+                    transaction.Commit();
+                    LogUtil.Info($"Bouquet parts {parts.Code} saved.");
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(parts.Code);
+                }
+            }
+        }
+        private void Save(MemorieDeFleursDbContext context, BouquetPart parts)
+        {
+            var found = FindBouquetPart(context, parts.Code);
+            if(found == null)
+            {
+                context.BouquetParts.Add(parts);
+            }
+            else
+            {
+                if(found.CheckAndModify(parts))
+                {
+                    context.BouquetParts.Update(found);
+                }
+
+                foreach(var supplier in found.Suppliers)
+                {
+                    if(parts.Suppliers.SingleOrDefault(s => s.SupplierCode == supplier.SupplierCode) == null)
+                    {
+                        // found にあって supplier にない SupplyParts を削除
+                        context.PartsSuppliers.Remove(supplier);
+                    }
+                    else
+                    {
+                        // 何もしない：2つのキー(仕入先コードと花束コード)以外にDB上のカラムがないので、更新は発生しない。
+                    }
+                }
+
+                foreach(var supplier in parts.Suppliers)
+                {
+                    if (found.Suppliers.SingleOrDefault(s => s.SupplierCode == supplier.SupplierCode) == null)
+                    {
+                        // supplier にあって found にない SupplyParts を追加
+                        context.PartsSuppliers.Add(supplier);
+                    }
+                }
+            }
+            context.SaveChanges();
+        }
         #endregion // 単品の登録改廃
 
         #region 商品の登録改廃
@@ -412,11 +479,15 @@ namespace MemorieDeFleurs.Models
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return context.Bouquets
-                    .Include(b => b.PartsList)
-                    .ThenInclude(p => p.Part)
-                    .SingleOrDefault(b => b.Code == bouquetCode);
+                return FindBouquet(context, bouquetCode);
             }
+        }
+        private Bouquet FindBouquet(MemorieDeFleursDbContext context, string bouquetCode)
+        {
+            return context.Bouquets
+                .Include(b => b.PartsList)
+                .ThenInclude(p => p.Part)
+                .SingleOrDefault(b => b.Code == bouquetCode);
         }
 
         /// <summary>
@@ -477,6 +548,71 @@ namespace MemorieDeFleurs.Models
                 context.Bouquets.Remove(bouquet);
             }
 
+            context.SaveChanges();
+        }
+
+        public void Save(Bouquet bouquet)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(bouquet.Code);
+                    Save(context, bouquet);
+                    transaction.Commit();
+                    LogUtil.Info($"Bouquet {bouquet.Code} saved.");
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(bouquet.Code);
+                }
+            }
+        }
+        private void Save(MemorieDeFleursDbContext context, Bouquet bouquet)
+        {
+            var found = FindBouquet(context, bouquet.Code);
+            if(found == null)
+            {
+                context.Bouquets.Add(bouquet);
+            }
+            else
+            {
+                if(found.CheckAndModify(bouquet))
+                {
+                    context.Bouquets.Update(found);
+                }
+
+                foreach(var parts in found.PartsList)
+                {
+                    var foundParts = bouquet.PartsList.SingleOrDefault(p => p.PartsCode == parts.PartsCode);
+                    if(foundParts == null)
+                    {
+                        // found にあって bouquet にない PartsList を削除
+                        context.PartsList.Remove(parts);
+                    }
+                    else if(parts.CheckAndModify(foundParts))
+                    {
+                        // found と bouquet に共通する PartsList に値の変更があったら更新
+                        context.PartsList.Update(parts);
+                    }
+                }
+
+                foreach(var parts in bouquet.PartsList)
+                {
+                    if(found.PartsList.SingleOrDefault(p => p.PartsCode == parts.PartsCode) == null)
+                    {
+                        // bouquet にあって found にない PartsList を削除
+                        context.PartsList.Add(parts);
+                    }
+                }
+            }
             context.SaveChanges();
         }
         #endregion // 商品の登録改廃

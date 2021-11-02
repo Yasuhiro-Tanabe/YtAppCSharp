@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace MemorieDeFleursTest.ModelTest
@@ -365,6 +366,153 @@ namespace MemorieDeFleursTest.ModelTest
             {
                 Assert.AreEqual(1, actualSuppliers.Count(s => s.Code == supplier.Code), $"仕入先{supplier.Code} の登録数が一致しない");
             }
+        }
+
+        private class SupplyPartsComarator : IEqualityComparer<PartSupplier>
+        {
+            public bool Equals(PartSupplier x, PartSupplier y)
+            {
+                return x.SupplierCode == y.SupplierCode ? x.PartCode == y.PartCode : true;
+            }
+
+            public int GetHashCode([DisallowNull] PartSupplier obj)
+            {
+                return obj.SupplierCode % 0xFFFF + obj.PartCode.GetHashCode();
+            }
+        }
+
+        [TestMethod]
+        public void Save_NewSupplier()
+        {
+            var ba001 = "BA001";
+            var ba002 = "BA002";
+
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba001).PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba002).PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+
+            var code = 1;
+            var expected = new Supplier()
+            {
+                Code = code,
+                Name = expectedName,
+                Address1 = expectedAddress,
+            };
+
+            expected.SupplyParts.Add(new PartSupplier() { SupplierCode = code, PartCode = ba001 });
+            expected.SupplyParts.Add(new PartSupplier() { SupplierCode = code, PartCode = ba002 });
+
+            Assert.IsNull(Model.SupplierModel.FindSupplier(code), $"仕入先コード {code} はすでに使用されている");
+            Model.SupplierModel.Save(expected);
+
+            var actual = Model.SupplierModel.FindSupplier(code);
+            Assert.IsNotNull(actual, $"仕入先 {code} が登録されていない");
+
+            Assert.AreEqual(expected.Name, actual.Name, "仕入先名称が一致しない");
+            Assert.AreEqual(expected.SupplyParts.Count, actual.SupplyParts.Count, "仕入可能な単品数が一致しない");
+            Assert.IsNotNull(actual.SupplyParts.SingleOrDefault(p => p.PartCode == ba001), $"単品 {ba001} が登録されていない");
+            Assert.IsNotNull(actual.SupplyParts.SingleOrDefault(p => p.PartCode == ba002), $"単品 {ba002} が登録されていない");
+
+            var otherParts = actual.SupplyParts.Except(expected.SupplyParts, new SupplyPartsComarator());
+            Assert.AreEqual(0, otherParts.Count(), $"想定外の単品が登録されている：{string.Join(", ", otherParts.Select(p => p.PartCode))}");
+        }
+
+        [TestMethod]
+        public void Save_NameChanged()
+        {
+            var ba001 = "BA001";
+            var ba002 = "BA002";
+
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba001).PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba002).PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+
+            var code = Model.SupplierModel.GetSupplierBuilder().NameIs(expectedName).AddressIs(expectedAddress).SupplyParts("BA001", "BA002").Create().Code;
+
+            var OTHER_NAME = "別の名前";
+            var supplier = new Supplier()
+            {
+                Code = code,
+                Name = OTHER_NAME,
+                Address1 = expectedAddress,
+            };
+            supplier.SupplyParts.Add(new PartSupplier() { SupplierCode = code, PartCode = ba001 });
+            supplier.SupplyParts.Add(new PartSupplier() { SupplierCode = code, PartCode = ba002 });
+
+            Model.SupplierModel.Save(supplier);
+
+            var actual = Model.SupplierModel.FindSupplier(code);
+            Assert.AreEqual(OTHER_NAME, actual.Name, "仕入先名称が一致しない");
+            Assert.AreEqual(supplier.SupplyParts.Count, actual.SupplyParts.Count, "仕入可能な単品数が一致しない");
+            Assert.IsNotNull(actual.SupplyParts.SingleOrDefault(p => p.PartCode == ba001), $"単品 {ba001} が登録されていない");
+            Assert.IsNotNull(actual.SupplyParts.SingleOrDefault(p => p.PartCode == ba002), $"単品 {ba002} が登録されていない");
+
+            var otherParts = actual.SupplyParts.Except(supplier.SupplyParts, new SupplyPartsComarator());
+            Assert.AreEqual(0, otherParts.Count(), $"想定外の単品が登録されている：{string.Join(", ", otherParts.Select(p => p.PartCode))}");
+        }
+
+        [TestMethod]
+        public void Save_SupplyPartsRemoved()
+        {
+            var ba001 = "BA001";
+            var ba002 = "BA002";
+
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba001).PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba002).PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+
+            var code = Model.SupplierModel.GetSupplierBuilder().NameIs(expectedName).AddressIs(expectedAddress).SupplyParts("BA001", "BA002").Create().Code;
+
+            var OTHER_NAME = "別の名前";
+            var supplier = new Supplier()
+            {
+                Code = code,
+                Name = OTHER_NAME,
+                Address1 = expectedAddress,
+            };
+            supplier.SupplyParts.Add(new PartSupplier() { SupplierCode = code, PartCode = ba001 });
+
+            Model.SupplierModel.Save(supplier);
+
+            var actual = Model.SupplierModel.FindSupplier(code);
+            Assert.AreEqual(OTHER_NAME, actual.Name, "仕入先名称が一致しない");
+            Assert.AreEqual(supplier.SupplyParts.Count, actual.SupplyParts.Count, "仕入可能な単品数が一致しない");
+            Assert.IsNotNull(actual.SupplyParts.SingleOrDefault(p => p.PartCode == ba001), $"単品 {ba001} が登録されていない");
+
+            var otherParts = actual.SupplyParts.Except(supplier.SupplyParts, new SupplyPartsComarator());
+            Assert.AreEqual(0, otherParts.Count(), $"想定外の単品が登録されている：{string.Join(", ", otherParts.Select(p => p.PartCode))}");
+        }
+
+        [TestMethod]
+        public void Save_SupplyPartsAdded()
+        {
+            var ba001 = "BA001";
+            var ba002 = "BA002";
+            var gp001 = "GP001";
+
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba001).PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba002).PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(10).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(gp001).PartNameIs("かすみ草").LeadTimeIs(2).QauntityParLotIs(5).ExpiryDateIs(2).Create();
+
+            var code = Model.SupplierModel.GetSupplierBuilder().NameIs(expectedName).AddressIs(expectedAddress).SupplyParts("BA001", "BA002").Create().Code;
+
+            var supplier = new Supplier()
+            {
+                Code = code,
+                Name = expectedName,
+                Address1 = expectedAddress,
+            };
+            supplier.SupplyParts.Add(new PartSupplier() { SupplierCode = code, PartCode = ba001 });
+            supplier.SupplyParts.Add(new PartSupplier() { SupplierCode = code, PartCode = ba002 });
+            supplier.SupplyParts.Add(new PartSupplier() { SupplierCode = code, PartCode = gp001 });
+
+            Model.SupplierModel.Save(supplier);
+
+            var actual = Model.SupplierModel.FindSupplier(code);
+            Assert.AreEqual(supplier.Name, actual.Name, "仕入先名称が一致しない");
+            Assert.AreEqual(supplier.SupplyParts.Count, actual.SupplyParts.Count, "仕入可能な単品数が一致しない");
+            Assert.IsNotNull(actual.SupplyParts.SingleOrDefault(p => p.PartCode == ba001), $"単品 {ba001} が登録されていない");
+
+            var otherParts = actual.SupplyParts.Except(supplier.SupplyParts, new SupplyPartsComarator());
+            Assert.AreEqual(0, otherParts.Count(), $"想定外の単品が登録されている：{string.Join(", ", otherParts.Select(p => p.PartCode))}");
+
         }
     }
 }

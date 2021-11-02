@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace MemorieDeFleursTest.ModelTest
@@ -223,6 +224,179 @@ namespace MemorieDeFleursTest.ModelTest
 
             Assert.AreEqual(expectedBouquets.Count - 1, actualBouquets.Count());
             Assert.AreEqual(0, actualBouquets.Count(b => b.Code == "HT001"));
+        }
+
+        [TestMethod]
+        public void Save_NewBouquetPart()
+        {
+            var code = "BA001";
+            var name = "薔薇(赤)";
+            var parts = new BouquetPart()
+            {
+                Code = code,
+                Name = name,
+                LeadTime = 1,
+                QuantitiesPerLot = 100,
+                ExpiryDate = 3
+            };
+
+            Model.BouquetModel.Save(parts);
+
+            var actual = Model.BouquetModel.FindBouquetPart(code);
+
+            Assert.AreEqual(name, actual.Name);
+        }
+
+        [TestMethod]
+        public void Save_BouquetPartNameChanged()
+        {
+            var code = "BA001";
+            var MODIFIED_NAME = "薔薇(バラ色)";
+
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(code).PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create();
+
+            var parts = new BouquetPart()
+            {
+                Code = code,
+                Name = MODIFIED_NAME,
+                LeadTime = 1,
+                QuantitiesPerLot = 100,
+                ExpiryDate = 3
+            };
+
+            Model.BouquetModel.Save(parts);
+
+            var actual = Model.BouquetModel.FindBouquetPart(code);
+
+            Assert.AreEqual(MODIFIED_NAME, actual.Name);
+        }
+
+        private class PartsListComparer : IEqualityComparer<BouquetPartsList>
+        {
+            public bool Equals(BouquetPartsList x, BouquetPartsList y)
+            {
+                return x.BouquetCode == y.BouquetCode ? x.PartsCode == y.PartsCode : true;
+            }
+
+            public int GetHashCode([DisallowNull] BouquetPartsList obj)
+            {
+                return (obj.BouquetCode + obj.PartsCode).GetHashCode();
+            }
+        }
+
+        [TestMethod]
+        public void Save_NewBouquet()
+        {
+            var ba001 = "BA001";
+
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba001).PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create();
+
+            var ht001 = "HT001";
+            var quantity = 4;
+            var bouquet = new Bouquet()
+            {
+                Code = ht001,
+                Name = "花束-Aセット",
+                LeadTime = 1
+            };
+            bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = ht001, PartsCode = ba001, Quantity = quantity });
+
+            Model.BouquetModel.Save(bouquet);
+
+            var actual = Model.BouquetModel.FindBouquet(ht001);
+            Assert.AreEqual(bouquet.Name, actual.Name, "花束名称が一致しない");
+            Assert.AreEqual(bouquet.PartsList.Count, actual.PartsList.Count, "花束を構成する単品の種類数が一致しない");
+            Assert.AreEqual(ba001, actual.PartsList[0].PartsCode, $"花束を構成する単品が {ba001} ではない");
+            Assert.AreEqual(quantity, actual.PartsList[0].Quantity, $"単品 {ba001} の使用数が一致しない");
+
+            var otherParts = actual.PartsList.Except(bouquet.PartsList, new PartsListComparer());
+            Assert.AreEqual(0, otherParts.Count(), $"余計な単品が花束構成要素として登録されている：{string.Join(",", otherParts.Select(p => p.PartsCode))}");
+        }
+
+        [TestMethod]
+        public void Save_PartsListRemoved()
+        {
+            var ba002 = "BA002";
+            var ba003 = "BA003";
+            var gp001 = "GP001";
+            var cn002 = "CN002";
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba002).PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba003).PartNameIs("薔薇(ピンク)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(gp001).PartNameIs("かすみ草").LeadTimeIs(2).QauntityParLotIs(50).ExpiryDateIs(2).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(cn002).PartNameIs("カーネーション(ピンク)").LeadTimeIs(3).QauntityParLotIs(20).ExpiryDateIs(5).Create();
+
+            var ht004 = "HT004";
+            var name = "結婚式用ブーケ";
+            Model.BouquetModel.GetBouquetBuilder().CodeIs(ht004).NameIs(name).Uses(ba002, 3).Uses(ba003, 5).Uses(gp001, 3).Uses(cn002, 3).Create();
+
+            var bouquet = new Bouquet()
+            {
+                Code = ht004,
+                Name = name,
+                LeadTime = 5,
+            };
+            bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = ht004, PartsCode = ba002, Quantity = 3 });
+            bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = ht004, PartsCode = gp001, Quantity = 3 });
+            bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = ht004, PartsCode = cn002, Quantity = 3 });
+
+            Model.BouquetModel.Save(bouquet);
+
+            var actual = Model.BouquetModel.FindBouquet(ht004);
+
+            Assert.AreEqual(bouquet.PartsList.Count, actual.PartsList.Count, "商品を構成する単品の種類数が一致しない");
+            foreach(var parts in bouquet.PartsList)
+            {
+                Assert.IsNotNull(actual.PartsList.SingleOrDefault(p => p.PartsCode == parts.PartsCode), $"単品 {parts.PartsCode} が登録されていない");
+            }
+            foreach(var parts in actual.PartsList)
+            {
+                Assert.IsNotNull(bouquet.PartsList.SingleOrDefault(p => p.PartsCode == parts.PartsCode), $"想定外の単品 {parts.PartsCode} が登録されている");
+            }
+        }
+
+        [TestMethod]
+        public void Save_PartsListAdded()
+        {
+            var ba001 = "BA001";
+            var ba002 = "BA002";
+            var ba003 = "BA003";
+            var gp001 = "GP001";
+            var cn002 = "CN002";
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba001).PartNameIs("薔薇(赤)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba002).PartNameIs("薔薇(白)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(ba003).PartNameIs("薔薇(ピンク)").LeadTimeIs(1).QauntityParLotIs(100).ExpiryDateIs(3).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(gp001).PartNameIs("かすみ草").LeadTimeIs(2).QauntityParLotIs(50).ExpiryDateIs(2).Create();
+            Model.BouquetModel.GetBouquetPartBuilder().PartCodeIs(cn002).PartNameIs("カーネーション(ピンク)").LeadTimeIs(3).QauntityParLotIs(20).ExpiryDateIs(5).Create();
+
+            var ht004 = "HT004";
+            var name = "結婚式用ブーケ";
+            Model.BouquetModel.GetBouquetBuilder().CodeIs(ht004).NameIs(name).Uses(ba002, 3).Uses(ba003, 5).Uses(gp001, 3).Uses(cn002, 3).Create();
+
+            var bouquet = new Bouquet()
+            {
+                Code = ht004,
+                Name = name,
+                LeadTime = 5,
+            };
+            bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = ht004, PartsCode = ba001, Quantity = 5 });
+            bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = ht004, PartsCode = ba002, Quantity = 5 });
+            bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = ht004, PartsCode = ba003, Quantity = 5 });
+            bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = ht004, PartsCode = gp001, Quantity = 5 });
+            bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = ht004, PartsCode = cn002, Quantity = 5 });
+
+            Model.BouquetModel.Save(bouquet);
+
+            var actual = Model.BouquetModel.FindBouquet(ht004);
+
+            Assert.AreEqual(bouquet.PartsList.Count, actual.PartsList.Count, "商品を構成する単品の種類数が一致しない");
+            foreach (var parts in bouquet.PartsList)
+            {
+                Assert.IsNotNull(actual.PartsList.SingleOrDefault(p => p.PartsCode == parts.PartsCode), $"単品 {parts.PartsCode} が登録されていない");
+            }
+            foreach (var parts in actual.PartsList)
+            {
+                Assert.IsNotNull(bouquet.PartsList.SingleOrDefault(p => p.PartsCode == parts.PartsCode), $"想定外の単品 {parts.PartsCode} が登録されている");
+            }
         }
     }
 }
