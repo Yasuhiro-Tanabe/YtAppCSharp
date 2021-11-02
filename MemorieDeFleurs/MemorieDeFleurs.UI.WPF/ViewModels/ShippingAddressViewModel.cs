@@ -1,5 +1,7 @@
 ﻿using MemorieDeFleurs.Models.Entities;
 
+using System;
+
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class ShippingAddressViewModel : NotificationObject
@@ -61,11 +63,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 最新注文日 (表示のみ)
         /// </summary>
-        public string LatestOrderDate
+        public string LatestOrderDateText
+        {
+            get { return _date.ToString("yyyy/mm/dd"); }
+        }
+
+        public DateTime LatestOrderDate
         {
             get { return _date; }
+            set { SetProperty(ref _date, value); }
         }
-        private string _date;
+        private DateTime _date;
         #endregion // プロパティ
 
         public ShippingAddressViewModel(ShippingAddress sa)
@@ -80,7 +88,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _name = sa.Name;
             _address1 = sa.Address1;
             _address2 = sa.Address2;
-            _date = sa.LatestOrderDate.ToString("yyyy/MM/dd");
+            _date = sa.LatestOrderDate;
             RaisePropertyChanged(nameof(ID), nameof(CustomerID), nameof(Name), nameof(Address1), nameof(Address2), nameof(AddressText), nameof(LatestOrderDate));
         }
     }

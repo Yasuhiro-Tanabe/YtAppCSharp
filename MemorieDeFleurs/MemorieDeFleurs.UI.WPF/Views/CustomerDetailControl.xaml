@@ -102,7 +102,7 @@
                             <TextBlock Grid.Column="1" VerticalAlignment="Center" Text="様、"/>
                             <TextBlock Grid.Column="2" Margin="5,0" VerticalAlignment="Center" Text="{Binding AddressText, Mode=OneWay}" TextWrapping="Wrap"/>
                             <TextBlock Grid.Column="3" Margin="5,0" VerticalAlignment="Center" Text="、前回お届け日："/>
-                            <TextBlock Grid.Column="4" Margin="5,0" VerticalAlignment="Center" Text="{Binding LatestOrderDate, Mode=OneWay}"/>
+                            <TextBlock Grid.Column="4" Margin="5,0" VerticalAlignment="Center" Text="{Binding LatestOrderDateText, Mode=OneWay}"/>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
