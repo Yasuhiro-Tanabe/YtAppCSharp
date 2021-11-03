@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleursTest", "Memo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleurs.UI.WPF", "MemorieDeFleurs.UI.WPF\MemorieDeFleurs.UI.WPF.csproj", "{BA63A4A3-EF1C-45B9-91CF-95102E5EE664}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemorieDeFleurs.Logging", "MemorieDeFleurs.Logging\MemorieDeFleurs.Logging.csproj", "{15AF2C96-A4BB-4AC3-A2BD-3AFFDF2F4151}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleurs.Logging", "MemorieDeFleurs.Logging\MemorieDeFleurs.Logging.csproj", "{15AF2C96-A4BB-4AC3-A2BD-3AFFDF2F4151}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
