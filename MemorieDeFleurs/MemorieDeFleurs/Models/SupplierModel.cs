@@ -1573,7 +1573,7 @@ namespace MemorieDeFleurs.Models
         }
 
         /// <summary>
-        /// 入荷予定日に関係なくすべての仕入先発注履歴を取得する
+        /// 発注日・入荷予定日に関係なくすべての仕入先発注履歴を取得する
         /// </summary>
         /// <returns>仕入先発注履歴</returns>
         public IEnumerable<OrdersToSupplier> FindAllOrders()
@@ -1592,17 +1592,17 @@ namespace MemorieDeFleurs.Models
         }
 
         /// <summary>
-        /// 入荷予定日が指定範囲内にある仕入先発注履歴を取得する
+        /// 発注日が指定範囲内にある仕入先発注履歴を取得する
         /// </summary>
-        /// <param name="from">入荷予定日の最小値</param>
-        /// <param name="to">入荷予定日の最大値</param>
+        /// <param name="from">発注日の範囲：この日以降に発注した仕入先発注履歴を抽出する</param>
+        /// <param name="to">入発注日の範囲：この日までに発注した仕入先発注履歴を抽出する</param>
         /// <returns>仕入先発注履歴</returns>
         public IEnumerable<OrdersToSupplier> FindAllOrders(DateTime from, DateTime to)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
                 return context.OrdersToSuppliers
-                    .Where(order => from <= order.DeliveryDate && order.DeliveryDate <= to)
+                    .Where(order => from <= order.OrderDate && order.OrderDate <= to)
                     .Include(o => o.Details)
                     .ThenInclude(d => d.BouquetPart)
                     .OrderBy(order => order.OrderDate)
@@ -1613,10 +1613,10 @@ namespace MemorieDeFleurs.Models
             }
         }
         /// <summary>
-        /// 入荷予定日が指定範囲内にある仕入先発注履歴を、仕入先を絞って取得する
+        /// 発注日が指定範囲内にある仕入先発注履歴を、仕入先を絞って取得する
         /// </summary>
-        /// <param name="from">入荷予定日の最小値</param>
-        /// <param name="to">入荷予定日の最大値</param>
+        /// <param name="from">発注日の範囲：この日以降に発注した仕入先発注履歴を抽出する</param>
+        /// <param name="to">入発注日の範囲：この日までに発注した仕入先発注履歴を抽出する</param>
         /// <param name="supplier">絞り込み対象仕入先ID</param>
         /// <returns>仕入先発注履歴</returns>
         public IEnumerable<OrdersToSupplier> FindAllOrders(DateTime from, DateTime to, int supplier)
@@ -1624,7 +1624,7 @@ namespace MemorieDeFleurs.Models
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
                 return context.OrdersToSuppliers
-                    .Where(order => from <= order.DeliveryDate && order.DeliveryDate <= to)
+                    .Where(order => from <= order.OrderDate && order.OrderDate <= to)
                     .Where(order => order.Supplier == supplier)
                     .Include(o => o.Details)
                     .ThenInclude(d => d.BouquetPart)
