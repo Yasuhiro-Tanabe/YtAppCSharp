@@ -43,6 +43,10 @@
                 <MenuItem Header="得意先一覧" Command="{Binding OpenCustomerListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="得意先登録" Command="{Binding OpenCustomerDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
+            <MenuItem Header="受発注">
+                <MenuItem Header="仕入先発注一覧" Command="{Binding OpenOrderToSupplierListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="仕入先発注登録" Command="{Binding OpenOrderToSupplierDetailView}" CommandParameter="{Binding}"/>
+            </MenuItem>
         </Menu>
 
         <TabControl Grid.Row="1" x:Name="Views" ItemsSource="{Binding TabItemControlCollection}" SelectedItem="{Binding CurrentItem}">
@@ -71,6 +75,12 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:CustomerDetailViewModel}">
                     <v:CustomerDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierListViewModel}">
+                    <v:OrderToSupplierListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
+                    <v:OrderToSupplierDetailControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>

@@ -253,5 +253,37 @@ namespace MemorieDeFleurs.UI.WPF.Model
         }
         #endregion // 得意先の操作
 
+        #region 仕入先発注情報の操作
+        public OrdersToSupplier FindOrderToSupplier(string id)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.SupplierModel.FindOrder(id);
+        }
+
+        public IEnumerable<OrdersToSupplier> FindAllOrders()
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.SupplierModel.FindAllOrders();
+        }
+
+        public IEnumerable<OrdersToSupplier> FindAllOrders(DateTime from, DateTime to)
+        {
+            if(DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.SupplierModel.FindAllOrders(from, to);
+        }
+
+        public IEnumerable<OrdersToSupplier> FindAllOrders(DateTime from, DateTime to, int supplier)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.SupplierModel.FindAllOrders(from, to, supplier);
+        }
+
+        public void CancelOrderToSupplier(string orderNo)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.SupplierModel.CancelOrder(orderNo);
+        }
+        #endregion // 仕入先発注情報の操作
+
     }
 }

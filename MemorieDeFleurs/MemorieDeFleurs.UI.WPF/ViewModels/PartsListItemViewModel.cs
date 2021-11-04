@@ -40,7 +40,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _name = item.Part.Name;
             _quantity = item.Quantity;
             _leadtime = item.Part.LeadTime;
-            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(Quantity), nameof(LeadTime));
+            RaiseAllPropertiesChanged();
         }
 
         public PartsListItemViewModel(BouquetPart parts)
@@ -49,6 +49,20 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _name = parts.Name;
             _quantity = 0;
             _leadtime = parts.LeadTime;
+            RaiseAllPropertiesChanged();
+        }
+
+        public PartsListItemViewModel(OrderDetailsToSupplier detail)
+        {
+            _code = detail.PartsCode;
+            _name = detail.BouquetPart.Name;
+            _quantity = detail.LotCount;
+            _leadtime = detail.BouquetPart.LeadTime;
+            RaiseAllPropertiesChanged();
+        }
+
+        public void RaiseAllPropertiesChanged()
+        {
             RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(Quantity), nameof(LeadTime));
         }
     }

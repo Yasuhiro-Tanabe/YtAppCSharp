@@ -8,7 +8,12 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class SelectionChangedEventCommand : CommandBase
     {
-        public SelectionChangedEventCommand() : base(typeof(SelectionChangedEventArgs), ChangeCommandButtonVisibility) { }
+        public SelectionChangedEventCommand() : base()
+        {
+            AddAction(typeof(SelectionChangedEventArgs), ChangeCommandButtonVisibility);
+            AddAction(typeof(OrderToSupplierListViewModel), ReloadItems);
+        }
+
         private static void ChangeCommandButtonVisibility(object parameter)
         {
             LogUtil.DEBUGLOG_BeginMethod(parameter == null ? "parameter=null" : $"parameter={parameter.GetType().Name}");
@@ -61,5 +66,8 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             }
             LogUtil.DEBUGLOG_EndMethod();
         }
+
+        private static void ReloadItems(object parameter) => (parameter as OrderToSupplierListViewModel).LoadItems();
+        private static void NothingToDo() { }
     }
 }
