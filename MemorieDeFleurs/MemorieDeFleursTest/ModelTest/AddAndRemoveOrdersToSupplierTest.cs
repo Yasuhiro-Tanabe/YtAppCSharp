@@ -511,15 +511,18 @@ namespace MemorieDeFleursTest.ModelTest
         [TestMethod]
         public void OrderToSupplier()
         {
+            LogUtil.DEBUGLOG_BeginTest();
             var orderNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedSupplier, DateConst.May9th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ExpectedPart, 1) });
             var expectedLotNo = InitialOrders.Count()+1; // 新規ロット番号は既存ロット数+1 のはず
             var date = Enumerable.Range(0, 4).Select(i => DateConst.May9th.AddDays(i)).ToArray();
 
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            {
-                Assert.AreEqual(1, context.OrdersToSuppliers.Count());
-                Assert.AreEqual(1, context.OrderDetailsToSuppliers.Count());
-            }
+            var order = Model.SupplierModel.FindAllOrders().Single();
+            Assert.AreEqual(orderNo, order.ID);
+            Assert.AreEqual(ExpectedSupplier.Code, order.Supplier);
+            Assert.AreEqual(1, order.Details.Count);
+            Assert.AreEqual(ExpectedPart.Code, order.Details[0].PartsCode);
+            Assert.IsNotNull(order.Details[0].BouquetPart);
+
             Assert.AreEqual($"{DateConst.April30th.ToString("yyyyMMdd")}-000001", orderNo);
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.May9th).BEGIN
@@ -532,6 +535,8 @@ namespace MemorieDeFleursTest.ModelTest
                 .END
                 .TargetDBIs(TestDB)
                 .AssertAll();
+
+            LogUtil.DEBUGLOG_EndTest();
         }
 
         [TestMethod]
@@ -547,11 +552,7 @@ namespace MemorieDeFleursTest.ModelTest
                 transaction.Rollback();
             }
 
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            {
-                Assert.AreEqual(0, context.OrdersToSuppliers.Count());
-                Assert.AreEqual(0, context.OrderDetailsToSuppliers.Count());
-            }
+            Assert.IsNull(Model.SupplierModel.FindOrder(orderNo));
             Assert.AreEqual($"{DateConst.April30th.ToString("yyyyMMdd")}-000001", orderNo);
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.May9th).BEGIN
@@ -569,13 +570,10 @@ namespace MemorieDeFleursTest.ModelTest
             var orderNo = Model.SupplierModel.Order(DateConst.April30th, ExpectedSupplier, DateConst.May9th, new List<Tuple<BouquetPart, int>>() { Tuple.Create(ExpectedPart, 1) });
             var expectedLotNo = InitialOrders.Count() + 1;
 
+            Assert.IsNotNull(Model.SupplierModel.FindOrder(orderNo));
             Model.SupplierModel.CancelOrder(orderNo);
+            Assert.IsNull(Model.SupplierModel.FindOrder(orderNo));
 
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            {
-                Assert.AreEqual(0, context.OrdersToSuppliers.Count());
-                Assert.AreEqual(0, context.OrderDetailsToSuppliers.Count());
-            }
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN
                 .Lot(DateConst.May9th).BEGIN
                     .LotNumberIs(expectedLotNo)
@@ -601,11 +599,9 @@ namespace MemorieDeFleursTest.ModelTest
             }
 
             // キャンセルを取り消したので注文は残っているはず
-            using (var context = new MemorieDeFleursDbContext(TestDB))
-            {
-                Assert.AreEqual(1, context.OrdersToSuppliers.Count());
-                Assert.AreEqual(1, context.OrderDetailsToSuppliers.Count());
-            }
+            var order = Model.SupplierModel.FindOrder(orderNo);
+            Assert.IsNotNull(order);
+            Assert.AreEqual(1, order.Details.Count);
 
             var date = Enumerable.Range(0, 4).Select(i => DateConst.May9th.AddDays(i)).ToArray();
             InventoryActionValidator.NewInstance().BouquetPartIs(ExpectedPart).BEGIN

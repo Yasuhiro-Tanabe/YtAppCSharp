@@ -103,6 +103,7 @@ namespace MemorieDeFleurs.Databese.SQLite
                 {
                     order.Property(o => o.DeliveryDate).HasConversion(converter);
                     order.Property(o => o.OrderDate).HasConversion(converter);
+                    order.HasMany(o => o.Details).WithOne(d => d.Order).HasForeignKey(d => d.OrderToSupplierID);
                 });
 
             modelBuilder

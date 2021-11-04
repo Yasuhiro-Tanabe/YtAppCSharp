@@ -1549,6 +1549,17 @@ namespace MemorieDeFleurs.Models
         #endregion // 入荷予定数量変更
 
         #region 発注履歴の取得
+        public OrdersToSupplier FindOrder(string orderNo)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrdersToSuppliers
+                    .Where(order => order.ID == orderNo)
+                    .Include(o => o.Details)
+                    .ThenInclude(d => d.BouquetPart)
+                    .SingleOrDefault();
+            }
+        }
         public IEnumerable<string> FindAllOrdersAt(DateTime arrivalDate)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -1558,6 +1569,69 @@ namespace MemorieDeFleurs.Models
                     .OrderBy(order => order.ID)
                     .Select(order => order.ID)
                     .ToList();
+            }
+        }
+
+        /// <summary>
+        /// 入荷予定日に関係なくすべての仕入先発注履歴を取得する
+        /// </summary>
+        /// <returns>仕入先発注履歴</returns>
+        public IEnumerable<OrdersToSupplier> FindAllOrders()
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrdersToSuppliers
+                    .Include(o => o.Details)
+                    .ThenInclude(d => d.BouquetPart)
+                    .OrderBy(o => o.OrderDate)
+                    .ThenBy(o => o.Supplier)
+                    .ThenBy(o => o.DeliveryDate)
+                    .ToList()
+                    .AsEnumerable();
+            }
+        }
+
+        /// <summary>
+        /// 入荷予定日が指定範囲内にある仕入先発注履歴を取得する
+        /// </summary>
+        /// <param name="from">入荷予定日の最小値</param>
+        /// <param name="to">入荷予定日の最大値</param>
+        /// <returns>仕入先発注履歴</returns>
+        public IEnumerable<OrdersToSupplier> FindAllOrders(DateTime from, DateTime to)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrdersToSuppliers
+                    .Where(order => from <= order.DeliveryDate && order.DeliveryDate <= to)
+                    .Include(o => o.Details)
+                    .ThenInclude(d => d.BouquetPart)
+                    .OrderBy(order => order.OrderDate)
+                    .ThenBy(order => order.Supplier)
+                    .ThenBy(order => order.DeliveryDate)
+                    .ToList()
+                    .AsEnumerable();
+            }
+        }
+        /// <summary>
+        /// 入荷予定日が指定範囲内にある仕入先発注履歴を、仕入先を絞って取得する
+        /// </summary>
+        /// <param name="from">入荷予定日の最小値</param>
+        /// <param name="to">入荷予定日の最大値</param>
+        /// <param name="supplier">絞り込み対象仕入先ID</param>
+        /// <returns>仕入先発注履歴</returns>
+        public IEnumerable<OrdersToSupplier> FindAllOrders(DateTime from, DateTime to, int supplier)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrdersToSuppliers
+                    .Where(order => from <= order.DeliveryDate && order.DeliveryDate <= to)
+                    .Where(order => order.Supplier == supplier)
+                    .Include(o => o.Details)
+                    .ThenInclude(d => d.BouquetPart)
+                    .OrderBy(order => order.OrderDate)
+                    .ThenBy(order => order.DeliveryDate)
+                    .ToList()
+                    .AsEnumerable();
             }
         }
         #endregion // 発注履歴取得
