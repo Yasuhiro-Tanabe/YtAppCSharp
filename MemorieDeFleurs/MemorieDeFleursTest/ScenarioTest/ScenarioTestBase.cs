@@ -117,12 +117,43 @@ namespace MemorieDeFleursTest.ScenarioTest
                     PrepareInitialOrderToSupplier(model, context);
                     PrepareOrdersFromCustomer(model, context);
                     transaction.Commit();
+
+                    // 必要なら現状を保存
+                    //SaveCurrentDatabaseTo(db, "./testdata/MemorieDeFleursInitial.db");
                 }
                 catch(Exception)
                 {
                     transaction.Rollback();
                     throw;
                 }
+            }
+        }
+
+        protected static void SaveCurrentDatabaseTo(SqliteConnection connection, string dbFileName)
+        {
+            LogUtil.DEBUGLOG_BeginMethod(dbFileName);
+            try
+            {
+                if (File.Exists(dbFileName))
+                {
+                    LogUtil.Debug($"Database {dbFileName} is alerdy exists. removed.");
+                    File.Delete(dbFileName);
+                }
+
+                var builder = new SqliteConnectionStringBuilder();
+                builder.DataSource = dbFileName;
+                builder.Mode = SqliteOpenMode.ReadWriteCreate;
+                builder.ForeignKeys = true;
+
+                var backupDb = new SqliteConnection(builder.ToString());
+                connection.BackupDatabase(backupDb);
+                LogUtil.Debug($"Database backuped to: {dbFileName}");
+
+                LogUtil.DEBUGLOG_EndMethod(dbFileName, $"Saved successfully.");
+            }
+            catch (Exception ex)
+            {
+                LogUtil.DEBUGLOG_EndMethod(dbFileName, $"{ex.GetType().Name}: {ex.Message}");
             }
         }
 
