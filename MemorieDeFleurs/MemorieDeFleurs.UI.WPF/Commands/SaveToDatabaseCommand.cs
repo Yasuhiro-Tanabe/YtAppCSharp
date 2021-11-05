@@ -1,24 +1,13 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models;
-using MemorieDeFleurs.UI.WPF.Model;
-using MemorieDeFleurs.UI.WPF.ViewModels;
-using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
+﻿using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System.ComponentModel;
-using System.Linq;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class SaveToDatabaseCommand : CommandBase
     {
-        public SaveToDatabaseCommand(NotificationObject vm) : base()
+        public SaveToDatabaseCommand(NotificationObject vm) : base(typeof(DetailViewModelBase), SaveToDatabase, IsDirty)
         {
-            AddChecker(typeof(TabItemControlViewModelBase), IsDirty);
-            AddAction(typeof(BouquetPartsDetailViewModel), SaveToDatabase);
-            AddAction(typeof(BouquetDetailViewModel), SaveToDatabase);
-            AddAction(typeof(SupplierDetailViewModel), SaveToDatabase);
-            AddAction(typeof(CustomerDetailViewModel), SaveToDatabase);
-
             vm.PropertyChanged += CheckDirtyFlag;
         }
 

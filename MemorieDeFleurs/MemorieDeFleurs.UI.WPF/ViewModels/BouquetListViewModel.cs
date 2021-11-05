@@ -34,15 +34,23 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(Bouquets), nameof(CurrentBouquet));
         }
 
-        private void SummaryViewModelChanged(object sender, PropertyChangedEventArgs args)
+        //private void SummaryViewModelChanged(object sender, PropertyChangedEventArgs args)
+        //{
+        //    var vm = sender as BouquetSummaryViewModel;
+        //    if (args.PropertyName == nameof(BouquetSummaryViewModel.RemoveMe))
+        //    {
+        //        MemorieDeFleursUIModel.Instance.RemoveBouquet(vm.BouquetCode);
+        //        LogUtil.Debug($"{vm.BouquetCode} deleted.");
+        //        LoadItems();
+        //    }
+        //}
+
+        protected override void RemoveSelectedItem(object sender)
         {
             var vm = sender as BouquetSummaryViewModel;
-            if (args.PropertyName == nameof(BouquetSummaryViewModel.RemoveMe))
-            {
-                MemorieDeFleursUIModel.Instance.RemoveBouquet(vm.BouquetCode);
-                LogUtil.Debug($"{vm.BouquetCode} deleted.");
-                LoadItems();
-            }
+            MemorieDeFleursUIModel.Instance.RemoveBouquet(vm.BouquetCode);
+            LogUtil.Debug($"{vm.BouquetCode} deleted.");
+            LoadItems();
         }
     }
 }

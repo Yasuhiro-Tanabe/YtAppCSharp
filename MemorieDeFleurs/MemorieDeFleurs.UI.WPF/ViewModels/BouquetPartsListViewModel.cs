@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.UI.WPF.Model;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System.Collections.ObjectModel;
@@ -26,6 +27,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
             CurrentParts = null;
             RaisePropertyChanged(nameof(BouquetParts), nameof(CurrentParts));
+        }
+
+        protected override void RemoveSelectedItem(object sender)
+        {
+            var vm = sender as BouquetPartsSummaryViewModel;
+            MemorieDeFleursUIModel.Instance.RemoveBouquetParts(vm.PartsCode);
+            LogUtil.Debug($"{vm.PartsCode} deleted.");
+            LoadItems();
         }
     }
 }

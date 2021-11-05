@@ -33,6 +33,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             var vm = sender as SupplierSummaryViewModel;
             MemorieDeFleursUIModel.Instance.RemoveSupplier(vm.SupplierCode);
+            LogUtil.Debug($"{vm.SupplierCode} deleted.");
             LoadItems();
         }
 
