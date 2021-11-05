@@ -8,12 +8,13 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         {
             AddAction(typeof(BouquetDetailViewModel), FixBouquetPartsList);
             AddAction(typeof(SupplierDetailViewModel), FixSupplierPartsList);
-            AddAction(typeof(OrderToSupplierDetailViewModel), null);
+            AddAction(typeof(OrderToSupplierDetailViewModel), FixOrderPartsList);
         }
 
         private static void FixBouquetPartsList(object parameter) => (parameter as BouquetDetailViewModel).FixPartsList();
         private static void FixSupplierPartsList(object parameter) => (parameter as SupplierDetailViewModel).FixSupplierParts();
 
         private static void FixOrderPartsList(object parameter) => (parameter as OrderToSupplierDetailViewModel).FixOrderParts();
+
     }
 }
