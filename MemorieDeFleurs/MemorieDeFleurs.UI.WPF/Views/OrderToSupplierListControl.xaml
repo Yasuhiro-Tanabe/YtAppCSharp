@@ -39,8 +39,7 @@
                     SelectedDate="{Binding From}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectedDateChanged">
-                    <!-- CommandParameter として SelectionChangedEventArgs ではなくこの UserControl の DataContext (ViewModel) を渡す -->
-                    <i:InvokeCommandAction Command="{Binding Selected}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    <i:InvokeCommandAction Command="{Binding Selected}" CommandParameter="{Binding}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DatePicker>
@@ -52,8 +51,7 @@
                     SelectedDate="{Binding To}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectedDateChanged">
-                    <!-- CommandParameter として SelectionChangedEventArgs ではなくこの UserControl の DataContext (ViewModel) を渡す -->
-                    <i:InvokeCommandAction Command="{Binding Selected}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    <i:InvokeCommandAction Command="{Binding Selected}" CommandParameter="{Binding}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DatePicker>
@@ -68,8 +66,7 @@
                   ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
-                    <!-- CommandParameter として SelectionChangedEventArgs ではなくこの UserControl の DataContext (ViewModel) を渡す -->
-                    <i:InvokeCommandAction Command="{Binding Selected}" CommandParameter="{Binding DataContext, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+                    <i:InvokeCommandAction Command="{Binding Selected}" CommandParameter="{Binding}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <ComboBox.ItemTemplate>
