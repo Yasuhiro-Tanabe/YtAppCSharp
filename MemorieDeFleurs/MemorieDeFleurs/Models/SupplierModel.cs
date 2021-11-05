@@ -552,6 +552,10 @@ namespace MemorieDeFleurs.Models
             var found = FindSupplier(supplier.Code);
             if(found == null)
             {
+                if(supplier.Code == 0)
+                {
+                    supplier.Code = Parent.Sequences.SEQ_SUPPLIERS.Next(context);
+                }
                 found = context.Suppliers.Add(supplier).Entity;
             }
             else

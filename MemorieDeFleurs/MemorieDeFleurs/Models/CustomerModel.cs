@@ -358,7 +358,6 @@ namespace MemorieDeFleurs.Models
                 }
             }
         }
-
         private void RemoveCustomer(MemorieDeFleursDbContext context, int customerID)
         {
             var customer = context.Customers.Find(customerID);
@@ -411,6 +410,10 @@ namespace MemorieDeFleurs.Models
             var found = FindCustomer(context, customer.ID);
             if(found == null)
             {
+                if(customer.ID == 0)
+                {
+                    customer.ID = Parent.Sequences.SEQ_CUSTOMERS.Next(context);
+                }
                 found = context.Customers.Add(customer).Entity;
             }
             else
