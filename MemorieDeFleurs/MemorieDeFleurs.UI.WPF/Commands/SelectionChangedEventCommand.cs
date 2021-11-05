@@ -23,17 +23,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             {
                 foreach (var item in args.RemovedItems)
                 {
-                    if (item is BouquetPartsSummaryViewModel)
-                    {
-                        var vm = item as BouquetPartsSummaryViewModel;
-                        vm.HideCommandButtons();
-                    }
-                    else if (item is BouquetSummaryViewModel)
-                    {
-                        var vm = item as BouquetSummaryViewModel;
-                        vm.HideCommandButtons();
-                    }
-                    else if(item is ListItemViewModelBase)
+                    if (item is ListItemViewModelBase)
                     {
                         (item as ListItemViewModelBase).HideCommandButtons();
                     }
@@ -44,19 +34,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             {
                 foreach (var item in args.AddedItems)
                 {
-                    if (item is BouquetPartsSummaryViewModel)
-                    {
-                        var vm = item as BouquetPartsSummaryViewModel;
-                        vm.ShowCommandButtons();
-                        LogUtil.Debug($"{vm.PartsCode} selected.");
-                    }
-                    else if (item is BouquetSummaryViewModel)
-                    {
-                        var vm = item as BouquetSummaryViewModel;
-                        vm.ShowCommandButtons();
-                        LogUtil.Debug($"{vm.BouquetCode} selected.");
-                    }
-                    else if(item is ListItemViewModelBase)
+                    if (item is ListItemViewModelBase)
                     {
                         var vm = item as ListItemViewModelBase;
                         vm.ShowCommandButtons();
