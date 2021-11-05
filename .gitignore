@@ -2,23 +2,17 @@
 # この .gitignore ファイルは Microsoft(R) Visual Studio によって自動的に作成されました。
 ################################################################################
 
-/BookManager/YtBookManagerCore/bin
-/BookManager/YtBookManagerCore/obj
-/BookManager/YtBookManagerCore/.vs
-/.vs
-
-/BookManager/.vs
-/SimpleDigitalClock/.vs/SimpleDigitalClock
+/SimpleDigitalClock/.vs
 /SimpleDigitalClock/SimpleDigitalClock/SimpleDigitalClock/bin
 /SimpleDigitalClock/SimpleDigitalClock/SimpleDigitalClock/obj
 /SimpleDigitalClock/SimpleDigitalClockInstaller/Debug
 /SimpleDigitalClock/SimpleDigitalClockInstaller/Release
 /SimpleDigitalClock/SimpleDigitalClock/obj
 /SimpleDigitalClock/SimpleDigitalClock/bin
+
 /DDLGenerator/.vs
 /DDLGenerator/DDLGenerator/bin
 /DDLGenerator/DDLGenerator/obj
-
 /DDLGenerator/DDLGeneratorInstaller/Debug
 /DDLGenerator/DDLGeneratorInstaller/Release
 
@@ -27,6 +21,11 @@
 /MemorieDeFleurs/MemorieDeFleurs/obj
 /MemorieDeFleurs/MemorieDeFleursTest/bin
 /MemorieDeFleurs/MemorieDeFleursTest/obj
+/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/bin
+/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/obj
+/MemorieDeFleurs/MemorieDeFleurs.Logging/bin
+/MemorieDeFleurs/MemorieDeFleurs.Logging/obj
+
 /GameOfLife/.vs
 /GameOfLife/GameOfLife/bin
 /GameOfLife/GameOfLife/obj
@@ -34,11 +33,6 @@
 /GameOfLife/GameOfLife.Core.Test/obj
 /GameOfLife/GameOfLife.UI/bin
 /GameOfLife/GameOfLife.UI/obj
-/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/bin
-/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/obj
-/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/MemorieDeFleurs.db
-/MemorieDeFleurs/MemorieDeFleurs.Logging/bin/Debug/net5.0
-/MemorieDeFleurs/MemorieDeFleurs.Logging/obj
 /SVGEditor/.vs
 /SVGEditor/SVGEditor/bin
 /SVGEditor/SVGEditor/obj
