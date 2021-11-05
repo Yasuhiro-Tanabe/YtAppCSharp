@@ -32,5 +32,10 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
                 }
             }
         }
+
+        public override string ToString()
+        {
+            return string.Join(", ", this.Select(kv => $"[{kv.Key:yyyyMMdd}, ({string.Join(", ", kv.Value)})]"));
+        }
     }
 }

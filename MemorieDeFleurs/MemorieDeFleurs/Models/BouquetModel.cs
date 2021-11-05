@@ -2,6 +2,8 @@
 using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 
+using Microsoft.EntityFrameworkCore;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -265,6 +267,15 @@ namespace MemorieDeFleurs.Models
 
                 foreach (var p in _partsList)
                 {
+                    var parts = context.BouquetParts.Find(p.Key);
+                    if(parts == null)
+                    {
+                        throw new ApplicationException($"該当単品なし：{p.Key}");
+                    }
+                    if(ret.LeadTime < parts.LeadTime)
+                    {
+                        ret.LeadTime = parts.LeadTime;
+                    }
                     var item = new BouquetPartsList() { BouquetCode = _code, PartsCode = p.Key, Quantity = p.Value };
                     ret.PartsList.Add(item);
                 }
@@ -322,8 +333,142 @@ namespace MemorieDeFleurs.Models
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                return context.BouquetParts.Find(partCode);
+                return FindBouquetPart(context, partCode);
             }
+        }
+        private BouquetPart FindBouquetPart(MemorieDeFleursDbContext context, string partCode)
+        {
+            return context.BouquetParts
+                .Include(p => p.Suppliers)
+                .ThenInclude(i => i.Supplier)
+                .SingleOrDefault(p => p.Code == partCode);
+        }
+
+        /// <summary>
+        /// 登録されている単品オブジェクトをすべて取得する
+        /// </summary>
+        /// <returns>登録されている単品オブジェクトの一覧。何も登録されていないときは空の一覧を返す。</returns>
+        public IEnumerable<BouquetPart> FindAllBoueuqtParts()
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.BouquetParts
+                    .Include(p => p.Suppliers)
+                    .ThenInclude(i => i.Supplier)
+                    .ToList()
+                    .AsEnumerable();
+            }
+        }
+
+        /// <summary>
+        /// 指定された花コードを持つ単品を削除する
+        /// </summary>
+        /// <param name="partsCode"></param>
+        public void RemoveBouquetParts(string partsCode)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(partsCode);
+                    RemoveBouquetParts(context, partsCode);
+                    transaction.Commit();
+                    LogUtil.Info($"Bouquet parts {partsCode} removed.");
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(partsCode);
+                }
+            }
+        }
+        private void RemoveBouquetParts(MemorieDeFleursDbContext context, string partsCode)
+        {
+            var parts = context.BouquetParts.Find(partsCode);
+            if(parts != null)
+            {
+                // チェックなしで削除しても商品構成の外部キー制約で SQLException がスローされるが、
+                // メッセージがわかりづらいので「使用している商品」がわかるようなエラーメッセージを出す
+                var used = context.PartsList.Where(i => i.PartsCode == partsCode).ToList();
+                if (used.Count > 0)
+                {
+                    throw new ApplicationException($"単品 {partsCode} は以下の商品で使用中です： {string.Join(", ", used.Select(i => i.BouquetCode))}");
+                }
+                context.BouquetParts.Remove(parts);
+                context.SaveChanges();
+            }
+        }
+
+        public BouquetPart Save(BouquetPart parts)
+        {
+            using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(parts.Code);
+                    var saved = Save(context, parts);
+                    transaction.Commit();
+                    LogUtil.Info($"Bouquet parts {saved.Code} saved.");
+                    return saved;
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(parts.Code);
+                }
+            }
+        }
+        private BouquetPart Save(MemorieDeFleursDbContext context, BouquetPart parts)
+        {
+            var found = FindBouquetPart(context, parts.Code);
+            if(found == null)
+            {
+                found = context.BouquetParts.Add(parts).Entity;
+            }
+            else
+            {
+                if(found.CheckAndModify(parts))
+                {
+                    context.BouquetParts.Update(found);
+                }
+
+                foreach(var supplier in found.Suppliers)
+                {
+                    if(parts.Suppliers.SingleOrDefault(s => s.SupplierCode == supplier.SupplierCode) == null)
+                    {
+                        // found にあって supplier にない SupplyParts を削除
+                        context.PartsSuppliers.Remove(supplier);
+                    }
+                    else
+                    {
+                        // 何もしない：2つのキー(仕入先コードと花束コード)以外にDB上のカラムがないので、更新は発生しない。
+                    }
+                }
+
+                foreach(var supplier in parts.Suppliers)
+                {
+                    if (found.Suppliers.SingleOrDefault(s => s.SupplierCode == supplier.SupplierCode) == null)
+                    {
+                        // supplier にあって found にない SupplyParts を追加
+                        context.PartsSuppliers.Add(supplier);
+                    }
+                }
+            }
+            context.SaveChanges();
+
+            return FindBouquetPart(context, found.Code);
         }
         #endregion // 単品の登録改廃
 
@@ -337,46 +482,172 @@ namespace MemorieDeFleurs.Models
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                var bouquet = context.Bouquets.Find(bouquetCode);
-
-                // [NOTE]
-                // 以下の２点を追加しても、Bouquet.PartsList[i].Parts が正しくセットされない状況は変わらない。
-                // （いずれにせよ商品を構成する単品を Find() でキャッシュに登録する必要がある）
-                // 
-                // 1) BouquetParts:
-                //        public IList<BouquetPartsList> Bouquets {get;} = new List<BouquetPartsList>();
-                //
-                // 2) DbContext.OnModelCreating(modelBuilder):
-                //        modelBuilder.Entity<BouquetPartsList>()
-                //            .HasOne(i => i.Parts)
-                //            .WithMany(b => b.Bouquets)
-                //            .HasForeginKye(i => i.PartsCode)
-                //
-                // 3) 単品をキャッシュに読み込む
-                foreach (var parts in context.PartsList.Where(i => i.BouquetCode == bouquetCode))
-                {
-                    parts.Part = context.BouquetParts.Find(parts.PartsCode);
-                }
-                return bouquet;
+                return FindBouquet(context, bouquetCode);
             }
         }
-        #endregion // 商品の登録改廃
+        private Bouquet FindBouquet(MemorieDeFleursDbContext context, string bouquetCode)
+        {
+            return context.Bouquets
+                .Include(b => b.PartsList)
+                .ThenInclude(p => p.Part)
+                .SingleOrDefault(b => b.Code == bouquetCode);
+        }
 
-        #region UseBouquetPart
         /// <summary>
-        /// 在庫から使用した単品を指定個数取り去る
+        /// 登録されている全商品を取得する
         /// </summary>
-        /// <param name="part">対象となる単品</param>
-        /// <param name="date">日付</param>
-        /// <param name="quantity">取り去る数量</param>
-        public void UseBouquetPart(BouquetPart part, DateTime date, int quantity)
+        /// <returns>登録されている商品オブジェクトの一覧、商品が登録されていないときは空のリスト</returns>
+        public IEnumerable<Bouquet> FindAllBouquets()
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.Bouquets
+                    .Include(b => b.PartsList)
+                    .ThenInclude(p => p.Part)
+                    .ToList()
+                    .AsEnumerable();
+            }
+        }
+
+        /// <summary>
+        /// 指定された商品オブジェクトを削除する
+        /// </summary>
+        /// <param name="bouquetCode">削除対象商品の花束コード</param>
+        public void RemoveBouquet(string bouquetCode)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
                 {
-                    UseBouquetPart(context, part, date, quantity);
+                    LogUtil.DEBUGLOG_BeginMethod(bouquetCode);
+                    RemoveBouquet(context, bouquetCode);
+                    transaction.Commit();
+                    LogUtil.Info($"Bouquet {bouquetCode} removed.");
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(bouquetCode);
+                }
+            }
+        }
+
+        private void RemoveBouquet(MemorieDeFleursDbContext context, string bouquetCode)
+        {
+            var partsList = context.PartsList.Where(i => i.BouquetCode == bouquetCode);
+            if(partsList.Count() > 0)
+            {
+                context.PartsList.RemoveRange(partsList);
+            }
+            var bouquet = context.Bouquets.Find(bouquetCode);
+            if(bouquet != null)
+            {
+                context.Bouquets.Remove(bouquet);
+            }
+
+            context.SaveChanges();
+        }
+
+        public Bouquet Save(Bouquet bouquet)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(bouquet.Code);
+                    var saved = Save(context, bouquet);
+                    transaction.Commit();
+                    LogUtil.Info($"Bouquet {saved.Code} saved.");
+                    return saved;
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(bouquet.Code);
+                }
+            }
+        }
+        private Bouquet Save(MemorieDeFleursDbContext context, Bouquet bouquet)
+        {
+            var found = FindBouquet(context, bouquet.Code);
+            if(found == null)
+            {
+                found = context.Bouquets.Add(bouquet).Entity;
+            }
+            else
+            {
+                if(found.CheckAndModify(bouquet))
+                {
+                    context.Bouquets.Update(found);
+                }
+
+                foreach(var parts in found.PartsList)
+                {
+                    var foundParts = bouquet.PartsList.SingleOrDefault(p => p.PartsCode == parts.PartsCode);
+                    if(foundParts == null)
+                    {
+                        // found にあって bouquet にない PartsList を削除
+                        context.PartsList.Remove(parts);
+                    }
+                    else if(parts.CheckAndModify(foundParts))
+                    {
+                        // found と bouquet に共通する PartsList に値の変更があったら更新
+                        context.PartsList.Update(parts);
+                    }
+                }
+
+                foreach(var parts in bouquet.PartsList)
+                {
+                    if(found.PartsList.SingleOrDefault(p => p.PartsCode == parts.PartsCode) == null)
+                    {
+                        // bouquet にあって found にない PartsList を削除
+                        context.PartsList.Add(parts);
+                    }
+                }
+            }
+            context.SaveChanges();
+
+            return FindBouquet(context, found.Code);
+        }
+        #endregion // 商品の登録改廃
+
+        /// <summary>
+        /// 単品引当中に発生した在庫不足アクション一覧
+        /// 
+        /// 引当処理、とくにロット内日付方向への在庫払出展開処理では、
+        /// 在庫不足発生時は在庫不足アクションを登録して先に進むため例外がスローされない。
+        /// 都合の良いタイミングで在庫不足例外をスローするため、
+        /// 登録された在庫不足アクションを逐次このリストに登録しておく。
+        /// </summary>
+        public IList<InventoryAction> ShortageInventories { get; } = new List<InventoryAction>();
+
+        #region UseFromInventory
+        /// <summary>
+        /// 在庫から使用した単品を指定個数取り去る
+        /// </summary>
+        /// <param name="part">対象となる単品</param>
+        /// <param name="date">日付</param>
+        /// <param name="quantity">取り去る数量</param>
+        public void UseFromInventory(BouquetPart part, DateTime date, int quantity)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    UseFromInventory(context, part, date, quantity);
                     transaction.Commit();
                     LogUtil.Info($"{date:yyyyMMdd}, {part.Code} x {quantity} used.");
                 }
@@ -395,11 +666,13 @@ namespace MemorieDeFleurs.Models
         /// <param name="part">対象となる単品</param>
         /// <param name="date">日付</param>
         /// <param name="quantity">取り去る数量</param>
-        public void UseBouquetPart(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
+        public void UseFromInventory(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantity)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{part.Code}, {date.ToString("yyyyMMdd")}, {quantity}");
             try
             {
+                ShortageInventories.Clear();
+
                 var inventory = context.InventoryActions
                     .Where(a => a.PartsCode == part.Code)
                     .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE)
@@ -410,7 +683,19 @@ namespace MemorieDeFleurs.Models
 
                 if (inventory == null)
                 {
-                    throw new NotImplementedException($"該当ストックなし：基準日={date.ToString("yyyyMMdd")}, 花コード{part.Code}, 数量={quantity}");
+                    var shortage = new InventoryAction()
+                    {
+                        Action = InventoryActionType.SHORTAGE,
+                        ActionDate = date,
+                        ArrivalDate = date,
+                        InventoryLotNo = -1,
+                        BouquetPart = part,
+                        PartsCode = part.Code,
+                        Quantity = quantity,
+                        Remain = -quantity
+                    };
+                    ShortageInventories.Add(shortage);
+                    throw new InventoryShortageException(shortage, quantity);
                 }
                 else
                 {
@@ -438,77 +723,59 @@ namespace MemorieDeFleurs.Models
 
         public void UseFromThisLot(MemorieDeFleursDbContext context, InventoryAction today, int quantity, Stack<int> usedLot)
         {
-            LogUtil.DEBUGLOG_BeginMethod($"today={today.ToString("s")}, quantity={quantity}, usedLot={string.Join(",", usedLot)}");
+            LogUtil.DEBUGLOG_BeginMethod($"{today.ToString("s")}, {quantity}, [ {string.Join(",", usedLot)} ]");
 
-            var theLot = context.InventoryActions
+            try
+            {
+                UseFromThisLotToday(context, today, quantity, usedLot);
+                UseFromPreviousRemain(context, today, today.ActionDate.AddDays(1), usedLot);
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
+        }
+
+        private void UseFromPreviousRemain(MemorieDeFleursDbContext context, InventoryAction today, DateTime startDate, Stack<int> usedLot)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"{today.ToString("s")}, {startDate:yyyyMMdd}, [ {string.Join(", ", usedLot)} ]");
+            var previousRemain = today.Remain;
+            foreach (var action in context.InventoryActions
                 .Where(act => act.PartsCode == today.PartsCode)
                 .Where(act => act.InventoryLotNo == today.InventoryLotNo)
-                .Where(act => act.ActionDate >= today.ActionDate)
-                .ToList();
-
-            LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(today, quantity);
-            if (today.Remain >= quantity)
-            {
-                // 全量引き出せる
-                LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(today, quantity);
-
-                today.Quantity += quantity;
-                today.Remain -= quantity;
-                context.InventoryActions.Update(today);
-
-            }
-            else
-            {
-                // 残数分はこのロットから、それ以外は他のロットから引き出す
-                LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(today, today.Remain);
-
-                var useFromThisLot = today.Remain;
-                var useFromOtherLot = quantity - today.Remain;
-                today.Quantity += useFromThisLot;
-                today.Remain -= useFromThisLot;
-                context.InventoryActions.Update(today);
-
-                try
-                {
-                    usedLot.Push(today.InventoryLotNo);
-                    UseFromOtherLot(context, today, useFromOtherLot, usedLot);
-                }
-                catch (InventoryShortageException eis)
-                {
-                    context.InventoryActions.Add(eis.InventoryShortageAction);
-                    LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
-                }
-                usedLot.Pop();
-            }
-
-            var previousRemain = today.Remain;
-            foreach (var action in theLot
                 .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
-                .Where(act => act.ActionDate > today.ActionDate)
+                .Where(act => act.ActionDate >= startDate)
                 .OrderBy(act => act.ActionDate))
             {
-                LogUtil.DEBUGLOG_ComparisonOfInventoryQuantityAndPreviousRemain(action, previousRemain);
-                if(previousRemain >= action.Quantity)
+                InventoryActionLogger.DEBUGLOG_ComparationOfInventoryQuantityAndPreviousRemain(action, previousRemain);
+                if (previousRemain >= action.Quantity)
                 {
-                    // 全量引き出せる
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, action.Quantity, previousRemain - action.Quantity);
+                    var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain };
 
+                    // 全量引き出せる
                     action.Remain = previousRemain - action.Quantity;
                     context.InventoryActions.Update(action);
+
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
 
                     previousRemain -= action.Quantity;
                 }
                 else
                 {
-                    // 前日残の分はこのロットから、それ以外は他のロットから引き出す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChanged(action, previousRemain, 0);
+                    var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain }; // デバッグログ用
 
+                    // 前日残の分はこのロットから、それ以外は他のロットから引き出す
                     var usedFromThisLot = previousRemain;
                     var useFromOtherLot = action.Quantity - previousRemain;
 
                     action.Quantity = usedFromThisLot;
                     action.Remain = 0;
                     context.InventoryActions.Update(action);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
 
                     try
                     {
@@ -517,18 +784,66 @@ namespace MemorieDeFleurs.Models
                     }
                     catch (InventoryShortageException eis)
                     {
+                        ShortageInventories.Add(eis.InventoryShortageAction);
                         context.InventoryActions.Add(eis.InventoryShortageAction);
-                        LogUtil.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
+                        InventoryActionLogger.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
                     }
+                    usedLot.Pop();
                     previousRemain = 0;
                 }
             }
 
-            var discard = theLot.Single(act => act.Action == InventoryActionType.SCHEDULED_TO_DISCARD);
+            var discard = context.InventoryActions
+                .Where(act => act.PartsCode == today.PartsCode)
+                .Where(act => act.InventoryLotNo == today.InventoryLotNo)
+                .Single(act => act.Action == InventoryActionType.SCHEDULED_TO_DISCARD);
+            var oldDiscard = new InventoryAction() { Quantity = discard.Quantity, Remain = discard.Remain };
             discard.Quantity = previousRemain;
             context.InventoryActions.Update(discard);
+            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(discard, oldDiscard);
 
-            LogUtil.DEBUGLOG_EndMethod();
+            LogUtil.DEBUGLOG_EndMethod($"{today.ToString("s")}, {startDate:yyyyMMdd}, [ {string.Join(", ", usedLot)} ]");
+        }
+
+        private void UseFromThisLotToday(MemorieDeFleursDbContext context, InventoryAction today, int quantity, Stack<int> usedLot)
+        {
+            InventoryActionLogger.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(today, quantity);
+            if (today.Remain >= quantity)
+            {
+                // 全量引き出せる
+                today.Quantity += quantity;
+                today.Remain -= quantity;
+                context.InventoryActions.Update(today);
+
+                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(today, quantity);
+
+            }
+            else
+            {
+                var oldAction = new InventoryAction() { Quantity = today.Quantity, Remain = today.Remain }; // デバッグログ用
+
+                // 残数分はこのロットから、それ以外は他のロットから引き出す
+                var useFromThisLot = today.Remain;
+                var useFromOtherLot = quantity - today.Remain;
+                today.Quantity += useFromThisLot;
+                today.Remain -= useFromThisLot;
+                context.InventoryActions.Update(today);
+
+                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(today, oldAction);
+
+                try
+                {
+                    usedLot.Push(today.InventoryLotNo);
+                    UseFromOtherLot(context, today, useFromOtherLot, usedLot);
+                }
+                catch (InventoryShortageException eis)
+                {
+                    ShortageInventories.Add(eis.InventoryShortageAction);
+                    context.InventoryActions.Add(eis.InventoryShortageAction);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionCreated(eis.InventoryShortageAction);
+                }
+                usedLot.Pop();
+            }
         }
 
         public void UseFromOtherLot(MemorieDeFleursDbContext context, InventoryAction inventory, int quantity, Stack<int> usedLot)
@@ -546,29 +861,34 @@ namespace MemorieDeFleurs.Models
             var useToThisLot = quantity;
             var previousLot = inventory;
 
+            LogUtil.Debug($"usableLots={string.Join(", ", usableLots.Select(act => act.ToString("s")))}");
+
             foreach(var action in usableLots.OrderBy(act => act.ArrivalDate))
             {
                 // すでに引当対象としたロットは除外：Linq式で usableLots を生成するタイミングでは除外できなかったため。
                 if(usedLot.Contains(action.InventoryLotNo)) { continue; }
 
-                LogUtil.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, useToThisLot);
+                var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain }; // デバッグログ用
+
+                InventoryActionLogger.DEBUGLOG_ComparationOfInventoryRemainAndQuantity(action, useToThisLot);
                 if(action.Remain >= useToThisLot)
                 {
-                    // このロットから全量引き出す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(action, useToThisLot);
 
+                    // このロットから全量引き出す
                     UseFromThisLot(context, action, quantity, usedLot);
+
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
                     LogUtil.DEBUGLOG_EndMethod(msg: $"resolved");
                     return;
                 }
                 else
                 {
                     // 残数分はこのロットから、引き出せなかった分は次のロットから引き出す
-                    LogUtil.DEBUGLOG_InventoryActionQuantityChangingTo(action, action.Remain);
-
                     useToThisLot -= action.Remain;
                     UseFromThisLot(context, action, action.Remain, usedLot);
                     previousLot = action;
+
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
                 }
             }
 
@@ -581,7 +901,209 @@ namespace MemorieDeFleurs.Models
 
             LogUtil.DEBUGLOG_EndMethod();
         }
-        #endregion // UseBouquetPart
+        #endregion // UseFromInventory
+
+        #region BackToInventory
+        /// <summary>
+        /// 指定数量を在庫に戻す
+        /// </summary>
+        /// <param name="part">対象単品</param>
+        /// <param name="date">日付</param>
+        /// <param name="quantityToReturn">在庫に戻す数量</param>
+        /// <remarks>
+        /// 複数ロットから払い出した在庫を適切に戻せないので
+        /// 使用数量を負数 (10本戻す→－10本使用する) にして <see cref="UseFromInventory(BouquetPart, DateTime, int)"/> を呼び出さないこと。
+        /// 代わりにこのメソッドを呼び出すこと
+        /// </remarks>
+        public void ReturnToInventory(BouquetPart part, DateTime date, int quantityToReturn)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    ReturnToInventory(context, part, date, quantityToReturn);
+                    transaction.Commit();
+                    LogUtil.Info($"{date:yyyyMMdd}, {part.Code} x {quantityToReturn} backed to inventory.");
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+
+            }
+        }
+
+        /// <summary>
+        /// 指定数量を在庫に戻す、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="part">対象単品</param>
+        /// <param name="date">日付</param>
+        /// <param name="quantityToReturn">在庫に戻す数量</param>
+        /// <remarks>
+        /// 複数ロットから払い出した在庫を適切に戻せないので
+        /// 使用数量を負数 (10本戻す→－10本使用する) にして
+        /// <see cref="UseFromInventory(MemorieDeFleursDbContext, BouquetPart, DateTime, int)"/> を呼び出さないこと。
+        /// 代わりにこのメソッドを呼び出すこと
+        /// </remarks>
+        public void ReturnToInventory(MemorieDeFleursDbContext context, BouquetPart part, DateTime date, int quantityToReturn)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"{part.Code}, {date:yyyyMMdd}, {quantityToReturn}");
+            try
+            {
+                ShortageInventories.Clear();
+
+                var inventory = context.InventoryActions
+                    .Where(a => a.PartsCode == part.Code)
+                    .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE)
+                    .Where(a => a.ActionDate == date)
+                    .Where(a => a.Quantity > 0)
+                    .OrderByDescending(a => a.ArrivalDate) // 入荷(予定)日の新しい在庫から戻していく
+                    .FirstOrDefault();
+
+                if (inventory == null)
+                {
+                    throw new NotImplementedException($"該当在庫なし：{part.Code}, 基準日 {date:yyyyMMdd}");
+                }
+                else
+                {
+                    var returnedLot = new Stack<int>();
+                    ReturnToThisLot(context, inventory, quantityToReturn, returnedLot);
+                }
+
+                context.SaveChanges();
+            }
+            catch (NotImplementedException ei)
+            {
+                LogUtil.Fatal($"★未実装★ {ei.Message}");
+                throw;
+            }
+            catch (Exception e)
+            {
+                LogUtil.Error($"{nameof(ReturnToInventory)}({part.Code}, {date:yyyyMMdd}, {quantityToReturn}) faled cause of unexpected exception, " +
+                    $"{e.GetType().Name}: {e.Message}\n{e.StackTrace}");
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
+
+        }
+
+        public void ReturnToThisLot(MemorieDeFleursDbContext context, InventoryAction today, int quantityToReturn, Stack<int> returnedLot)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"{today.ToString("s")}, {today:yyyyMMdd}, {quantityToReturn}, [{string.Join(", ", returnedLot)}]");
+            try
+            {
+                ReturnToThisLotToday(context, today, quantityToReturn, returnedLot);
+
+                // 翌日以降の数量引当は在庫払出時と同じ。基準日の前日残が変わったので「引当」をやりなおす。
+                UseFromPreviousRemain(context, today, today.ActionDate.AddDays(1), returnedLot);
+            }
+            catch(Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
+        }
+
+        private void ReturnToThisLotToday(MemorieDeFleursDbContext context, InventoryAction today, int quantityToReturn, Stack<int> returnedLot)
+        {
+            InventoryActionLogger.DEBUGLOG_ComparationOfInventoryUsedAndReturns(today, quantityToReturn);
+            if (today.Quantity >= quantityToReturn)
+            {
+                // 全量戻せる
+                today.Quantity -= quantityToReturn;
+                today.Remain += quantityToReturn;
+                context.InventoryActions.Update(today);
+                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(today, -quantityToReturn);
+            }
+            else
+            {
+                // 戻せる分だけこのロットに戻し、残りは他のロットに戻す
+                var returnToThisLot = today.Quantity;
+                var returnToOtherLot = quantityToReturn - returnToThisLot;
+
+                today.Quantity -= returnToThisLot;
+                today.Remain += returnToThisLot;
+                context.InventoryActions.Update(today);
+                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(today, -returnToThisLot);
+
+                try
+                {
+                    returnedLot.Push(today.InventoryLotNo);
+                    ReturnToOtherLot(context, today, returnToOtherLot, returnedLot);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+                finally
+                {
+                    returnedLot.Pop();
+                }
+
+            }
+        }
+
+        private void ReturnToOtherLot(MemorieDeFleursDbContext context, InventoryAction inventory, int quantityToReturn, Stack<int> returnedLot)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"{inventory.ToString("s")}, {quantityToReturn}, [{string.Join(", ", returnedLot)}]");
+
+            var candidates = context.InventoryActions
+                .Where(act => act.PartsCode == inventory.PartsCode)
+                .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
+                .Where(act => act.ActionDate == inventory.ActionDate)
+                .Where(act => act.Quantity > 0)
+                .OrderByDescending(act => act.ArrivalDate) // 入荷(予定日)が遠い先の在庫から順次戻していく
+                .ToList();
+
+            var returnToThisLot = quantityToReturn;
+            var previousLot = inventory;
+
+            foreach (var action in candidates)
+            {
+                // すでに引当対象としたロットは除外：candidates 抽出時の式はSQLに変換されるため
+                if (returnedLot.Contains(action.InventoryLotNo)) { continue; }
+
+                var oldAction = new InventoryAction() { Quantity = action.Quantity, Remain = action.Remain }; // デバッグログ用
+
+                InventoryActionLogger.DEBUGLOG_ComparationOfInventoryUsedAndReturns(action, returnToThisLot);
+                if (action.Quantity >= returnToThisLot)
+                {
+                    // このロットに全量戻す
+                    ReturnToThisLot(context, action, quantityToReturn, returnedLot);
+
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
+                    LogUtil.DEBUGLOG_EndMethod(msg: $"resolved");
+                    return;
+                }
+                else
+                {
+                    // 加工数量分はこのロットに、戻し残った分は次のロットに戻す
+                    returnToThisLot -= action.Quantity;
+                    ReturnToThisLot(context, action, action.Remain, returnedLot);
+                    previousLot = action;
+
+                    InventoryActionLogger.DEBUGLOG_InventoryActionChanged(action, oldAction);
+                }
+            }
+
+            if (returnToThisLot > 0)
+            {
+                throw new NotImplementedException($"ロットが少なく全量を在庫に戻せない：最終確認ロット={previousLot.PartsCode}.Lot{previousLot.InventoryLotNo}" +
+                    $", 戻し残={returnToThisLot}");
+            }
+
+            LogUtil.DEBUGLOG_EndMethod();
+        }
+        #endregion // BackToInventory
 
         #region 商品構成の追加削除
         #region 新規作成・追加
@@ -618,16 +1140,24 @@ namespace MemorieDeFleurs.Models
         /// <param name="quantity">数量</param>
         private void AppendPartsTo(MemorieDeFleursDbContext context, string bouquetCode, string partsCode, int quantity)
         {
-            if (context.Bouquets.Find(bouquetCode) == null)
+            var bouquet = context.Bouquets.Find(bouquetCode);
+            var parts = context.BouquetParts.Find(partsCode);
+            if ( bouquet == null)
             {
                 throw new ArgumentException($"花束未登録： {bouquetCode}");
             }
-            if (context.BouquetParts.Find(partsCode) == null)
+            if ( parts == null)
             {
                 throw new ArgumentException($"単品未登録： {partsCode}");
             }
 
             CreateOrUpdatePartsList(context, bouquetCode, partsCode, quantity);
+
+            if (bouquet.LeadTime < parts.LeadTime)
+            {
+                bouquet.LeadTime = parts.LeadTime;
+                context.Bouquets.Update(bouquet);
+            }
         }
 
         private void CreateOrUpdatePartsList(MemorieDeFleursDbContext context, string bouquetCode, string partsCode, int quantity)
@@ -848,5 +1378,427 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // 数量更新
         #endregion // 商品構成の追加削除
+
+        #region 入荷予定数量変更
+        /// <summary>
+        /// 入荷予定数量を変更し、必要に応じて在庫払出展開する、トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="partsCode">花コード</param>
+        /// <param name="lotNo">発注ロット番号(=在庫ロット番号)</param>
+        /// <param name="newQuantity">変更後の入荷数量</param>
+        public void ChangeArrivalQuantity(MemorieDeFleursDbContext context, string partsCode, int lotNo, int newQuantity)
+        {
+            var arrived = context.InventoryActions
+                .Where(act => act.PartsCode == partsCode)
+                .Where(act => act.InventoryLotNo == lotNo)
+                .SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE || act.Action == InventoryActionType.ARRIVED);
+
+            if (arrived == null)
+            {
+                throw new NotImplementedException($"対象ロットが見つからない：{partsCode}.Lot{lotNo}");
+            }
+            else if (arrived.Action == InventoryActionType.ARRIVED)
+            {
+                throw new NotImplementedException($"入荷済み変更不可：{partsCode}.Lot{lotNo}");
+            }
+
+            if (arrived.Quantity == newQuantity)
+            {
+                // 変更不要
+                return;
+            }
+
+            arrived.Quantity = newQuantity;
+            arrived.Remain = newQuantity;
+            context.InventoryActions.Update(arrived);
+
+            var usedLot = new Stack<int>();
+            Parent.BouquetModel.UseFromPreviousRemain(context, arrived, arrived.ArrivalDate, usedLot);
+            context.SaveChanges();
+        }
+        #endregion // 入荷予定数量変更
+
+        #region 出荷数量変更
+        /// <summary>
+        /// 指定日付の全受注に対し出荷確定処理を行う：
+        /// 
+        /// 受注ステータスを「出荷済(SHIPPED)」に変更する
+        /// 当日分の加工予定在庫アクションを加工済在庫アクションに変更する
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="date">出荷確定処理を行う日</param>
+        public void ChangeAllScheduledPartsOfTheDayUsed(MemorieDeFleursDbContext context, DateTime date)
+        {
+            LogUtil.DEBUGLOG_BeginMethod(date.ToString("yyyyMMdd"));
+
+            try
+            {
+                foreach (var action in context.InventoryActions
+                    .Where(act => act.ActionDate == date)
+                    .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE)
+                    .ToList())
+                {
+                    // Action プロパティは InventoryAction テーブルのプライマリキーなので
+                    // UPDATE ではなく DELETE → INSERT する。
+                    var newAction = new InventoryAction()
+                    {
+                        Action = InventoryActionType.USED,
+                        ActionDate = action.ActionDate,
+                        ArrivalDate = action.ArrivalDate,
+                        BouquetPart = action.BouquetPart,
+                        InventoryLotNo = action.InventoryLotNo,
+                        PartsCode = action.PartsCode,
+                        Quantity = action.Quantity,
+                        Remain = action.Remain
+                    };
+                    context.InventoryActions.Remove(action);
+                    context.InventoryActions.Add(newAction);
+                }
+
+                context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod(date.ToString("yyyyMMdd"));
+            }
+        }
+
+        /// <summary>
+        /// 指定単品の指定数量分を加工予定から加工済に変更する
+        /// 
+        /// この処理を行うと、同一日の加工予定在庫アクションと加工済在庫アクションが両方並存することになる。
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="date">在庫アクションの状態変更対象日</param>
+        /// <param name="partsQuantity">単品の商品コードと加工済への変更数量</param>
+        public void UpdatePartsUsedQuantity(MemorieDeFleursDbContext context, DateTime date, KeyValuePair<string, int> partsQuantity)
+        {
+            // 指定単品指定日の使用予定・使用在庫アクションをロット毎にグループ化
+            var inventories = context.InventoryActions
+                .Where(act => act.ActionDate == date)
+                .Where(act => act.PartsCode == partsQuantity.Key)
+                .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_USE || act.Action == InventoryActionType.USED)
+                .AsEnumerable()
+                .GroupBy(act => act.ArrivalDate)
+                .ToDictionary(grp => grp.Key, grp => grp.AsEnumerable().GroupBy(act => act.InventoryLotNo).ToDictionary(grp => grp.Key, grp => grp.ToList()));
+
+            var previousUsed = partsQuantity.Value;
+
+            foreach(var act1 in inventories)
+            {
+                foreach(var act2 in act1.Value)
+                {
+                    // 使用予定在庫アクションから使用在庫アクションに partsQuantity で指定された数量を移し替える
+                    var used = act2.Value.SingleOrDefault(act => act.Action == InventoryActionType.USED);
+                    var scheduled = act2.Value.SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_USE);
+                    if(scheduled == null)
+                    {
+                        // このロットから在庫を移し替えることができない：次のロットにすすむ
+                        continue;
+                    }
+
+                    if(used == null)
+                    {
+                        used = new InventoryAction()
+                        {
+                            Action = InventoryActionType.USED,
+                            ActionDate = scheduled.ActionDate,
+                            ArrivalDate = scheduled.ArrivalDate,
+                            BouquetPart = scheduled.BouquetPart,
+                            InventoryLotNo = scheduled.InventoryLotNo,
+                            PartsCode = scheduled.PartsCode,
+                            Quantity = 0,
+                            Remain = scheduled.Remain
+                        };
+                        UpdateAndAddInventoryActions(context, used, scheduled, ref previousUsed);
+                    }
+                    else
+                    {
+                        UpdateInventoryActions(context, used, scheduled, ref previousUsed);
+                    }
+                }
+            }
+        }
+
+        private void UpdateAndAddInventoryActions(MemorieDeFleursDbContext context, InventoryAction used, InventoryAction scheduled, ref int quantity)
+        {
+            UpdateQuantity(used, scheduled, ref quantity);
+            UpdateScheduledToUseInventoryAction(context, scheduled);
+
+            context.InventoryActions.Add(used);
+            InventoryActionLogger.DEBUGLOG_InventoryActionCreated(used);
+        }
+
+        private void UpdateInventoryActions(MemorieDeFleursDbContext context, InventoryAction used, InventoryAction scheduled, ref int quantity)
+        {
+            var oldUsed = new InventoryAction() { Quantity = used.Quantity, Remain = used.Remain }; // デバッグ用、変更前の数量残数
+
+            UpdateQuantity(used, scheduled, ref quantity);
+            UpdateScheduledToUseInventoryAction(context, scheduled);
+
+            context.InventoryActions.Update(used);
+            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(used, oldUsed);
+        }
+
+        private void UpdateQuantity(InventoryAction used, InventoryAction scheduled, ref int quantity)
+        {
+            var oldScheduled = new InventoryAction() { Quantity = scheduled.Quantity, Remain = scheduled.Remain }; // デバッグ用、変更前の数量残数
+
+            if(scheduled.Quantity > quantity)
+            {
+                scheduled.Quantity -= quantity;
+                used.Quantity += quantity;
+                quantity = 0;
+
+                if(scheduled.Quantity == 0)
+                {
+                    scheduled.Remain = 0;
+                }
+            }
+            else
+            {
+                quantity -= scheduled.Quantity;
+                used.Quantity += scheduled.Quantity;
+                scheduled.Quantity = 0;
+                scheduled.Remain = 0;
+            }
+
+            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(scheduled, oldScheduled);
+        }
+        
+        private void UpdateScheduledToUseInventoryAction(MemorieDeFleursDbContext context, InventoryAction scheduled)
+        {
+            if(scheduled.Quantity == 0 && scheduled.Remain ==0)
+            {
+                context.InventoryActions.Remove(scheduled);
+                InventoryActionLogger.DEBUGLOG_InventoryActionRemoved(scheduled);
+            }
+            else
+            {
+                context.InventoryActions.Update(scheduled);
+            }
+        }
+        #endregion // 出荷数量変更
+
+        #region 単品破棄
+        public void DiscardBouquetParts(DateTime date, params Tuple<string, int>[] discardParts)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                var partsString = string.Join(", ", discardParts.Select(p => $"{p.Item1} x {p.Item2}"));
+                LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, [ {partsString} ]");
+
+                try
+                {
+                    DiscardBouquetParts(context, date, discardParts);
+                    transaction.Commit();
+                }
+                catch(Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod($"{date:yyyyMMdd}, [ {partsString} ]");
+                }
+            }
+
+        }
+
+        private void DiscardBouquetParts(MemorieDeFleursDbContext context, DateTime date, params Tuple<string, int>[] discardParts)
+        {
+            foreach(var parts in discardParts)
+            {
+                DiscardBouquetParts(context, date, parts.Item1, parts.Item2);
+            }
+        }
+
+        private void DiscardBouquetParts(MemorieDeFleursDbContext context, DateTime date, string partsCode, int discardQuantity)
+        {
+            LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, {partsCode}, {discardQuantity}");
+            try
+            {
+                var expectedActions = new SortedSet<InventoryActionType>()
+                {
+                    InventoryActionType.DISCARDED,
+                    InventoryActionType.SCHEDULED_TO_DISCARD,
+                    InventoryActionType.SCHEDULED_TO_USE,
+                    InventoryActionType.USED
+                };
+                var inventories = context.InventoryActions
+                    .Where(act => act.PartsCode == partsCode)
+                    .Where(act => act.ActionDate == date)
+                    .Where(act => expectedActions.Contains(act.Action))
+                    .OrderBy(act => act.ArrivalDate)
+                    .AsEnumerable()
+                    .GroupBy(act => act.ArrivalDate)
+                    .ToDictionary(grp => grp.Key, grp => grp.AsEnumerable().GroupBy(act => act.InventoryLotNo).ToDictionary(grp => grp.Key, grp => grp.ToList()));
+
+                var remainToDiscard = discardQuantity;
+                InventoryAction previousAction = null;
+                foreach (var lots in inventories.OrderBy(kv => kv.Key))
+                {
+                    foreach (var actions in lots.Value.OrderBy(kv => kv.Key))
+                    {
+
+                        var scheduledToUse = actions.Value.SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_USE);
+                        var scheduledToDiscard = actions.Value.SingleOrDefault(act => act.Action == InventoryActionType.SCHEDULED_TO_DISCARD);
+                        var discarded = actions.Value.SingleOrDefault(act => act.Action == InventoryActionType.DISCARDED);
+                        var isNewCreated = false;
+
+                        // 破棄可能な予定在庫がこのロットにはない→次のロットから破棄する
+                        if (scheduledToDiscard == null && scheduledToUse == null) { continue; }
+
+                        if (discarded == null)
+                        {
+                            var action = scheduledToUse == null ? scheduledToDiscard : scheduledToUse;
+
+                            discarded = new InventoryAction()
+                            {
+                                Action = InventoryActionType.DISCARDED,
+                                ActionDate = action.ActionDate,
+                                ArrivalDate = action.ArrivalDate,
+                                BouquetPart = action.BouquetPart,
+                                InventoryLotNo = action.InventoryLotNo,
+                                PartsCode = action.PartsCode,
+                                Quantity = 0,
+                                Remain = 0
+                            };
+                            isNewCreated = true;
+                        }
+                        var oldDiscarded = new InventoryAction() { Quantity = discarded.Quantity, Remain = discarded.Remain };
+
+
+                        if (scheduledToDiscard == null)
+                        {
+                            var oldScheduledToUse = new InventoryAction() { Quantity = scheduledToUse.Quantity, Remain = scheduledToUse.Remain };
+
+                            // 加工予定在庫アクションの残数から破棄アクションの破棄数を切り出す
+                            if (scheduledToUse.Remain > remainToDiscard)
+                            {
+                                // 今ある加工残数から破棄済在庫アクションに全量振り替える
+                                // 振り替えた分を翌日以降の払い出し予定に反映する
+                                scheduledToUse.Remain -= remainToDiscard;
+                                discarded.Quantity += remainToDiscard;
+
+                                var usedLot = new Stack<int>();
+                                UseFromPreviousRemain(context, scheduledToUse, scheduledToUse.ActionDate.AddDays(1), usedLot);
+
+                                remainToDiscard = 0;
+                            }
+                            else
+                            {
+                                // 今ある加工残数をすべて破棄済在庫アクションに振り替える
+                                // 振り替えた分を翌日以降の払い出し予定に反映する
+                                // 振り替えできなかった分 (remainToDiscard - used.Remain) は次以降のロットから引く
+                                discarded.Quantity = scheduledToUse.Remain;
+                                remainToDiscard -= scheduledToUse.Remain;
+                                scheduledToUse.Remain = 0;
+
+                                var usedLot = new Stack<int>();
+                                UseFromPreviousRemain(context, scheduledToUse, scheduledToUse.ActionDate.AddDays(1), usedLot);
+                            }
+
+                            context.InventoryActions.Update(scheduledToUse);
+                            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(scheduledToUse, oldScheduledToUse);
+                        }
+                        else
+                        {
+                            var oldScheduledToDiscard = new InventoryAction() { Quantity = scheduledToDiscard.Quantity, Remain = scheduledToDiscard.Remain };
+
+                            // 破棄予定在庫アクションの数量から破棄アクションの数量を切り出す
+                            if (scheduledToDiscard.Quantity >= remainToDiscard)
+                            {
+                                // 破棄予定数量から今回破棄対象数量の全量を振り替え可能
+                                discarded.Quantity += remainToDiscard;
+                                scheduledToDiscard.Quantity -= remainToDiscard;
+                                remainToDiscard = 0;
+                            }
+                            else
+                            {
+                                // 破棄数量をこの破棄予定アクションから全量振り替えできない：
+                                // 足りない分(remainToDiscard - scheduledToDiscard.Quantity) は次のロットから引く
+                                remainToDiscard -= scheduledToDiscard.Quantity;
+                                discarded.Quantity += scheduledToDiscard.Quantity;
+                                scheduledToDiscard.Quantity = 0;
+                            }
+
+                            if (scheduledToDiscard.Quantity == 0)
+                            {
+                                context.InventoryActions.Remove(scheduledToDiscard);
+                                InventoryActionLogger.DEBUGLOG_InventoryActionRemoved(scheduledToDiscard);
+                            }
+                            else if (IsInventoryQuantityChanged(scheduledToDiscard, oldScheduledToDiscard))
+                            {
+                                context.InventoryActions.Update(scheduledToDiscard);
+                                InventoryActionLogger.DEBUGLOG_InventoryActionChanged(scheduledToDiscard, oldScheduledToDiscard);
+                            }
+                        }
+
+                        if (isNewCreated)
+                        {
+                            context.InventoryActions.Add(discarded);
+                            InventoryActionLogger.DEBUGLOG_InventoryActionCreated(discarded);
+                        }
+                        else if(IsInventoryQuantityChanged(discarded, oldDiscarded))
+                        {
+                            context.InventoryActions.Update(discarded);
+                            InventoryActionLogger.DEBUGLOG_InventoryActionChanged(discarded, oldDiscarded);
+                        }
+                        previousAction = discarded;
+
+                        if (remainToDiscard == 0) { break; }
+                    }
+
+                    if (remainToDiscard == 0) { break; }
+                }
+
+
+                if (remainToDiscard > 0)
+                {
+                    // 破棄残がある：在庫払出の最後のロットへ SHORTAGE アクション追加
+                    var shortage = new InventoryAction()
+                    {
+                        Action = InventoryActionType.SHORTAGE,
+                        ActionDate = previousAction.ActionDate,
+                        ArrivalDate = previousAction.ArrivalDate,
+                        BouquetPart = previousAction.BouquetPart,
+                        InventoryLotNo = previousAction.InventoryLotNo,
+                        PartsCode = previousAction.PartsCode,
+                        Quantity = remainToDiscard,
+                        Remain = -remainToDiscard
+                    };
+                    context.InventoryActions.Add(shortage);
+                    InventoryActionLogger.DEBUGLOG_InventoryActionCreated(shortage);
+                }
+                context.SaveChanges();
+                LogUtil.DEBUGLOG_EndMethod($"{date:yyyyMMdd}, {partsCode}, {discardQuantity}", "Succeeded.");
+            }
+            catch (Exception ex)
+            {
+                LogUtil.DEBUGLOG_EndMethod(msg: $" failed: {ex.GetType().Name}, {ex.Message}\n{ex.StackTrace}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 数量または残数の変更があったかどうかを確認する
+        /// </summary>
+        /// <param name="lhs">左辺の在庫アクション</param>
+        /// <param name="rhs">右辺の在庫アクション</param>
+        /// <returns>数量と残数のいずれかで 左辺 ！＝ 右辺 だったとき真、そうでないとき偽</returns>
+        private bool IsInventoryQuantityChanged(InventoryAction lhs, InventoryAction rhs)
+        {
+            return (lhs.Quantity != rhs.Quantity)
+                || (lhs.Remain != rhs.Remain);
+        }
+        #endregion // 単品破棄
     }
 }

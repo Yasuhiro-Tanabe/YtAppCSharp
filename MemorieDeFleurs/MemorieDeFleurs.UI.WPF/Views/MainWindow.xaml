@@ -1,0 +1,115 @@
+﻿<Window x:Class="MemorieDeFleurs.UI.WPF.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
+        xmlns:v="clr-namespace:MemorieDeFleurs.UI.WPF.Views"
+        xmlns:vh="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
+        mc:Ignorable="d"
+        Title="{Binding WindowTitle}" Height="650" Width="800">
+    <Window.DataContext>
+        <vm:MainWindowViiewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="*" MinHeight="50"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100" MinHeight="50"/>
+        </Grid.RowDefinitions>
+
+        <Menu Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <MenuItem Header="画面" HorizontalAlignment="Left">
+                <MenuItem Header="DB接続...">
+                    <MenuItem Header="SQLite">
+                        <MenuItem Header="読込..." Command="{Binding SQLiteLoad}" CommandParameter="{Binding}"/>
+                        <MenuItem Header="保存..." Command="{Binding SQLiteSave}" CommandParameter="{Binding}"/>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="終了" Command="{Binding Exit}" CommandParameter="{Binding}"/>
+            </MenuItem>
+            <MenuItem Header="仕入先">
+                <MenuItem Header="仕入先一覧" Command="{Binding OpenSupplierListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="仕入先登録" Command="{Binding OpenSupplierDetailView}" CommandParameter="{Binding}"/>
+            </MenuItem>
+            <MenuItem Header="商品">
+                <MenuItem Header="商品一覧" Command="{Binding OpenBouquetListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="商品登録" Command="{Binding OpenBouquetDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="単品一覧" Command="{Binding OpenPartsListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="単品登録" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
+            </MenuItem>
+            <MenuItem Header="得意先">
+                <MenuItem Header="得意先一覧" Command="{Binding OpenCustomerListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="得意先登録" Command="{Binding OpenCustomerDetailView}" CommandParameter="{Binding}"/>
+            </MenuItem>
+            <MenuItem Header="受発注">
+                <MenuItem Header="仕入先発注一覧" Command="{Binding OpenOrderToSupplierListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="仕入先発注登録" Command="{Binding OpenOrderToSupplierDetailView}" CommandParameter="{Binding}"/>
+            </MenuItem>
+        </Menu>
+
+        <TabControl Grid.Row="1" x:Name="Views" ItemsSource="{Binding TabItemControlCollection}" SelectedItem="{Binding CurrentItem}">
+            <TabControl.Resources>
+                <!-- 選択した ViewModel 毎に対応する View (UserControl) を使い分ける -->
+                <DataTemplate DataType="{x:Type vm:BouquetPartsListViewModel}">
+                    <v:BouquetPartsListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:BouquetPartsDetailViewModel}">
+                    <v:BouquetPartsDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:BouquetListViewModel}">
+                    <v:BouquetListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:BouquetDetailViewModel}">
+                    <v:BouquetDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:SupplierListViewModel}">
+                    <v:SupplierListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:SupplierDetailViewModel}">
+                    <v:SupplierDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:CustomerListViewModel}">
+                    <v:CustomerListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:CustomerDetailViewModel}">
+                    <v:CustomerDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierListViewModel}">
+                    <v:OrderToSupplierListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
+                    <v:OrderToSupplierDetailControl/>
+                </DataTemplate>
+            </TabControl.Resources>
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Stretch"
+                                   Text="{Binding Header}"/>
+                        <Button Grid.Column="1" Content="x" Command="{Binding Close}" CommandParameter="{Binding}"/>
+                    </Grid>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+        </TabControl>
+
+        <GridSplitter Grid.Row="2" Height="3" Background="LightGray" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+        <ScrollViewer Grid.Row="3"
+                      Margin="2" Padding="3"
+                      HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                      VerticalAlignment="Stretch" VerticalContentAlignment="Stretch"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Visible"
+                      vh:ScrollViewerHelper.AutoScrollToBottom="True">
+            <TextBlock Text="{Binding Message, Mode=OneWay}" TextWrapping="NoWrap"/>
+        </ScrollViewer>
+    </Grid>
+</Window>

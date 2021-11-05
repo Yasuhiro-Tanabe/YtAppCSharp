@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleurs", "MemorieD
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleursTest", "MemorieDeFleursTest\MemorieDeFleursTest.csproj", "{46F987CC-8705-4609-9860-856142492FE8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleurs.UI.WPF", "MemorieDeFleurs.UI.WPF\MemorieDeFleurs.UI.WPF.csproj", "{BA63A4A3-EF1C-45B9-91CF-95102E5EE664}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleurs.Logging", "MemorieDeFleurs.Logging\MemorieDeFleurs.Logging.csproj", "{15AF2C96-A4BB-4AC3-A2BD-3AFFDF2F4151}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{46F987CC-8705-4609-9860-856142492FE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46F987CC-8705-4609-9860-856142492FE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46F987CC-8705-4609-9860-856142492FE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA63A4A3-EF1C-45B9-91CF-95102E5EE664}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA63A4A3-EF1C-45B9-91CF-95102E5EE664}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA63A4A3-EF1C-45B9-91CF-95102E5EE664}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA63A4A3-EF1C-45B9-91CF-95102E5EE664}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15AF2C96-A4BB-4AC3-A2BD-3AFFDF2F4151}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15AF2C96-A4BB-4AC3-A2BD-3AFFDF2F4151}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15AF2C96-A4BB-4AC3-A2BD-3AFFDF2F4151}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15AF2C96-A4BB-4AC3-A2BD-3AFFDF2F4151}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

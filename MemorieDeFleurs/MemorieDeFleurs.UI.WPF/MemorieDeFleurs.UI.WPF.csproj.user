@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <ApplicationDefinition Update="App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Views\BouquetDetailControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\BouquetListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\BouquetPartsDetailControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\BouquetPartsListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\CustomerDetailControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\CustomerListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\OrderToSupplierDetailControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\OrderToSupplierListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\SupplierDetailControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\SupplierListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Views\BouquetDetailControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\BouquetListControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\BouquetPartsDetailControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\BouquetPartsListControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\CustomerDetailControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\CustomerListControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\OrderToSupplierDetailControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\OrderToSupplierListControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\SupplierDetailControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\SupplierListControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+</Project>

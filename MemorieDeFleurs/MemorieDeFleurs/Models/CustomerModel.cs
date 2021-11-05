@@ -2,10 +2,11 @@
 using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
 
+using Microsoft.EntityFrameworkCore;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace MemorieDeFleurs.Models
 {
@@ -49,11 +50,11 @@ namespace MemorieDeFleurs.Models
             string _password;
             string _cardNo;
 
-            IDictionary<string, Tuple<string, string>> _shipping = new SortedDictionary<string, Tuple<string, string>>();            
+            IDictionary<string, Tuple<string, string>> _shipping = new SortedDictionary<string, Tuple<string, string>>();
 
             internal static CustomerBuilder GetInstance(CustomerModel parent)
             {
-                return new CustomerBuilder(parent);   
+                return new CustomerBuilder(parent);
             }
 
             private CustomerBuilder(CustomerModel model)
@@ -137,7 +138,7 @@ namespace MemorieDeFleurs.Models
                         transaction.Commit();
                         return customer;
                     }
-                    catch(Exception)
+                    catch (Exception)
                     {
                         transaction.Rollback();
                         throw;
@@ -166,7 +167,7 @@ namespace MemorieDeFleurs.Models
 
                 context.Customers.Add(c);
 
-                if(_shipping.Count > 0)
+                if (_shipping.Count > 0)
                 {
                     var builder = _model.GetShippingAddressBuilder();
                     foreach (var addr in _shipping)
@@ -202,7 +203,7 @@ namespace MemorieDeFleurs.Models
             private string _name;
 
             private Customer _sendFrom;
-            
+
             public static ShippingAddressBuilder GetInstance(CustomerModel parent)
             {
                 return new ShippingAddressBuilder(parent);
@@ -241,7 +242,7 @@ namespace MemorieDeFleurs.Models
             /// <param name="address1">お届け先住所1 (入力必須)</param>
             /// <param name="address2">お届け先住所2</param>
             /// <returns>お届け先住所を変更したお届け先オブジェクト生成器(自分自身)</returns>
-            public ShippingAddressBuilder AddressIs(string address1, string address2="")
+            public ShippingAddressBuilder AddressIs(string address1, string address2 = "")
             {
                 _address1 = address1;
                 _address2 = address2;
@@ -308,20 +309,150 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // ShippingAddressBuilder
 
-        #region 仕入先の登録改廃
-        public Customer Find(int id)
+        #region 得意先の登録改廃
+        public Customer FindCustomer(int id)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                var customer = context.Customers.Find(id);
-
-                // キャッシュにお届け先をロード
-                context.ShippingAddresses.Where(ship => ship.CustomerID == id);
-
-                return customer;
+                return FindCustomer(context, id);
             }
         }
-        #endregion // 仕入先の登録改廃
+        private Customer FindCustomer(MemorieDeFleursDbContext context, int id)
+        {
+            return context.Customers
+                .Include(c => c.ShippingAddresses)
+                .SingleOrDefault(c => c.ID == id);
+        }
+
+        public IEnumerable<Customer> FindAllCustomers()
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.Customers
+                    .Include(c => c.ShippingAddresses)
+                    .ToList().AsEnumerable();
+            }
+        }
+
+        public void RemoveCustomer(int customerID)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using(var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(customerID.ToString());
+                    RemoveCustomer(context, customerID);
+                    LogUtil.Info($"Customer {customerID} removed.");
+                    transaction.Commit();
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(customerID.ToString());
+                }
+            }
+        }
+        private void RemoveCustomer(MemorieDeFleursDbContext context, int customerID)
+        {
+            var customer = context.Customers.Find(customerID);
+            if(customer == null)
+            {
+                throw new ApplicationException($"IDに該当する得意先なし：得意先ID={customerID}");
+            }
+            else
+            {
+                if(context.OrderFromCustomers.Count(o => o.CustomerID == customerID) > 0)
+                {
+                    throw new ApplicationException($"受注実績のある得意先は削除できない：得意先ID={customerID}");
+                }
+
+                var shipping = context.ShippingAddresses.Where(a => a.CustomerID == customerID);
+                if (shipping.Count() > 0) { context.ShippingAddresses.RemoveRange(shipping); }
+                context.Customers.Remove(customer);
+
+                context.SaveChanges();
+            }
+        }
+
+        public Customer Save(Customer customer)
+        {
+            using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(customer.ID.ToString());
+                    var saved = Save(context, customer);
+                    transaction.Commit();
+                    LogUtil.Info($"Customer {saved.ID} saved.");
+                    return saved;
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(customer.ID.ToString());
+                }
+            }
+        }
+        public Customer Save(MemorieDeFleursDbContext context, Customer customer)
+        {
+            var found = FindCustomer(context, customer.ID);
+            if(found == null)
+            {
+                if(customer.ID == 0)
+                {
+                    customer.ID = Parent.Sequences.SEQ_CUSTOMERS.Next(context);
+                }
+                found = context.Customers.Add(customer).Entity;
+            }
+            else
+            {
+                if(found.CheckAndModify(customer))
+                {
+                    context.Customers.Update(found);
+                }
+
+
+                foreach(var addr in found.ShippingAddresses)
+                {
+                    var foundShipping = customer.ShippingAddresses.SingleOrDefault(a => a.ID == addr.ID);
+                    if (foundShipping == null)
+                    {
+                        // found にあって customer にないお届け先を削除
+                        context.ShippingAddresses.Remove(addr);
+                    }
+                    else if (addr.CheckAndModify(foundShipping))
+                    {
+                        // 両方に存在するお届け先は、名称等変更があったらそれを反映する
+                        context.ShippingAddresses.Update(addr);
+                    }
+                }
+
+                foreach (var addr in customer.ShippingAddresses)
+                {
+                    if(found.ShippingAddresses.SingleOrDefault(a => a.ID == addr.ID) == null)
+                    {
+                        // customer にあって found にないお届け先を追加
+                        context.ShippingAddresses.Add(addr);
+                    }
+                }
+            }
+            context.SaveChanges();
+
+            return FindCustomer(found.ID);
+        }
+        #endregion // 得意先の登録改廃
 
         #region 受注履歴の登録改廃
         public OrderFromCustomer FindOrder(string orderID)
@@ -361,7 +492,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="sendTo">花束の送り先：贈り主はここから参照して取得する</param>
         /// <param name="arrivalDate">お届け日：花束の作成は前日なので、在庫は arrivalDate - 1 日の分が消費される</param>
         /// <param name="message">（省略可能）お届けメッセージ</param>
-        public string Order(DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "" )
+        public string Order(DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "")
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -390,59 +521,64 @@ namespace MemorieDeFleurs.Models
             LogUtil.DEBUGLOG_BeginMethod($"orderDate={orderDate.ToString("yyyyMMdd")}, bouquet={bouquet.Code}" +
                 $", shipping={sendTo.CustomerID}-{sendTo.ID}, arrivalDate={arrivalDate.ToString("yyyyMMdd")}");
 
-            var countOfOrdersToday = context.OrderFromCustomers.Count(o => o.OrderDate == orderDate);
-            var customer = context.Customers.Find(sendTo.CustomerID);
-
-            if(customer == null)
+            try
             {
-                throw new InvalidOperationException($"得意先不明 (ID={sendTo.CustomerID})");
-            }
-            if(countOfOrdersToday > 999999)
-            {
-                throw new InvalidOperationException($"当日受注数が想定外に多い：受注日={orderDate.ToString("yyyyMMdd")}, 受注数={countOfOrdersToday}");
-            }
+                var countOfOrdersToday = context.OrderFromCustomers.Count(o => o.OrderDate == orderDate);
+                var customer = context.Customers.Find(sendTo.CustomerID);
 
-            var usedDate = arrivalDate.AddDays(-1);
-            foreach (var item in bouquet.PartsList)
-            {
-                var part = context.BouquetParts.Find(item.PartsCode);
-                Parent.BouquetModel.UseBouquetPart(context, part, usedDate, item.Quantity);
-
-                var remain = context.InventoryActions
-                    .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE || a.Action == InventoryActionType.SHORTAGE)
-                    .Where(a => a.ActionDate == usedDate)
-                    .Sum(a => a.Remain);
-                if (remain < 0)
+                if (customer == null)
                 {
-                    throw new NotImplementedException(new StringBuilder()
-                        .Append("注文不可：単品在庫なし、")
-                        .AppendFormat(" お届け日={0:yyyyMMdd}", arrivalDate)
-                        .Append(", 商品=").Append(bouquet.Code)
-                        .Append(", 単品=").Append(item.PartsCode)
-                        .Append(", 要求数=").Append(item.Quantity)
-                        .Append(", 不足数=").Append(-remain) // 符号を＋に変えて表示
-                        .ToString());
+                    throw new InvalidOperationException($"得意先不明 (ID={sendTo.CustomerID})");
                 }
+                if (countOfOrdersToday > 999999)
+                {
+                    throw new InvalidOperationException($"当日受注数が想定外に多い：受注日={orderDate.ToString("yyyyMMdd")}, 受注数={countOfOrdersToday}");
+                }
+
+                var minmalArrivalDate = orderDate.AddDays(bouquet.LeadTime);
+                if (arrivalDate < minmalArrivalDate)
+                {
+                    throw new ApplicationException($"注文不可：お届け日 {arrivalDate:yyyyMMdd} が最短お届け可能日 {minmalArrivalDate:yyyyMMdd} より近い");
+                }
+
+                var usedDate = arrivalDate.AddDays(-1);
+                foreach (var item in bouquet.PartsList)
+                {
+                    var part = context.BouquetParts.Find(item.PartsCode);
+                    Parent.BouquetModel.UseFromInventory(context, part, usedDate, item.Quantity);
+
+                    if (Parent.BouquetModel.ShortageInventories.Count() > 0)
+                    {
+                        throw new InventoryShortageException(Parent.BouquetModel.ShortageInventories.First(), item.Quantity);
+                    }
+                }
+
+                var order = new OrderFromCustomer()
+                {
+                    ID = $"{orderDate.ToString("yyyyMMdd")}-{countOfOrdersToday + 1:000000}",
+                    BouquetCode = bouquet.Code,
+                    CustomerID = context.Customers.Find(sendTo.CustomerID).ID,
+                    ShippingAddressID = sendTo.ID,
+                    OrderDate = orderDate,
+                    ShippingDate = arrivalDate.AddDays(-1),
+                    HasMessage = string.IsNullOrWhiteSpace(message),
+                    Message = message,
+                    Status = 0
+                };
+
+                context.OrderFromCustomers.Add(order);
+                context.SaveChanges();
+                return order.ID;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
             }
 
-            var order = new OrderFromCustomer()
-            {
-                ID = $"{orderDate.ToString("yyyyMMdd")}-{countOfOrdersToday+1:000000}",
-                BouquetCode = bouquet.Code,
-                CustomerID = context.Customers.Find(sendTo.CustomerID).ID,
-                ShippingAddressID = sendTo.ID,
-                OrderDate = orderDate,
-                ShippingDate = arrivalDate.AddDays(-1),
-                HasMessage = string.IsNullOrWhiteSpace(message),
-                Message = message,
-                Status = 0
-            };
-
-            context.OrderFromCustomers.Add(order);
-            context.SaveChanges();
-            
-            LogUtil.DEBUGLOG_EndMethod();
-            return order.ID;
         }
         #endregion // 注文
 
@@ -470,30 +606,44 @@ namespace MemorieDeFleurs.Models
         {
             LogUtil.DEBUGLOG_BeginMethod($"order={orderNo}");
 
-            var order = FindOrder(context, orderNo);
-            if (order == null)
+            try
             {
-                throw new NotSupportedException($"該当する受注履歴なし：{orderNo}");
+                var order = FindOrder(context, orderNo);
+                if (order == null)
+                {
+                    throw new NotSupportedException($"該当する受注履歴なし：{orderNo}");
+                }
+
+                if (order.Status == OrderFromCustomerStatus.SHIPPED)
+                {
+                    // 出荷済み注文はキャンセル不可
+                    throw new ApplicationException($"出荷済みキャンセル不可：{orderNo}");
+                }
+
+                var partsList = context.PartsList.Where(i => i.BouquetCode == order.BouquetCode);
+
+                LogUtil.Debug($"{order.BouquetCode} ({partsList.Count()} part(s)):" +
+                    $" {string.Join(", ", partsList.Select(p => $"({p.PartsCode} x {p.Quantity})"))}");
+
+                foreach (var item in partsList)
+                {
+                    var part = context.BouquetParts.Find(item.PartsCode);
+                    Parent.BouquetModel.ReturnToInventory(context, part, order.ShippingDate, item.Quantity);
+                }
             }
-
-            var partsList = context.PartsList.Where(i => i.BouquetCode == order.BouquetCode);
-
-            LogUtil.Debug($"{LogUtil.Indent}{order.BouquetCode} ({partsList.Count()} part(s)):" +
-                $" {string.Join(", ", partsList.Select(p => $"({p.PartsCode} x {p.Quantity})"))}");
-
-            foreach(var item in partsList)
+            catch (Exception)
             {
-                var part = context.BouquetParts.Find(item.PartsCode);
-                // 受注したのと同じ数量を引く
-                Parent.BouquetModel.UseBouquetPart(context, part, order.ShippingDate, - item.Quantity);
+                throw;
             }
-
-            LogUtil.DEBUGLOG_EndMethod($"order={orderNo}");
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod($"order={orderNo}");
+            }
         }
         #endregion // 注文取消
 
         #region お届け日変更
-        public void ChangeArrivalDate(string orderNo, DateTime newArrivalDate)
+        public void ChangeArrivalDate(DateTime orderChangeDate, string orderNo, DateTime newArrivalDate)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -503,12 +653,12 @@ namespace MemorieDeFleurs.Models
                     var oldShippingDate = context.OrderFromCustomers.Find(orderNo).ShippingDate;
 
                     LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, {newArrivalDate:yyyyMMdd}");
-                    ChangeArrivalDate(context, orderNo, newArrivalDate);
+                    ChangeArrivalDate(context, orderChangeDate, orderNo, newArrivalDate);
                     transaction.Commit();
                     LogUtil.DEBUGLOG_EndMethod($"{orderNo}", "succeeded.");
                     LogUtil.Info($"Shipping Date changed; order={orderNo}, from {oldShippingDate:yyyyMMdd} to {newArrivalDate.AddDays(-1):yyyyMMdd}");
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     transaction.Rollback();
                     LogUtil.Warn($"ChangeArrivalDate({orderNo},{newArrivalDate.ToString("yyyyMMdd")}) failed, cause={e.GetType().Name}: {e.Message}");
@@ -518,7 +668,7 @@ namespace MemorieDeFleurs.Models
             }
         }
 
-        public void ChangeArrivalDate(MemorieDeFleursDbContext context, string orderNo, DateTime newArrivalDate)
+        public void ChangeArrivalDate(MemorieDeFleursDbContext context, DateTime orderChangeDate, string orderNo, DateTime newArrivalDate)
         {
 
             if (string.IsNullOrWhiteSpace(orderNo))
@@ -532,20 +682,143 @@ namespace MemorieDeFleurs.Models
                 throw new NotImplementedException($"エラー処理未実装：{orderNo} に該当するオーダーがない");
             }
 
+            if (order.Status == OrderFromCustomerStatus.SHIPPED)
+            {
+                // 出荷済み注文はキャンセル不可
+                throw new ApplicationException($"出荷済み出荷日変更不可：{orderNo}");
+            }
+
             var bouquet = Parent.BouquetModel.FindBouquet(order.BouquetCode);
-            
+            var minimalArrivalDate = orderChangeDate.AddDays(bouquet.LeadTime);
+            if (newArrivalDate <= minimalArrivalDate)
+            {
+                // リードタイムより近い日付への移動はできない
+                // 等号を含む：当日受け付けた注文変更に伴う在庫不足があると、仕入先への単品発注が間に合わないため。
+                throw new ApplicationException($"注文変更不可：お届け日 {newArrivalDate:yyyyMMdd} が最短お届け可能日 {minimalArrivalDate:yyyyMMdd} より近い");
+            }
+
             var newShippingDate = newArrivalDate.AddDays(-1);
             var partsList = bouquet.PartsList.Select(i => $"{i.PartsCode} x{i.Quantity}");
-            LogUtil.Debug($"{LogUtil.Indent}Order={orderNo}" +
-                $", Shipping={order.ShippingDate.ToString("yyyyMMdd")}->{newShippingDate.ToString("yyyyMMdd")}" +
+            LogUtil.Debug($"Order={orderNo}, Shipping={order.ShippingDate.ToString("yyyyMMdd")}->{newShippingDate.ToString("yyyyMMdd")}" +
                 $", Bouquet({bouquet.PartsList.Count()} part(s))=[{string.Join(", ", partsList).Trim()}]");
 
-            foreach(var item in bouquet.PartsList)
+            foreach (var item in bouquet.PartsList)
             {
-                Parent.BouquetModel.UseBouquetPart(context, item.Part, order.ShippingDate, -item.Quantity);
-                Parent.BouquetModel.UseBouquetPart(context, item.Part, newShippingDate, item.Quantity);
+                Parent.BouquetModel.ReturnToInventory(context, item.Part, order.ShippingDate, item.Quantity);
+                Parent.BouquetModel.UseFromInventory(context, item.Part, newShippingDate, item.Quantity);
             }
         }
         #endregion // お届け日変更
+
+        #region 出荷
+        public void ShipAllBouquets(DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                LogUtil.DEBUGLOG_BeginMethod(date.ToString("yyyyMMdd"));
+                try
+                {
+                    ShipAllOrdersFromCustomerInTheDay(context, date);
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod();
+                }
+
+            }
+        }
+
+        private void ShipAllOrdersFromCustomerInTheDay(MemorieDeFleursDbContext context, DateTime date)
+        {
+            foreach (var order in context.OrderFromCustomers.Where(order => order.ShippingDate == date).ToList())
+            {
+                if (order.Status == OrderFromCustomerStatus.SHIPPED)
+                {
+                    // 二重出荷はできない
+                    throw new ApplicationException($"すでに出荷済み：{order.ID}");
+                }
+
+                order.Status = OrderFromCustomerStatus.SHIPPED;
+                context.OrderFromCustomers.Update(order);
+            }
+            context.SaveChanges();
+
+            Parent.BouquetModel.ChangeAllScheduledPartsOfTheDayUsed(context, date);
+        }
+
+        /// <summary>
+        /// 得意先からの受注番号指定で出荷処理を行う。
+        /// </summary>
+        /// <param name="date">出荷日</param>
+        /// <param name="orderNumbers">出荷した受注番号</param>
+        public void ShipOrders(DateTime date, params string[] orderNumbers)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, [ {string.Join(", ", orderNumbers)} ]");
+                try
+                {
+                    ShipOrders(context, date, orderNumbers);
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn($"Order shipping failed: {date:yyyyMMdd}, {ex.GetType().Name} : {ex.Message}");
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod();
+                }
+            }
+        }
+
+        private void ShipOrders(MemorieDeFleursDbContext context, DateTime date, params string[] orderNumbers)
+        {
+            var orderList = context.OrderFromCustomers.Where(o => orderNumbers.Contains(o.ID)).ToList();
+            foreach (var order in orderList)
+            {
+                order.ShippingDate = date;
+                order.Status = OrderFromCustomerStatus.SHIPPED;
+                context.OrderFromCustomers.Update(order);
+            }
+            context.SaveChanges();
+            LogUtil.Debug("OrderFromCustomers changed.");
+
+
+            var partsList = orderList
+                .SelectMany(o => context.PartsList.Where(i => i.BouquetCode == o.BouquetCode))
+                .GroupBy(i => i.PartsCode)
+                .ToDictionary(g => g.Key, g => g.Sum(i => i.Quantity));
+            foreach (var item in partsList)
+            {
+                Parent.BouquetModel.UpdatePartsUsedQuantity(context, date, item);
+            }
+            context.SaveChanges();
+        }
+        #endregion // 出荷
+
+        #region 受注履歴の取得
+        public IEnumerable<string> FindAllOrdersShippingAt(DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrderFromCustomers
+                    .Where(order => order.ShippingDate == date)
+                    .OrderBy(order => order.ID)
+                    .Select(order => order.ID)
+                    .ToList();
+            }
+        }
+        #endregion // 受注履歴の取得
     }
 }

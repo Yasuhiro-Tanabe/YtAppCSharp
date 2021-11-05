@@ -4,6 +4,7 @@ using MemorieDeFleurs.Models.Entities;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
+using System;
 using System.Data.Common;
 
 namespace MemorieDeFleurs.Databese.SQLite
@@ -53,7 +54,8 @@ namespace MemorieDeFleurs.Databese.SQLite
             if(Connection is SqliteConnection)
             {
                 builder.UseSqlite(Connection);
-                builder.EnableSensitiveDataLogging(true); // for Debug
+                //builder.EnableSensitiveDataLogging(true); // for Debug
+                //builder.LogTo(Console.WriteLine); // for Debug
             }
         }
 
@@ -69,10 +71,14 @@ namespace MemorieDeFleurs.Databese.SQLite
                     ent.Property(act => act.ArrivalDate).HasConversion(converter);
                 });
 
-
             modelBuilder
-                .Entity<PartSupplier>()
-                .HasKey("SupplierCode", "PartCode");
+                .Entity<PartSupplier>(item =>
+                {
+                    item.HasKey("SupplierCode", "PartCode");
+                    item.HasKey(nameof(PartSupplier.SupplierCode), nameof(PartSupplier.PartCode));
+                    item.HasOne(i => i.Supplier).WithMany(s => s.SupplyParts).HasForeignKey(i => i.SupplierCode);
+                    item.HasOne(i => i.Part).WithMany(p => p.Suppliers).HasForeignKey(i => i.PartCode);
+                });
 
             modelBuilder.Entity<BouquetPartsList>(ent =>
                 {
@@ -87,16 +93,17 @@ namespace MemorieDeFleurs.Databese.SQLite
                     ent.HasOne(a => a.Customer).WithMany(c => c.ShippingAddresses).HasForeignKey(a => a.CustomerID);
                 });
 
-            modelBuilder
-                .Entity<OrderFromCustomer>()
-                .Property(o => o.OrderDate)
-                .HasConversion(converter);
+            modelBuilder.Entity<OrderFromCustomer>(order => {
+                order.Property(o => o.OrderDate).HasConversion(converter);
+                order.Property(o => o.ShippingDate).HasConversion(converter);
+            });
 
             modelBuilder
                 .Entity<OrdersToSupplier>(order =>
                 {
                     order.Property(o => o.DeliveryDate).HasConversion(converter);
                     order.Property(o => o.OrderDate).HasConversion(converter);
+                    order.HasMany(o => o.Details).WithOne(d => d.Order).HasForeignKey(d => d.OrderToSupplierID);
                 });
 
             modelBuilder
@@ -104,14 +111,6 @@ namespace MemorieDeFleurs.Databese.SQLite
                 {
                     detail.HasKey(nameof(OrderDetailsToSupplier.OrderToSupplierID), nameof(OrderDetailsToSupplier.OrderIndex));
                     detail.HasOne(d => d.Order).WithMany(o => o.Details).HasForeignKey(d => d.OrderToSupplierID);
-                });
-
-            modelBuilder
-                .Entity<PartSupplier>(item =>
-                {
-                    item.HasKey(nameof(PartSupplier.SupplierCode), nameof(PartSupplier.PartCode));
-                    item.HasOne(i => i.Supplier).WithMany(s => s.SupplyParts).HasForeignKey(i => i.SupplierCode);
-                    item.HasOne(i => i.Part).WithMany(p => p.Suppliers).HasForeignKey(i => i.PartCode);
                 });
         }
 

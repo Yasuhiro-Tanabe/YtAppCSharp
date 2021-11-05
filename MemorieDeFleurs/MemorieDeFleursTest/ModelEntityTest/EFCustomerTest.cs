@@ -1,6 +1,8 @@
 ﻿using MemorieDeFleurs.Databese.SQLite;
 using MemorieDeFleurs.Models.Entities;
 
+using MemorieDeFleursTest.ModelTest;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -147,7 +149,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
                 context.Customers.Add(new Customer() { ID = 2, EmailAddress = "user2@localdomain", Name = "ユーザ2", CardNo = "1234123412341234" });
                 context.Customers.Add(new Customer() { ID = 3, EmailAddress = "user3@localdomain", Name = "ユーザ3", CardNo = "1234567890123450" });
 
-                var date = new DateTime(2021, 1, 1);
+                var date = new DateTime(DateConst.Year, 1, 1);
                 context.ShippingAddresses.Add(new ShippingAddress() { ID = 7, CustomerID = 2, Address1 = "住所2-1", Name = "友人A", LatestOrderDate = date });
                 context.ShippingAddresses.Add(new ShippingAddress() { ID = 8, CustomerID = 2, Address1 = "住所2-2", Name = "友人B", LatestOrderDate = date });
                 context.ShippingAddresses.Add(new ShippingAddress() { ID = 9, CustomerID = 2, Address1 = "住所2-3", Name = "友人C", LatestOrderDate = date });

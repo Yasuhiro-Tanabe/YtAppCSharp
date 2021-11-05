@@ -34,12 +34,12 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// ロットの在庫アクション検証器を生成する：生成するだけで制御は移さない。
         /// </summary>
         /// <param name="arrivedDate">入荷予定日</param>
-        /// <param name="lotNo">ロット番号</param>
+        /// <param name="index">ロット番号</param>
         /// <returns>自分自身</returns>
-        public PartsInventoryActionValidator Lot(DateTime arrivedDate, int lotNo)
+        public PartsInventoryActionValidator Lot(DateTime arrivedDate,  int index = 0)
         {
             LotInventoryActionValidator validator;
-            var key = Tuple.Create(arrivedDate, lotNo);
+            var key = Tuple.Create(arrivedDate, index);
             if (!LotValidators.TryGetValue(key, out validator))
             {
                 validator = new LotInventoryActionValidator(this);
@@ -51,26 +51,15 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         }
 
         /// <summary>
-        /// ロットの在庫アクション検証器を生成する：生成するだけで制御は移さない。
-        /// </summary>
-        /// <param name="arrivalDate">入荷予定日</param>
-        /// <param name="findLotNumber">入荷予定日からロット番号を特定するためのメソッドまたはデレゲート</param>
-        /// <returns>自分自身</returns>
-        public PartsInventoryActionValidator Lot(DateTime arrivalDate, Func<DateTime, int> findLotNumber)
-        {
-            return Lot(arrivalDate, findLotNumber(arrivalDate));
-        }
-
-        /// <summary>
         /// 現在選択中のロットが在庫アクションを持たないことを明示する。
         /// 
         /// このメソッドを呼び出したときは Begin() を呼び出せない。
         /// Lot() で別のロットを割り当てること。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>自分自身</returns>
         public PartsInventoryActionValidator HasNoInventoryActions()
         {
-            CurrentChild.HasInventoryShortageAction = true;
+            CurrentChild.HasNoInventoryActions();
             CurrentChild = null;
             return this;
         }

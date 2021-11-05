@@ -134,7 +134,7 @@ namespace MemorieDeFleursTest.ModelEntityTest
             {
                 if (File.Exists(dbFileName))
                 {
-                    LogUtil.Debug($"{LogUtil.Indent}Database {dbFileName} is alerdy exists. removed.");
+                    LogUtil.Debug($"Database {dbFileName} is alerdy exists. removed.");
                     File.Delete(dbFileName);
                 }
 

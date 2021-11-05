@@ -1,5 +1,6 @@
 ﻿using MemorieDeFleurs.Databese.SQLite;
 using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 
 using MemorieDeFleursTest.ModelTest.Fluent;
@@ -8,9 +9,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MemorieDeFleursTest.ModelTest
 {
@@ -31,9 +31,60 @@ namespace MemorieDeFleursTest.ModelTest
 
         private ISet<string> InitialOrdersToSupplyer { get; } = new SortedSet<string>();
 
+        #region LotNumberFinder
+        private class LotNumberFinder
+        {
+            private DbConnection _connection;
+            private MemorieDeFleursDbContext _context;
+
+            public LotNumberFinder(DbConnection conn)
+            {
+                _connection = conn;
+            }
+
+            public int this[BouquetPart part, DateTime arrivedAt, int index = 0]
+            {
+                get
+                {
+                    bool isContextCreated = (_context == null);
+
+                    if(isContextCreated)
+                    {
+                        _context = new MemorieDeFleursDbContext(_connection);
+                    }
+                    var lotNumbers = _context.InventoryActions
+                        .Where(act => act.PartsCode == part.Code)
+                        .Where(act => act.ActionDate == arrivedAt)
+                        .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE)
+                        .OrderBy(act => act.InventoryLotNo)
+                        .Select(act => act.InventoryLotNo).ToArray();
+                    if(isContextCreated)
+                    {
+                        _context.Dispose();
+                        _context = null;
+                    }
+
+                    if(lotNumbers.Length == 0)
+                    {
+                        throw new ArgumentException($"該当ロットなし：入荷日={arrivedAt:yyyyMMdd}");
+                    }
+                    if(index >= lotNumbers.Length)
+                    {
+                        throw new IndexOutOfRangeException($"{arrivedAt:yyyyMMdd}入荷ロット数={lotNumbers.Length}, index={index}");
+                    }
+                    
+                    return lotNumbers[index];
+                }
+            }
+        }
+
+        private LotNumberFinder LotNumber { get; set; }
+        #endregion
+
         public MultiPartsBouquetOrdersFromCustomerTest() : base()
         {
             AfterTestBaseInitializing += PrepareModel;
+            LotNumber = new LotNumberFinder(TestDB);
         }
 
         #region TestInitialize
@@ -48,7 +99,7 @@ namespace MemorieDeFleursTest.ModelTest
                     PrepareBouquets(context);
                     PrepareCustomers(context);
                     PrepareSuppliers(context);
-                    PrepareInitialOrder(context);
+                    PrepareInitialOrderToSupplier(context);
                     transaction.Commit();
                 }
                 catch(Exception)
@@ -230,9 +281,9 @@ namespace MemorieDeFleursTest.ModelTest
                 .Create(context));
         }
 
-        private void PrepareInitialOrder(MemorieDeFleursDbContext context)
+        private void PrepareInitialOrderToSupplier(MemorieDeFleursDbContext context)
         {
-            var orderDate = new DateTime(2020, 3, 10);
+            var orderDate = new DateTime(DateConst.Year, 3, 10);
             Action<string> add = s => InitialOrdersToSupplyer.Add(s);
 
 
@@ -254,40 +305,41 @@ namespace MemorieDeFleursTest.ModelTest
         #endregion // TestInitialize
 
         [TestMethod]
-        public void Order1()
+        public void OneBouquetOrdered()
         {
             LogUtil.DEBUGLOG_BeginTest();
-            Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd, "メッセージ");
 
+            Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd, "メッセージ");
+            
             InventoryActionValidator.NewInstance()
                 .BouquetPartIs(BouquetParts["BA001"]).BEGIN
-                    .Lot(DateConst.April30th, 1).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
                         .At(DateConst.April30th).Arrived(10)
                         .At(DateConst.May1st).Used(3, 7)
                         .At(DateConst.May3rd).Discarded(7)
                         .END
                     .END
                 .BouquetPartIs(BouquetParts["BA002"]).BEGIN
-                    .Lot(DateConst.April30th, 2).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
                         .At(DateConst.April30th).Arrived(10)
                         .At(DateConst.May1st).Used(5, 5)
                         .At(DateConst.May3rd).Discarded(5)
                         .END
                     .END
                 .BouquetPartIs(BouquetParts["BA003"]).BEGIN
-                    .Lot(DateConst.April30th, 3).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
                         .At(DateConst.April30th).Arrived(10)
                         .At(DateConst.May1st).Used(3, 7)
                         .At(DateConst.May3rd).Discarded(7)
                         .END
                     .END
                 .BouquetPartIs(BouquetParts["GP001"]).BEGIN
-                    .Lot(DateConst.April30th, 4).BEGIN
+                    .Lot(DateConst.April30th, 0).BEGIN
                         .At(DateConst.April30th).Arrived(5)
                         .At(DateConst.May1st).Used(5, 0)
                         .At(DateConst.May2nd).Discarded(0)
                         .END
-                    .Lot(DateConst.April30th, 5).BEGIN
+                    .Lot(DateConst.April30th, 1).BEGIN
                         .At(DateConst.April30th).Arrived(10)
                         .At(DateConst.May1st).Used(1, 9)
                         .At(DateConst.May2nd).Discarded(9)
@@ -297,6 +349,211 @@ namespace MemorieDeFleursTest.ModelTest
                 .AssertAll();
 
             LogUtil.DEBUGLOG_EndTest();
+        }
+
+        [TestMethod]
+        public void TwoDifferentBouquetIsOrdered()
+        {
+            LogUtil.DEBUGLOG_BeginTest();
+
+            var orderDate = DateConst.April30th.AddDays(-5);
+            Model.CustomerModel.Order(orderDate, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd, "メッセージ");
+            Model.CustomerModel.Order(orderDate, Bouquets["HT004"], Customers[2].ShippingAddresses[1], DateConst.May1st);
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(BouquetParts["BA001"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May1st).Used(3, 7)
+                        .At(DateConst.May3rd).Discarded(7)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["BA002"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(10).Used(3, 7)
+                        .At(DateConst.May1st).Used(5, 2)
+                        .At(DateConst.May3rd).Discarded(2)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["BA003"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(10).Used(5,5)
+                        .At(DateConst.May1st).Used(3, 2)
+                        .At(DateConst.May3rd).Discarded(2)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["GP001"]).BEGIN
+                    .Lot(DateConst.April30th, 0).BEGIN
+                        .At(DateConst.April30th).Arrived(5).Used(3,2)
+                        .At(DateConst.May1st).Used(2, 0)
+                        .At(DateConst.May2nd).Discarded(0)
+                        .END
+                    .Lot(DateConst.April30th, 1).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May1st).Used(4, 6)
+                        .At(DateConst.May2nd).Discarded(6)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["CN002"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(40).Used(3, 37)
+                        .At(DateConst.May5th).Discarded(37)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+            LogUtil.DEBUGLOG_EndTest();
+        }
+
+        /// <summary>
+        /// 受注できない：かすみ草の品質維持可能日数が2日のため 5/3 に破棄され在庫 0、引当できない
+        /// </summary>
+        [TestMethod]
+        public void OrderFailedAtMay4th()
+        {
+            try
+            {
+                Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May4th, "メッセージ");
+                Assert.Fail($"想定外の成功：GP001が在庫切れのはず");
+            }
+            catch (InventoryShortageException)
+            {
+                // 意図した例外が出たので、引当結果が破棄されていることを確認
+                InventoryActionValidator.NewInstance()
+                    .BouquetPartIs(BouquetParts["BA001"]).BEGIN
+                        .Lot(DateConst.April30th).BEGIN
+                            .At(DateConst.April30th).Arrived(10)
+                            .At(DateConst.May3rd).Discarded(10)
+                            .END
+                        .END
+                    .BouquetPartIs(BouquetParts["BA002"]).BEGIN
+                        .Lot(DateConst.April30th).BEGIN
+                            .At(DateConst.April30th).Arrived(10)
+                            .At(DateConst.May3rd).Discarded(10)
+                            .END
+                        .END
+                    .BouquetPartIs(BouquetParts["BA003"]).BEGIN
+                        .Lot(DateConst.April30th).BEGIN
+                            .At(DateConst.April30th).Arrived(10)
+                            .At(DateConst.May3rd).Discarded(10)
+                            .END
+                        .END
+                    .BouquetPartIs(BouquetParts["GP001"]).BEGIN
+                        .Lot(DateConst.April30th, 0).BEGIN
+                            .At(DateConst.April30th).Arrived(5)
+                            .At(DateConst.May2nd).Discarded(5)
+                            .END
+                        .Lot(DateConst.April30th, 1).BEGIN
+                            .At(DateConst.April30th).Arrived(10)
+                            .At(DateConst.May2nd).Discarded(10)
+                            .END
+                        .END
+                    .TargetDBIs(TestDB)
+                    .AssertAll();
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"想定外のエラー、{ex.GetType().Name}: {ex.Message}\n{ex.StackTrace}");
+            }
+        }
+
+        [TestMethod]
+        public void OrderAndCancelOrder()
+        {
+            var orderNo = Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT002"], Customers[1].ShippingAddresses[0], DateConst.May2nd);
+            Model.CustomerModel.CancelOrder(orderNo);
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(BouquetParts["BA001"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May3rd).Discarded(10)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["BA002"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May3rd).Discarded(10)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["BA003"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May3rd).Discarded(10)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["GP001"]).BEGIN
+                    .Lot(DateConst.April30th, 0).BEGIN
+                        .At(DateConst.April30th).Arrived(5)
+                        .At(DateConst.May2nd).Discarded(5)
+                        .END
+                    .Lot(DateConst.April30th, 1).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May2nd).Discarded(10)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+        }
+
+        [TestMethod]
+        public void ChangeArrivalDate()
+        {
+            var orderDate = DateConst.April30th.AddDays(-5);
+            var orderNo = Model.CustomerModel.Order(orderDate, Bouquets["HT004"], Customers[1].ShippingAddresses[0], DateConst.May1st);
+            Model.CustomerModel.ChangeArrivalDate(orderDate, orderNo, DateConst.May3rd);
+
+            InventoryActionValidator.NewInstance()
+                .BouquetPartIs(BouquetParts["BA002"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May2nd).Used(3, 7)
+                        .At(DateConst.May3rd).Discarded(7)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["BA003"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May2nd).Used(5, 5)
+                        .At(DateConst.May3rd).Discarded(5)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["GP001"]).BEGIN
+                    .Lot(DateConst.April30th, 0).BEGIN
+                        .At(DateConst.April30th).Arrived(5)
+                        .At(DateConst.May2nd).Used(3, 2)
+                        .At(DateConst.May2nd).Discarded(2)
+                        .END
+                    .Lot(DateConst.April30th, 1).BEGIN
+                        .At(DateConst.April30th).Arrived(10)
+                        .At(DateConst.May2nd).Discarded(10)
+                        .END
+                    .END
+                .BouquetPartIs(BouquetParts["CN002"]).BEGIN
+                    .Lot(DateConst.April30th).BEGIN
+                        .At(DateConst.April30th).Arrived(40)
+                        .At(DateConst.May2nd).Used(3, 37)
+                        .At(DateConst.May5th).Discarded(37)
+                        .END
+                    .END
+                .TargetDBIs(TestDB)
+                .AssertAll();
+
+        }
+
+        [TestMethod,ExpectedException(typeof(ApplicationException))]
+        public void ArrivalDateIsCloserThanLeadTime()
+        {
+            // HT004のリードタイムは3日 (構成単品 CN002 の発注リードタイム) なので、4/30発注の場合お届け日は最短で5/3
+            var orderNo = Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT004"], Customers[1].ShippingAddresses[0], DateConst.May1st);
+        }
+
+        [TestMethod,ExpectedException(typeof(ApplicationException))]
+        public void ChangeArrivalDate_NewArrivalDateIsCloserThanLeadTime()
+        {
+            var orderNo = Model.CustomerModel.Order(DateConst.April30th, Bouquets["HT004"], Customers[1].ShippingAddresses[0], DateConst.May3rd);
+            Model.CustomerModel.ChangeArrivalDate(DateConst.April30th, orderNo, DateConst.May1st);
         }
     }
 }

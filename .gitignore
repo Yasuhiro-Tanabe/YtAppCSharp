@@ -34,8 +34,11 @@
 /GameOfLife/GameOfLife.Core.Test/obj
 /GameOfLife/GameOfLife.UI/bin
 /GameOfLife/GameOfLife.UI/obj
+/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/bin
+/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/obj
+/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/MemorieDeFleurs.db
+/MemorieDeFleurs/MemorieDeFleurs.Logging/bin/Debug/net5.0
+/MemorieDeFleurs/MemorieDeFleurs.Logging/obj
 /SVGEditor/.vs
 /SVGEditor/SVGEditor/bin
 /SVGEditor/SVGEditor/obj
-/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/obj/
-/MemorieDeFleurs/MemorieDeFleurs.UI.WPF/bin/

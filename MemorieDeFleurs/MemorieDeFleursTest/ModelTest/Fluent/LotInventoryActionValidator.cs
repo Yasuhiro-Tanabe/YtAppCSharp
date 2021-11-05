@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Databese.SQLite;
+using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -23,7 +24,18 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
 
         private DateInventoryActionValidator CurrentChild { get; set; } = null;
 
-        internal bool HasInventoryShortageAction { get; set; } = false;
+        private bool InventoryActionNotExists { get; set; } = false;
+
+        /// <summary>
+        /// このロットが在庫アクション中に存在しないことを指定する
+        /// </summary>
+        /// <returns>自分自身</returns>
+        public LotInventoryActionValidator HasNoInventoryActions()
+        {
+            InventoryActionNotExists = true;
+            return this;
+        }
+
 
         /// <summary>
         /// 検証器を作成する
@@ -49,7 +61,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             DateInventoryActionValidator validator;
             if (!DateValidators.TryGetValue(actionDate, out validator))
             {
-                validator = new DateInventoryActionValidator(this);
+                validator = new DateInventoryActionValidator(this, actionDate);
                 DateValidators.Add(actionDate, validator);
             }
 
@@ -57,6 +69,23 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             CurrentChild = validator;
             return CurrentChild;
         }
+
+        /// <summary>
+        /// 在庫ロット番号の期待値
+        /// </summary>
+        private int CurrentLotNo { get; set; } = 0;
+
+        /// <summary>
+        /// 在庫ロット番号の期待値を指定する
+        /// </summary>
+        /// <param name="lotNo">ロット番号の期待値</param>
+        /// <returns>自分自身</returns>
+        public LotInventoryActionValidator LotNumberIs(int lotNo)
+        {
+            CurrentLotNo = lotNo;
+            return this;
+        }
+
 
         /// <summary>
         /// 日別在庫検証項目登録終了マーク：
@@ -73,21 +102,36 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
         /// <param name="context">検証対象データベース</param>
         /// <param name="partsCode">対象単品の花コード</param>
         /// <param name="arrivedDate">対象ロットの入荷予定日</param>
-        /// <param name="lotNo">対象ロットのロット番号</param>
-        public void AssertAll(MemorieDeFleursDbContext context, string partsCode, DateTime arrivedDate, int lotNo)
+        /// <param name="index">入荷予定日の入荷ロットが複数ある場合、その中での順番(0, 1, 2, ...)</param>
+        public void AssertAll(MemorieDeFleursDbContext context, string partsCode, DateTime arrivedDate, int index)
         {
-            if(HasInventoryShortageAction)
+            if (InventoryActionNotExists)
             {
+                if(CurrentLotNo == 0)
+                {
+                    Assert.Fail($"ロット番号未指定： 花コード {partsCode}, 入荷日 {arrivedDate:yyyyMMdd}");
+                }
+
                 var actual = context.InventoryActions
                     .Where(act => act.PartsCode == partsCode)
                     .Where(act => act.ArrivalDate == arrivedDate)
-                    .Count(act => act.InventoryLotNo == lotNo);
+                    .Count(act => act.InventoryLotNo == CurrentLotNo);
                 Assert.AreEqual(0, actual,
-                    $"このロットの在庫アクションは存在しないはず： LotNo={lotNo} (part={partsCode}, arrived={arrivedDate.ToString("yyyyMMdd")})");
+                    $"このロットの在庫アクションは存在しないはず： LotNo={CurrentLotNo} (part={partsCode}, arrived={arrivedDate.ToString("yyyyMMdd")})");
             }
             else
             {
-                DateValidators.All(kv => { kv.Value.AssertAll(context, partsCode, arrivedDate, lotNo, kv.Key); return true; });
+                if (CurrentLotNo == 0)
+                {
+                    var lots = context.InventoryActions
+                        .Where(act => act.PartsCode == partsCode)
+                        .Where(act => act.ArrivalDate == arrivedDate)
+                        .Where(act => act.Action == InventoryActionType.SCHEDULED_TO_ARRIVE || act.Action == InventoryActionType.ARRIVED)
+                        .OrderBy(act => act.InventoryLotNo).ToArray();
+                    CurrentLotNo = lots[index].InventoryLotNo;
+                }
+
+                DateValidators.All(kv => { kv.Value.AssertAll(context, partsCode, arrivedDate, CurrentLotNo, kv.Key); return true; });
             }
         }
 

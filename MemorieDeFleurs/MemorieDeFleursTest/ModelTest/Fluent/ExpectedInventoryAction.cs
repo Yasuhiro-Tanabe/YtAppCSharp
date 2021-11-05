@@ -4,6 +4,7 @@ using MemorieDeFleurs.Models.Entities;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -78,6 +79,14 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
             return new ExpectedInventoryAction(InventoryActionType.SHORTAGE, lacked, -lacked);
         }
 
+        IDictionary<InventoryActionType, InventoryActionType> AnotherType = new SortedDictionary<InventoryActionType, InventoryActionType>()
+            {
+                { InventoryActionType.SCHEDULED_TO_ARRIVE, InventoryActionType.ARRIVED },
+                { InventoryActionType.SCHEDULED_TO_DISCARD, InventoryActionType.DISCARDED },
+                { InventoryActionType.SCHEDULED_TO_USE, InventoryActionType.USED },
+                { InventoryActionType.SHORTAGE, InventoryActionType.SHORTAGE }
+            };
+
         /// <summary>
         /// 特定の１在庫アクションが、数量や残数も含めすべて意図通り登録されているかどうかを検証する
         /// </summary>
@@ -97,7 +106,7 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
                 .ToString();
 
             var candidate = context.InventoryActions
-                .Where(a => a.Action == Type)
+                .Where(a => a.Action == Type || a.Action == AnotherType[Type])
                 .Where(a => a.ActionDate == actionDate)
                 .Where(a => a.PartsCode == part)
                 .Where(a => a.InventoryLotNo == lot)
@@ -105,12 +114,36 @@ namespace MemorieDeFleursTest.ModelTest.Fluent
 
             Assert.IsNotNull(candidate, "抽出結果が null：" + key);
             Assert.AreNotEqual(0, candidate.Count(), "該当するアクションが0件：" + key);
-            Assert.AreEqual(1, candidate.Count(), $"該当するアクションが {candidate.Count()} 個ある：" + key);
+            AssertActionCount(candidate, Type, key);
+            AssertActionCount(candidate, AnotherType[Type], key);
+            AssertActionQuantity(Quantity, candidate, key);
+            AssertActionRemain(Remain, candidate, key);
+        }
 
-            var action = candidate.SingleOrDefault();
+        private void AssertActionCount(IQueryable<InventoryAction> candidate, InventoryActionType type, string key)
+        {
+            var count = candidate.Count(act => act.Action == type);
+            if (count > 1)
+            {
+                Assert.Fail($"{type} アクションが {count} 個ある：{key}");
+            }
+        }
 
-            Assert.AreEqual(Quantity, action.Quantity, "数量不一致：" + key);
-            Assert.AreEqual(Remain, action.Remain, "残数不一致：" + key);
+        private void AssertActionQuantity(int expected, IQueryable<InventoryAction> candidate, string key)
+        {
+            var actual = candidate.Sum(act => act.Quantity);
+            Assert.AreEqual(expected, actual, $"数量不一致：{key}");
+        }
+
+        private void AssertActionRemain(int expected, IQueryable<InventoryAction> candidate, string key)
+        {
+            var action = candidate.SingleOrDefault(act => act.Action == Type);
+            if(action == null)
+            {
+                action = candidate.SingleOrDefault(act => act.Action == AnotherType[Type]);
+            }
+
+            Assert.AreEqual(expected, action.Remain, $"残数不一致；{key}");
         }
     }
 }
