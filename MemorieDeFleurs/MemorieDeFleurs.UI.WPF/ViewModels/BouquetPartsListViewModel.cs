@@ -36,5 +36,20 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             LogUtil.Debug($"{vm.PartsCode} deleted.");
             LoadItems();
         }
+
+        public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
+        {
+            LogUtil.DEBUGLOG_BeginMethod(mainVM.GetType().Name);
+            var detail = mainVM.FindTabItem(BouquetPartsDetailViewModel.Name) as BouquetPartsDetailViewModel;
+            if (detail == null)
+            {
+                detail = new BouquetPartsDetailViewModel();
+                mainVM.OpenTabItem(detail);
+            }
+            detail.PartsCode = CurrentParts.PartsCode;
+            detail.Update();
+            LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name);
+            return detail;
+        }
     }
 }

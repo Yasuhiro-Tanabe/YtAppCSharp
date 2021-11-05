@@ -74,6 +74,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private DateTime _arrivalDate = DateTime.Today;
 
+        /// <summary>
+        /// 発注する単品一覧 (表示専用)
+        /// </summary>
         public string OrderPartsText
         {
             get { return _partsText; }
@@ -113,6 +116,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Remove { get; } = new RemoveFromListItemCommand();
         public ICommand Order { get; }
         public ICommand Cancel { get; }
+        public ICommand ChangeArrivalDate { get; }
         #endregion // コマンド
 
         public void Update(OrdersToSupplier order)
@@ -191,33 +195,66 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             RaisePropertyChanged(nameof(SupplyParts), nameof(SelectedOrderParts), nameof(SelectedSupplyParts), nameof(OrderParts), nameof(EditingModeVisivility));
         }
+
         public void FixOrderParts()
         {
             _editing = false;
+            _partsText = string.Join(", ", OrderParts.Select(p => $"{p.PartsCode} x{p.Quantity}"));
+
             RaisePropertyChanged(nameof(EditingModeVisivility), nameof(OrderPartsText));
         }
 
         public void AppendToOrderParts()
         {
+            // SupplyParts から OrderParts への移動
+            var parts = SelectedSupplyParts;
 
+            OrderParts.Add(parts);
+            SelectedOrderParts = parts;
+
+            SupplyParts.Remove(parts);
+            SelectedSupplyParts = null;
+
+            RaisePropertyChanged(nameof(OrderParts), nameof(SelectedOrderParts), nameof(SupplyParts), nameof(SelectedSupplyParts));
         }
 
         public void RemoveFromOrderParts()
         {
+            // OrderParts から SupplyParts への移動
+            var parts = SelectedSupplyParts;
 
+            SupplyParts.Add(parts);
+            SelectedSupplyParts = parts;
+
+            OrderParts.Remove(parts);
+            SelectedOrderParts = null;
+
+            RaisePropertyChanged(nameof(OrderParts), nameof(SelectedOrderParts), nameof(SupplyParts), nameof(SelectedSupplyParts));
         }
 
         public void OrderMe()
         {
             if(string.IsNullOrWhiteSpace(_id))
             {
-
+                var order = new OrdersToSupplier()
+                {
+                    OrderDate = _orderDate,
+                    DeliveryDate = ArrivalDate,
+                    Supplier = SupplierCode
+                };
+                foreach(var parts in OrderParts)
+                {
+                    order.Details.Add(new OrderDetailsToSupplier() { PartsCode = parts.PartsCode, LotCount = parts.Quantity });
+                }
+                _id = MemorieDeFleursUIModel.Instance.Order(order);
+                Update();
             }
             else
             {
                 throw new ApplicationException("すでに発注済です。");
             }
         }
+
         public void CancelMe()
         {
             if(string.IsNullOrWhiteSpace(_id))
@@ -226,12 +263,25 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
             else
             {
+                MemorieDeFleursUIModel.Instance.CancelOrderToSupplier(ID);
+            }
+        }
 
+        public void ChangeMyArrivalDate()
+        {
+            if (string.IsNullOrWhiteSpace(_id))
+            {
+                throw new ApplicationException("発注されていません。");
+            }
+            else
+            {
+                MemorieDeFleursUIModel.Instance.ChangeArrivalDateOfOrderToSupplier(ID, ArrivalDate);
             }
         }
 
         public override void SaveToDatabase()
         {
+            // 使用しない：「発注」、「納期変更」、発注取消」で操作させる。
             base.SaveToDatabase();
         }
 

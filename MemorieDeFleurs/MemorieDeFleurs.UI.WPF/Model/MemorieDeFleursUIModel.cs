@@ -9,6 +9,7 @@ using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 
 namespace MemorieDeFleurs.UI.WPF.Model
 {
@@ -282,6 +283,18 @@ namespace MemorieDeFleurs.UI.WPF.Model
         {
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             Model.SupplierModel.CancelOrder(orderNo);
+        }
+
+        public string Order(OrdersToSupplier order)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.SupplierModel.Order(order.OrderDate, order.Supplier, order.DeliveryDate, order.Details.Select(i => Tuple.Create(i.PartsCode, i.LotCount)).ToArray());
+        }
+
+        public void ChangeArrivalDateOfOrderToSupplier(string orderNo, DateTime newDate)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.SupplierModel.ChangeArrivalDate(orderNo, newDate);
         }
         #endregion // 仕入先発注情報の操作
 

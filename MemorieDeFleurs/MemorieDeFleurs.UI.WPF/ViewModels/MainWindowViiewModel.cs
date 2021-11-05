@@ -114,49 +114,27 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         private void OpenDetailView(object sender, EventArgs unused)
         {
-            LogUtil.DEBUGLOG_BeginMethod(sender.GetType().Name);
-            if(sender is BouquetListViewModel)
+            try
             {
-                var vm = sender as BouquetListViewModel;
-                var detail = FindTabItem(BouquetDetailViewModel.Name) as BouquetDetailViewModel;
-
-                if(detail == null)
+                LogUtil.DEBUGLOG_BeginMethod(sender.GetType().Name);
+                if (sender is ListViewModelBase)
                 {
-                    detail = new BouquetDetailViewModel();
-                    OpenTabItem(detail);
+                    CurrentItem = (sender as ListViewModelBase).OpenDetailTabItem(this);
+                    RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
                 }
-
-                detail.BouquetCode = vm.CurrentBouquet.BouquetCode;
-                detail.Update();
-                CurrentItem = detail;
-            }
-            else if(sender is BouquetPartsListViewModel)
-            {
-                var vm = sender as BouquetPartsListViewModel;
-                var detail = FindTabItem(BouquetPartsDetailViewModel.Name) as BouquetPartsDetailViewModel;
-                if(detail == null)
+                else
                 {
-                    detail = new BouquetPartsDetailViewModel();
-                    OpenTabItem(detail);
+                    throw new NotImplementedException($"Invalid sender: {GetType().Name}.{nameof(OpenDetailView)}({sender.GetType().Name}, unused)");
                 }
-                detail.PartsCode = vm.CurrentParts.PartsCode;
-                detail.Update();
-                CurrentItem = detail;
             }
-            else if(sender is SupplierListViewModel)
+            catch (Exception)
             {
-                CurrentItem = (sender as SupplierListViewModel).OpenDetailTabItem(this);
+                throw;
             }
-            else if(sender is CustomerListViewModel)
+            finally
             {
-                CurrentItem = (sender as CustomerListViewModel).OpenDetailTabItem(this);
+                LogUtil.DEBUGLOG_EndMethod(sender.GetType().Name);
             }
-            else if (sender is ListViewModelBase)
-            {
-                CurrentItem = (sender as ListViewModelBase).OpenDetailTabItem(this);
-            }
-            RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
-            LogUtil.DEBUGLOG_EndMethod(sender.GetType().Name);
         }
     }
 }

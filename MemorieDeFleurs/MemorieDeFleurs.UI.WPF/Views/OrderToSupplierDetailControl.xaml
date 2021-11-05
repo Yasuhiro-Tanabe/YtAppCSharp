@@ -41,14 +41,18 @@
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
-            <Button Margin="5, 1"
-                    TabIndex="999"
-                    Content="検索..."
-                    Command="{Binding Reload}" CommandParameter="{Binding}"/>
-            <Button Margin="5, 1"
-                    TabIndex="1000"
-                    Content="登録"
-                    Command="{Binding Register}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998"
+                    Margin="5,1"
+                    Content="発注取消"
+                    Command="{Binding Cancel}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999"
+                    Margin="5,1"
+                    Content="納品予定日変更"
+                    Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000"
+                    Margin="5,1"
+                    Content="発注"
+                    Command="{Binding Order}" CommandParameter="{Binding}"/>
         </StackPanel>
 
         <TextBlock Grid.Row="1" Grid.Column="0"
@@ -74,23 +78,11 @@
                    Text="仕入先："/>
         <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
                   Margin="5,1"
-                  VerticalAlignment="Center"
+                  HorizontalAlignment="Left" VerticalAlignment="Center"
                   ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="50px"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="0"
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
-                               Text="{Binding SupplierCode, Mode=OneWay}"/>
-                        <TextBlock Grid.Column="1"
-                               VerticalAlignment="Center"
-                               Text="{Binding SupplierName, Mode=OneWay}"/>
-                    </Grid>
+                    <TextBlock Text="{Binding SupplierName, Mode=OneWay}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>

@@ -46,6 +46,5 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         }
 
         private static void ReloadItems(object parameter) => (parameter as OrderToSupplierListViewModel).LoadItems();
-        private static void NothingToDo() { }
     }
 }

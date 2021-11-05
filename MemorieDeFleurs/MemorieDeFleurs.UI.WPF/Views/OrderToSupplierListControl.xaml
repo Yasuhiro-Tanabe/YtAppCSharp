@@ -36,25 +36,13 @@
                    Text="発注日："/>
         <DatePicker Grid.Row="0" Grid.Column="1"
                     VerticalAlignment="Center"
-                    SelectedDate="{Binding From}">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SelectedDateChanged">
-                    <i:InvokeCommandAction Command="{Binding Selected}" CommandParameter="{Binding}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </DatePicker>
+                    SelectedDate="{Binding From}"/>
         <TextBlock Grid.Row="0" Grid.Column="2"
                    VerticalAlignment="Center"
                    Text="から"/>
         <DatePicker Grid.Row="0" Grid.Column="3"
                     VerticalAlignment="Center"
-                    SelectedDate="{Binding To}">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SelectedDateChanged">
-                    <i:InvokeCommandAction Command="{Binding Selected}" CommandParameter="{Binding}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
-        </DatePicker>
+                    SelectedDate="{Binding To}"/>
         <TextBlock Grid.Row="0" Grid.Column="4"
                    VerticalAlignment="Center"
                    Text="まで"/>
@@ -64,17 +52,17 @@
         <ComboBox Grid.Row="0" Grid.Column="6"
                   VerticalAlignment="Center"
                   ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}">
-            <i:Interaction.Triggers>
-                <i:EventTrigger EventName="SelectionChanged">
-                    <i:InvokeCommandAction Command="{Binding Selected}" CommandParameter="{Binding}"/>
-                </i:EventTrigger>
-            </i:Interaction.Triggers>
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding SupplierName}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
+        <Button Grid.Row="0" Grid.Column="7"
+                Margin="5,1"
+                HorizontalAlignment="Left" VerticalAlignment="Center"
+                Content="更新"
+                Command="{Binding Reload}" CommandParameter="{Binding}"/>
 
         <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="8"
                   Margin="5"

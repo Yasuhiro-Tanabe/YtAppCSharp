@@ -34,23 +34,29 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(Bouquets), nameof(CurrentBouquet));
         }
 
-        //private void SummaryViewModelChanged(object sender, PropertyChangedEventArgs args)
-        //{
-        //    var vm = sender as BouquetSummaryViewModel;
-        //    if (args.PropertyName == nameof(BouquetSummaryViewModel.RemoveMe))
-        //    {
-        //        MemorieDeFleursUIModel.Instance.RemoveBouquet(vm.BouquetCode);
-        //        LogUtil.Debug($"{vm.BouquetCode} deleted.");
-        //        LoadItems();
-        //    }
-        //}
-
         protected override void RemoveSelectedItem(object sender)
         {
             var vm = sender as BouquetSummaryViewModel;
             MemorieDeFleursUIModel.Instance.RemoveBouquet(vm.BouquetCode);
             LogUtil.Debug($"{vm.BouquetCode} deleted.");
             LoadItems();
+        }
+
+        public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
+        {
+            LogUtil.DEBUGLOG_BeginMethod(mainVM.GetType().Name);
+            var detail = mainVM.FindTabItem(BouquetDetailViewModel.Name) as BouquetDetailViewModel;
+
+            if (detail == null)
+            {
+                detail = new BouquetDetailViewModel();
+                mainVM.OpenTabItem(detail);
+            }
+
+            detail.BouquetCode = CurrentBouquet.BouquetCode;
+            detail.Update();
+            LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name);
+            return detail;
         }
     }
 }
