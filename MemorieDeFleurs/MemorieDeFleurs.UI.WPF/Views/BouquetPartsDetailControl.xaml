@@ -57,6 +57,7 @@
         <TextBox Grid.Row="2" Grid.Column="1"
                  Margin="5,1"
                  TabIndex="3"
+                 HorizontalContentAlignment="Right"
                  VerticalAlignment="Center"
                  Text="{Binding QuantitiesParLot}"/>
         <TextBlock Grid.Row="2" Grid.Column="2"
@@ -69,6 +70,7 @@
         <TextBox Grid.Row="3" Grid.Column="1"
                  Margin="5,1"
                  TabIndex="4"
+                 HorizontalContentAlignment="Right"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding LeadTime}"/>
         <TextBlock Grid.Row="3" Grid.Column="2"
@@ -81,6 +83,7 @@
         <TextBox Grid.Row="4" Grid.Column="1"
                  Margin="5,1"
                  TabIndex="5"
+                 HorizontalContentAlignment="Right"
                  VerticalAlignment="Center" VerticalContentAlignment="Center"
                  Text="{Binding ExpiryDate}"/>
         <TextBlock Grid.Row="4" Grid.Column="2"
