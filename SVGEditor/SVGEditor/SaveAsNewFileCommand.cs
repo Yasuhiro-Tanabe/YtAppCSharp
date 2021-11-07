@@ -4,7 +4,7 @@ namespace SVGEditor
 {
     internal class SaveAsNewFileCommand : CommandBase
     {
-        protected override void Execute()
+        public override void Execute(object parameter)
         {
             var dialog = new SaveFileDialog()
             {
@@ -17,8 +17,8 @@ namespace SVGEditor
             var result = dialog.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                ViewModel.SvgFileName = dialog.FileName;
-                Model.SaveToFile(ViewModel.SvgFileName, ViewModel.SourceCode);
+                SVGEditorModel.Instance.Save(dialog.FileName);
+                (parameter as MainWindowViewModel).SvgFileName = dialog.FileName;
             }
         }
     }

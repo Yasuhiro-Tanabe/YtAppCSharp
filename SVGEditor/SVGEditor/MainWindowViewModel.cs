@@ -8,33 +8,25 @@ using System.Windows.Media.Imaging;
 
 namespace SVGEditor
 {
-    internal class MainWindowViewModel : INotifyPropertyChanged
+    internal class MainWindowViewModel : NotificationObject
     {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void SetProperty<T>(ref T property, T value, [CallerMemberName] string propertyName = "")
-        {
-            property = value;
-            RaisePropertyChanged(propertyName);
-        }
-
-        private void RaisePropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
+        #region 定数
         /// <summary>
         /// ウィンドウタイトル共通部
         /// </summary>
         private static string WINDOW_TITLE = "SVGEditor";
-        private static string NoImageFile = "./no_images.png";
 
-        private SVGEditorModel Model { get; } = new SVGEditorModel();
+        #endregion // 定数
 
+        #region プロパティ
         /// <summary>
         /// ウィンドウタイトル
         /// </summary>
-        public string WindowTitle { get { return _title; } set { SetProperty(ref _title, value); } }
+        public string WindowTitle
+        {
+            get { return _title; }
+            set { SetProperty(ref _title, value); }
+        }
         private string _title = WINDOW_TITLE;
 
         /// <summary>
@@ -54,30 +46,52 @@ namespace SVGEditor
         /// <summary>
         /// 現在表示中の SVG ソースコード
         /// </summary>
-        public string SourceCode
+        public string SvgCode
         {
             get { return _sourceCode; }
             set { SetProperty(ref _sourceCode, value); }
         }
         private string _sourceCode;
 
+        /// <summary>
+        /// 現在表示中のSVGイメージ
+        /// </summary>
+        public BitmapImage SvgImage
+        {
+            get { return _image; }
+            set { SetProperty(ref _image, value); }
+        }
+        private BitmapImage _image;
+        #endregion // プロパティ
+
+        public MainWindowViewModel() : base()
+        {
+            SVGEditorModel.Instance.PropertyChanged += OnModelChanged;
+        }
+
+        #region コマンド
         public OpenFileCommand Open { get; } = new OpenFileCommand();
         public RenderCommand Render { get; } = new RenderCommand();
         public SaveToFileCommand Save { get; } = new SaveToFileCommand();
         public SaveAsNewFileCommand SaveAs { get; } = new SaveAsNewFileCommand();
+        #endregion // コマンド
 
-        public ImageSource ImageSource { get { return RenderImage(); } }
-
-        private BitmapImage RenderImage()
+        private void OnModelChanged(object sender, PropertyChangedEventArgs args)
         {
-            var bmp = string.IsNullOrWhiteSpace(SourceCode)
-                ? Bitmap.FromFile(NoImageFile)
-                : Model.Render(SourceCode);
+            var model = sender as SVGEditorModel;
+            
+            if(args.PropertyName == nameof(model.SvgCode))
+            {
+                if(SvgCode != model.SvgCode) { SvgCode = model.SvgCode; }
+            }
+            else if(args.PropertyName == nameof(model.SvgImage))
+            {
+                SvgImage = Convert(model.SvgImage);
+            }
+        }
 
-            var stream = new MemoryStream();
-            bmp.Save(stream, ImageFormat.Bmp);
-            stream.Seek(0, SeekOrigin.Begin);
-
+        private BitmapImage Convert(MemoryStream stream)
+        {
             var im = new BitmapImage();
             im.BeginInit();
             im.CacheOption = BitmapCacheOption.OnLoad;
@@ -85,11 +99,6 @@ namespace SVGEditor
             im.EndInit();
 
             return im;
-        }
-
-        public void RefreshImage()
-        {
-            RaisePropertyChanged(nameof(ImageSource));
         }
     }
 }

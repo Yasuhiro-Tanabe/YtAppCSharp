@@ -4,9 +4,9 @@ namespace SVGEditor
 {
     internal class RenderCommand : CommandBase
     {
-        protected override void Execute()
+        public override void Execute(object parameter)
         {
-            ViewModel.RefreshImage();
+            SVGEditorModel.Instance.RenderCode((parameter as MainWindowViewModel).SvgCode);
         }
     }
 }

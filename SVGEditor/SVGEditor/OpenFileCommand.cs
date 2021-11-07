@@ -1,10 +1,12 @@
 ﻿using Microsoft.Win32;
 
+using System.Windows.Input;
+
 namespace SVGEditor
 {
     internal class OpenFileCommand : CommandBase
     {
-        protected override void Execute()
+        public override void Execute(object parameter)
         {
             var dialog = new OpenFileDialog()
             {
@@ -13,11 +15,10 @@ namespace SVGEditor
             };
 
             var result = dialog.ShowDialog();
-            if(result.HasValue && result.Value)
+            if (result.HasValue && result.Value)
             {
-                ViewModel.SvgFileName = dialog.FileName;
-                ViewModel.SourceCode = Model.LoadXmlFile(ViewModel.SvgFileName);
-                ViewModel.RefreshImage();
+                SVGEditorModel.Instance.Load(dialog.FileName);
+                (parameter as MainWindowViewModel).SvgFileName = dialog.FileName;
             }
         }
     }

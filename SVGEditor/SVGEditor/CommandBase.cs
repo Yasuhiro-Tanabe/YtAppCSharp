@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Input;
 
 namespace SVGEditor
@@ -7,32 +8,16 @@ namespace SVGEditor
     {
         public event EventHandler CanExecuteChanged;
 
-        protected void RaiseEvent()
+        protected void CommandExecutabilityChanged()
         {
             CanExecuteChanged?.Invoke(this, null);
         }
 
-        protected MainWindowViewModel ViewModel { get; private set; }
-        protected SVGEditorModel Model { get; } = new SVGEditorModel();
-
-        public bool CanExecute(object parameter)
-        {
-            return CanExecute();
-        }
-
-        public void Execute(object parameter)
-        {
-            ViewModel = parameter as MainWindowViewModel;
-
-            Execute();
-        }
-
-        protected virtual bool CanExecute()
+        public virtual bool CanExecute(object parameter)
         {
             return true;
         }
 
-        protected abstract void Execute();
-
+        public abstract void Execute(object parameter);
     }
 }
