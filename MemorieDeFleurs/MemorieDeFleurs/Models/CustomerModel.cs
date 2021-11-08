@@ -467,7 +467,7 @@ namespace MemorieDeFleurs.Models
                     .ThenBy(o => o.ShippingDate)
                     .ThenBy(o => o.CustomerID)
                     .ThenBy(o => o.ShippingAddressID)
-                    .ToArray()
+                    .ToList()
                     .AsEnumerable();
             }
         }
@@ -485,7 +485,7 @@ namespace MemorieDeFleurs.Models
                     .ThenBy(o => o.ShippingDate)
                     .ThenBy(o => o.CustomerID)
                     .ThenBy(o => o.ShippingAddressID)
-                    .ToArray()
+                    .ToList()
                     .AsEnumerable();
             }
         }
@@ -503,7 +503,7 @@ namespace MemorieDeFleurs.Models
                     .OrderBy(o => o.OrderDate)
                     .ThenBy(o => o.ShippingDate)
                     .ThenBy(o => o.ShippingAddressID)
-                    .ToArray()
+                    .ToList()
                     .AsEnumerable();
             }
         }
@@ -534,6 +534,19 @@ namespace MemorieDeFleurs.Models
                     .OrderBy(order => order.ID)
                     .Select(order => order.ID)
                     .ToList();
+            }
+        }
+
+        public IEnumerable<ShippingAddress> FindAllShippingAddressesOfCustomer(int customer)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.ShippingAddresses
+                    .Where(s => s.CustomerID == customer)
+                    .Include(s => s.Customer)
+                    .OrderBy(s => s.LatestOrderDate)
+                    .ToList()
+                    .AsEnumerable();
             }
         }
         #endregion // 受注履歴の登録改廃

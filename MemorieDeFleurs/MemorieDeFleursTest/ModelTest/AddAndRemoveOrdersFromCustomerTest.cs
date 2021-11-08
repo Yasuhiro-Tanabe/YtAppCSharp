@@ -697,5 +697,35 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(2, Model.CustomerModel.FindAllOrders(DateConst.May2nd, DateConst.May3rd).Count());
             Assert.AreEqual(1, Model.CustomerModel.FindAllOrders(DateConst.May2nd, DateConst.May5th, user2.ID).Count());
         }
+
+        [TestMethod]
+        public void FindAllShippingAddressOfCustomer_NoShippingAddress()
+        {
+            var user2 = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs("ユーザ2").EmailAddressIs("user2@localdomain").CardNoIs("1234567890123456").Create();
+
+            var actual = Model.CustomerModel.FindAllShippingAddressesOfCustomer(user2.ID);
+            Assert.AreEqual(0, actual.Count());
+        }
+
+        [TestMethod]
+        public void FindAllShippingAddressesOfCustomer_HasSomeShippingAddress()
+        {
+            var user2 = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs("ユーザ2").EmailAddressIs("user2@localdomain").CardNoIs("1234567890123456").Create();
+
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人1").AddressIs("住所1").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人2").AddressIs("住所2").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人3").AddressIs("住所3").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人4").AddressIs("住所4").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人5").AddressIs("住所5").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人6").AddressIs("住所6").Create();
+
+            SaveCurrentDatabaseTo(TestDB, "./testdata/db/debug.db");
+
+            var actual = Model.CustomerModel.FindAllShippingAddressesOfCustomer(user2.ID);
+            Assert.AreEqual(6, actual.Count());
+
+        }
     }
 }
