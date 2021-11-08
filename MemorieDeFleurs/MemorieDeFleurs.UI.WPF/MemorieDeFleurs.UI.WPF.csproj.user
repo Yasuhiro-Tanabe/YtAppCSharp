@@ -25,6 +25,12 @@
     <Compile Update="Views\CustomerListControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\OrderFromCustomerDetailControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\OrderFromCustomerListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\OrderToSupplierDetailControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -58,6 +64,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\OrderFromCustomerDetailControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\OrderFromCustomerListControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\OrderToSupplierDetailControl.xaml">

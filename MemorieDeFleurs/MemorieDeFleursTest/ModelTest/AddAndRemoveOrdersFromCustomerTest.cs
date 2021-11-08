@@ -721,8 +721,6 @@ namespace MemorieDeFleursTest.ModelTest
             Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人5").AddressIs("住所5").Create();
             Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人6").AddressIs("住所6").Create();
 
-            SaveCurrentDatabaseTo(TestDB, "./testdata/db/debug.db");
-
             var actual = Model.CustomerModel.FindAllShippingAddressesOfCustomer(user2.ID);
             Assert.AreEqual(6, actual.Count());
 

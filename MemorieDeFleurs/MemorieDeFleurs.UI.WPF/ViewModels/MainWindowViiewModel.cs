@@ -51,6 +51,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand OpenCustomerDetailView { get; } = new OpenCustomerDetailViewCommand();
         public ICommand OpenOrderToSupplierListView { get; } = new OpenOrderToSupplierListViewCommand();
         public ICommand OpenOrderToSupplierDetailView { get; } = new OpenOrderToSupplierDetailViewCommand();
+        public ICommand OpenOrderFromCustomerListView { get; } = new OpenOrderFromCustomerListViewCommand();
+        public ICommand OpenOrderFromCustomerDetailView { get; } = new OpenOrderToSupplierDetailViewCommand();
         public ICommand SQLiteLoad { get; } = new SQLiteOpenDbFileCommand();
         public ICommand SQLiteSave { get; } = new SQLiteSaveToDbFileCommand();
         #endregion // コマンド

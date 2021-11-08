@@ -26,6 +26,15 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private int _customerID;
 
         /// <summary>
+        /// 得意先名称 (参照のみ)
+        /// </summary>
+        public string CustomerName
+        {
+            get { return _customerName; }
+        }
+        private string _customerName;
+
+        /// <summary>
         /// お届け先住所 (表示用)
         /// </summary>
         public string AddressText { get { return $"{_address1} {_address2}"; } }
@@ -85,11 +94,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             _shippingID = sa.ID;
             _customerID = sa.CustomerID;
+            _customerName = sa.Customer.Name;
             _name = sa.Name;
             _address1 = sa.Address1;
             _address2 = sa.Address2;
             _date = sa.LatestOrderDate;
-            RaisePropertyChanged(nameof(ID), nameof(CustomerID), nameof(Name), nameof(Address1), nameof(Address2), nameof(AddressText), nameof(LatestOrderDate));
+            RaisePropertyChanged(nameof(ID), nameof(CustomerID), nameof(CustomerName), nameof(Name), nameof(Address1), nameof(Address2),
+                nameof(AddressText), nameof(LatestOrderDate));
         }
     }
 }

@@ -67,7 +67,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if (SelectedSupplier == null)
             {
                 // 初期表示
-                UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrders());
+                UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier());
                 UpdateSuppliers();
 
                 if (Orders.Count > 0)
@@ -89,13 +89,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 if (SelectedSupplier.SupplierCode < 1)
                 {
                     // すべての仕入先を選択した
-                    UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrders(From, To));
+                    UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier(From, To));
                     RaisePropertyChanged(nameof(Orders), nameof(SelectedOrder));
                 }
                 else
                 {
                     // 特定の仕入先を選択した
-                    UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrders(From, To, SelectedSupplier.SupplierCode));
+                    UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier(From, To, SelectedSupplier.SupplierCode));
                     RaisePropertyChanged(nameof(Orders), nameof(SelectedOrder));
                 }
 
