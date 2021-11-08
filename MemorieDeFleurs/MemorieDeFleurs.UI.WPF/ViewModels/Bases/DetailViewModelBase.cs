@@ -12,10 +12,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
 
         #region コマンド
         public ICommand Reload { get; } = new ReloadDetailCommand();
+        public ICommand Clear { get; } = new ClearDetailCommand();
         #endregion // コマンド
 
         public virtual void Validate() { throw new NotImplementedException($"{GetType().Name}.{nameof(Validate)}()"); }
         public virtual void Update() { throw new NotImplementedException($"{this.GetType().Name}.{nameof(Update)}()"); }
         public virtual void SaveToDatabase() { throw new NotImplementedException($"{GetType().Name}.{nameof(SaveToDatabase)}()"); }
+        public virtual void ClearProperties() { throw new NotImplementedException($"{GetType().Name}.{nameof(ClearProperties)}()"); }
     }
 }

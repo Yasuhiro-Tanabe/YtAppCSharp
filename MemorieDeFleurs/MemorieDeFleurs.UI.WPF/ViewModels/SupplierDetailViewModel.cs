@@ -304,5 +304,27 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 LogUtil.DEBUGLOG_EndMethod();
             }
         }
+
+        public override void ClearProperties()
+        {
+            _code = 0;
+            _name = string.Empty;
+            _address1 = string.Empty;
+            _address2 = string.Empty;
+            _email = string.Empty;
+            _fax = string.Empty;
+            _tel = string.Empty;
+            _editing = false;
+
+            SupplingParts.Clear();
+            PartsCandidate.Clear();
+            SelectedCandidate = null;
+            SelectedSuppling = null;
+
+            RaisePropertyChanged(nameof(SupplierCode), nameof(SupplierName), nameof(Address1), nameof(Address2),
+                nameof(EmailAddress), nameof(FaxNumber), nameof(TelephoneNumber), nameof(EditingModeVisivility),
+                nameof(PartsText));
+            IsDirty = false;
+        }
     }
 }

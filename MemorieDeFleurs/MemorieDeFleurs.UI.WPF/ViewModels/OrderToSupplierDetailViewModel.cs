@@ -5,11 +5,8 @@ using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -307,6 +304,29 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
 
             if(ex.ValidationErrors.Count >0) { throw ex; }
+        }
+
+        public override void ClearProperties()
+        {
+            _id = string.Empty;
+            _partsText = string.Empty;
+            _orderDate = DateTime.Today;
+            _arrivalDate = DateTime.Today;
+
+            SelectedSupplier = null;
+            LoadSupplierList();
+
+            SelectedOrderParts = null;
+            OrderParts.Clear();
+
+            SelectedSupplyParts = null;
+            SupplyParts.Clear();
+
+            _editing = false;
+
+            RaisePropertyChanged(nameof(ID), nameof(OrderDateText), nameof(ArrivalDate), nameof(_partsText), nameof(EditingModeVisivility));
+
+            IsDirty = false;
         }
     }
 }

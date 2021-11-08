@@ -31,6 +31,10 @@
                  Text="{Binding ID}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
                     VerticalAlignment="Center" HorizontalAlignment="Right">
+            <Button Margin="5,1"
+                    TabIndex="998"
+                    Content="クリア"
+                    Command="{Binding Clear}" CommandParameter="{Binding}"/>
             <Button Margin="5, 1"
                     TabIndex="999"
                     Content="検索..."

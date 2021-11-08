@@ -163,5 +163,15 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 LogUtil.DEBUGLOG_EndMethod();
             }
         }
+
+        public override void ClearProperties()
+        {
+            _code = string.Empty;
+            _name = string.Empty;
+            _quantity = 0;
+            _leadTime = 0;
+            _expriy = 0;
+            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(QuantitiesParLot), nameof(LeadTime), nameof(ExpiryDate));
+        }
     }
 }

@@ -275,5 +275,25 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 LogUtil.DEBUGLOG_EndMethod();
             }
         }
+
+        public override void ClearProperties()
+        {
+            _code = string.Empty;
+            _name = string.Empty;
+            _image = string.Empty;
+            _leadTime = 0;
+
+            SelectedPartListItem.Clear();
+            SelectableParts.Clear();
+            CurrentSelectedInPartsList = null;
+            CurrentSelectedInSelectablePartsList = null;
+
+            _editing = false;
+
+            RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(LeadTime),
+                nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsListString));
+
+            IsDirty = false;
+        }
     }
 }

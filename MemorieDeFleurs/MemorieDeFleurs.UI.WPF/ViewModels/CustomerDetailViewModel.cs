@@ -174,5 +174,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 LogUtil.DEBUGLOG_EndMethod();
             }
         }
+
+        public override void ClearProperties()
+        {
+            _id = 0;
+            _name = string.Empty;
+            _email = string.Empty;
+            _cardNo = string.Empty;
+            _passwd = string.Empty;
+            ShippingAddresses.Clear();
+            RaisePropertyChanged(nameof(ID), nameof(CustomerName), nameof(EmailAddress), nameof(CardNo), nameof(Password), nameof(ShippingAddresses));
+        }
     }
 }

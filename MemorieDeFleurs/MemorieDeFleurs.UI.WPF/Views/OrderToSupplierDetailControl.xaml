@@ -36,11 +36,15 @@
                  Margin="5,1"
                  VerticalAlignment="Center"
                  Text="{Binding ID}"/>
-        <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
+        <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3"
                     Orientation="Horizontal"
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
+            <Button TabIndex="997"
+                    Margin="5,1"
+                    Content="クリア"
+                    Command="{Binding Clear}" CommandParameter="{Binding}"/>
             <Button TabIndex="998"
                     Margin="5,1"
                     Content="発注取消"
@@ -76,9 +80,9 @@
                    Margin="5,1"
                    VerticalAlignment="Center"
                    Text="仕入先："/>
-        <ComboBox Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+        <ComboBox Grid.Row="2" Grid.Column="1"
                   Margin="5,1"
-                  HorizontalAlignment="Left" VerticalAlignment="Center"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Center"
                   ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>

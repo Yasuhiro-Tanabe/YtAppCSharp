@@ -38,6 +38,10 @@
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
+            <Button Margin="5,1"
+                    TabIndex="998"
+                    Content="クリア"
+                    Command="{Binding Clear}" CommandParameter="{Binding}"/>
             <Button Margin="5, 1"
                     TabIndex="999"
                     Content="検索..."
