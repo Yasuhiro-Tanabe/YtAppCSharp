@@ -78,6 +78,9 @@
     <Page Update="Views\OrderToSupplierListControl.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Views\Style.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\SupplierDetailControl.xaml">
       <SubType>Designer</SubType>
     </Page>

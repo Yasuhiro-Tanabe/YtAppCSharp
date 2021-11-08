@@ -8,9 +8,14 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <h:NegativeVisivilityConverter x:Key="negVisConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <h:NegativeVisivilityConverter x:Key="negVisConverter"/>
+        </ResourceDictionary>
     </UserControl.Resources>
-    <Grid>
+    <Grid Style="{StaticResource ControlBorderStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
@@ -28,103 +33,42 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0"
-                   Margin="5,1"
-                   VerticalAlignment="Center"
-                   Text="受注番号："/>
-        <TextBox Grid.Row="0" Grid.Column="1"
-                 Margin="5,1"
-                 VerticalAlignment="Center"
-                 Text="{Binding OrderNo}"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="受注番号："/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding OrderNo}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3"
                     Orientation="Horizontal"
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
-            <Button TabIndex="997"
-                    Margin="5,1"
-                    Content="クリア"
-                    Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button TabIndex="998"
-                    Margin="5,1"
-                    Content="受注取消"
-                    Command="{Binding Cancel}" CommandParameter="{Binding}"/>
-            <Button TabIndex="999"
-                    Margin="5,1"
-                    Content="お届け日変更"
-                    Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
-            <Button TabIndex="1000"
-                    Margin="5,1"
-                    Content="受注"
-                    Command="{Binding Order}" CommandParameter="{Binding}"/>
+            <Button TabIndex="997" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="受注取消" Command="{Binding Cancel}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="お届け日変更" Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="受注" Command="{Binding Order}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0"
-                   Margin="5,1"
-                   VerticalAlignment="Center"
-                   Text="お届け先："/>
-        <TextBlock Grid.Row="1" Grid.Column="1"
-                   Margin="5,1"
-                   VerticalAlignment="Center"
-                   Text="{Binding CustomerName}"/>
-        <TextBlock Grid.Row="1" Grid.Column="2"
-                   Margin="1,1"
-                   VerticalAlignment="Center"
-                   Text="様"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="お届け先："/>
+        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CustomerName}"/>
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="様"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0"
-                   Margin="5,1"
-                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                   Text="受注日："/>
-        <TextBlock Grid.Row="2" Grid.Column="1"
-                   VerticalAlignment="Center"
-                   Text="{Binding OrderDateText, Mode=OneWay}"/>
-        <TextBlock Grid.Row="2" Grid.Column="2"
-                   Margin="5,1"
-                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                   Text="お届け日："/>
-        <DatePicker Grid.Row="2" Grid.Column="3"
-                    Margin="5,1"
-                    SelectedDateFormat="Short"
-                    VerticalAlignment="Center"
-                    SelectedDate="{Binding ArrivalDate}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="受注日："/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding OrderDateText, Mode=OneWay}"/>
+        <TextBlock Grid.Row="2" Grid.Column="2" Text="お届け日："/>
+        <DatePicker Grid.Row="2" Grid.Column="3" SelectedDate="{Binding ArrivalDate}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0"
-                   Margin="5,1"
-                   VerticalAlignment="Center"
-                   Text="お届けメッセージ："/>
-        <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3"
-                 Margin="5,1"
-                 VerticalAlignment="Center"
-                 Text="{Binding Message}"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="お届けメッセージ："/>
+        <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Message}"/>
 
 
-        <TextBlock Grid.Row="4" Grid.Column="0"
-                   Margin="5,1"
-                   VerticalAlignment="Center"
-                   Text="お届け先："/>
-        <ComboBox Grid.Row="4" Grid.Column="1"
-                  Margin="5,1"
-                  HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                  ItemsSource="{Binding ShippingAddresses}" SelectedItem="{Binding SelectedShippingAddress}">
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="お届け先："/>
+        <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding ShippingAddresses}" SelectedItem="{Binding SelectedShippingAddress}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding CustomerName, Mode=OneWay}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Grid.Row="4" Grid.Column="4"
-                Margin="5,1"
-                Content="新規"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Visibility="{Binding EditingModeVisibility, Converter={StaticResource negVisConverter}}"
-                Command="{Binding Edit}" CommandParameter="{Binding}"/>
-        <Button Grid.Row="4" Grid.Column="4"
-                Margin="5,1"
-                HorizontalAlignment="Center" VerticalAlignment="Center"
-                Content="確定"
-                Visibility="{Binding EditingModeVisibility}"
-                Command="{Binding Fix}" CommandParameter="{Binding}"/>
+        <Button Grid.Row="4" Grid.Column="4" Content="新規" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisibility, Converter={StaticResource negVisConverter}}"/>
+        <Button Grid.Row="4" Grid.Column="4" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisibility}"/>
 
 
         <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5"
@@ -141,32 +85,14 @@
                 <ColumnDefinition Width="150px"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="1"
-                       Margin="5,1"
-                       VerticalAlignment="Center"
-                       Text="お届け先名称："/>
-            <TextBox Grid.Row="0" Grid.Column="2"
-                     Margin="5,1"
-                     VerticalAlignment="Center"
-                     Text="{Binding NewShippingName}"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="お届け先名称："/>
+            <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding NewShippingName}"/>
 
-            <TextBlock Grid.Row="0" Grid.Column="1"
-                       Margin="5,1"
-                       VerticalAlignment="Center"
-                       Text="お届け先住所1："/>
-            <TextBox Grid.Row="0" Grid.Column="2"
-                     Margin="5,1"
-                     VerticalAlignment="Center"
-                     Text="{Binding NewAddress1}"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="お届け先住所1："/>
+            <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding NewAddress1}"/>
 
-            <TextBlock Grid.Row="0" Grid.Column="1"
-                       Margin="5,1"
-                       VerticalAlignment="Center"
-                       Text="お届け先住所2："/>
-            <TextBox Grid.Row="0" Grid.Column="2"
-                     Margin="5,1"
-                     VerticalAlignment="Center"
-                     Text="{Binding NewAddress2}"/>
+            <TextBlock Grid.Row="0" Grid.Column="1" Text="お届け先住所2："/>
+            <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding NewAddress2}"/>
         </Grid>
     </Grid>
 </UserControl>

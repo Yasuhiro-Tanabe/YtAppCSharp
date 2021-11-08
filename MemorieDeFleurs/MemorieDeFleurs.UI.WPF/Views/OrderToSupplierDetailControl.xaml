@@ -8,10 +8,15 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
-        <h:NegativeVisivilityConverter x:Key="negVisConverter"/>
-        <h:MinimumDeliveryDateConverter x:Key="minDelivConverter"/>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <h:NegativeVisivilityConverter x:Key="negVisConverter"/>
+            <h:MinimumDeliveryDateConverter x:Key="minDelivConverter"/>
+        </ResourceDictionary>
     </UserControl.Resources>
-    <Grid Margin="10">
+    <Grid Style="{StaticResource ControlBorderStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
@@ -28,62 +33,26 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0"
-                   Margin="5,1"
-                   VerticalAlignment="Center"
-                   Text="発注ID："/>
-        <TextBox Grid.Row="0" Grid.Column="1"
-                 Margin="5,1"
-                 VerticalAlignment="Center"
-                 Text="{Binding ID}"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="発注ID："/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ID}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3"
                     Orientation="Horizontal"
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
-            <Button TabIndex="997"
-                    Margin="5,1"
-                    Content="クリア"
-                    Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button TabIndex="998"
-                    Margin="5,1"
-                    Content="発注取消"
-                    Command="{Binding Cancel}" CommandParameter="{Binding}"/>
-            <Button TabIndex="999"
-                    Margin="5,1"
-                    Content="納品予定日変更"
-                    Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
-            <Button TabIndex="1000"
-                    Margin="5,1"
-                    Content="発注"
-                    Command="{Binding Order}" CommandParameter="{Binding}"/>
+            <Button TabIndex="997" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="発注取消" Command="{Binding Cancel}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="納品予定日変更" Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="発注" Command="{Binding Order}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0"
-                   Margin="5,1"
-                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                   Text="発注日："/>
-        <TextBlock Grid.Row="1" Grid.Column="1"
-                   VerticalAlignment="Center"
-                   Text="{Binding OrderDateText, Mode=OneWay}"/>
-        <TextBlock Grid.Row="1" Grid.Column="2"
-                   Margin="5,1"
-                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                   Text="納品希望日："/>
-        <DatePicker Grid.Row="1" Grid.Column="3"
-                    Margin="5,1"
-                    SelectedDateFormat="Short"
-                    VerticalAlignment="Center"
-                    SelectedDate="{Binding ArrivalDate}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="発注日："/>
+        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding OrderDateText, Mode=OneWay}"/>
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="納品希望日："/>
+        <DatePicker Grid.Row="1" Grid.Column="3" SelectedDate="{Binding ArrivalDate}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0"
-                   Margin="5,1"
-                   VerticalAlignment="Center"
-                   Text="仕入先："/>
-        <ComboBox Grid.Row="2" Grid.Column="1"
-                  Margin="5,1"
-                  HorizontalAlignment="Stretch" VerticalAlignment="Center"
-                  ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}">
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="仕入先："/>
+        <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding SupplierName, Mode=OneWay}"/>
@@ -91,27 +60,12 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <TextBlock Grid.Row="3" Grid.Column="0"
-                   Margin="5,1"
-                   VerticalAlignment="Center"
-                   Text="発注内容："/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="発注内容："/>
         <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3"
                    Visibility="{Binding EditingModeVisivility, Converter={StaticResource negVisConverter}}"
                    Text="{Binding OrderPartsText, Mode=OneWay}" TextWrapping="Wrap"/>
-        <Button Grid.Row="3" Grid.Column="3"
-                Margin="5, 1, 15,1"
-                HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                Visibility="{Binding EditingModeVisivility}"
-                Content="確定"
-                Command="{Binding Fix}" CommandParameter="{Binding}"/>
-        <Button Grid.Row="3" Grid.Column="3"
-                Margin="5, 1, 15, 1"
-                HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                Visibility="{Binding EditingModeVisivility, Converter={StaticResource negVisConverter}}"
-                Content="編集"
-                Command="{Binding Edit}" CommandParameter="{Binding}"/>
+        <Button Grid.Row="3" Grid.Column="3" Visibility="{Binding EditingModeVisivility}" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}"/>
+        <Button Grid.Row="3" Grid.Column="3" Visibility="{Binding EditingModeVisivility, Converter={StaticResource negVisConverter}}" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}"/>
 
         <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5"
               Margin="10"
@@ -127,17 +81,10 @@
                 <ColumnDefinition Width="200pt"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0"
-                       VerticalAlignment="Center"
-                       Text="発注する単品"/>
-            <TextBlock Grid.Row="0" Grid.Column="2"
-                       VerticalAlignment="Center"
-                       Text="発注可能な単品と最短納期"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="発注する単品"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="発注可能な単品と最短納期"/>
 
-            <ListView Grid.Row="1" Grid.Column="0"
-                      Margin="5"
-                      VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                      ItemsSource="{Binding OrderParts}" SelectedItem="{Binding SelectedOrderParts}">
+            <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding OrderParts}" SelectedItem="{Binding SelectedOrderParts}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -148,19 +95,10 @@
                                 <ColumnDefinition Width="120pt"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding PartsCode, Mode=OneWay}"/>
-                            <TextBox Grid.Column="1"
-                                     VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                                     TextAlignment="Right"
-                                     Text="{Binding Quantity}"/>
-                            <TextBlock Grid.Column="2"
-                                       VerticalAlignment="Center"
-                                       Text="ロット"/>
-                            <TextBlock Grid.Column="3"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding PartsName, Mode=OneWay}"/>
+                            <TextBlock Grid.Column="0" Text="{Binding PartsCode, Mode=OneWay}"/>
+                            <TextBox Grid.Column="1" Text="{Binding Quantity}" Style="{StaticResource NumericTextBox}"/>
+                            <TextBlock Grid.Column="2" Text="ロット"/>
+                            <TextBlock Grid.Column="3" Text="{Binding PartsName, Mode=OneWay}"/>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -168,22 +106,11 @@
 
             <StackPanel Grid.Row="1" Grid.Column="1"
                         Orientation="Vertical" Margin="5,50">
-                <Button HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                        VerticalAlignment="Center" VerticalContentAlignment="Center"
-                        Content="＜"
-                        Command="{Binding Append}" CommandParameter="{Binding}"/>
-                <Button HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                        VerticalAlignment="Center" VerticalContentAlignment="Center"
-                        Content="＞"
-                        Command="{Binding Remove}" CommandParameter="{Binding}"/>
+                <Button Content="＜" Command="{Binding Append}" CommandParameter="{Binding}" Style="{StaticResource AppendButton}"/>
+                <Button Content="＞" Command="{Binding Remove}" CommandParameter="{Binding}" Style="{StaticResource RemoveButton}"/>
             </StackPanel>
 
-            <ListView Grid.Row="1" Grid.Column="2"
-                      Margin="5"
-                      VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                      ItemsSource="{Binding SupplyParts}" SelectedItem="{Binding SelectedSupplyParts}"
-                      ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListView Grid.Row="1" Grid.Column="2" ItemsSource="{Binding SupplyParts}" SelectedItem="{Binding SelectedSupplyParts}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -193,15 +120,9 @@
                                 <ColumnDefinition Width="100px"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding PartsCode, Mode=OneWay}"/>
-                            <TextBlock Grid.Column="1"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding PartsName, Mode=OneWay}"/>
-                            <TextBlock Grid.Column="2"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding LeadTime, Converter={StaticResource minDelivConverter}}"/>
+                            <TextBlock Grid.Column="0" Text="{Binding PartsCode, Mode=OneWay}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding PartsName, Mode=OneWay}"/>
+                            <TextBlock Grid.Column="2" Text="{Binding LeadTime, Converter={StaticResource minDelivConverter}}"/>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>

@@ -8,6 +8,13 @@
         xmlns:vh="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Height="650" Width="800">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <Window.DataContext>
         <vm:MainWindowViiewModel/>
     </Window.DataContext>
@@ -98,10 +105,7 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Stretch"
-                                   Text="{Binding Header}"/>
+                        <TextBlock Grid.Column="0" Text="{Binding Header}"/>
                         <Button Grid.Column="1" Content="x" Command="{Binding Close}" CommandParameter="{Binding}"/>
                     </Grid>
                 </DataTemplate>

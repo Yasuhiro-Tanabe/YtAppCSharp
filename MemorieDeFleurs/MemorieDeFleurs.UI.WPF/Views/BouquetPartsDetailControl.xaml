@@ -6,7 +6,14 @@
              xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="100">
-    <Grid Margin="15, 5">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Style="{StaticResource ControlBorderStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
@@ -22,77 +29,29 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="花コード:"/>
-        <TextBox Grid.Row="0" Grid.Column="1"
-                 Margin="5,1"
-                 TabIndex="1"
-                 VerticalAlignment="Center" VerticalContentAlignment="Center"
-                 Text="{Binding PartsCode}"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="花コード:"/>
+        <TextBox Grid.Row="0" Grid.Column="1" TabIndex="1" Text="{Binding PartsCode}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal"
                     HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Margin="5,1"
-                    TabIndex="998"
-                    Content="クリア"
-                    Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button Margin="5, 1"
-                    TabIndex="999"
-                    Content="検索..."
-                    Command="{Binding Reload}" CommandParameter="{Binding}"/>
-            <Button Margin="5, 1"
-                    TabIndex="1000"
-                    Content="登録"
-                    Command="{Binding Register}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="検索..." Command="{Binding Reload}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="登録" Command="{Binding Register}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="名称:"/>
-        <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
-                 Margin="5,1"
-                 TabIndex="2"
-                 VerticalAlignment="Center" VerticalContentAlignment="Center"
-                 Text="{Binding PartsName}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="名称:"/>
+        <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" TabIndex="2" Text="{Binding PartsName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="購入単位数:"/>
-        <TextBox Grid.Row="2" Grid.Column="1"
-                 Margin="5,1"
-                 TabIndex="3"
-                 HorizontalContentAlignment="Right"
-                 VerticalAlignment="Center"
-                 Text="{Binding QuantitiesParLot}"/>
-        <TextBlock Grid.Row="2" Grid.Column="2"
-                   VerticalAlignment="Center"
-                   Text="本/ロット"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="購入単位数:"/>
+        <TextBox Grid.Row="2" Grid.Column="1" TabIndex="3" Text="{Binding QuantitiesParLot}" Style="{StaticResource NumericTextBox}"/>
+        <TextBlock Grid.Row="2" Grid.Column="2" Text="本/ロット"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="リードタイム:"/>
-        <TextBox Grid.Row="3" Grid.Column="1"
-                 Margin="5,1"
-                 TabIndex="4"
-                 HorizontalContentAlignment="Right"
-                 VerticalAlignment="Center" VerticalContentAlignment="Center"
-                 Text="{Binding LeadTime}"/>
-        <TextBlock Grid.Row="3" Grid.Column="2"
-                   VerticalAlignment="Center"
-                   Text="日"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="リードタイム:"/>
+        <TextBox Grid.Row="3" Grid.Column="1" TabIndex="4" Text="{Binding LeadTime}" Style="{StaticResource NumericTextBox}"/>
+        <TextBlock Grid.Row="3" Grid.Column="2" Text="日"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="品質維持可能日数:"/>
-        <TextBox Grid.Row="4" Grid.Column="1"
-                 Margin="5,1"
-                 TabIndex="5"
-                 HorizontalContentAlignment="Right"
-                 VerticalAlignment="Center" VerticalContentAlignment="Center"
-                 Text="{Binding ExpiryDate}"/>
-        <TextBlock Grid.Row="4" Grid.Column="2"
-                   VerticalAlignment="Center"
-                   Text="日"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="品質維持可能日数:"/>
+        <TextBox Grid.Row="4" Grid.Column="1" TabIndex="5" Text="{Binding ExpiryDate}" Style="{StaticResource NumericTextBox}"/>
+        <TextBlock Grid.Row="4" Grid.Column="2" Text="日"/>
 
     </Grid>
 </UserControl>
