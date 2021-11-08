@@ -672,5 +672,30 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(1, orders.Length);
             Assert.AreEqual(orderNo, orders[0]);
         }
+
+        [TestMethod]
+        public void FindAllOrders_Nothing()
+        {
+            var orders = Model.CustomerModel.FindAllOrders();
+            Assert.AreEqual(0, orders.Count());
+        }
+
+        [TestMethod]
+        public void FindAllOrders_HasSomeOrder()
+        {
+            var user2 = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs("ユーザ2").EmailAddressIs("user2@localdomain").CardNoIs("1234567890123456").Create();
+            var sendTo = Model.CustomerModel.GetShippingAddressBuilder()
+                .From(user2).To("友人1").AddressIs("住所1").Create();
+
+            Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May3rd);
+            Model.CustomerModel.Order(DateConst.May2nd, ExpectedBouquet, sendTo, DateConst.May4th);
+            Model.CustomerModel.Order(DateConst.May3rd, ExpectedBouquet, ExpectedShippingAddress, DateConst.May5th);
+            Model.CustomerModel.Order(DateConst.May4th, ExpectedBouquet, ExpectedShippingAddress, DateConst.May6th);
+
+            Assert.AreEqual(4, Model.CustomerModel.FindAllOrders().Count());
+            Assert.AreEqual(2, Model.CustomerModel.FindAllOrders(DateConst.May2nd, DateConst.May3rd).Count());
+            Assert.AreEqual(1, Model.CustomerModel.FindAllOrders(DateConst.May2nd, DateConst.May5th, user2.ID).Count());
+        }
     }
 }

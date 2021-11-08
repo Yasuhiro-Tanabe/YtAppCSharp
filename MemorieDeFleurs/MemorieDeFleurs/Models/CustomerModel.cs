@@ -405,7 +405,7 @@ namespace MemorieDeFleurs.Models
                 }
             }
         }
-        public Customer Save(MemorieDeFleursDbContext context, Customer customer)
+        private Customer Save(MemorieDeFleursDbContext context, Customer customer)
         {
             var found = FindCustomer(context, customer.ID);
             if(found == null)
@@ -455,6 +455,59 @@ namespace MemorieDeFleurs.Models
         #endregion // 得意先の登録改廃
 
         #region 受注履歴の登録改廃
+        public IEnumerable<OrderFromCustomer> FindAllOrders()
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrderFromCustomers
+                    .Include(o => o.Bouquet)
+                    .Include(o => o.Customer)
+                    .Include(o => o.ShippingAddress)
+                    .OrderBy(o => o.OrderDate)
+                    .ThenBy(o => o.ShippingDate)
+                    .ThenBy(o => o.CustomerID)
+                    .ThenBy(o => o.ShippingAddressID)
+                    .ToArray()
+                    .AsEnumerable();
+            }
+        }
+
+        public IEnumerable<OrderFromCustomer> FindAllOrders(DateTime from, DateTime to)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrderFromCustomers
+                    .Include(o => o.Bouquet)
+                    .Include(o => o.Customer)
+                    .Include(o => o.ShippingAddress)
+                    .Where(o => from <= o.OrderDate && o.OrderDate <= to)
+                    .OrderBy(o => o.OrderDate)
+                    .ThenBy(o => o.ShippingDate)
+                    .ThenBy(o => o.CustomerID)
+                    .ThenBy(o => o.ShippingAddressID)
+                    .ToArray()
+                    .AsEnumerable();
+            }
+        }
+
+        public IEnumerable<OrderFromCustomer> FindAllOrders(DateTime from, DateTime to, int customerID)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrderFromCustomers
+                    .Include(o => o.Bouquet)
+                    .Include(o => o.Customer)
+                    .Include(o => o.ShippingAddress)
+                    .Where(o => from <= o.OrderDate && o.OrderDate <= to)
+                    .Where(o => o.CustomerID == customerID)
+                    .OrderBy(o => o.OrderDate)
+                    .ThenBy(o => o.ShippingDate)
+                    .ThenBy(o => o.ShippingAddressID)
+                    .ToArray()
+                    .AsEnumerable();
+            }
+        }
+
         public OrderFromCustomer FindOrder(string orderID)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -465,21 +518,23 @@ namespace MemorieDeFleurs.Models
 
         private static OrderFromCustomer FindOrder(MemorieDeFleursDbContext context, string orderID)
         {
-            var order = context.OrderFromCustomers.Find(orderID);
+            return context.OrderFromCustomers
+                .Include(o => o.Bouquet)
+                .Include(o => o.Customer)
+                .Include(o => o.ShippingAddress)
+                .SingleOrDefault(o => o.ID == orderID);
+        }
 
-            if (order.Bouquet == null)
+        public IEnumerable<string> FindAllOrdersShippingAt(DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             {
-                order.Bouquet = context.Bouquets.Find(order.BouquetCode);
+                return context.OrderFromCustomers
+                    .Where(order => order.ShippingDate == date)
+                    .OrderBy(order => order.ID)
+                    .Select(order => order.ID)
+                    .ToList();
             }
-            if (order.Customer == null)
-            {
-                order.Customer = context.Customers.Find(order.CustomerID);
-            }
-            if (order.ShippingAddress == null)
-            {
-                order.ShippingAddress = context.ShippingAddresses.Find(order.ShippingAddressID);
-            }
-            return order;
         }
         #endregion // 受注履歴の登録改廃
 
@@ -806,19 +861,5 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
         }
         #endregion // 出荷
-
-        #region 受注履歴の取得
-        public IEnumerable<string> FindAllOrdersShippingAt(DateTime date)
-        {
-            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
-            {
-                return context.OrderFromCustomers
-                    .Where(order => order.ShippingDate == date)
-                    .OrderBy(order => order.ID)
-                    .Select(order => order.ID)
-                    .ToList();
-            }
-        }
-        #endregion // 受注履歴の取得
     }
 }
