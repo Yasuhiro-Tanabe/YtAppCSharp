@@ -111,9 +111,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Fix { get; } = new FixPartsListCommand();
         public ICommand Append { get; } = new AddToListItemCommand();
         public ICommand Remove { get; } = new RemoveFromListItemCommand();
-        public ICommand Order { get; }
-        public ICommand Cancel { get; }
-        public ICommand ChangeArrivalDate { get; }
+        public ICommand Order { get; } = new OrderCommand();
+        public ICommand Cancel { get; } = new CancelOrderCommand();
+        public ICommand ChangeArrivalDate { get; } = new ChangeDateCommand(); 
         #endregion // コマンド
 
         public void Update(OrdersToSupplier order)
@@ -261,6 +261,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             else
             {
                 MemorieDeFleursUIModel.Instance.CancelOrderToSupplier(ID);
+                Clear.Execute(this);
             }
         }
 

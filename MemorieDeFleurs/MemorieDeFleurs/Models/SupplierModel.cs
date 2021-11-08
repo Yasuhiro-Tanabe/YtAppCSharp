@@ -998,6 +998,7 @@ namespace MemorieDeFleurs.Models
                 {
                     CancelOrder(context, orderNo);
                     transaction.Commit();
+                    LogUtil.Info($"Order {orderNo} canceled.");
                 }
                 catch(Exception)
                 {
