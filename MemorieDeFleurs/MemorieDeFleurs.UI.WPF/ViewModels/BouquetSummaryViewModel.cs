@@ -45,6 +45,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _parts, value); }
         }
         private string _parts;
+
+        public int LeadTime
+        {
+            get { return _lead; }
+            set { SetProperty(ref _lead, value); }
+        }
+        private int _lead;
         #endregion // プロパティ
 
         public void Update(Bouquet bouquet)
@@ -52,13 +59,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             BouquetCode = bouquet.Code;
             BouquetName = bouquet.Name;
             ImageFileName = bouquet.Image;
+            LeadTime = bouquet.LeadTime;
 
             if(bouquet.PartsList.Count > 0)
             {
                 PartsList = string.Join(", ", bouquet.PartsList.Select(p => $"{p.PartsCode} x{p.Quantity}"));
             }
 
-            RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(PartsList));
+            RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(LeadTime), nameof(PartsList));
         }
     }
 }

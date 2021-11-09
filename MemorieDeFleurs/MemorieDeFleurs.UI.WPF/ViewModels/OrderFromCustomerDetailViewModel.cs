@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
@@ -16,7 +15,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     {
         public static string Name { get; } = "得意先受注詳細";
 
-        public OrderFromCustomerDetailViewModel() : base(Name) { }
+        public OrderFromCustomerDetailViewModel() : base(Name)
+        {
+            LoadCustomers();
+            LoadBouquets();
+        }
 
         #region プロパティ
         /// <summary>
@@ -43,11 +46,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _customer, value); }
         }
         private CustomerSummaryViewModel _customer;
-
-        /// <summary>
-        /// 得意先名称(表示用)
-        /// </summary>
-        public string CustomerName { get { return SelectedCustomer == null ? string.Empty : SelectedCustomer.CustomerName; } }
 
         /// <summary>
         /// 注文日(表示用)
@@ -94,6 +92,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// </summary>
         public ShippingAddressViewModel SelectedShippingAddress { get; set; }
 
+        public ObservableCollection<BouquetSummaryViewModel> Bouquets { get; } = new ObservableCollection<BouquetSummaryViewModel>();
+        public BouquetSummaryViewModel SelectedBouquet { get; set; }
 
         #region // 新規お届け先登録時に使用するプロパティ
         /// <summary>
@@ -140,6 +140,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Order { get; } = new OrderCommand();
         public ICommand Cancel { get; } = new CancelOrderCommand();
         public ICommand ChangeArrivalDate { get; } = new ChangeDateCommand();
+        public ICommand ChangeShippingAddress { get; } = new ChangeShippingAddressCommand();
         #endregion // コマンド
 
         public void Update(OrderFromCustomer order)
@@ -149,19 +150,48 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _orderDate = order.OrderDate;
             _arrival = order.ShippingDate.AddDays(1);
 
-            ShippingAddresses.Clear();
-            foreach(var addr in MemorieDeFleursUIModel.Instance.FindAllShippingAddressOfCustomer(order.CustomerID))
-            {
-                ShippingAddresses.Add(new ShippingAddressViewModel(addr));
-            }
+            LoadCustomers();
+            SelectedCustomer = Customers.SingleOrDefault(c => c.CustomerID == order.CustomerID);
+
+            LoadBouquets();
+            SelectedBouquet = Bouquets.SingleOrDefault(b => b.BouquetCode == order.BouquetCode);
+
+            LoadShippingAddresses(order.CustomerID);
             SelectedShippingAddress = ShippingAddresses.SingleOrDefault(a => a.ID == order.ShippingAddressID);
 
             _editing = false;
             RaisePropertyChanged(nameof(OrderNo), nameof(Message),
                 nameof(OrderDateText), nameof(ArrivalDate),
                 nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(EditingModeVisibility));
-            
+
             IsDirty = false;
+        }
+
+        public void LoadShippingAddresses(int  customerID)
+        {
+            ShippingAddresses.Clear();
+            foreach (var addr in MemorieDeFleursUIModel.Instance.FindAllShippingAddressOfCustomer(customerID))
+            {
+                ShippingAddresses.Add(new ShippingAddressViewModel(addr));
+            }
+        }
+
+        private void LoadCustomers()
+        {
+            Customers.Clear();
+            foreach (var customer in MemorieDeFleursUIModel.Instance.FindAllCustomers())
+            {
+                Customers.Add(new CustomerSummaryViewModel(customer));
+            }
+        }
+
+        private void LoadBouquets()
+        {
+            Bouquets.Clear();
+            foreach(var bouquet in MemorieDeFleursUIModel.Instance.FindAllBouquets())
+            {
+                Bouquets.Add(new BouquetSummaryViewModel(bouquet));
+            }
         }
 
         public override void Update()
@@ -191,10 +221,23 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _newShippingName = string.Empty;
             _newShippingAddress1 = string.Empty;
             _newShippingAddress2 = string.Empty;
+            _orderDate = DateTime.Today;
+            _arrival = DateTime.Today;
 
+            SelectedCustomer = null;
+            LoadCustomers();
 
+            SelectedBouquet = null;
+            LoadBouquets();
+
+            SelectedShippingAddress = null;
+            ShippingAddresses.Clear();
 
             _editing = false;
+
+            RaisePropertyChanged(nameof(OrderNo), nameof(OrderDate), nameof(OrderDateText), nameof(ArrivalDate), nameof(Customers), nameof(SelectedCustomer),
+                nameof(Message), nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(NewShippingName), nameof(NewAddress1), nameof(NewAddress2),
+                nameof(EditingModeVisibility));
         }
     }
 }

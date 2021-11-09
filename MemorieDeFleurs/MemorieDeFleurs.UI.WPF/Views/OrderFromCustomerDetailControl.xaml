@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
              xmlns:h="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -13,10 +14,12 @@
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <h:NegativeVisivilityConverter x:Key="negVisConverter"/>
+            <h:MinimumDeliveryDateConverter x:Key="deriveryDateConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Style="{StaticResource ControlBorderStyle}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
@@ -46,8 +49,19 @@
             <Button TabIndex="1000" Content="受注" Command="{Binding Order}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="お届け先："/>
-        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CustomerName}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="得意先："/>
+        <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectionChanged">
+                    <i:InvokeCommandAction Command="{Binding ChangeShippingAddress}" PassEventArgsToCommand="False" CommandParameter="{Binding}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding CustomerName}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
         <TextBlock Grid.Row="1" Grid.Column="2" Text="様"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="受注日："/>
@@ -58,20 +72,39 @@
         <TextBlock Grid.Row="3" Grid.Column="0" Text="お届けメッセージ："/>
         <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Message}"/>
 
-
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="お届け先："/>
-        <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding ShippingAddresses}" SelectedItem="{Binding SelectedShippingAddress}">
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="商品(最短お届け日)："/>
+        <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Bouquets}" SelectedItem="{Binding SelectedBouquet}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding CustomerName, Mode=OneWay}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40px"/>
+                            <ColumnDefinition Width="150px"/>
+                            <ColumnDefinition Width="80px"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" Text="{Binding BouquetCode}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding BouquetName}"/>
+                        <TextBlock Grid.Column="2" Text="{Binding LeadTime, Converter={StaticResource deriveryDateConverter}}"/>
+                    </Grid>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Grid.Row="4" Grid.Column="4" Content="新規" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisibility, Converter={StaticResource negVisConverter}}"/>
-        <Button Grid.Row="4" Grid.Column="4" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisibility}"/>
 
 
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5"
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="お届け先："/>
+        <ComboBox Grid.Row="5" Grid.Column="1" ItemsSource="{Binding ShippingAddresses}" SelectedItem="{Binding SelectedShippingAddress}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name, Mode=OneWay}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Button Grid.Row="5" Grid.Column="4" Content="新規" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisibility, Converter={StaticResource negVisConverter}}"/>
+        <Button Grid.Row="5" Grid.Column="4" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisibility}"/>
+
+
+        <Grid Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="5"
               Visibility="{Binding EditingModeVisibility}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20pt"/>
@@ -88,11 +121,11 @@
             <TextBlock Grid.Row="0" Grid.Column="1" Text="お届け先名称："/>
             <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding NewShippingName}"/>
 
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="お届け先住所1："/>
-            <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding NewAddress1}"/>
+            <TextBlock Grid.Row="1" Grid.Column="1" Text="お届け先住所1："/>
+            <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding NewAddress1}"/>
 
-            <TextBlock Grid.Row="0" Grid.Column="1" Text="お届け先住所2："/>
-            <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding NewAddress2}"/>
+            <TextBlock Grid.Row="2" Grid.Column="1" Text="お届け先住所2："/>
+            <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding NewAddress2}"/>
         </Grid>
     </Grid>
 </UserControl>
