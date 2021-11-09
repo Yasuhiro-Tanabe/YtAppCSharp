@@ -725,5 +725,51 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(6, actual.Count());
 
         }
+
+        [TestMethod]
+        public void AddShippingAddress_NotModified()
+        {
+            var actual = Model.CustomerModel.Save(ExpectedShippingAddress);
+
+            Assert.AreEqual(ExpectedShippingAddress.ID, actual.ID);
+            Assert.IsFalse(ExpectedShippingAddress.IsModified(actual));
+        }
+
+        [TestMethod]
+        public void AddShippingAddress_NewAddress()
+        {
+            // Save() の際呼び出し元オブジェクトの情報も書き換えてしまうので、期待値を保持する
+            var expectedID = 0;
+
+            var expected = new ShippingAddress()
+            {
+                ID = expectedID,
+                Name = "テスト",
+                Address1 = "都道府県 市町村",
+                Address2 = "大字 字 番地",
+                LatestOrderDate = DateTime.Today,
+                Customer = ExpectedCustomer,
+                CustomerID = ExpectedCustomer.ID
+            };
+
+            var actual = Model.CustomerModel.Save(expected);
+
+            Assert.AreNotEqual(expectedID, actual.ID);
+            Assert.IsFalse(expected.IsModified(actual));
+        }
+
+        [TestMethod]
+        public void AddShippingAddress_Modified()
+        {
+            // Save() の際呼び出し元オブジェクトの情報も書き換えてしまうので、期待値を保持する
+            var expectedID = ExpectedShippingAddress.ID;
+
+            ExpectedShippingAddress.Name = "別の名前";
+
+            var actual = Model.CustomerModel.Save(ExpectedShippingAddress);
+
+            Assert.AreNotEqual(expectedID, actual.ID);
+            Assert.IsFalse(ExpectedShippingAddress.IsModified(actual));
+        }
     }
 }

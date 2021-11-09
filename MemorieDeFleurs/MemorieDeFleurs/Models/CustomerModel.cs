@@ -454,6 +454,86 @@ namespace MemorieDeFleurs.Models
         }
         #endregion // 得意先の登録改廃
 
+        #region お届け先の登録改廃
+        public ShippingAddress Save(ShippingAddress address)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod(address.ID.ToString());
+                    var saved = Save(context, address);
+                    transaction.Commit();
+                    return saved;
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                    throw;
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod(address.ID.ToString());
+                }
+            }
+        }
+        private ShippingAddress Save(MemorieDeFleursDbContext context, ShippingAddress address)
+        {
+            var found = FindShippingAddress(context, address.ID);
+            if(found == null)
+            {
+                if(address.ID == 0)
+                {
+                    address.ID = Parent.Sequences.SEQ_SHIPPING.Next(context);
+                }
+
+                if (address.Customer != null)
+                {
+                    address.CustomerID = address.Customer.ID;
+                    address.Customer = null;
+                }
+
+                found = context.ShippingAddresses.Add(address).Entity;
+            }
+            else if(found.IsModified(address))
+            {
+                // 変更があったら(更新ではなく)新規のお届け先として登録する
+                address.ID = Parent.Sequences.SEQ_SHIPPING.Next(context);
+                address.CustomerID = address.Customer.ID;
+                address.Customer = null;
+                found = context.ShippingAddresses.Add(address).Entity;
+            }
+
+            context.SaveChanges();
+
+            return FindShippingAddress(context, found.ID);
+        }
+
+
+        public IEnumerable<ShippingAddress> FindAllShippingAddressesOfCustomer(int customer)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.ShippingAddresses
+                    .Where(s => s.CustomerID == customer)
+                    .Include(s => s.Customer)
+                    .OrderBy(s => s.LatestOrderDate)
+                    .ToList()
+                    .AsEnumerable();
+            }
+        }
+
+        private ShippingAddress FindShippingAddress(MemorieDeFleursDbContext context, int id)
+        {
+            return context.ShippingAddresses
+                .Where(s => s.ID == id)
+                .Include(s => s.Customer)
+                .SingleOrDefault();
+        }
+        #endregion // お届け先の登録改廃
+
         #region 受注履歴の登録改廃
         public IEnumerable<OrderFromCustomer> FindAllOrders()
         {
@@ -534,19 +614,6 @@ namespace MemorieDeFleurs.Models
                     .OrderBy(order => order.ID)
                     .Select(order => order.ID)
                     .ToList();
-            }
-        }
-
-        public IEnumerable<ShippingAddress> FindAllShippingAddressesOfCustomer(int customer)
-        {
-            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
-            {
-                return context.ShippingAddresses
-                    .Where(s => s.CustomerID == customer)
-                    .Include(s => s.Customer)
-                    .OrderBy(s => s.LatestOrderDate)
-                    .ToList()
-                    .AsEnumerable();
             }
         }
         #endregion // 受注履歴の登録改廃

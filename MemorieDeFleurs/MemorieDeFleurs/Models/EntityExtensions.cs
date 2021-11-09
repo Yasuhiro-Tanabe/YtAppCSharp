@@ -22,6 +22,14 @@ namespace MemorieDeFleurs.Models
                 || CheckAndModify(() => inDB.LatestOrderDate == newValue.LatestOrderDate, () => inDB.LatestOrderDate = newValue.LatestOrderDate);
         }
 
+        public static bool IsModified(this ShippingAddress inDB, ShippingAddress newValue)
+        {
+            return inDB.Name != newValue.Name
+                || inDB.Address1 != newValue.Address1
+                || inDB.Address2 != newValue.Address2
+                || inDB.LatestOrderDate != newValue.LatestOrderDate;
+        }
+
         public static bool CheckAndModify(this Supplier inDB, Supplier newValue)
         {
             return CheckAndModify(() => inDB.Name == newValue.Name, () => inDB.Name = newValue.Name)
