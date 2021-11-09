@@ -1,6 +1,7 @@
 ﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
+using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
@@ -95,43 +96,41 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ObservableCollection<BouquetSummaryViewModel> Bouquets { get; } = new ObservableCollection<BouquetSummaryViewModel>();
         public BouquetSummaryViewModel SelectedBouquet { get; set; }
 
-        #region // 新規お届け先登録時に使用するプロパティ
         /// <summary>
-        /// 新規登録するお届け先名称
+        /// お届け先名称
         /// </summary>
-        public string NewShippingName
+        public string ShippingName
         {
-            get { return _newShippingName; }
-            set { SetProperty(ref _newShippingName, value); }
+            get { return _shippingName; }
+            set { SetProperty(ref _shippingName, value); }
         }
-        private string _newShippingName;
+        private string _shippingName;
 
         /// <summary>
-        /// 新規登録するお届け先住所1
+        /// お届け先住所1
         /// </summary>
-        public string NewAddress1
+        public string Address1
         {
-            get { return _newShippingAddress1; }
-            set { SetProperty(ref _newShippingAddress1, value); }
+            get { return _shippingAddress1; }
+            set { SetProperty(ref _shippingAddress1, value); }
         }
-        private string _newShippingAddress1;
+        private string _shippingAddress1;
 
         /// <summary>
-        /// 新規登録するお届け先住所2
+        /// お届け先住所2
         /// </summary>
-        public string NewAddress2
+        public string Address2
         {
-            get { return _newShippingAddress2; }
-            set { SetProperty(ref _newShippingAddress2, value); }
+            get { return _shippingAddress2; }
+            set { SetProperty(ref _shippingAddress2, value); }
         }
-        private string _newShippingAddress2;
-        #endregion // 新規お届け先登録時に使用するプロパティ
+        private string _shippingAddress2;
 
         /// <summary>
-        /// お届け先新規登録モード
+        /// お届け先選択モード
         /// </summary>
-        public Visibility EditingModeVisibility { get { return _editing ? Visibility.Visible : Visibility.Collapsed; } }
-        private bool _editing;
+        public Visibility ShippingAddressListVisivility { get { return _listVisible ? Visibility.Visible : Visibility.Collapsed; } }
+        private bool _listVisible;
         #endregion // プロパティ
 
         #region コマンド
@@ -159,10 +158,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             LoadShippingAddresses(order.CustomerID);
             SelectedShippingAddress = ShippingAddresses.SingleOrDefault(a => a.ID == order.ShippingAddressID);
 
-            _editing = false;
-            RaisePropertyChanged(nameof(OrderNo), nameof(Message),
-                nameof(OrderDateText), nameof(ArrivalDate),
-                nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(EditingModeVisibility));
+            if(SelectedShippingAddress != null)
+            {
+                _shippingName = order.ShippingAddress.Name;
+                _shippingAddress1 = order.ShippingAddress.Address1;
+                _shippingAddress2 = order.ShippingAddress.Address2;
+                RaisePropertyChanged(nameof(ShippingName), nameof(Address1), nameof(Address2));
+            }
+
+            _listVisible = false;
+            RaisePropertyChanged(nameof(OrderNo), nameof(Message), nameof(OrderDateText), nameof(ArrivalDate),
+                nameof(Customers), nameof(SelectedCustomer), nameof(Bouquets), nameof(SelectedBouquet),
+                nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(ShippingAddressListVisivility));
 
             IsDirty = false;
         }
@@ -218,9 +225,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             _orderNo = string.Empty;
             _message = string.Empty;
-            _newShippingName = string.Empty;
-            _newShippingAddress1 = string.Empty;
-            _newShippingAddress2 = string.Empty;
+            _shippingName = string.Empty;
+            _shippingAddress1 = string.Empty;
+            _shippingAddress2 = string.Empty;
             _orderDate = DateTime.Today;
             _arrival = DateTime.Today;
 
@@ -233,11 +240,88 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedShippingAddress = null;
             ShippingAddresses.Clear();
 
-            _editing = false;
+            _listVisible = false;
 
             RaisePropertyChanged(nameof(OrderNo), nameof(OrderDate), nameof(OrderDateText), nameof(ArrivalDate), nameof(Customers), nameof(SelectedCustomer),
-                nameof(Message), nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(NewShippingName), nameof(NewAddress1), nameof(NewAddress2),
-                nameof(EditingModeVisibility));
+                nameof(Message), nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(ShippingName), nameof(Address1), nameof(Address2),
+                nameof(ShippingAddressListVisivility));
+
+            IsDirty = false;
+        }
+
+        public override void Validate()
+        {
+            var ex = new ValidateFailedException();
+            if (SelectedBouquet == null)
+            {
+                ex.Append("商品が選択されていません。");
+            }
+            if (SelectedCustomer == null)
+            {
+                ex.Append("得意先が選択されていません。");
+            }
+            if (SelectedShippingAddress == null)
+            {
+                if(string.IsNullOrWhiteSpace(ShippingName))
+                {
+                    ex.Append("お届け先名称が指定されていません。");
+                }
+                if(string.IsNullOrWhiteSpace(Address1))
+                {
+                    ex.Append("お届け先住所1が指定されていません。");
+                    if(!string.IsNullOrWhiteSpace(Address2))
+                    {
+                        ex.Append("お届け先住所1が空です。お届け先住所1を先に入力してください");
+                    }
+                }
+            }
+
+            var nearest = DateTime.Today.AddDays(SelectedBouquet.LeadTime);
+            if (ArrivalDate < nearest)
+            {
+                ex.Append($"商品 {SelectedBouquet.BouquetCode} は {nearest:yyyy/MM/dd} 以降でなければお届けできません。");
+            }
+
+            if (ex.ValidationErrors.Count > 0)
+            {
+                throw ex;
+            }
+        }
+
+        public void OpenShippingAddressList()
+        {
+            if(SelectedCustomer == null)
+            {
+                throw new ApplicationException("得意先を先に指定してください。");
+            }
+
+            // 既存お届け先を選択中だったら、そのお届け先を選択状態にしてリストを開く。
+            // お届け先IDをキーに検索しないのは、前回選択後にユーザが入力内容を変更しているかもしれないため。
+            // 入力内容が異なる場合は、新規の登録先として扱いたい。
+            LoadShippingAddresses(SelectedCustomer.CustomerID);
+            SelectedShippingAddress = ShippingAddresses
+                .Where(s => s.Name == _shippingName)
+                .Where(s => s.Address1 == _shippingAddress1)
+                .Where(s => s.Address2 == _shippingAddress2)
+                .SingleOrDefault();
+
+            _listVisible = true;
+            RaisePropertyChanged(nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(ShippingAddressListVisivility));
+        }
+
+        public void CloseShippingAddressList()
+        {
+            if(SelectedShippingAddress != null)
+            {
+                _shippingName = SelectedShippingAddress.Name;
+                _shippingAddress1 = SelectedShippingAddress.Address1;
+                _shippingAddress2 = SelectedShippingAddress.Address2;
+
+                RaisePropertyChanged(nameof(ShippingName), nameof(Address1), nameof(Address2));
+            }
+
+            _listVisible = false;
+            RaisePropertyChanged(nameof(ShippingAddressListVisivility));
         }
     }
 }
