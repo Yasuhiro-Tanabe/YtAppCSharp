@@ -501,8 +501,11 @@ namespace MemorieDeFleurs.Models
             {
                 // 変更があったら(更新ではなく)新規のお届け先として登録する
                 address.ID = Parent.Sequences.SEQ_SHIPPING.Next(context);
-                address.CustomerID = address.Customer.ID;
-                address.Customer = null;
+                if(address.Customer != null)
+                {
+                    address.CustomerID = address.Customer.ID;
+                    address.Customer = null;
+                }
                 found = context.ShippingAddresses.Add(address).Entity;
             }
 
