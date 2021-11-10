@@ -67,11 +67,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// 商品構成編集中に表示するコントロールの可視性
         /// </summary>
         public Visibility EditingModeVisivility { get { return _editing ? Visibility.Visible : Visibility.Collapsed; } }
-
-        /// <summary>
-        /// 商品構成編集中でないときに表示するコントロールの可視性
-        /// </summary>
-        public Visibility ViewModeVisivility { get { return _editing ? Visibility.Collapsed : Visibility.Visible; } }
         private bool _editing = false;
 
         /// <summary>
@@ -129,7 +124,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _editing = false;
 
             RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(LeadTime),
-                nameof(PartsListString), nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
+                nameof(PartsListString), nameof(EditingModeVisivility), nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
                  nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
 
             IsDirty = false;
@@ -183,7 +178,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
             CurrentSelectedInSelectablePartsList = null;
 
-            RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
+            RaisePropertyChanged(nameof(EditingModeVisivility), nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
                  nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
         }
 
@@ -191,7 +186,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             _editing = false;
             _leadTime = SelectedPartListItem.Count() > 0 ? SelectedPartListItem.Max(p => p.LeadTime) : 0;
-            RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsListString), nameof(LeadTime));
+            RaisePropertyChanged(nameof(EditingModeVisivility), nameof(PartsListString), nameof(LeadTime));
         }
         #endregion // IEditableFixable
 
@@ -295,7 +290,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _editing = false;
 
             RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(LeadTime),
-                nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsListString));
+                nameof(EditingModeVisivility), nameof(PartsListString));
 
             IsDirty = false;
         }

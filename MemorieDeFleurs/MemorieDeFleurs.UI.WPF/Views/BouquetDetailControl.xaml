@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:h="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="100">
     <UserControl.Resources>
@@ -10,6 +11,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <h:NegativeVisivilityConverter x:Key="negVisConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Style="{StaticResource ControlBorderStyle}">
@@ -52,7 +54,7 @@
         <TextBlock Grid.Row="4" Grid.Column="0" Text="商品構成："/>
         <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding PartsListString}" Style="{StaticResource MultiLineTextBlock}"/>
         <Button Grid.Row="4" Grid.Column="3" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisivility}"/>
-        <Button Grid.Row="4" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding ViewModeVisivility}"/>
+        <Button Grid.Row="4" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisivility, Converter={StaticResource negVisConverter}}"/>
 
         <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4"
               Margin="10"
