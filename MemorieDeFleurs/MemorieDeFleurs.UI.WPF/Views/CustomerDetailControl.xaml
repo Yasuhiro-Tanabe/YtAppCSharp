@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:h="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -10,6 +11,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <h:NameTitleConverter x:Key="titleConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Style="{StaticResource ControlBorderStyle}">
@@ -39,6 +41,7 @@
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="名前："/>
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CustomerName}"/>
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="様"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="e-メールアドレス："/>
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EmailAddress}"/>
@@ -57,17 +60,13 @@
                     <Grid Margin="5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120px"/>
-                            <ColumnDefinition Width="60px"/>
                             <ColumnDefinition Width="200px"/>
-                            <ColumnDefinition Width="150px"/>
                             <ColumnDefinition Width="100px"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="{Binding Name, Mode=OneWay}"/>
-                        <TextBlock Grid.Column="1" Text="様、"/>
-                        <TextBlock Grid.Column="2" Text="{Binding AddressText, Mode=OneWay}" Style="{StaticResource MultiLineTextBlock}"/>
-                        <TextBlock Grid.Column="3" Text="、前回お届け日："/>
-                        <TextBlock Grid.Column="4" Text="{Binding LatestOrderDateText, Mode=OneWay}"/>
+                        <TextBlock Grid.Column="0" Text="{Binding Name, Mode=OneWay, Converter={StaticResource titleConverter}}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding AddressText, Mode=OneWay}" Style="{StaticResource MultiLineTextBlock}"/>
+                        <TextBlock Grid.Column="2" Text="{Binding LatestOrderDateText, Mode=OneWay}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

@@ -15,6 +15,7 @@
             </ResourceDictionary.MergedDictionaries>
             <h:NegativeVisivilityConverter x:Key="negVisConverter"/>
             <h:MinimumDeliveryDateConverter x:Key="deriveryDateConverter"/>
+            <h:NameTitleConverter x:Key="titleConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Style="{StaticResource ControlBorderStyle}">
@@ -96,6 +97,7 @@
 
         <TextBlock Grid.Row="5" Grid.Column="0" Text="お届け先："/>
         <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ShippingName}"/>
+        <TextBlock Grid.Row="5" Grid.Column="2" Text="様"/>
         <Button Grid.Row="5" Grid.Column="4" Content="選択..." Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding ShippingAddressListVisivility, Converter={StaticResource negVisConverter}}"/>
         <Button Grid.Row="5" Grid.Column="4" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding ShippingAddressListVisivility}"/>
 
@@ -114,7 +116,7 @@
                             <ColumnDefinition Width="200px"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="{Binding Name, Mode=OneWay}"/>
+                        <TextBlock Grid.Column="0" Text="{Binding Name, Mode=OneWay, Converter={StaticResource titleConverter}}"/>
                         <TextBlock Grid.Column="1" Text="{Binding AddressText, Mode=OneWay}" Style="{StaticResource MultiLineTextBlock}"/>
                     </Grid>
                 </DataTemplate>

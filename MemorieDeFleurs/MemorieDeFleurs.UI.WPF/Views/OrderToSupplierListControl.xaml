@@ -13,6 +13,7 @@
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <h:NegativeVisivilityConverter x:Key="negativeVisivilityConverter"/>
+            <h:NameTitleConverter x:Key="titleConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <i:Interaction.Triggers>
@@ -70,7 +71,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" Text="{Binding OrderID}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding SupplierName}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding SupplierName, Converter={StaticResource titleConverter}}"/>
                         <TextBlock Grid.Column="2" Text="{Binding ArrivalDateText}"/>
                         <TextBlock Grid.Column="3" Grid.ColumnSpan="3" Text="{Binding OrderParts}" Style="{StaticResource MultiLineTextBlock}" Visibility="{Binding ActionVisivility, Converter={StaticResource negativeVisivilityConverter}}" />
                         <Button Grid.Column="4" Content="詳細..." Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding ActionVisivility}"/>
