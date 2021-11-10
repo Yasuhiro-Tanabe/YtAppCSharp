@@ -4,13 +4,8 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class CancelOrderCommand : CommandBase
     {
-        public CancelOrderCommand() : base()
-        {
-            AddAction(typeof(OrderToSupplierDetailViewModel), CancelOrderToSupplier);
-            AddAction(typeof(OrderFromCustomerDetailViewModel), CancelOrderFromCustomer);
-        }
+        public CancelOrderCommand() : base(typeof(IOrderable), CancelOrder) { }
 
-        private static void CancelOrderToSupplier(object parameter) => (parameter as OrderToSupplierDetailViewModel).CancelMe();
-        private static void CancelOrderFromCustomer(object parameter) => (parameter as OrderFromCustomerDetailViewModel).CancelMe();
+        private static void CancelOrder(object parameter) => (parameter as IOrderable).CancelMe();
     }
 }

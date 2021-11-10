@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable
+    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable
     {
         public static string Name { get; } = "仕入先発注詳細";
 
@@ -113,7 +113,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Remove { get; } = new RemoveFromListCommand();
         public ICommand Order { get; } = new OrderCommand();
         public ICommand Cancel { get; } = new CancelOrderCommand();
-        public ICommand ChangeArrivalDate { get; } = new ChangeDateCommand(); 
+        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand(); 
         #endregion // コマンド
 
         public void Update(OrdersToSupplier order)
@@ -232,6 +232,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IAddableRemovable
 
+        #region IOrderable
         public void OrderMe()
         {
             if(string.IsNullOrWhiteSpace(_id))
@@ -279,6 +280,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 MemorieDeFleursUIModel.Instance.ChangeArrivalDateOfOrderToSupplier(ID, ArrivalDate);
             }
         }
+        #endregion // IOrderable
 
         public override void SaveToDatabase()
         {

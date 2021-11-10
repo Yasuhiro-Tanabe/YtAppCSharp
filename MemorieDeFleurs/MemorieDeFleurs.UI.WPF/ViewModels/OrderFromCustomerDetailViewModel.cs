@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderFromCustomerDetailViewModel : DetailViewModelBase, IEditableAndFixable
+    public class OrderFromCustomerDetailViewModel : DetailViewModelBase, IEditableAndFixable, IOrderable
     {
         public static string Name { get; } = "得意先受注詳細";
 
@@ -93,7 +93,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// </summary>
         public ShippingAddressViewModel SelectedShippingAddress { get; set; }
 
+        /// <summary>
+        /// 選択可能な商品一覧
+        /// </summary>
         public ObservableCollection<BouquetSummaryViewModel> Bouquets { get; } = new ObservableCollection<BouquetSummaryViewModel>();
+
+        /// <summary>
+        /// 現在選択中の商品
+        /// </summary>
         public BouquetSummaryViewModel SelectedBouquet { get; set; }
 
         /// <summary>
@@ -138,7 +145,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Fix { get; } = new FixCommand();
         public ICommand Order { get; } = new OrderCommand();
         public ICommand Cancel { get; } = new CancelOrderCommand();
-        public ICommand ChangeArrivalDate { get; } = new ChangeDateCommand();
+        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
         public ICommand ChangeShippingAddress { get; } = new ChangeShippingAddressCommand();
         #endregion // コマンド
 
@@ -326,6 +333,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IEditableFixable
 
+        #region IOrderable
         public void OrderMe()
         {
             if(string.IsNullOrWhiteSpace(_orderNo))
@@ -382,5 +390,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 MemorieDeFleursUIModel.Instance.ChangeArrivalDateOfOrderFromCustomer(_orderNo, ArrivalDate);
             }
         }
+        #endregion // IOrderable
     }
 }

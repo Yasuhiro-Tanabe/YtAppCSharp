@@ -4,14 +4,8 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class OrderCommand : CommandBase
     {
-        public OrderCommand() : base()
-        {
-            AddAction(typeof(OrderToSupplierDetailViewModel), OrderToSupplier);
-            AddAction(typeof(OrderFromCustomerDetailViewModel), OrderFromCustomer);
-        }
+        public OrderCommand() : base(typeof(IOrderable), Order) { }
 
-
-        private static void OrderToSupplier(object parameter) => (parameter as OrderToSupplierDetailViewModel).OrderMe();
-        private static void OrderFromCustomer(object parameter) => (parameter as OrderFromCustomerDetailViewModel).OrderMe();
+        private static void Order(object parameter) => (parameter as IOrderable).OrderMe();
     }
 }
