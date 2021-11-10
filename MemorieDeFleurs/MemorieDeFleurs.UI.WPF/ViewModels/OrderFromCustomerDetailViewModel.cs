@@ -61,7 +61,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             get { return _orderDate; }
             set { SetProperty(ref _orderDate, value); }
         }
-        private DateTime _orderDate;
+        private DateTime _orderDate = DateTime.Today;
 
         /// <summary>
         /// お届け日
@@ -71,7 +71,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             get { return _arrival; }
             set { SetProperty(ref _arrival, value); }
         }
-        private DateTime _arrival;
+        private DateTime _arrival = DateTime.Today.AddDays(1);
 
         /// <summary>
         /// お届けメッセージ
@@ -229,7 +229,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _shippingAddress1 = string.Empty;
             _shippingAddress2 = string.Empty;
             _orderDate = DateTime.Today;
-            _arrival = DateTime.Today;
+            _arrival = DateTime.Today.AddDays(1);
 
             SelectedCustomer = null;
             LoadCustomers();
@@ -322,6 +322,63 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             _listVisible = false;
             RaisePropertyChanged(nameof(ShippingAddressListVisivility));
+        }
+
+        public void OrderMe()
+        {
+            if(string.IsNullOrWhiteSpace(_orderNo))
+            {
+                Validate();
+
+                var address = new ShippingAddress()
+                {
+                    ID = SelectedShippingAddress == null ? 0 : SelectedShippingAddress.ID,
+                    CustomerID = SelectedCustomer.CustomerID,
+                    Name = ShippingName,
+                    Address1 = Address1,
+                    Address2 = Address2,
+                    LatestOrderDate = DateTime.Today
+                };
+
+                var order = new OrderFromCustomer()
+                {
+                    OrderDate = OrderDate,
+                    Bouquet = MemorieDeFleursUIModel.Instance.FindBouquet(SelectedBouquet.BouquetCode),
+                    ShippingAddress = MemorieDeFleursUIModel.Instance.Save(address),
+                };
+
+                OrderNo = MemorieDeFleursUIModel.Instance.OrderFromCustomer(order, ArrivalDate);
+                Update();
+            }
+            else
+            {
+                throw new ApplicationException("すでに発注済です。");
+            }
+        }
+
+        public void CancelMe()
+        {
+            if(string.IsNullOrWhiteSpace(_orderNo))
+            {
+                throw new ApplicationException("発注されていません。");
+            }
+            else
+            {
+                MemorieDeFleursUIModel.Instance.CancelOrderFromCustomer(_orderNo);
+                Cancel.Execute(this);
+            }
+        }
+
+        public void ChangeMyArrivalDate()
+        {
+            if (string.IsNullOrWhiteSpace(_orderNo))
+            {
+                throw new ApplicationException("発注されていません。");
+            }
+            else
+            {
+                MemorieDeFleursUIModel.Instance.ChangeArrivalDateOfOrderFromCustomer(_orderNo, ArrivalDate);
+            }
         }
     }
 }

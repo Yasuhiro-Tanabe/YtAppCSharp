@@ -347,6 +347,12 @@ namespace MemorieDeFleurs.UI.WPF.Model
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             return Model.CustomerModel.FindAllShippingAddressesOfCustomer(customer);
         }
+
+        public ShippingAddress Save(ShippingAddress address)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.Save(address);
+        }
         #endregion // お届け先の操作
 
     }
