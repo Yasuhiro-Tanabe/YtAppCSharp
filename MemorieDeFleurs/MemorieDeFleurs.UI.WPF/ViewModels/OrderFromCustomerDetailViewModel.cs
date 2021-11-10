@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderFromCustomerDetailViewModel : DetailViewModelBase
+    public class OrderFromCustomerDetailViewModel : DetailViewModelBase, IEditableAndFixable
     {
         public static string Name { get; } = "得意先受注詳細";
 
@@ -134,8 +134,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Edit { get; } = new EditPartsListCommand();
-        public ICommand Fix { get; } = new FixPartsListCommand();
+        public ICommand Edit { get; } = new EditCommand();
+        public ICommand Fix { get; } = new FixCommand();
         public ICommand Order { get; } = new OrderCommand();
         public ICommand Cancel { get; } = new CancelOrderCommand();
         public ICommand ChangeArrivalDate { get; } = new ChangeDateCommand();
@@ -288,7 +288,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
-        public void OpenShippingAddressList()
+        #region IEditableFixable
+        public void OpenEditView()
         {
             if(SelectedCustomer == null)
             {
@@ -309,7 +310,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(ShippingAddressListVisivility));
         }
 
-        public void CloseShippingAddressList()
+        public void FixEditing()
         {
             if(SelectedShippingAddress != null)
             {
@@ -323,6 +324,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _listVisible = false;
             RaisePropertyChanged(nameof(ShippingAddressListVisivility));
         }
+        #endregion // IEditableFixable
 
         public void OrderMe()
         {

@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderToSupplierDetailViewModel : DetailViewModelBase
+    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable
     {
         public static string Name { get; } = "仕入先発注詳細";
 
@@ -107,10 +107,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Edit { get; } = new EditPartsListCommand();
-        public ICommand Fix { get; } = new FixPartsListCommand();
-        public ICommand Append { get; } = new AddToListItemCommand();
-        public ICommand Remove { get; } = new RemoveFromListItemCommand();
+        public ICommand Edit { get; } = new EditCommand();
+        public ICommand Fix { get; } = new FixCommand();
+        public ICommand Append { get; } = new AppendToListCommand();
+        public ICommand Remove { get; } = new RemoveFromListCommand();
         public ICommand Order { get; } = new OrderCommand();
         public ICommand Cancel { get; } = new CancelOrderCommand();
         public ICommand ChangeArrivalDate { get; } = new ChangeDateCommand(); 
@@ -166,8 +166,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
-
-        public void EditOrderParts()
+        #region IEditableFixable
+        public void OpenEditView()
         {
             if(SelectedSupplier == null)
             {
@@ -193,15 +193,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(SupplyParts), nameof(SelectedOrderParts), nameof(SelectedSupplyParts), nameof(OrderParts), nameof(EditingModeVisivility));
         }
 
-        public void FixOrderParts()
+        public void FixEditing()
         {
             _editing = false;
             _partsText = string.Join(", ", OrderParts.Select(p => $"{p.PartsCode} x{p.Quantity}"));
 
             RaisePropertyChanged(nameof(EditingModeVisivility), nameof(OrderPartsText));
         }
+        #endregion // IEditableFixable
 
-        public void AppendToOrderParts()
+        #region IAddableRemovable
+        public void AppendToList()
         {
             // SupplyParts から OrderParts への移動
             var parts = SelectedSupplyParts;
@@ -215,7 +217,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(OrderParts), nameof(SelectedOrderParts), nameof(SupplyParts), nameof(SelectedSupplyParts));
         }
 
-        public void RemoveFromOrderParts()
+        public void RemoveFromList()
         {
             // OrderParts から SupplyParts への移動
             var parts = SelectedSupplyParts;
@@ -228,6 +230,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             RaisePropertyChanged(nameof(OrderParts), nameof(SelectedOrderParts), nameof(SupplyParts), nameof(SelectedSupplyParts));
         }
+        #endregion // IAddableRemovable
 
         public void OrderMe()
         {

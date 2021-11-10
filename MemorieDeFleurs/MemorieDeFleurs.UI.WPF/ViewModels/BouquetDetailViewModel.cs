@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetDetailViewModel : DetailViewModelBase
+    public class BouquetDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable
     {
         public static string Name { get; } = "商品詳細";
         public BouquetDetailViewModel() : base(Name) { }
@@ -104,10 +104,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region コマンド
         public ICommand FindImageSource { get; } = new FindImageSourceFileCommand();
-        public ICommand Edit { get; } = new EditPartsListCommand();
-        public ICommand Fix { get; } = new FixPartsListCommand();
-        public ICommand Append { get; } = new AddToListItemCommand();
-        public ICommand Remove { get; } = new RemoveFromListItemCommand();
+        public ICommand Edit { get; } = new EditCommand();
+        public ICommand Fix { get; } = new FixCommand();
+        public ICommand Append { get; } = new AppendToListCommand();
+        public ICommand Remove { get; } = new RemoveFromListCommand();
         #endregion // コマンド
 
         /// <summary>
@@ -164,7 +164,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if(result.ValidationErrors.Count > 0) { throw result; }
         }
 
-        public void EditPartsList()
+        #region IEditableFixable
+        public void OpenEditView()
         {
             _editing = true;
             var allParts = MemorieDeFleursUIModel.Instance.FindAllBouquetParts();
@@ -186,14 +187,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                  nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
         }
 
-        public void FixPartsList()
+        public void FixEditing()
         {
             _editing = false;
-            _leadTime = SelectedPartListItem.Max(p => p.LeadTime);
+            _leadTime = SelectedPartListItem.Count() > 0 ? SelectedPartListItem.Max(p => p.LeadTime) : 0;
             RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsListString), nameof(LeadTime));
         }
+        #endregion // IEditableFixable
 
-        public void AppendToPartsList()
+        #region IAddableRemovable
+        public void AppendToList()
         {
             var item = CurrentSelectedInSelectablePartsList;
 
@@ -207,7 +210,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                  nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
         }
 
-        public void RemoveFromPartsList()
+        public void RemoveFromList()
         {
             var item = CurrentSelectedInPartsList;
 
@@ -220,6 +223,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
                  nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
         }
+        #endregion // IAddableRemovbable
 
         public override void Update()
         {

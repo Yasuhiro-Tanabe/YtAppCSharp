@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class SupplierDetailViewModel : DetailViewModelBase
+    public class SupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable
     {
         public static string Name { get; } = "仕入先詳細";
 
@@ -137,10 +137,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Edit { get; } = new EditPartsListCommand();
-        public ICommand Fix { get; } = new FixPartsListCommand();
-        public ICommand Append { get; } = new AddToListItemCommand();
-        public ICommand Remove { get; } = new RemoveFromListItemCommand();
+        public ICommand Edit { get; } = new EditCommand();
+        public ICommand Fix { get; } = new FixCommand();
+        public ICommand Append { get; } = new AppendToListCommand();
+        public ICommand Remove { get; } = new RemoveFromListCommand();
         #endregion // コマンド
 
         public void Update(Supplier supplier)
@@ -212,7 +212,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if (result.ValidationErrors.Count > 0) { throw result; }
         }
 
-        public void EditSupplierParts()
+        #region IEditableFixable
+        public void OpenEditView()
         {
             PartsCandidate.Clear();
             var allParts = MemorieDeFleursUIModel.Instance.FindAllBouquetParts();
@@ -230,15 +231,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 nameof(EditingModeVisivility), nameof(ViewModeVisivility));
         }
 
-        public void FixSupplierParts()
+        public void FixEditing()
         {
             var parts = SupplingParts.Select(p => p.PartsCode);
             _editing = false;
 
             RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsText));
         }
+        #endregion // IEditableFixable
 
-        public void AppnedToSupplingParts()
+        #region IAddableRemovable
+        public void AppendToList()
         {
             var parts = SelectedCandidate;
 
@@ -252,7 +255,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 nameof(EditingModeVisivility), nameof(ViewModeVisivility));
         }
 
-        public void RemoveFromSupplingParts()
+        public void RemoveFromList()
         {
             var parts = SelectedSuppling;
 
@@ -265,6 +268,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(SupplingParts), nameof(SelectedSuppling), nameof(PartsCandidate), nameof(SelectedCandidate),
                 nameof(EditingModeVisivility), nameof(ViewModeVisivility));
         }
+        #endregion // IAddableRemovable
 
         public override void SaveToDatabase()
         {
