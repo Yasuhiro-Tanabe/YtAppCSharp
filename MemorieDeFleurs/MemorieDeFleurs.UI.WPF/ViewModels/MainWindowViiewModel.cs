@@ -67,8 +67,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 found = vm;
                 found.TabItemControlClosing += CloseTabItem;
 
-                if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening += OpenDetailView; }
-                if (found is BouquetPartsListViewModel) { (found as BouquetPartsListViewModel).DetailViewOpening += OpenDetailView; }
                 if (found is ListViewModelBase) { (found as ListViewModelBase).DetailViewOpening += OpenDetailView; }
             }
             CurrentItem = found;
@@ -85,8 +83,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 {
                     TabItemControlCollection.Remove(found);
 
-                    if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening -= OpenDetailView; }
-                    if (found is BouquetPartsListViewModel) { (found as BouquetPartsListViewModel).DetailViewOpening -= OpenDetailView; }
                     if (found is ListViewModelBase) { (found as ListViewModelBase).DetailViewOpening -= OpenDetailView; }
                 }
                 CurrentItem = TabItemControlCollection.FirstOrDefault();
