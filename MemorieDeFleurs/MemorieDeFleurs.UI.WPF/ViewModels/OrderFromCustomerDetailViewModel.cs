@@ -375,7 +375,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             else
             {
                 MemorieDeFleursUIModel.Instance.CancelOrderFromCustomer(_orderNo);
-                Cancel.Execute(this);
+                Clear.Execute(this);
             }
         }
 

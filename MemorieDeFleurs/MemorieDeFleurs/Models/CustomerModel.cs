@@ -768,6 +768,9 @@ namespace MemorieDeFleurs.Models
                     var part = context.BouquetParts.Find(item.PartsCode);
                     Parent.BouquetModel.ReturnToInventory(context, part, order.ShippingDate, item.Quantity);
                 }
+
+                context.OrderFromCustomers.Remove(order);
+                context.SaveChanges();
             }
             catch (Exception)
             {
@@ -845,6 +848,7 @@ namespace MemorieDeFleurs.Models
                 Parent.BouquetModel.ReturnToInventory(context, item.Part, order.ShippingDate, item.Quantity);
                 Parent.BouquetModel.UseFromInventory(context, item.Part, newShippingDate, item.Quantity);
             }
+            context.SaveChanges();
         }
         #endregion // お届け日変更
 
