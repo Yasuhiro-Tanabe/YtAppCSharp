@@ -25,6 +25,9 @@
     <Compile Update="Views\CustomerListControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\InvenetoryTransitionTablePreviewControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\InventoryTransitionTableControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -64,6 +67,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\CustomerListControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\InvenetoryTransitionTablePreviewControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\InventoryTransitionTableControl.xaml">

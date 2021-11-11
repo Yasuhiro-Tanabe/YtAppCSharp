@@ -101,7 +101,7 @@
                     <v:OrderFromCustomerDetailControl/>
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:InventoryTransitionTableViewModel}">
-                    <v:InventoryTransitionTableControl/>
+                    <v:InvenetoryTransitionTablePreviewControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>

@@ -1,23 +1,21 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
+using MemorieDeFleurs.UI.WPF.Views;
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
+using System.Printing;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Markup;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class InventoryTransitionTableViewModel : ListViewModelBase
+    public class InventoryTransitionTableViewModel : ListViewModelBase, IPrintable
     {
         public InventoryTransitionTableViewModel() : base("在庫推移表") { }
 
@@ -97,11 +95,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private DataTemplate _template;
 
+        /// <summary>
+        /// 在庫推移表に表示するデータ
+        /// </summary>
         public ObservableCollection<InventoryTransitionRowViewModel> InventoryTransitions { get; } = new ObservableCollection<InventoryTransitionRowViewModel>();
         #endregion
 
         #region コマンド
-        public ICommand Print { get; }
+        public ICommand Print { get; } = new PrintCommand();
         public ICommand UpdateTable { get; } = new InventoryTransitionTableChangedCommand();
         #endregion // コマンド
 
@@ -158,5 +159,35 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             Update();
         }
+
+        #region IPrintable
+        public void PrintDocument()
+        {
+            var control = new InventoryTransitionTableControl();
+            control.DataContext = this;
+            control.Margin = new Thickness(MmToPixcel(5.0), MmToPixcel(10.0), MmToPixcel(5.0), MmToPixcel(10.0));
+
+            var doc = new FixedDocument();
+            var page = new FixedPage();
+
+            page.Children.Add(control);
+            doc.Pages.Add(new PageContent() { Child = page });
+
+            PrintDocumentImageableArea area = null;
+            var writer = PrintQueue.CreateXpsDocumentWriter(ref area);
+
+            writer.Write(doc);
+        }
+
+        private double InchToPixcell(double inch)
+        {
+            return inch * 96.0;
+        }
+
+        private double MmToPixcel(double mm)
+        {
+            return InchToPixcell(mm / 24.5);
+        }
+        #endregion // IPrintable
     }
 }

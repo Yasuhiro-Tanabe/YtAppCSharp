@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows;
 
 using static MemorieDeFleurs.Models.InventoryTransitionTable;
 
@@ -25,9 +26,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public DateTime Date
         {
             get { return _date; }
-            set { SetProperty(ref _date, value); }
+            set
+            {
+                SetProperty(ref _date, value);
+                RaisePropertyChanged(nameof(DateText));
+            }
         }
         private DateTime _date;
+
+        public string DateText
+        {
+            get { return _date.ToString("yyyy.MM.dd"); }
+        }
 
         public int Arrived
         {
