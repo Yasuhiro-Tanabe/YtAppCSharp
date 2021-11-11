@@ -355,5 +355,12 @@ namespace MemorieDeFleurs.UI.WPF.Model
         }
         #endregion // お届け先の操作
 
+        #region
+        public InventoryTransitionTable CreateInventoryTransitionTable(string partsCode, DateTime from, DateTime to)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CreateInventoryTransitionTable(partsCode, from, (to - from).Days);
+        }
+        #endregion
     }
 }

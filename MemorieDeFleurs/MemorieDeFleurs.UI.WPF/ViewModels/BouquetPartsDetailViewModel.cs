@@ -13,6 +13,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     {
         public static string Name { get; } = "単品詳細";
         public BouquetPartsDetailViewModel() : base(Name) { }
+        public BouquetPartsDetailViewModel(BouquetPart parts) : base(Name) { Update(parts); }
 
         #region プロパティ
         /// <summary>

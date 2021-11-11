@@ -34,6 +34,9 @@
                         <MenuItem Header="保存..." Command="{Binding SQLiteSave}" CommandParameter="{Binding}"/>
                     </MenuItem>
                 </MenuItem>
+                <MenuItem Header="印刷...">
+                    <MenuItem Header="在庫推移表" Command="{Binding OpenInventoryTransactionView}" CommandParameter="{Binding}"/>
+                </MenuItem>
                 <MenuItem Header="終了" Command="{Binding Exit}" CommandParameter="{Binding}"/>
             </MenuItem>
             <MenuItem Header="仕入先">
@@ -96,6 +99,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:OrderFromCustomerDetailViewModel}">
                     <v:OrderFromCustomerDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:InventoryTransitionTableViewModel}">
+                    <v:InventoryTransitionTableControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>
