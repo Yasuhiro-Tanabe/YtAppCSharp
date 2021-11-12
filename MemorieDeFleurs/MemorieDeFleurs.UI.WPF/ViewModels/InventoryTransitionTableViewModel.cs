@@ -162,20 +162,47 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #region IPrintable
         public void PrintDocument()
         {
-            var control = new InventoryTransitionTableControl();
-            control.DataContext = this;
-            control.Margin = new Thickness(MmToPixcel(5.0), MmToPixcel(10.0), MmToPixcel(5.0), MmToPixcel(10.0));
+            if (string.IsNullOrWhiteSpace(BouquetPartsCode)) { throw new ApplicationException("印刷対象の花コードが指定されていません。"); }
+            if (ExpiryDate == 0) { throw new ApplicationException($"品質維持可能日数が0日です。{BouquetPartsCode} ({SelectedParts.PartsName}) の品質維持可能日数が設定されているか確認してください。"); }
+            try
+            {
+                var control = new InventoryTransitionTableControl();
+                control.DataContext = this;
+                control.Margin = new Thickness(MmToPixcel(5.0), MmToPixcel(10.0), MmToPixcel(5.0), MmToPixcel(10.0));
 
-            var doc = new FixedDocument();
-            var page = new FixedPage();
+                // control 内の在庫推移表 DataGrid を作り直すため PropertyChanged イベントを強制発行する。
+                RaisePropertyChanged(nameof(InventoryTransitions));
 
-            page.Children.Add(control);
-            doc.Pages.Add(new PageContent() { Child = page });
+                var doc = new FixedDocument();
+                var page = new FixedPage();
 
-            PrintDocumentImageableArea area = null;
-            var writer = PrintQueue.CreateXpsDocumentWriter(ref area);
+                page.Children.Add(control);
+                doc.Pages.Add(new PageContent() { Child = page });
 
-            writer.Write(doc);
+                PrintDocumentImageableArea area = null;
+                var writer = PrintQueue.CreateXpsDocumentWriter(ref area);
+                if(writer != null)
+                {
+                    writer.Write(doc);
+                    LogUtil.Info($"Inventory transaction table of parts {BouquetPartsCode} was printed.");
+                }
+                else
+                {
+                    // 何もしない： プリンタ選択ダイアログをキャンセルで閉じると
+                    // CreateXpsDocumentWriter() の戻り値が null になる。このときは印刷を行わずに処理正常終了する。
+                    LogUtil.Debug("Canceled printing.");
+                }
+
+                LogUtil.DEBUGLOG_BeginMethod();
+            }
+            catch(Exception ex)
+            {
+                LogUtil.Warn(ex);
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
         }
 
         private double InchToPixcell(double inch)
