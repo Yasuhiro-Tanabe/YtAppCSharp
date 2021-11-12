@@ -30,7 +30,7 @@ namespace MemorieDeFleurs.UI.WPF.Views
         {
             if(e.OldValue != null) { (e.OldValue as InventoryTransitionTableViewModel).PropertyChanged -= ChangeDataGridColumns; }
             if(e.NewValue != null) { (e.NewValue as InventoryTransitionTableViewModel).PropertyChanged += ChangeDataGridColumns; }
-            LogUtil.DEBULOG_MethodCalled($"{sender?.GetType()?.Name}, {e.Property.Name}[old={e.OldValue}, new={e.NewValue}]");
+            LogUtil.DEBUGLOG_MethodCalled($"{sender?.GetType()?.Name}, {e.Property.Name}[old={e.OldValue}, new={e.NewValue}]");
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace MemorieDeFleurs.UI.WPF.Views
                 InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = "当日残", Binding = new Binding("Remains[0]"), ElementStyle = style });
                 InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = "破棄", Binding = new Binding("Discarded") { Converter = converter }, ElementStyle = style });
 
-                LogUtil.DEBULOG_MethodCalled($"{sender.GetType().Name}, {args.PropertyName}",
+                LogUtil.DEBUGLOG_MethodCalled($"{sender.GetType().Name}, {args.PropertyName}",
                     $"{vm.BouquetPartsCode}, {vm.ExpiryDate}: {string.Join(" ,", InventoryTransitionTable.Columns.Select(col => col.Header))}");
             }
         }

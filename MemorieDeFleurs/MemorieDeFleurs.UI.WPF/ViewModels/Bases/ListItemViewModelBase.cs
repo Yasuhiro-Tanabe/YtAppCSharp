@@ -56,14 +56,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
 
         public void RemoveMe()
         {
-            LogUtil.DEBULOG_MethodCalled();
+            LogUtil.DEBUGLOG_MethodCalled();
             SelectedItemRemoving?.Invoke(this, null);
             RaisePropertyChanged(nameof(RemoveMe));
         }
 
         public void OpenDetailView()
         {
-            LogUtil.DEBULOG_MethodCalled();
+            LogUtil.DEBUGLOG_MethodCalled();
             DetailViewOpening?.Invoke(this, null);
         }
 

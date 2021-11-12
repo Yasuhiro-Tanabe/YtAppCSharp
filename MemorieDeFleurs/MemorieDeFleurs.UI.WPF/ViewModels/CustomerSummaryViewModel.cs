@@ -42,7 +42,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             _id = customer.ID;
             _name = customer.Name;
             RaisePropertyChanged(nameof(CustomerID), nameof(CustomerName));
-            LogUtil.DEBULOG_MethodCalled($"#{CustomerID}: {CustomerName}");
+            LogUtil.DEBUGLOG_MethodCalled($"#{CustomerID}: {CustomerName}");
         }
     }
 }
