@@ -1,6 +1,4 @@
-﻿using MemorieDeFleurs.UI.WPF.ViewModels;
-
-namespace MemorieDeFleurs.UI.WPF.Commands
+﻿namespace MemorieDeFleurs.UI.WPF.Commands
 {
     internal class AppendToListCommand : CommandBase
     {
