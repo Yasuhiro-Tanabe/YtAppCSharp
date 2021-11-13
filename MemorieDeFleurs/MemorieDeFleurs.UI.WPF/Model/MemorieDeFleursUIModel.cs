@@ -261,19 +261,19 @@ namespace MemorieDeFleurs.UI.WPF.Model
             return Model.SupplierModel.FindOrder(id);
         }
 
-        public IEnumerable<OrdersToSupplier> FindAllOrders()
+        public IEnumerable<OrdersToSupplier> FindAllOrdersToSupplier()
         {
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             return Model.SupplierModel.FindAllOrders();
         }
 
-        public IEnumerable<OrdersToSupplier> FindAllOrders(DateTime from, DateTime to)
+        public IEnumerable<OrdersToSupplier> FindAllOrdersToSupplier(DateTime from, DateTime to)
         {
             if(DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             return Model.SupplierModel.FindAllOrders(from, to);
         }
 
-        public IEnumerable<OrdersToSupplier> FindAllOrders(DateTime from, DateTime to, int supplier)
+        public IEnumerable<OrdersToSupplier> FindAllOrdersToSupplier(DateTime from, DateTime to, int supplier)
         {
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             return Model.SupplierModel.FindAllOrders(from, to, supplier);
@@ -298,5 +298,69 @@ namespace MemorieDeFleurs.UI.WPF.Model
         }
         #endregion // 仕入先発注情報の操作
 
+        #region 得意先受注情報の操作
+        public OrderFromCustomer FindOrdersFromCustomer(string orderNo)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.FindOrder(orderNo);
+        }
+        public IEnumerable<OrderFromCustomer> FindAllOrdersFromCustomer()
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.FindAllOrders();
+        }
+
+        public IEnumerable<OrderFromCustomer> FindAllOrdersFromCustomer(DateTime from, DateTime to)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.FindAllOrders(from, to);
+        }
+
+        public IEnumerable<OrderFromCustomer> FindAllOrdersFromCustomer(DateTime from, DateTime to, int customerID)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.FindAllOrders(from, to, customerID);
+        }
+
+        public string OrderFromCustomer(OrderFromCustomer order, DateTime arrivalDate)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.Order(order.OrderDate, order.Bouquet, order.ShippingAddress, arrivalDate);
+        }
+
+        public void CancelOrderFromCustomer(string orderNo)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.CustomerModel.CancelOrder(orderNo);
+        }
+
+        public void ChangeArrivalDateOfOrderFromCustomer(string orderNo, DateTime arrivalDate)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.CustomerModel.ChangeArrivalDate(DateTime.Today, orderNo, arrivalDate);
+        }
+        #endregion // 得意先受注情報の操作
+
+        #region お届け先の操作
+        public IEnumerable<ShippingAddress> FindAllShippingAddressOfCustomer(int customer)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.FindAllShippingAddressesOfCustomer(customer);
+        }
+
+        public ShippingAddress Save(ShippingAddress address)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.Save(address);
+        }
+        #endregion // お届け先の操作
+
+        #region
+        public InventoryTransitionTable CreateInventoryTransitionTable(string partsCode, DateTime from, DateTime to)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CreateInventoryTransitionTable(partsCode, from, (to - from).Days);
+        }
+        #endregion
     }
 }

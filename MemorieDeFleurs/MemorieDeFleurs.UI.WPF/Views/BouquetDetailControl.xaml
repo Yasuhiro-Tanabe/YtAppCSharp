@@ -3,9 +3,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:h="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="100">
-    <Grid Margin="15, 5">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <h:VisibilityConverter x:Key="positiveCovnerter"/>
+            <h:NegativeVisivilityConverter x:Key="negativeConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Style="{StaticResource ControlBorderStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
@@ -21,90 +31,36 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="花束コード："/>
-        <TextBox Grid.Row="0" Grid.Column="1"
-                 Margin="5,1"
-                 TabIndex="1"
-                 VerticalAlignment="Center" VerticalContentAlignment="Center"
-                 Text="{Binding BouquetCode}"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="花束コード："/>
+        <TextBox Grid.Row="0" Grid.Column="1" TabIndex="1" Text="{Binding BouquetCode}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3" Orientation="Horizontal"
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button Margin="5, 1"
-                    TabIndex="999"
-                    Content="検索..."
-                    Command="{Binding Reload}" CommandParameter="{Binding}"/>
-            <Button Margin="5, 1"
-                    TabIndex="1000"
-                    Content="登録"
-                    Command="{Binding Register}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="検索..." Command="{Binding Reload}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="登録" Command="{Binding Register}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="花束名称："/>
-        <TextBox Grid.Row="1" Grid.Column="1"
-                 Margin="5,1"
-                 TabIndex="2"
-                 VerticalAlignment="Center" VerticalContentAlignment="Center"
-                 Text="{Binding BouquetName}"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="花束名称："/>
+        <TextBox Grid.Row="1" Grid.Column="1" TabIndex="2" Text="{Binding BouquetName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="イメージファイル名："/>
-        <TextBox Grid.Row="2" Grid.Column="1"
-                 Margin="5,1"
-                 TabIndex="3"
-                 VerticalAlignment="Center" VerticalContentAlignment="Center"
-                 Text="{Binding ImageFileName}"/>
-        <Button Grid.Row="2" Grid.Column="2"
-                Margin="5,1"
-                TabIndex="1001"
-                HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                Content="..."
-                Command="{Binding FindImageSource}" CommandParameter="{Binding}"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="イメージファイル名："/>
+        <TextBox Grid.Row="2" Grid.Column="1" TabIndex="3" Text="{Binding ImageFileName}"/>
+        <Button Grid.Row="2" Grid.Column="2" TabIndex="1001" Content="..." Command="{Binding FindImageSource}" CommandParameter="{Binding}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="受注リードタイム"/>
-        <TextBlock Grid.Row="3" Grid.Column="1"
-                   Margin="0,0,5,0"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Right"
-                   Text="{Binding LeadTime}"/>
-        <TextBlock Grid.Row="3" Grid.Column="2"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Left"
-                   Text="日"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="受注リードタイム"/>
+        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding LeadTime}" Style="{StaticResource NumericTextBlock}"/>
+        <TextBlock Grid.Row="3" Grid.Column="2" Text="日"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="商品構成："/>
-        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
-                   VerticalAlignment="Center"
-                   Text="{Binding PartsListString}" TextWrapping="Wrap"/>
-        <Button Grid.Row="4" Grid.Column="3"
-                Margin="5, 1, 15,1"
-                HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                Visibility="{Binding EditingModeVisivility}"
-                Content="確定"
-                Command="{Binding Fix}" CommandParameter="{Binding}"/>
-        <Button Grid.Row="4" Grid.Column="3"
-                Margin="5, 1, 15, 1"
-                HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                Visibility="{Binding ViewModeVisivility}"
-                Content="編集"
-                Command="{Binding Edit}" CommandParameter="{Binding}"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="商品構成："/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding PartsListText}" Style="{StaticResource MultiLineTextBlock}"/>
+        <Button Grid.Row="4" Grid.Column="3" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Mode=OneWay,Converter={StaticResource positiveCovnerter}}"/>
+        <Button Grid.Row="4" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Mode=OneWay, Converter={StaticResource negativeConverter}}"/>
 
         <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4"
               Margin="10"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-              Visibility="{Binding EditingModeVisivility}">
+              Visibility="{Binding IsEditing, Mode=OneWay, Converter={StaticResource positiveCovnerter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20px"/>
                 <RowDefinition Height="220px"/>
@@ -115,18 +71,10 @@
                 <ColumnDefinition Width="200pt"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0"
-                       VerticalAlignment="Center"
-                       Text="現在の商品構成"/>
-            <TextBlock Grid.Row="0" Grid.Column="2"
-                       VerticalAlignment="Center"
-                       Text="単品リスト"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="現在の商品構成"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="単品リスト"/>
             
-            <ListView Grid.Row="1" Grid.Column="0"
-                      Margin="5"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                      ItemsSource="{Binding SelectedPartListItem}" SelectedItem="{Binding CurrentSelectedInPartsList}"
-                      SelectionMode="Single">
+            <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding SelectedPartsList}" SelectedItem="{Binding SelectedParts}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -137,41 +85,20 @@
                                 <ColumnDefinition Width="120pt"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding PartsCode}"/>
-                            <TextBox Grid.Column="1"
-                                     VerticalAlignment="Center" HorizontalAlignment="Stretch"
-                                     TextAlignment="Right"
-                                     Text="{Binding Quantity}"/>
-                            <TextBlock Grid.Column="2"
-                                       VerticalAlignment="Center"
-                                       Text="本"/>
-                            <TextBlock Grid.Column="3"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding PartsName}"/>
+                            <TextBlock Grid.Column="0" Text="{Binding PartsCode}"/>
+                            <TextBox Grid.Column="1" Text="{Binding Quantity}" Style="{StaticResource NumericTextBox}"/>
+                            <TextBlock Grid.Column="2" Text="本"/>
+                            <TextBlock Grid.Column="3" Text="{Binding PartsName}"/>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
             <StackPanel Grid.Row="1" Grid.Column="1"
                         Orientation="Vertical">
-                <Button Margin="20,50,20,0"
-                        HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                        VerticalAlignment="Center" VerticalContentAlignment="Center"
-                        Content="＜"
-                        Command="{Binding Append}" CommandParameter="{Binding}"/>
-                <Button Margin="20,10,20,0"
-                        HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                        VerticalAlignment="Center" VerticalContentAlignment="Center"
-                        Content="＞"
-                        Command="{Binding Remove}" CommandParameter="{Binding}"/>
+                <Button Content="＜" Command="{Binding Append}" CommandParameter="{Binding}" Style="{StaticResource AppendButton}"/>
+                <Button Content="＞" Command="{Binding Remove}" CommandParameter="{Binding}" Style="{StaticResource RemoveButton}"/>
             </StackPanel>
-            <ListView Grid.Row="1" Grid.Column="2"
-                      Margin="5"
-                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                      ItemsSource="{Binding SelectableParts}" SelectedItem="{Binding CurrentSelectedInSelectablePartsList}"
-                      SelectionMode="Single">
+            <ListView Grid.Row="1" Grid.Column="2" ItemsSource="{Binding CandidatePartsList}" SelectedItem="{Binding CandidateParts}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -180,13 +107,8 @@
                                 <ColumnDefinition Width="120px"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding PartsCode}"/>
-                            <TextBlock Grid.Column="1"
-                                       Margin="10,0,0,0"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding PartsName}"/>
+                            <TextBlock Grid.Column="0" Text="{Binding PartsCode}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding PartsName}"/>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>

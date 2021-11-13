@@ -25,6 +25,18 @@
     <Compile Update="Views\CustomerListControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\InvenetoryTransitionTablePreviewControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\InventoryTransitionTableControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\OrderFromCustomerDetailControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\OrderFromCustomerListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\OrderToSupplierDetailControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -57,13 +69,28 @@
     <Page Update="Views\CustomerListControl.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Views\InvenetoryTransitionTablePreviewControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\InventoryTransitionTableControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\OrderFromCustomerDetailControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\OrderFromCustomerListControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\OrderToSupplierDetailControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\OrderToSupplierListControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\Style.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\SupplierDetailControl.xaml">

@@ -7,6 +7,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class CustomerSummaryViewModel : ListItemViewModelBase
     {
+        public CustomerSummaryViewModel() : base(new OpenCustomerDetailViewCommand()) { }
+
         public CustomerSummaryViewModel(Customer customer) : base(new OpenCustomerDetailViewCommand())
         {
             Update(customer);
@@ -37,10 +39,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void Update(Customer customer)
         {
             Update(customer.ID.ToString());
-            _id = customer.ID;
-            _name = customer.Name;
-            RaisePropertyChanged(nameof(CustomerID), nameof(CustomerName));
-            LogUtil.DEBULOG_MethodCalled($"#{CustomerID}: {CustomerName}");
+            CustomerID = customer.ID;
+            CustomerName = customer.Name;
+            LogUtil.DEBUGLOG_MethodCalled($"#{CustomerID}: {CustomerName}");
         }
     }
 }

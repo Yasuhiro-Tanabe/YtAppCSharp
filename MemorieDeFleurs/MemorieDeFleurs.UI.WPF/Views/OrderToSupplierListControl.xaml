@@ -7,15 +7,22 @@
              xmlns:h="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <h:VisibilityConverter x:Key="positiveCovnerter"/>
+            <h:NegativeVisivilityConverter x:Key="negativeConverter"/>
+            <h:NameTitleConverter x:Key="titleConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction Command="{Binding Reload}" CommandParameter="{Binding}"/>
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <UserControl.Resources>
-        <h:NegativeVisivilityConverter x:Key="negativeVisivilityConverter"/>
-    </UserControl.Resources>
-    <Grid Margin="10">
+    <Grid Style="{StaticResource ControlBorderStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="*"/>
@@ -31,45 +38,22 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0"
-                   VerticalAlignment="Center"
-                   Text="発注日："/>
-        <DatePicker Grid.Row="0" Grid.Column="1"
-                    VerticalAlignment="Center"
-                    SelectedDate="{Binding From}"/>
-        <TextBlock Grid.Row="0" Grid.Column="2"
-                   VerticalAlignment="Center"
-                   Text="から"/>
-        <DatePicker Grid.Row="0" Grid.Column="3"
-                    VerticalAlignment="Center"
-                    SelectedDate="{Binding To}"/>
-        <TextBlock Grid.Row="0" Grid.Column="4"
-                   VerticalAlignment="Center"
-                   Text="まで"/>
-        <TextBlock Grid.Row="0" Grid.Column="5"
-                   VerticalAlignment="Center"
-                   Text="仕入先："/>
-        <ComboBox Grid.Row="0" Grid.Column="6"
-                  VerticalAlignment="Center"
-                  ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="発注日："/>
+        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding From}"/>
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="から"/>
+        <DatePicker Grid.Row="0" Grid.Column="3" SelectedDate="{Binding To}"/>
+        <TextBlock Grid.Row="0" Grid.Column="4" Text="まで"/>
+        <TextBlock Grid.Row="0" Grid.Column="5" Text="仕入先："/>
+        <ComboBox Grid.Row="0" Grid.Column="6" ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding SupplierName}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Grid.Row="0" Grid.Column="7"
-                Margin="5,1"
-                HorizontalAlignment="Left" VerticalAlignment="Center"
-                Content="更新"
-                Command="{Binding Reload}" CommandParameter="{Binding}"/>
+        <Button Grid.Row="0" Grid.Column="7" Content="更新" Command="{Binding Reload}" CommandParameter="{Binding}"/>
 
-        <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="8"
-                  Margin="5"
-                  BorderBrush="AliceBlue" BorderThickness="2"
-                  ScrollViewer.VerticalScrollBarVisibility="Visible"
-                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                  ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}">
+        <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="8" ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}" Style="{StaticResource SummaryList}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
                     <i:InvokeCommandAction Command="{Binding Selected}" PassEventArgsToCommand="True"/>
@@ -87,40 +71,12 @@
                             <ColumnDefinition Width="100px"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0"
-                                   Margin="5,1"
-                                   VerticalAlignment="Center"
-                                   Text="{Binding OrderID}"/>
-                        <TextBlock Grid.Column="1"
-                                   Margin="5,1"
-                                   VerticalAlignment="Center"
-                                   Text="{Binding SupplierName}"/>
-                        <TextBlock Grid.Column="2"
-                                   Margin="5,1"
-                                   VerticalAlignment="Center"
-                                   Text="{Binding ArrivalDateText}"/>
-                        
-                        <TextBlock Grid.Column="3" Grid.ColumnSpan="3"
-                                   Margin="5,1"
-                                   VerticalAlignment="Center"
-                                   Visibility="{Binding ActionVisivility, Converter={StaticResource negativeVisivilityConverter}}"
-                                   Text="{Binding OrderParts}" TextWrapping="Wrap"/>
-
-                        <Button Grid.Column="4"
-                                Margin="5,1"
-                                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                                HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                                Content="詳細..."
-                                Visibility="{Binding ActionVisivility}"
-                                Command="{Binding Detail}" CommandParameter="{Binding}"/>
-
-                        <Button Grid.Column="5"
-                                Margin="5,1,20,1"
-                                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                                HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                                Content="削除"
-                                Visibility="{Binding ActionVisivility}"
-                                Command="{Binding Remove}" CommandParameter="{Binding}"/>
+                        <TextBlock Grid.Column="0" Text="{Binding OrderNo}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding SupplierName, Converter={StaticResource titleConverter}}"/>
+                        <TextBlock Grid.Column="2" Text="{Binding ArrivalDateText}"/>
+                        <TextBlock Grid.Column="3" Grid.ColumnSpan="3" Text="{Binding OrderParts}" Style="{StaticResource MultiLineTextBlock}" Visibility="{Binding IsActionVisible, Converter={StaticResource negativeConverter}}" />
+                        <Button Grid.Column="4" Content="詳細..." Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
+                        <Button Grid.Column="5" Content="削除" Command="{Binding Remove}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
 
                     </Grid>
                 </DataTemplate>

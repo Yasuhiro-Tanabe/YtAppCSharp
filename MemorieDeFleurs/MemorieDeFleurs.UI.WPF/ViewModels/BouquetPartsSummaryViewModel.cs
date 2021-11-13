@@ -13,12 +13,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public void Update(BouquetPart part)
         {
-            _code = part.Code;
-            _name = part.Name;
-            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName));
+            PartsCode = part.Code;
+            PartsName = part.Name;
         }
 
         #region プロパティ
+        /// <summary>
+        /// 花コード
+        /// </summary>
         public string PartsCode
         {
             get { return _code; }
@@ -26,6 +28,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private string _code;
 
+        /// <summary>
+        /// 単品名称
+        /// </summary>
         public string PartsName
         {
             get { return _name; }

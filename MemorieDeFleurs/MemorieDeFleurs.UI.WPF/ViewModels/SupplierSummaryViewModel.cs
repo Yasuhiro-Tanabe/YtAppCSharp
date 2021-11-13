@@ -7,7 +7,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     public class SupplierSummaryViewModel : ListItemViewModelBase
     {
         public SupplierSummaryViewModel() : base(new OpenSupplierDetailViewCommand()) { }
-        public SupplierSummaryViewModel(Supplier supplier) :base(new OpenSupplierDetailViewCommand())
+        public SupplierSummaryViewModel(Supplier supplier) : base(new OpenSupplierDetailViewCommand())
         {
             Update(supplier);
         }
@@ -39,8 +39,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void Update(Supplier supplier)
         {
             Update(supplier.Code.ToString());
-            _code = supplier.Code;
-            _name = supplier.Name;
+            SupplierCode = supplier.Code;
+            SupplierName = supplier.Name;
             RaisePropertyChanged(nameof(SupplierCode), nameof(SupplierName));
         }
     }

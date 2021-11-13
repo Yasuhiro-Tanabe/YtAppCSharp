@@ -16,13 +16,19 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region プロパティ
-        public string OrderID
+        /// <summary>
+        /// 発注番号
+        /// </summary>
+        public string OrderNo
         {
-            get { return _id; }
-            set { SetProperty(ref _id, value); }
+            get { return _no; }
+            set { SetProperty(ref _no, value); }
         }
-        private string _id;
+        private string _no;
 
+        /// <summary>
+        /// 仕入先名称
+        /// </summary>
         public string SupplierName
         {
             get { return _supplier; }
@@ -30,6 +36,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private string _supplier;
 
+        /// <summary>
+        /// 発注明細 (一覧表示用)
+        /// </summary>
         public string OrderParts
         {
             get { return _parts; }
@@ -37,39 +46,58 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private string _parts;
 
+        /// <summary>
+        /// 納品予定日 (表示用)
+        /// </summary>
         public string ArrivalDateText
         {
             get { return _arrival.ToString("yyyyMMdd"); }
         }
+
+        /// <summary>
+        /// 納品予定日
+        /// </summary>
         public DateTime ArrivalDate
         {
             get { return _arrival; }
-            set { SetProperty(ref _arrival, value); }
+            set
+            {
+                SetProperty(ref _arrival, value);
+                RaisePropertyChanged(nameof(ArrivalDateText));
+            }
         }
         private DateTime _arrival;
 
+        /// <summary>
+        /// 発注日 (表示用)
+        /// </summary>
         public string OrderedDateText
         {
             get { return _ordered.ToString("yyyyMMdd"); }
         }
 
+        /// <summary>
+        /// 発注日
+        /// </summary>
         public DateTime OrderedDate
         {
             get { return _ordered; }
-            set { SetProperty(ref _ordered, value); }
+            set
+            {
+                SetProperty(ref _ordered, value);
+                RaisePropertyChanged(nameof(OrderedDateText));
+            }
         }
         private DateTime _ordered;
         #endregion // プロパティ
 
         public void Update(OrdersToSupplier order)
         {
-            _id = order.ID;
-            _supplier = MemorieDeFleursUIModel.Instance.FindSupplier(order.Supplier).Name;
-            _parts = string.Join(", ", order.Details.Select(i => $"{i.PartsCode} x{i.LotCount}"));
-            _arrival = order.DeliveryDate;
-            _ordered = order.OrderDate;
-
-            RaisePropertyChanged(nameof(ActionVisivility), nameof(OrderID), nameof(SupplierName), nameof(OrderParts), nameof(ArrivalDate));
+            OrderNo = order.ID;
+            SupplierName = MemorieDeFleursUIModel.Instance.FindSupplier(order.Supplier).Name;
+            OrderParts = string.Join(", ", order.Details.Select(i => $"{i.PartsCode} x{i.LotCount}"));
+            ArrivalDate = order.DeliveryDate;
+            OrderedDate = order.OrderDate;
         }
     }
 }

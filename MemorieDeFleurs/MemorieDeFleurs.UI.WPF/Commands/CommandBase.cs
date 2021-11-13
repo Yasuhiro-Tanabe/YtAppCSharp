@@ -47,6 +47,11 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             Func<object, bool> checker;
             if (Checkers.TryGetValue(type, out checker)) { return checker; }
 
+            foreach (var i in type.GetInterfaces())
+            {
+                if(Checkers.TryGetValue(i, out checker)) { return checker; }
+            }
+
             return FindChecker(type.BaseType);
         }
 
@@ -89,6 +94,11 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
             Action<object> action;
             if(Actions.TryGetValue(type, out action)) { return action; }
+
+            foreach(var i in type.GetInterfaces())
+            {
+                if(Actions.TryGetValue(i, out action)) { return action; }
+            }
 
             return FindAction(type.BaseType);
         }

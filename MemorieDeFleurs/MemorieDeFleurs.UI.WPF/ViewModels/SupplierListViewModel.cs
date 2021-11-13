@@ -11,9 +11,20 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public SupplierListViewModel() : base("仕入先一覧") { }
 
         #region プロパティ
+        /// <summary>
+        /// 全仕入先の一覧
+        /// </summary>
         public ObservableCollection<SupplierSummaryViewModel> Suppliers { get; } = new ObservableCollection<SupplierSummaryViewModel>();
 
-        public SupplierSummaryViewModel CurrentSupplier { get; set; }
+        /// <summary>
+        /// 現在選択中の仕入先
+        /// </summary>
+        public SupplierSummaryViewModel CurrentSupplier
+        {
+            get { return _supplier; }
+            set { SetProperty(ref _supplier, value); }
+        }
+        private SupplierSummaryViewModel _supplier;
         #endregion // プロパティ
 
         public override void LoadItems()

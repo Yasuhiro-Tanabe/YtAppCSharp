@@ -36,7 +36,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 現在選択中のタブアイテム
         /// </summary>
-        public TabItemControlViewModelBase CurrentItem { get; set; }
+        public TabItemControlViewModelBase CurrentItem
+        {
+            get { return _item; }
+            set { SetProperty(ref _item, value); }
+        }
+        private TabItemControlViewModelBase _item;
         #endregion // プロパティ
 
         #region コマンド
@@ -51,6 +56,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand OpenCustomerDetailView { get; } = new OpenCustomerDetailViewCommand();
         public ICommand OpenOrderToSupplierListView { get; } = new OpenOrderToSupplierListViewCommand();
         public ICommand OpenOrderToSupplierDetailView { get; } = new OpenOrderToSupplierDetailViewCommand();
+        public ICommand OpenOrderFromCustomerListView { get; } = new OpenOrderFromCustomerListViewCommand();
+        public ICommand OpenOrderFromCustomerDetailView { get; } = new OpenOrderFromCustomerDetailViewCommand();
+        public ICommand OpenInventoryTransactionView { get; } = new OpenInventoryTransitionViewCommand();
         public ICommand SQLiteLoad { get; } = new SQLiteOpenDbFileCommand();
         public ICommand SQLiteSave { get; } = new SQLiteSaveToDbFileCommand();
         #endregion // コマンド
@@ -65,12 +73,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 found = vm;
                 found.TabItemControlClosing += CloseTabItem;
 
-                if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening += OpenDetailView; }
-                if (found is BouquetPartsListViewModel) { (found as BouquetPartsListViewModel).DetailViewOpening += OpenDetailView; }
                 if (found is ListViewModelBase) { (found as ListViewModelBase).DetailViewOpening += OpenDetailView; }
             }
             CurrentItem = found;
-            RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
         }
 
         public void CloseTabItem(object sender, EventArgs unused)
@@ -83,12 +88,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 {
                     TabItemControlCollection.Remove(found);
 
-                    if (found is BouquetListViewModel) { (found as BouquetListViewModel).DetailViewOpening -= OpenDetailView; }
-                    if (found is BouquetPartsListViewModel) { (found as BouquetPartsListViewModel).DetailViewOpening -= OpenDetailView; }
                     if (found is ListViewModelBase) { (found as ListViewModelBase).DetailViewOpening -= OpenDetailView; }
                 }
                 CurrentItem = TabItemControlCollection.FirstOrDefault();
-                RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
                 vm.TabItemControlClosing -= CloseTabItem;
             }
         }
@@ -106,7 +108,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         private void RefreshLogMessage(object unused1, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName.Equals(nameof(LogUtil.Appender.Notification)))
+            if (args.PropertyName == nameof(LogUtil.Appender.Notification))
             {
                 RaisePropertyChanged(nameof(Message));
             }

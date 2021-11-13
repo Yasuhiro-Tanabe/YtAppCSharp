@@ -9,12 +9,11 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class SupplierDetailViewModel : DetailViewModelBase
+    public class SupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable
     {
         public static string Name { get; } = "仕入先詳細";
 
@@ -112,7 +111,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 選択中の仕入可能な単品
         /// </summary>
-        public SupplierPartsViewModel SelectedSuppling { get; set; }
+        public SupplierPartsViewModel SelectedSuppling
+        {
+            get { return _suppling; }
+            set { SetProperty(ref _suppling, value); }
+        }
+        private SupplierPartsViewModel _suppling;
 
         /// <summary>
         /// 仕入可能な単品候補一覧
@@ -122,36 +126,40 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 選択中の仕入可能な単品候補
         /// </summary>
-        public SupplierPartsViewModel SelectedCandidate { get; set; }
+        public SupplierPartsViewModel SelectedCandidate
+        {
+            get { return _candidate; }
+            set { SetProperty(ref _candidate, value); }
+        }
+        private SupplierPartsViewModel _candidate;
 
         /// <summary>
-        /// 商品構成編集中に表示するコントロールの可視性
+        /// 商品構成編集中かどうか
         /// </summary>
-        public Visibility EditingModeVisivility { get { return _editing ? Visibility.Visible : Visibility.Collapsed; } }
-
-        /// <summary>
-        /// 商品構成編集中でないときに表示するコントロールの可視性
-        /// </summary>
-        public Visibility ViewModeVisivility { get { return _editing ? Visibility.Collapsed : Visibility.Visible; } }
+        public bool IsEditing
+        {
+            get { return _editing; }
+            private set { SetProperty(ref _editing, value); }
+        }
         private bool _editing = false;
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Edit { get; } = new EditPartsListCommand();
-        public ICommand Fix { get; } = new FixPartsListCommand();
-        public ICommand Append { get; } = new AddToListItemCommand();
-        public ICommand Remove { get; } = new RemoveFromListItemCommand();
+        public ICommand Edit { get; } = new EditCommand();
+        public ICommand Fix { get; } = new FixCommand();
+        public ICommand Append { get; } = new AppendToListCommand();
+        public ICommand Remove { get; } = new RemoveFromListCommand();
         #endregion // コマンド
 
         public void Update(Supplier supplier)
         {
-            _code = supplier.Code;
-            _name = supplier.Name;
-            _address1 = supplier.Address1;
-            _address2 = supplier.Address2;
-            _email = supplier.EmailAddress;
-            _tel = supplier.Telephone;
-            _fax = supplier.Fax;
+            SupplierCode = supplier.Code;
+            SupplierName = supplier.Name;
+            Address1 = supplier.Address1;
+            Address2 = supplier.Address2;
+            EmailAddress = supplier.EmailAddress;
+            TelephoneNumber = supplier.Telephone;
+            FaxNumber = supplier.Fax;
 
             SupplingParts.Clear();
             foreach(var parts in supplier.SupplyParts)
@@ -163,24 +171,20 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             PartsCandidate.Clear();
             SelectedCandidate = null;
 
-            _editing = false;
-
-            RaisePropertyChanged(nameof(SupplierCode), nameof(SupplierName), nameof(Address1), nameof(Address2),
-                nameof(EmailAddress), nameof(TelephoneNumber), nameof(FaxNumber), nameof(PartsText),
-                nameof(EditingModeVisivility), nameof(ViewModeVisivility));
+            IsEditing = false;
 
             IsDirty = false;
         }
 
         public override void Update()
         {
-            if(_code == 0)
+            if(SupplierCode == 0)
             {
                 throw new ApplicationException($"仕入先コードが指定されていません。");
             }
             else
             {
-                var supplier = MemorieDeFleursUIModel.Instance.FindSupplier(_code);
+                var supplier = MemorieDeFleursUIModel.Instance.FindSupplier(SupplierCode);
                 if(supplier == null)
                 {
                     throw new ApplicationException($"該当する仕入先がありません。");
@@ -196,14 +200,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             var result = new ValidateFailedException();
 
-            if(string.IsNullOrWhiteSpace(_name))
+            if(string.IsNullOrWhiteSpace(SupplierName))
             {
                 result.Append("仕入先名称が入力されていません。");
             }
-            if(string.IsNullOrWhiteSpace(_address1))
+            if(string.IsNullOrWhiteSpace(Address1))
             {
                 result.Append("住所1が入力されていません。");
-                if(!string.IsNullOrWhiteSpace(_address2))
+                if(!string.IsNullOrWhiteSpace(Address2))
                 {
                     result.Append("住所1を先に入力してください。");
                 }
@@ -212,11 +216,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if (result.ValidationErrors.Count > 0) { throw result; }
         }
 
-        public void EditSupplierParts()
+        #region IEditableFixable
+        public void OpenEditView()
         {
             PartsCandidate.Clear();
-            var allParts = MemorieDeFleursUIModel.Instance.FindAllBouquetParts();
-            foreach (var parts in allParts)
+            foreach (var parts in MemorieDeFleursUIModel.Instance.FindAllBouquetParts())
             {
                 if (SupplingParts.SingleOrDefault(p => p.PartsCode == parts.Code) == null)
                 {
@@ -224,21 +228,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     PartsCandidate.Add(new SupplierPartsViewModel(parts));
                 }
             }
-            _editing = true;
-
-            RaisePropertyChanged(nameof(SupplingParts), nameof(SelectedSuppling), nameof(PartsCandidate), nameof(SelectedCandidate),
-                nameof(EditingModeVisivility), nameof(ViewModeVisivility));
+            IsEditing = true;
         }
 
-        public void FixSupplierParts()
+        public void FixEditing()
         {
-            var parts = SupplingParts.Select(p => p.PartsCode);
-            _editing = false;
-
-            RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsText));
+            RaisePropertyChanged(nameof(PartsText));
+            IsEditing = false;
         }
+        #endregion // IEditableFixable
 
-        public void AppnedToSupplingParts()
+        #region IAddableRemovable
+        public void AppendToList()
         {
             var parts = SelectedCandidate;
 
@@ -247,12 +248,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             SelectedCandidate = null;
             PartsCandidate.Remove(parts);
-
-            RaisePropertyChanged(nameof(SupplingParts), nameof(SelectedSuppling), nameof(PartsCandidate), nameof(SelectedCandidate),
-                nameof(EditingModeVisivility), nameof(ViewModeVisivility));
         }
 
-        public void RemoveFromSupplingParts()
+        public void RemoveFromList()
         {
             var parts = SelectedSuppling;
 
@@ -261,10 +259,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             SelectedSuppling = null;
             SupplingParts.Remove(parts);
-
-            RaisePropertyChanged(nameof(SupplingParts), nameof(SelectedSuppling), nameof(PartsCandidate), nameof(SelectedCandidate),
-                nameof(EditingModeVisivility), nameof(ViewModeVisivility));
         }
+        #endregion // IAddableRemovable
 
         public override void SaveToDatabase()
         {
@@ -303,6 +299,25 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 LogUtil.DEBUGLOG_EndMethod();
             }
+        }
+
+        public override void ClearProperties()
+        {
+            SupplierCode = 0;
+            SupplierName = string.Empty;
+            Address1 = string.Empty;
+            Address2 = string.Empty;
+            EmailAddress = string.Empty;
+            FaxNumber = string.Empty;
+            TelephoneNumber = string.Empty;
+            IsEditing = false;
+
+            SupplingParts.Clear();
+            PartsCandidate.Clear();
+            SelectedCandidate = null;
+            SelectedSuppling = null;
+
+            IsDirty = false;
         }
     }
 }

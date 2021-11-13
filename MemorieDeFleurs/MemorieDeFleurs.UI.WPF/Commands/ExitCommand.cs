@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.UI.WPF;
-
+﻿
 using System.Windows;
 
 namespace MemorieDeFleurs.UI.WPF.Commands

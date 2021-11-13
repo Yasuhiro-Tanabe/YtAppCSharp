@@ -9,12 +9,11 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetDetailViewModel : DetailViewModelBase
+    public class BouquetDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable
     {
         public static string Name { get; } = "商品詳細";
         public BouquetDetailViewModel() : base(Name) { }
@@ -55,59 +54,70 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// 
         /// 商品を構成する各単品の発注リードタイムの最大値
         /// </summary>
-        public int LeadTime { get { return _leadTime; } }
+        public int LeadTime
+        {
+            get { return _leadTime; }
+            private set { SetProperty(ref _leadTime, value); }
+        }
         private int _leadTime;
 
         /// <summary>
         /// 商品構成
         /// </summary>
-        public string PartsListString { get { return string.Join(", ", SelectedPartListItem.Select(i => $"{i.PartsCode} x{i.Quantity}")); } }
+        public string PartsListText
+        {
+            get { return _text; }
+            set { SetProperty(ref _text, value); }
+        }
+        private string _text;
 
         /// <summary>
-        /// 商品構成編集中に表示するコントロールの可視性
+        /// 商品構成編集中かどうか
         /// </summary>
-        public Visibility EditingModeVisivility { get { return _editing ? Visibility.Visible : Visibility.Collapsed; } }
-
-        /// <summary>
-        /// 商品構成編集中でないときに表示するコントロールの可視性
-        /// </summary>
-        public Visibility ViewModeVisivility { get { return _editing ? Visibility.Collapsed : Visibility.Visible; } }
+        public bool IsEditing
+        {
+            get { return _editing; }
+            set { SetProperty(ref _editing, value); }
+        }
         private bool _editing = false;
 
         /// <summary>
         /// 編集中の商品構成
         /// </summary>
-        public ObservableCollection<PartsListItemViewModel> SelectedPartListItem { get; } = new ObservableCollection<PartsListItemViewModel>();
+        public ObservableCollection<PartsListItemViewModel> SelectedPartsList { get; } = new ObservableCollection<PartsListItemViewModel>();
         
         /// <summary>
-        /// <see cref="SelectedPartListItem"/> 中の、現在選択中のオブジェクト
+        /// <see cref="SelectedPartsList"/> 中の、現在選択中のオブジェクト
         /// </summary>
-        public PartsListItemViewModel CurrentSelectedInPartsList
+        public PartsListItemViewModel SelectedParts
         {
-            get { return _selectedInPartsList; }
-            set { SetProperty(ref _selectedInPartsList, value); }
+            get { return _selected; }
+            set { SetProperty(ref _selected, value); }
         }
-        private PartsListItemViewModel _selectedInPartsList;
+        private PartsListItemViewModel _selected;
 
         /// <summary>
         /// 商品構成に追加可能な単品の一覧
         /// </summary>
-        public ObservableCollection<PartsListItemViewModel> SelectableParts { get; } = new ObservableCollection<PartsListItemViewModel>();
+        public ObservableCollection<PartsListItemViewModel> CandidatePartsList { get; } = new ObservableCollection<PartsListItemViewModel>();
 
-        public PartsListItemViewModel CurrentSelectedInSelectablePartsList
+        /// <summary>
+        /// 現在選択中の追加単品
+        /// </summary>
+        public PartsListItemViewModel CandidateParts
         {
-            get { return _selectedInSelectableParts; }
-            set { SetProperty(ref _selectedInSelectableParts, value); }
+            get { return _candidate; }
+            set { SetProperty(ref _candidate, value); }
         }
-        private PartsListItemViewModel _selectedInSelectableParts;
+        private PartsListItemViewModel _candidate;
         #endregion // プロパティ
 
         #region コマンド
         public ICommand FindImageSource { get; } = new FindImageSourceFileCommand();
-        public ICommand Edit { get; } = new EditPartsListCommand();
-        public ICommand Fix { get; } = new FixPartsListCommand();
-        public ICommand Append { get; } = new AddToListItemCommand();
-        public ICommand Remove { get; } = new RemoveFromListItemCommand();
+        public ICommand Edit { get; } = new EditCommand();
+        public ICommand Fix { get; } = new FixCommand();
+        public ICommand Append { get; } = new AppendToListCommand();
+        public ICommand Remove { get; } = new RemoveFromListCommand();
         #endregion // コマンド
 
         /// <summary>
@@ -116,23 +126,28 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <param name="bouquet">データベースから取得したエンティティオブジェクト</param>
         public void Update(Bouquet bouquet)
         {
-            _code = bouquet.Code;
-            _name = bouquet.Name;
-            _image = bouquet.Image;
-            _leadTime = bouquet.LeadTime;
+            BouquetCode = bouquet.Code;
+            BouquetName = bouquet.Name;
+            ImageFileName = bouquet.Image;
+            LeadTime = bouquet.LeadTime;
 
-            SelectedPartListItem.Clear();
-            foreach(var p in bouquet.PartsList)
-            {
-                SelectedPartListItem.Add(new PartsListItemViewModel(p));
-            }
-            _editing = false;
-
-            RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(LeadTime),
-                nameof(PartsListString), nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
-                 nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
+            LoadSelectedPartsList(bouquet);
+            LoadCandidatePartsList();
+            PartsListText = string.Join(", ", SelectedPartsList.Select(i => $"{i.PartsCode} x{i.Quantity}"));
+            IsEditing = false;
 
             IsDirty = false;
+        }
+
+        private void LoadSelectedPartsList(Bouquet bouquet)
+        {
+            SelectedPartsList.Clear();
+            foreach (var p in bouquet.PartsList)
+            {
+                SelectedPartsList.Add(new PartsListItemViewModel(p));
+            }
+            SelectedParts = null;
+            RaisePropertyChanged(nameof(SelectedPartsList));
         }
 
         /// <summary>
@@ -144,19 +159,19 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             var result = new ValidateFailedException();
 
-            if(string.IsNullOrWhiteSpace(_code))
+            if(string.IsNullOrWhiteSpace(BouquetCode))
             {
                 result.Append("花束コードが指定されていません。");
             }
-            if(string.IsNullOrWhiteSpace(_name))
+            if(string.IsNullOrWhiteSpace(BouquetName))
             {
                 result.Append("花束名称が指定されていません。");
             }
-            if(string.IsNullOrWhiteSpace(_name) && !File.Exists(_image))
+            if(string.IsNullOrWhiteSpace(ImageFileName) && !File.Exists(ImageFileName))
             {
-                result.Append($"イメージファイルが見つかりません: {_image}");
+                result.Append($"イメージファイルが見つかりません: {ImageFileName}");
             }
-            if(SelectedPartListItem.Count == 0)
+            if(SelectedPartsList.Count == 0)
             {
                 result.Append("商品構成が指定されていません。");
             }
@@ -164,75 +179,73 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if(result.ValidationErrors.Count > 0) { throw result; }
         }
 
-        public void EditPartsList()
+        #region IEditableFixable
+        public void OpenEditView()
         {
-            _editing = true;
-            var allParts = MemorieDeFleursUIModel.Instance.FindAllBouquetParts();
+            IsEditing = true;
 
-            CurrentSelectedInPartsList = null;
+            LoadCandidatePartsList();
+            SelectedParts = null;
+        }
 
-            SelectableParts.Clear();
-            foreach (var p in allParts)
+        private void LoadCandidatePartsList()
+        {
+            CandidatePartsList.Clear();
+            foreach (var p in MemorieDeFleursUIModel.Instance.FindAllBouquetParts())
             {
-                if(SelectedPartListItem.SingleOrDefault(i => i.PartsCode == p.Code) == null)
+                if (SelectedPartsList.SingleOrDefault(i => i.PartsCode == p.Code) == null)
                 {
                     // 選択中の仕入可能な単品一覧にない単品が対象
-                    SelectableParts.Add(new PartsListItemViewModel(p));
+                    CandidatePartsList.Add(new PartsListItemViewModel(p));
                 }
             }
-            CurrentSelectedInSelectablePartsList = null;
-
-            RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
-                 nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
+            CandidateParts = null;
         }
 
-        public void FixPartsList()
+        public void FixEditing()
         {
-            _editing = false;
-            _leadTime = SelectedPartListItem.Max(p => p.LeadTime);
-            RaisePropertyChanged(nameof(EditingModeVisivility), nameof(ViewModeVisivility), nameof(PartsListString), nameof(LeadTime));
+            IsEditing = false;
+            LeadTime = SelectedPartsList.Count() > 0 ? SelectedPartsList.Max(p => p.LeadTime) : 0;
+            PartsListText = string.Join(", ", SelectedPartsList.Select(i => $"{i.PartsCode} x{i.Quantity}"));
         }
+        #endregion // IEditableFixable
 
-        public void AppendToPartsList()
+        #region IAddableRemovable
+        public void AppendToList()
         {
-            var item = CurrentSelectedInSelectablePartsList;
+            var item = CandidateParts;
 
-            SelectedPartListItem.Add(item);
-            CurrentSelectedInPartsList = item;
+            SelectedPartsList.Add(item);
+            SelectedParts = item;
 
-            CurrentSelectedInSelectablePartsList = null;
-            SelectableParts.Remove(item);
-
-            RaisePropertyChanged(nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
-                 nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
+            CandidateParts = null;
+            CandidatePartsList.Remove(item);
         }
 
-        public void RemoveFromPartsList()
+        public void RemoveFromList()
         {
-            var item = CurrentSelectedInPartsList;
+            var item = SelectedParts;
 
-            SelectableParts.Add(item);
-            CurrentSelectedInSelectablePartsList = item;
+            CandidatePartsList.Add(item);
+            CandidateParts = item;
 
-            CurrentSelectedInPartsList = null;
-            SelectedPartListItem.Remove(item);
-
-            RaisePropertyChanged(nameof(SelectedPartListItem), nameof(CurrentSelectedInPartsList),
-                 nameof(SelectableParts), nameof(CurrentSelectedInSelectablePartsList));
+            SelectedParts = null;
+            SelectedPartsList.Remove(item);
         }
+        #endregion // IAddableRemovbable
 
         public override void Update()
         {
             if(string.IsNullOrWhiteSpace(BouquetCode))
             {
-                MessageBox.Show("花束コードが指定されていません。");
+                throw new ApplicationException("花束コードが指定されていません。");
             }
             else
             {
                 var bouquet = MemorieDeFleursUIModel.Instance.FindBouquet(BouquetCode);
                 if(bouquet == null)
                 {
-                    MessageBox.Show($"花束コードに該当する商品がありません：{BouquetCode}");
+                    throw new ApplicationException($"花束コードに該当する商品がありません：{BouquetCode}");
                 }
                 else
                 {
@@ -256,7 +269,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     Image = ImageFileName,
                     LeadTime = LeadTime
                 };
-                foreach(var parts in SelectedPartListItem)
+                foreach(var parts in SelectedPartsList)
                 {
                     bouquet.PartsList.Add(new BouquetPartsList() { BouquetCode = bouquet.Code, PartsCode = parts.PartsCode, Quantity = parts.Quantity });
                 }
@@ -274,6 +287,23 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 LogUtil.DEBUGLOG_EndMethod();
             }
+        }
+
+        public override void ClearProperties()
+        {
+            BouquetCode = string.Empty;
+            BouquetName = string.Empty;
+            ImageFileName = string.Empty;
+            LeadTime = 0;
+
+            SelectedPartsList.Clear();
+            CandidatePartsList.Clear();
+            SelectedParts = null;
+            CandidateParts = null;
+
+            IsEditing = false;
+
+            IsDirty = false;
         }
     }
 }

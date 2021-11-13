@@ -19,13 +19,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
 
         private void OpenDetailView(object sender, EventArgs unused)
         {
-            LogUtil.DEBULOG_MethodCalled(sender.GetType().Name);
+            LogUtil.DEBUGLOG_MethodCalled(sender.GetType().Name);
             DetailViewOpening?.Invoke(this, null);
         }
 
         protected void RemoveSelectedItem(object sender, EventArgs unused)
         {
-            LogUtil.DEBULOG_MethodCalled(sender.GetType().Name);
+            LogUtil.DEBUGLOG_MethodCalled(sender.GetType().Name);
             RemoveSelectedItem(sender);
         }
 

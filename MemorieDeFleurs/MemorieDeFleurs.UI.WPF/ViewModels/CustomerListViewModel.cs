@@ -11,8 +11,20 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public CustomerListViewModel() : base("得意先一覧") { }
 
         #region プロパティ
+        /// <summary>
+        /// 全得意先の一覧
+        /// </summary>
         public ObservableCollection<CustomerSummaryViewModel> Customers { get; } = new ObservableCollection<CustomerSummaryViewModel>();
-        public CustomerSummaryViewModel SelectedCustomer { get; set; }
+
+        /// <summary>
+        /// 現在選択中の得意先
+        /// </summary>
+        public CustomerSummaryViewModel SelectedCustomer
+        {
+            get { return _customer; }
+            set { SetProperty(ref _customer, value); }
+        }
+        private CustomerSummaryViewModel _customer;
         #endregion // プロパティ
 
         public override void LoadItems()
@@ -26,7 +38,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 Customers.Add(vm);
                 LogUtil.Debug($"[#{c.ID}:{c.Name}]");
             }
-            RaisePropertyChanged(nameof(Customers), nameof(SelectedCustomer));
+            SelectedCustomer = null;
             LogUtil.DEBUGLOG_EndMethod();
         }
 
@@ -46,7 +58,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 detail = new CustomerDetailViewModel();
                 mainVM.OpenTabItem(detail);
             }
-            detail.ID = SelectedCustomer.CustomerID;
+            detail.CustomerID = SelectedCustomer.CustomerID;
             detail.Update();
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name);
             return detail;

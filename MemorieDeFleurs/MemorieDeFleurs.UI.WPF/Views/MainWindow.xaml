@@ -8,6 +8,13 @@
         xmlns:vh="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}" Height="650" Width="800">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <Window.DataContext>
         <vm:MainWindowViiewModel/>
     </Window.DataContext>
@@ -26,6 +33,9 @@
                         <MenuItem Header="読込..." Command="{Binding SQLiteLoad}" CommandParameter="{Binding}"/>
                         <MenuItem Header="保存..." Command="{Binding SQLiteSave}" CommandParameter="{Binding}"/>
                     </MenuItem>
+                </MenuItem>
+                <MenuItem Header="印刷...">
+                    <MenuItem Header="在庫推移表" Command="{Binding OpenInventoryTransactionView}" CommandParameter="{Binding}"/>
                 </MenuItem>
                 <MenuItem Header="終了" Command="{Binding Exit}" CommandParameter="{Binding}"/>
             </MenuItem>
@@ -46,6 +56,8 @@
             <MenuItem Header="受発注">
                 <MenuItem Header="仕入先発注一覧" Command="{Binding OpenOrderToSupplierListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="仕入先発注登録" Command="{Binding OpenOrderToSupplierDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="得意先受注一覧" Command="{Binding OpenOrderFromCustomerListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="得意先受注登録" Command="{Binding OpenOrderFromCustomerDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
         </Menu>
 
@@ -82,6 +94,15 @@
                 <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
                     <v:OrderToSupplierDetailControl/>
                 </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderFromCustomerListViewModel}">
+                    <v:OrderFromCustomerListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderFromCustomerDetailViewModel}">
+                    <v:OrderFromCustomerDetailControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:InventoryTransitionTableViewModel}">
+                    <v:InvenetoryTransitionTablePreviewControl/>
+                </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>
                 <DataTemplate>
@@ -90,10 +111,7 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0"
-                                   VerticalAlignment="Center"
-                                   HorizontalAlignment="Stretch"
-                                   Text="{Binding Header}"/>
+                        <TextBlock Grid.Column="0" Text="{Binding Header}"/>
                         <Button Grid.Column="1" Content="x" Command="{Binding Close}" CommandParameter="{Binding}"/>
                     </Grid>
                 </DataTemplate>

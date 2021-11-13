@@ -120,7 +120,7 @@ namespace MemorieDeFleurs.Logging
         /// <param name="path"></param>
         /// <param name="line"></param>
         [Conditional("DEBUG")]
-        public static void DEBULOG_MethodCalled(string args="", string msg="", [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+        public static void DEBUGLOG_MethodCalled(string args="", string msg="", [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
         {
             var argument = string.IsNullOrWhiteSpace(args) ? "()" : $"( {args} )";
             var message = string.IsNullOrWhiteSpace(msg) ? "" : $" {msg}";

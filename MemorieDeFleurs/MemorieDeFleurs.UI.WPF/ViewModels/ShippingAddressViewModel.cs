@@ -10,9 +10,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// お届け先ID (参照のみ)
         /// </summary>
-        public int ID
+        public int ShippingID
         {
             get { return _shippingID; }
+            private set { SetProperty(ref _shippingID, value); }
         }
         private int _shippingID;
 
@@ -22,8 +23,19 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public int CustomerID
         {
             get { return _customerID; }
+            private set { SetProperty(ref _customerID, value); }
         }
         private int _customerID;
+
+        /// <summary>
+        /// 得意先名称 (参照のみ)
+        /// </summary>
+        public string CustomerName
+        {
+            get { return _customerName; }
+            private set { SetProperty(ref _customerName, value); }
+        }
+        private string _customerName;
 
         /// <summary>
         /// お届け先住所 (表示用)
@@ -36,7 +48,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public string Address1
         {
             get { return _address1; }
-            set { SetProperty(ref _address1, value); }
+            set
+            {
+                SetProperty(ref _address1, value);
+                RaisePropertyChanged(nameof(AddressText));
+            }
         }
         private string _address1;
 
@@ -46,14 +62,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public string Address2
         {
             get { return _address2; }
-            set { SetProperty(ref _address2, value); }
+            set
+            {
+                SetProperty(ref _address2, value);
+                RaisePropertyChanged(nameof(AddressText));
+            }
         }
         private string _address2;
 
         /// <summary>
         /// お届け先氏名
         /// </summary>
-        public string Name
+        public string NameOfShipping
         {
             get { return _name; }
             set { SetProperty(ref _name, value); }
@@ -68,10 +88,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             get { return _date.ToString("yyyy/mm/dd"); }
         }
 
+        /// <summary>
+        /// 最新注文日
+        /// </summary>
         public DateTime LatestOrderDate
         {
             get { return _date; }
-            set { SetProperty(ref _date, value); }
+            set
+            {
+                SetProperty(ref _date, value);
+                RaisePropertyChanged(nameof(LatestOrderDateText));
+            }
         }
         private DateTime _date;
         #endregion // プロパティ
@@ -83,13 +110,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public void Update(ShippingAddress sa)
         {
-            _shippingID = sa.ID;
-            _customerID = sa.CustomerID;
-            _name = sa.Name;
-            _address1 = sa.Address1;
-            _address2 = sa.Address2;
-            _date = sa.LatestOrderDate;
-            RaisePropertyChanged(nameof(ID), nameof(CustomerID), nameof(Name), nameof(Address1), nameof(Address2), nameof(AddressText), nameof(LatestOrderDate));
+            ShippingID = sa.ID;
+            CustomerID = sa.CustomerID;
+            CustomerName = sa.Customer.Name;
+            NameOfShipping = sa.Name;
+            Address1 = sa.Address1;
+            Address2 = sa.Address2;
+            LatestOrderDate = sa.LatestOrderDate;
         }
     }
 }

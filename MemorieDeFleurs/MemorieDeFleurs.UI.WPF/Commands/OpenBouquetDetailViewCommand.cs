@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.UI.WPF.Model;
-using MemorieDeFleurs.UI.WPF.ViewModels;
+﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {

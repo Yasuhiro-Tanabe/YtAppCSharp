@@ -1,24 +1,30 @@
 ﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
-using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetListViewModel : ListViewModelBase
     {
-
         public BouquetListViewModel() : base("商品一覧") { }
 
         #region プロパティ
+        /// <summary>
+        /// 全商品の一覧
+        /// </summary>
         public ObservableCollection<BouquetSummaryViewModel> Bouquets { get; } = new ObservableCollection<BouquetSummaryViewModel>();
 
-        public BouquetSummaryViewModel CurrentBouquet { get; set; }
+        /// <summary>
+        /// 現在選択中の商品
+        /// </summary>
+        public BouquetSummaryViewModel SelectedBouquet
+        {
+            get { return _bouquet; }
+            set { SetProperty(ref _bouquet, value); }
+        }
+        private BouquetSummaryViewModel _bouquet;
         #endregion // プロパティ
 
         public override void LoadItems()
@@ -30,8 +36,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 Subscribe(vm);
                 Bouquets.Add(vm);
             }
-            CurrentBouquet = null;
-            RaisePropertyChanged(nameof(Bouquets), nameof(CurrentBouquet));
+            SelectedBouquet = null;
         }
 
         protected override void RemoveSelectedItem(object sender)
@@ -53,7 +58,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 mainVM.OpenTabItem(detail);
             }
 
-            detail.BouquetCode = CurrentBouquet.BouquetCode;
+            detail.BouquetCode = SelectedBouquet.BouquetCode;
             detail.Update();
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name);
             return detail;

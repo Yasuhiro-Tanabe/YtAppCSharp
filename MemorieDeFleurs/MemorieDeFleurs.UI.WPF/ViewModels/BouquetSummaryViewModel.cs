@@ -1,12 +1,8 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
-using System;
 using System.Linq;
-using System.Windows;
-using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -18,6 +14,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region プロパティ
+        /// <summary>
+        /// 花束コード
+        /// </summary>
         public string BouquetCode
         {
             get { return _code; }
@@ -25,6 +24,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private string _code;
 
+        /// <summary>
+        /// 商品名称
+        /// </summary>
         public string BouquetName
         {
             get { return _name; }
@@ -32,6 +34,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private string _name;
 
+        /// <summary>
+        /// 商品イメージ (画像ファイル名)
+        /// </summary>
         public string ImageFileName
         {
             get { return _fileName; }
@@ -39,12 +44,27 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private string _fileName;
 
+        /// <summary>
+        /// 商品構成
+        /// </summary>
         public string PartsList
         {
             get { return _parts; }
             set { SetProperty(ref _parts, value); }
         }
         private string _parts;
+
+        /// <summary>
+        /// 商品リードタイム：構成各単品の発注リードタイムの最大値
+        /// 
+        /// 構成する単品が発送日に数量不足であっても受注は行い、受注当日に仕入先発注し数量不足を解消したい。
+        /// </summary>
+        public int LeadTime
+        {
+            get { return _lead; }
+            set { SetProperty(ref _lead, value); }
+        }
+        private int _lead;
         #endregion // プロパティ
 
         public void Update(Bouquet bouquet)
@@ -52,13 +72,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             BouquetCode = bouquet.Code;
             BouquetName = bouquet.Name;
             ImageFileName = bouquet.Image;
+            LeadTime = bouquet.LeadTime;
 
-            if(bouquet.PartsList.Count > 0)
+            if(bouquet.PartsList.Count == 0)
+            {
+                PartsList = string.Empty;
+            }
+            else
             {
                 PartsList = string.Join(", ", bouquet.PartsList.Select(p => $"{p.PartsCode} x{p.Quantity}"));
             }
-
-            RaisePropertyChanged(nameof(BouquetCode), nameof(BouquetName), nameof(ImageFileName), nameof(PartsList));
         }
     }
 }

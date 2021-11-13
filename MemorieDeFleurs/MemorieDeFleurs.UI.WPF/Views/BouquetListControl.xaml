@@ -5,35 +5,36 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
+             xmlns:h="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <h:VisibilityConverter x:Key="positiveCovnerter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Loaded">
             <i:InvokeCommandAction Command="{Binding Reload}" CommandParameter="{Binding}"/>
         </i:EventTrigger>
     </i:Interaction.Triggers>
-    <Grid>
+    <Grid Style="{StaticResource ControlBorderStyle}">
         <Grid.RowDefinitions>
             <RowDefinition Height="25pt"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Button Grid.Row="0"
-                Margin="0,1,100,1"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Center"
-                Content="更新"
-                Command="{Binding Reload}" CommandParameter="{Binding}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="100px"/>
+        </Grid.ColumnDefinitions>
 
-        <ListView Grid.Row="1"
-                  Margin="10,5"
-                  HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  ScrollViewer.VerticalScrollBarVisibility="Visible"
-                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                  BorderBrush="LightBlue" BorderThickness="1"
-                  ItemsSource="{Binding Bouquets}" SelectedItem="{Binding CurrentBouquet}"
-                  SelectionMode="Single">
+        <Button Grid.Row="0" Grid.Column="1" Content="更新" Command="{Binding Reload}" CommandParameter="{Binding}"/>
+
+        <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding Bouquets}" SelectedItem="{Binding SelectedBouquet}" Style="{StaticResource SummaryList}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
                     <i:InvokeCommandAction Command="{Binding Selected}" PassEventArgsToCommand="True"/>
@@ -51,36 +52,11 @@
                             <ColumnDefinition Width="80"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0"
-                                   Margin="15,1,5,1"
-                                   VerticalAlignment="Center" HorizontalAlignment="Left"
-                                   Text="{Binding BouquetCode}"/>
-
-                        <TextBlock Grid.Column="1"
-                                   Margin="5,1"
-                                   VerticalAlignment="Center" HorizontalAlignment="Left"
-                                   Text="{Binding BouquetName}"/>
-                        <TextBlock Grid.Column="2"
-                                   Margin="5, 1"
-                                   VerticalAlignment="Center" HorizontalAlignment="Left"
-                                   Text="{Binding PartsList}"/>
-
-                        <Button Grid.Column="4"
-                                Margin="5,1"
-                                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                                HorizontalAlignment="Center" HorizontalContentAlignment="Center"
-                                Content="詳細..."
-                                Visibility="{Binding ActionVisivility}"
-                                Command="{Binding Detail}" CommandParameter="{Binding}"/>
-
-                        <Button Grid.Column="5"
-                                Margin="5,1,20,1"
-                                VerticalAlignment="Center" VerticalContentAlignment="Center"
-                                HorizontalAlignment="Right" HorizontalContentAlignment="Center"
-                                Content="削除"
-                                Visibility="{Binding ActionVisivility}"
-                                Command="{Binding Remove}" CommandParameter="{Binding}"/>
-
+                        <TextBlock Grid.Column="0" Text="{Binding BouquetCode}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding BouquetName}"/>
+                        <TextBlock Grid.Column="2" Text="{Binding PartsList}"/>
+                        <Button Grid.Column="4" Content="詳細..." Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
+                        <Button Grid.Column="5" Content="削除" Command="{Binding Remove}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

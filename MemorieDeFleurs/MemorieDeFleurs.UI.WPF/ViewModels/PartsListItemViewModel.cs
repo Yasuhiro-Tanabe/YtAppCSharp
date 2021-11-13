@@ -5,6 +5,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     public class PartsListItemViewModel : NotificationObject
     {
         #region プロパティ
+        /// <summary>
+        /// 花コード
+        /// </summary>
         public string PartsCode
         {
             get { return _code; }
@@ -12,13 +15,21 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private string _code;
 
+        /// <summary>
+        /// 単品名称
+        /// </summary>
         public string PartsName
         {
             get { return _name; }
-            set { SetProperty(ref _code, value); }
+            set { SetProperty(ref _name, value); }
         }
         private string _name;
 
+        /// <summary>
+        /// 数量：本数あるいはロット数。
+        /// 
+        /// どちらを格納しているかは、元データと表示するビューにより異なる。
+        /// </summary>
         public int Quantity
         {
             get { return _quantity; }
@@ -26,6 +37,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private int _quantity;
 
+        /// <summary>
+        /// 発注リードタイム [日]
+        /// </summary>
         public int LeadTime
         {
             get { return _leadtime; }
@@ -36,34 +50,26 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public PartsListItemViewModel(BouquetPartsList item)
         {
-            _code = item.PartsCode;
-            _name = item.Part.Name;
-            _quantity = item.Quantity;
-            _leadtime = item.Part.LeadTime;
-            RaiseAllPropertiesChanged();
+            PartsCode = item.PartsCode;
+            PartsName = item.Part.Name;
+            Quantity = item.Quantity;
+            LeadTime = item.Part.LeadTime;
         }
 
         public PartsListItemViewModel(BouquetPart parts)
         {
-            _code = parts.Code;
-            _name = parts.Name;
-            _quantity = 0;
-            _leadtime = parts.LeadTime;
-            RaiseAllPropertiesChanged();
+            PartsCode = parts.Code;
+            PartsName = parts.Name;
+            Quantity = 0;
+            LeadTime = parts.LeadTime;
         }
 
         public PartsListItemViewModel(OrderDetailsToSupplier detail)
         {
-            _code = detail.PartsCode;
-            _name = detail.BouquetPart.Name;
-            _quantity = detail.LotCount;
-            _leadtime = detail.BouquetPart.LeadTime;
-            RaiseAllPropertiesChanged();
-        }
-
-        public void RaiseAllPropertiesChanged()
-        {
-            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(Quantity), nameof(LeadTime));
+            PartsCode = detail.PartsCode;
+            PartsName = detail.BouquetPart.Name;
+            Quantity = detail.LotCount;
+            LeadTime = detail.BouquetPart.LeadTime;
         }
     }
 }

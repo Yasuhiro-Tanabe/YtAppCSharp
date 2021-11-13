@@ -672,5 +672,104 @@ namespace MemorieDeFleursTest.ModelTest
             Assert.AreEqual(1, orders.Length);
             Assert.AreEqual(orderNo, orders[0]);
         }
+
+        [TestMethod]
+        public void FindAllOrders_Nothing()
+        {
+            var orders = Model.CustomerModel.FindAllOrders();
+            Assert.AreEqual(0, orders.Count());
+        }
+
+        [TestMethod]
+        public void FindAllOrders_HasSomeOrder()
+        {
+            var user2 = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs("ユーザ2").EmailAddressIs("user2@localdomain").CardNoIs("1234567890123456").Create();
+            var sendTo = Model.CustomerModel.GetShippingAddressBuilder()
+                .From(user2).To("友人1").AddressIs("住所1").Create();
+
+            Model.CustomerModel.Order(DateConst.May1st, ExpectedBouquet, ExpectedShippingAddress, DateConst.May3rd);
+            Model.CustomerModel.Order(DateConst.May2nd, ExpectedBouquet, sendTo, DateConst.May4th);
+            Model.CustomerModel.Order(DateConst.May3rd, ExpectedBouquet, ExpectedShippingAddress, DateConst.May5th);
+            Model.CustomerModel.Order(DateConst.May4th, ExpectedBouquet, ExpectedShippingAddress, DateConst.May6th);
+
+            Assert.AreEqual(4, Model.CustomerModel.FindAllOrders().Count());
+            Assert.AreEqual(2, Model.CustomerModel.FindAllOrders(DateConst.May2nd, DateConst.May3rd).Count());
+            Assert.AreEqual(1, Model.CustomerModel.FindAllOrders(DateConst.May2nd, DateConst.May5th, user2.ID).Count());
+        }
+
+        [TestMethod]
+        public void FindAllShippingAddressOfCustomer_NoShippingAddress()
+        {
+            var user2 = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs("ユーザ2").EmailAddressIs("user2@localdomain").CardNoIs("1234567890123456").Create();
+
+            var actual = Model.CustomerModel.FindAllShippingAddressesOfCustomer(user2.ID);
+            Assert.AreEqual(0, actual.Count());
+        }
+
+        [TestMethod]
+        public void FindAllShippingAddressesOfCustomer_HasSomeShippingAddress()
+        {
+            var user2 = Model.CustomerModel.GetCustomerBuilder()
+                .NameIs("ユーザ2").EmailAddressIs("user2@localdomain").CardNoIs("1234567890123456").Create();
+
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人1").AddressIs("住所1").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人2").AddressIs("住所2").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人3").AddressIs("住所3").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人4").AddressIs("住所4").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人5").AddressIs("住所5").Create();
+            Model.CustomerModel.GetShippingAddressBuilder().From(user2).To("友人6").AddressIs("住所6").Create();
+
+            var actual = Model.CustomerModel.FindAllShippingAddressesOfCustomer(user2.ID);
+            Assert.AreEqual(6, actual.Count());
+
+        }
+
+        [TestMethod]
+        public void AddShippingAddress_NotModified()
+        {
+            var actual = Model.CustomerModel.Save(ExpectedShippingAddress);
+
+            Assert.AreEqual(ExpectedShippingAddress.ID, actual.ID);
+            Assert.IsFalse(ExpectedShippingAddress.IsModified(actual));
+        }
+
+        [TestMethod]
+        public void AddShippingAddress_NewAddress()
+        {
+            // Save() の際呼び出し元オブジェクトの情報も書き換えてしまうので、期待値を保持する
+            var expectedID = 0;
+
+            var expected = new ShippingAddress()
+            {
+                ID = expectedID,
+                Name = "テスト",
+                Address1 = "都道府県 市町村",
+                Address2 = "大字 字 番地",
+                LatestOrderDate = DateTime.Today,
+                Customer = ExpectedCustomer,
+                CustomerID = ExpectedCustomer.ID
+            };
+
+            var actual = Model.CustomerModel.Save(expected);
+
+            Assert.AreNotEqual(expectedID, actual.ID);
+            Assert.IsFalse(expected.IsModified(actual));
+        }
+
+        [TestMethod]
+        public void AddShippingAddress_Modified()
+        {
+            // Save() の際呼び出し元オブジェクトの情報も書き換えてしまうので、期待値を保持する
+            var expectedID = ExpectedShippingAddress.ID;
+
+            ExpectedShippingAddress.Name = "別の名前";
+
+            var actual = Model.CustomerModel.Save(ExpectedShippingAddress);
+
+            Assert.AreNotEqual(expectedID, actual.ID);
+            Assert.IsFalse(ExpectedShippingAddress.IsModified(actual));
+        }
     }
 }
