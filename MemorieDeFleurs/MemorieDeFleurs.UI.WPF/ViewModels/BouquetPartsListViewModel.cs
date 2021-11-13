@@ -11,9 +11,20 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public BouquetPartsListViewModel() : base("単品一覧") { }
 
         #region プロパティ
+        /// <summary>
+        /// 全単品の一覧
+        /// </summary>
         public ObservableCollection<BouquetPartsSummaryViewModel> BouquetParts { get; } = new ObservableCollection<BouquetPartsSummaryViewModel>();
 
-        public BouquetPartsSummaryViewModel CurrentParts { get; set; }
+        /// <summary>
+        /// 現在選択中の単品
+        /// </summary>
+        public BouquetPartsSummaryViewModel SelectedParts
+        {
+            get { return _parts; }
+            set { SetProperty(ref _parts, value); }
+        }
+        private BouquetPartsSummaryViewModel _parts;
         #endregion // プロパティ
 
         public override void LoadItems()
@@ -25,8 +36,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 Subscribe(vm);
                 BouquetParts.Add(vm);
             }
-            CurrentParts = null;
-            RaisePropertyChanged(nameof(BouquetParts), nameof(CurrentParts));
+            SelectedParts = null;
+            RaisePropertyChanged(nameof(BouquetParts));
         }
 
         protected override void RemoveSelectedItem(object sender)
@@ -46,7 +57,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 detail = new BouquetPartsDetailViewModel();
                 mainVM.OpenTabItem(detail);
             }
-            detail.PartsCode = CurrentParts.PartsCode;
+            detail.PartsCode = SelectedParts.PartsCode;
             detail.Update();
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name);
             return detail;

@@ -69,12 +69,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public void Update(BouquetPart part)
         {
-            _code = part.Code;
-            _name = part.Name;
-            _quantity = part.QuantitiesPerLot;
-            _leadTime = part.LeadTime;
-            _expriy = part.ExpiryDate;
-            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(QuantitiesParLot), nameof(LeadTime), nameof(ExpiryDate));
+            PartsCode = part.Code;
+            PartsName = part.Name;
+            QuantitiesParLot = part.QuantitiesPerLot;
+            LeadTime = part.LeadTime;
+            ExpiryDate = part.ExpiryDate;
 
             IsDirty = false;
         }
@@ -88,25 +87,25 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             var result = new ValidateFailedException();
 
-            if(string.IsNullOrWhiteSpace(_code))
+            if(string.IsNullOrWhiteSpace(PartsCode))
             {
                 result.Append("花コードを入力してください。");
             }
-            if(string.IsNullOrWhiteSpace(_name))
+            if(string.IsNullOrWhiteSpace(PartsName))
             {
                 result.Append("単品名称を入力してください。");
             }
-            if(_quantity < 1)
+            if(QuantitiesParLot < 1)
             {
-                result.Append($"購入単位数が不適切です：{_quantity}。1本以上の値を入力してください。");
+                result.Append($"購入単位数が不適切です：{QuantitiesParLot}。1本以上の値を入力してください。");
             }
-            if(_leadTime < 1)
+            if(LeadTime < 1)
             {
-                result.Append($"商品リードタイムが不適切です：{_leadTime}。1日以上の値を入力してください。");
+                result.Append($"商品リードタイムが不適切です：{LeadTime}。1日以上の値を入力してください。");
             }
-            if(_expriy < 1)
+            if(ExpiryDate < 1)
             {
-                result.Append($"品質維持可能日数が不適切です：{_expriy}。1日以上の値を入力してください。");
+                result.Append($"品質維持可能日数が不適切です：{ExpiryDate}。1日以上の値を入力してください。");
             }
 
             if(result.ValidationErrors.Count > 0) { throw result; }
@@ -167,12 +166,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public override void ClearProperties()
         {
-            _code = string.Empty;
-            _name = string.Empty;
-            _quantity = 0;
-            _leadTime = 0;
-            _expriy = 0;
-            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName), nameof(QuantitiesParLot), nameof(LeadTime), nameof(ExpiryDate));
+            PartsCode = string.Empty;
+            PartsName = string.Empty;
+            QuantitiesParLot = 0;
+            LeadTime = 0;
+            ExpiryDate = 0;
         }
     }
 }

@@ -19,7 +19,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 得意先ID
         /// </summary>
-        public int ID
+        public int CustomerID
         {
             get { return _id; }
             set { SetProperty(ref _id, value); }
@@ -59,7 +59,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// カード番号
         /// </summary>
-        public string CardNo
+        public string CardNumber
         {
             get { return _cardNo; }
             set { SetProperty(ref _cardNo, value); }
@@ -74,19 +74,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public void Update(Customer c)
         {
-            _id = c.ID;
-            _email = c.EmailAddress;
-            _name = c.Name;
-            _passwd = c.Password;
-            _cardNo = c.CardNo;
+            CustomerID = c.ID;
+            EmailAddress = c.EmailAddress;
+            CustomerName = c.Name;
+            Password = c.Password;
+            CardNumber = c.CardNo;
 
             ShippingAddresses.Clear();
             foreach(var sa in c.ShippingAddresses)
             {
                 ShippingAddresses.Add(new ShippingAddressViewModel(sa));
             }
-
-            RaisePropertyChanged(nameof(ID), nameof(EmailAddress), nameof(CustomerName), nameof(Password), nameof(CardNo), nameof(ShippingAddresses));
 
             IsDirty = false;
         }
@@ -108,16 +106,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public override void Update()
         {
-            if(_id == 0)
+            if(CustomerID == 0)
             {
                 throw new ApplicationException($"得意先IDが入力されていません。");
             }
             else
             {
-                var customer = MemorieDeFleursUIModel.Instance.FindCustomer(_id);
+                var customer = MemorieDeFleursUIModel.Instance.FindCustomer(CustomerID);
                 if(customer == null)
                 {
-                    throw new ApplicationException($"該当する得意先がありません: ID={_id}");
+                    throw new ApplicationException($"該当する得意先がありません: ID={CustomerID}");
                 }
                 else
                 {
@@ -136,11 +134,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
                 var customer = new Customer()
                 {
-                    ID = ID,
+                    ID = CustomerID,
                     Name = CustomerName,
                     EmailAddress = EmailAddress,
                     Password = Password,
-                    CardNo = CardNo
+                    CardNo = CardNumber
                 };
 
                 if (ShippingAddresses.Count > 0)
@@ -149,9 +147,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     {
                         var sa = new ShippingAddress()
                         {
-                            CustomerID = ID,
-                            ID = vm.ID,
-                            Name = vm.Name,
+                            CustomerID = CustomerID,
+                            ID = vm.ShippingID,
+                            Name = vm.NameOfShipping,
                             Address1 = vm.Address1,
                             Address2 = vm.Address2,
                             LatestOrderDate = vm.LatestOrderDate
@@ -163,7 +161,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 var saved = MemorieDeFleursUIModel.Instance.Save(customer);
                 Update(saved);
 
-                LogUtil.Info($"Customer {ID} saved.");
+                LogUtil.Info($"Customer {CustomerID} saved.");
             }
             catch (Exception)
             {
@@ -177,13 +175,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public override void ClearProperties()
         {
-            _id = 0;
-            _name = string.Empty;
-            _email = string.Empty;
-            _cardNo = string.Empty;
-            _passwd = string.Empty;
+            CustomerID = 0;
+            CustomerName = string.Empty;
+            EmailAddress = string.Empty;
+            CardNumber = string.Empty;
+            Password = string.Empty;
             ShippingAddresses.Clear();
-            RaisePropertyChanged(nameof(ID), nameof(CustomerName), nameof(EmailAddress), nameof(CardNo), nameof(Password), nameof(ShippingAddresses));
         }
     }
 }

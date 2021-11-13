@@ -52,7 +52,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public DateTime OrderDate
         {
             get { return _ordered; }
-            set { SetProperty(ref _ordered, value); }
+            set
+            {
+                SetProperty(ref _ordered, value);
+                RaisePropertyChanged(nameof(OrderDateText));
+            }
         }
         private DateTime _ordered;
 
@@ -69,7 +73,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public DateTime ShippingDate
         {
             get { return _shipping; }
-            set { SetProperty(ref _shipping, value); }
+            set
+            {
+                SetProperty(ref _shipping, value);
+                RaisePropertyChanged(nameof(ArrivalDateText));
+            }
         }
         private DateTime _shipping;
 
@@ -92,15 +100,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         private void Update(OrderFromCustomer order)
         {
-            _orderNo = order.ID;
-            _customer = order.Customer.Name;
-            _shippingTo = order.ShippingAddress.Name;
-            _shipping = order.ShippingDate;
-            _bouquet = order.Bouquet.Name;
-            _ordered = order.OrderDate;
-
-            RaisePropertyChanged(nameof(OrderNo), nameof(CustomerName), nameof(ShippingTo), nameof(ArrivalDateText), nameof(ShippingDate),
-                nameof(BouquetName), nameof(OrderDateText), nameof(OrderDate));
+            OrderNo = order.ID;
+            CustomerName = order.Customer.Name;
+            ShippingTo = order.ShippingAddress.Name;
+            ShippingDate = order.ShippingDate;
+            BouquetName = order.Bouquet.Name;
+            OrderDate = order.OrderDate;
         }
     }
 }

@@ -7,7 +7,6 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
@@ -58,10 +57,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// </summary>
         public DateTime OrderDate
         {
-            get { return _orderDate; }
-            set { SetProperty(ref _orderDate, value); }
+            get { return _ordered; }
+            set
+            {
+                SetProperty(ref _ordered, value);
+                RaisePropertyChanged(nameof(OrderDateText));
+            }
         }
-        private DateTime _orderDate = DateTime.Today;
+        private DateTime _ordered = DateTime.Today;
 
         /// <summary>
         /// お届け日
@@ -91,7 +94,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 現在選択中のお届け先：「新規登録」を含む
         /// </summary>
-        public ShippingAddressViewModel SelectedShippingAddress { get; set; }
+        public ShippingAddressViewModel SelectedShippingAddress
+        {
+            get { return _shipping; }
+            set { SetProperty(ref _shipping, value); }
+        }
+        private ShippingAddressViewModel _shipping;
 
         /// <summary>
         /// 選択可能な商品一覧
@@ -101,7 +109,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 現在選択中の商品
         /// </summary>
-        public BouquetSummaryViewModel SelectedBouquet { get; set; }
+        public BouquetSummaryViewModel SelectedBouquet
+        {
+            get { return _bouquet; }
+            set { SetProperty(ref _bouquet, value); }
+        }
+        private BouquetSummaryViewModel _bouquet;
 
         /// <summary>
         /// お届け先名称
@@ -134,9 +147,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private string _shippingAddress2;
 
         /// <summary>
-        /// お届け先選択モード
+        /// お届け先選択モードかどうか
         /// </summary>
-        public Visibility ShippingAddressListVisivility { get { return _listVisible ? Visibility.Visible : Visibility.Collapsed; } }
+        public bool IsListVisible
+        {
+            get { return _listVisible; }
+            set { SetProperty(ref _listVisible, value); }
+        }
         private bool _listVisible;
         #endregion // プロパティ
 
@@ -151,10 +168,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public void Update(OrderFromCustomer order)
         {
-            _orderNo = order.ID;
-            _message = order.Message;
-            _orderDate = order.OrderDate;
-            _arrival = order.ShippingDate.AddDays(1);
+            OrderNo = order.ID;
+            Message = order.Message;
+            OrderDate = order.OrderDate;
+            ArrivalDate = order.ShippingDate.AddDays(1);
 
             LoadCustomers();
             SelectedCustomer = Customers.SingleOrDefault(c => c.CustomerID == order.CustomerID);
@@ -163,20 +180,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedBouquet = Bouquets.SingleOrDefault(b => b.BouquetCode == order.BouquetCode);
 
             LoadShippingAddresses(order.CustomerID);
-            SelectedShippingAddress = ShippingAddresses.SingleOrDefault(a => a.ID == order.ShippingAddressID);
+            SelectedShippingAddress = ShippingAddresses.SingleOrDefault(a => a.ShippingID == order.ShippingAddressID);
 
             if(SelectedShippingAddress != null)
             {
-                _shippingName = order.ShippingAddress.Name;
-                _shippingAddress1 = order.ShippingAddress.Address1;
-                _shippingAddress2 = order.ShippingAddress.Address2;
-                RaisePropertyChanged(nameof(ShippingName), nameof(Address1), nameof(Address2));
+                ShippingName = order.ShippingAddress.Name;
+                Address1 = order.ShippingAddress.Address1;
+                Address2 = order.ShippingAddress.Address2;
             }
 
-            _listVisible = false;
-            RaisePropertyChanged(nameof(OrderNo), nameof(Message), nameof(OrderDateText), nameof(ArrivalDate),
-                nameof(Customers), nameof(SelectedCustomer), nameof(Bouquets), nameof(SelectedBouquet),
-                nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(ShippingAddressListVisivility));
+            IsListVisible = false;
 
             IsDirty = false;
         }
@@ -210,16 +223,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public override void Update()
         {
-            if(string.IsNullOrWhiteSpace(_orderNo))
+            if(string.IsNullOrWhiteSpace(OrderNo))
             {
                 throw new ApplicationException("受注番号が指定されていません。");
             }
             else
             {
-                var found = MemorieDeFleursUIModel.Instance.FindOrdersFromCustomer(_orderNo);
+                var found = MemorieDeFleursUIModel.Instance.FindOrdersFromCustomer(OrderNo);
                 if(found == null)
                 {
-                    throw new ApplicationException($"該当する受注履歴がありません：{_orderNo}");
+                    throw new ApplicationException($"該当する受注履歴がありません：{OrderNo}");
                 }
                 else
                 {
@@ -230,13 +243,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public override void ClearProperties()
         {
-            _orderNo = string.Empty;
-            _message = string.Empty;
-            _shippingName = string.Empty;
-            _shippingAddress1 = string.Empty;
-            _shippingAddress2 = string.Empty;
-            _orderDate = DateTime.Today;
-            _arrival = DateTime.Today.AddDays(1);
+            OrderNo = string.Empty;
+            Message = string.Empty;
+            ShippingName = string.Empty;
+            Address1 = string.Empty;
+            Address2 = string.Empty;
+            OrderDate = DateTime.Today;
+            ArrivalDate = DateTime.Today.AddDays(1);
 
             SelectedCustomer = null;
             LoadCustomers();
@@ -247,11 +260,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedShippingAddress = null;
             ShippingAddresses.Clear();
 
-            _listVisible = false;
-
-            RaisePropertyChanged(nameof(OrderNo), nameof(OrderDate), nameof(OrderDateText), nameof(ArrivalDate), nameof(Customers), nameof(SelectedCustomer),
-                nameof(Message), nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(ShippingName), nameof(Address1), nameof(Address2),
-                nameof(ShippingAddressListVisivility));
+            IsListVisible = false;
 
             IsDirty = false;
         }
@@ -308,41 +317,37 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             // 入力内容が異なる場合は、新規の登録先として扱いたい。
             LoadShippingAddresses(SelectedCustomer.CustomerID);
             SelectedShippingAddress = ShippingAddresses
-                .Where(s => s.Name == _shippingName)
+                .Where(s => s.NameOfShipping == _shippingName)
                 .Where(s => s.Address1 == _shippingAddress1)
                 .Where(s => s.Address2 == _shippingAddress2)
                 .SingleOrDefault();
 
-            _listVisible = true;
-            RaisePropertyChanged(nameof(ShippingAddresses), nameof(SelectedShippingAddress), nameof(ShippingAddressListVisivility));
+            IsListVisible = true;
         }
 
         public void FixEditing()
         {
             if(SelectedShippingAddress != null)
             {
-                _shippingName = SelectedShippingAddress.Name;
-                _shippingAddress1 = SelectedShippingAddress.Address1;
-                _shippingAddress2 = SelectedShippingAddress.Address2;
-
-                RaisePropertyChanged(nameof(ShippingName), nameof(Address1), nameof(Address2));
+                ShippingName = SelectedShippingAddress.NameOfShipping;
+                Address1 = SelectedShippingAddress.Address1;
+                Address2 = SelectedShippingAddress.Address2;
             }
 
-            _listVisible = false;
-            RaisePropertyChanged(nameof(ShippingAddressListVisivility));
+            IsListVisible = false;
         }
         #endregion // IEditableFixable
 
         #region IOrderable
         public void OrderMe()
         {
-            if(string.IsNullOrWhiteSpace(_orderNo))
+            if(string.IsNullOrWhiteSpace(OrderNo))
             {
                 Validate();
 
                 var address = new ShippingAddress()
                 {
-                    ID = SelectedShippingAddress == null ? 0 : SelectedShippingAddress.ID,
+                    ID = SelectedShippingAddress == null ? 0 : SelectedShippingAddress.ShippingID,
                     CustomerID = SelectedCustomer.CustomerID,
                     Name = ShippingName,
                     Address1 = Address1,
@@ -368,26 +373,26 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public void CancelMe()
         {
-            if(string.IsNullOrWhiteSpace(_orderNo))
+            if(string.IsNullOrWhiteSpace(OrderNo))
             {
                 throw new ApplicationException("発注されていません。");
             }
             else
             {
-                MemorieDeFleursUIModel.Instance.CancelOrderFromCustomer(_orderNo);
+                MemorieDeFleursUIModel.Instance.CancelOrderFromCustomer(OrderNo);
                 Clear.Execute(this);
             }
         }
 
         public void ChangeMyArrivalDate()
         {
-            if (string.IsNullOrWhiteSpace(_orderNo))
+            if (string.IsNullOrWhiteSpace(OrderNo))
             {
                 throw new ApplicationException("発注されていません。");
             }
             else
             {
-                MemorieDeFleursUIModel.Instance.ChangeArrivalDateOfOrderFromCustomer(_orderNo, ArrivalDate);
+                MemorieDeFleursUIModel.Instance.ChangeArrivalDateOfOrderFromCustomer(OrderNo, ArrivalDate);
             }
         }
         #endregion // IOrderable

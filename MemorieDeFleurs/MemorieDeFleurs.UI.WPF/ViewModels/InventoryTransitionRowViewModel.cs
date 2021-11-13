@@ -23,6 +23,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region プロパティ
+        /// <summary>
+        /// 日付
+        /// </summary>
         public DateTime Date
         {
             get { return _date; }
@@ -34,11 +37,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private DateTime _date;
 
+        /// <summary>
+        /// 日付 (表示用)
+        /// </summary>
         public string DateText
         {
             get { return _date.ToString("yyyy.MM.dd"); }
         }
 
+        /// <summary>
+        /// 入荷予定数
+        /// </summary>
         public int Arrived
         {
             get { return _arrived; }
@@ -46,6 +55,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private int _arrived;
 
+        /// <summary>
+        /// 加工予定数
+        /// </summary>
         public int Used
         {
             get { return _used; }
@@ -53,6 +65,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private int _used;
 
+        /// <summary>
+        /// 破棄数
+        /// </summary>
         public int Discarded
         {
             get { return _discarded; }
@@ -60,6 +75,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private int _discarded;
 
+        /// <summary>
+        /// 納品日別残数 (当日残～N日前残、N=品質維持可能日数)
+        /// </summary>
         public InventoryRemains Remains { get; }
         #endregion // プロパティ
 

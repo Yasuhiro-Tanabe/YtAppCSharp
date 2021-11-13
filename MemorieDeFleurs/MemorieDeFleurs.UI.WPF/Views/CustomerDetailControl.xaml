@@ -31,7 +31,7 @@
         </Grid.ColumnDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="得意先ID："/>
-        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ID}"/>
+        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CustomerID}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
                     VerticalAlignment="Center" HorizontalAlignment="Right">
             <Button TabIndex="998" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
@@ -50,7 +50,7 @@
         <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Password}"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Text="カード番号"/>
-        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding CardNo}"/>
+        <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding CardNumber}"/>
 
         <TextBlock Grid.Row="5" Grid.Column="0" Text="登録済みのお届け先："/>
 
@@ -64,7 +64,7 @@
                             <ColumnDefinition Width="100px"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="{Binding Name, Mode=OneWay, Converter={StaticResource titleConverter}}"/>
+                        <TextBlock Grid.Column="0" Text="{Binding NameOfShipping, Mode=OneWay, Converter={StaticResource titleConverter}}"/>
                         <TextBlock Grid.Column="1" Text="{Binding AddressText, Mode=OneWay}" Style="{StaticResource MultiLineTextBlock}"/>
                         <TextBlock Grid.Column="2" Text="{Binding LatestOrderDateText, Mode=OneWay}"/>
                     </Grid>

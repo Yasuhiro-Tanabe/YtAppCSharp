@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:h="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
@@ -10,6 +11,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <h:VisibilityConverter x:Key="positiveConverter"/>
+            <h:NegativeVisivilityConverter x:Key="negativeConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Style="{StaticResource ControlBorderStyle}">
@@ -63,14 +66,14 @@
 
         <TextBlock Grid.Row="7" Grid.Column="0" Text="仕入可能な単品："/>
         <TextBlock Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding PartsText}" Style="{StaticResource MultiLineTextBlock}"/>
-        <Button Grid.Row="7" Grid.Column="3" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisivility}"/>
-        <Button Grid.Row="7" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding ViewModeVisivility}"/>
+        <Button Grid.Row="7" Grid.Column="3" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}"/>
+        <Button Grid.Row="7" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Converter={StaticResource negativeConverter}}"/>
 
 
         <Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="4"
               Margin="10"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-              Visibility="{Binding EditingModeVisivility}">
+              Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20px"/>
                 <RowDefinition Height="150px"/>

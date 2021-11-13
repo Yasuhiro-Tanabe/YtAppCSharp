@@ -13,16 +13,14 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <h:NegativeVisivilityConverter x:Key="negVisConverter"/>
+            <h:VisibilityConverter x:Key="positiveConverter"/>
+            <h:NegativeVisivilityConverter x:Key="negativeConverter"/>
             <h:MinimumDeliveryDateConverter x:Key="deriveryDateConverter"/>
             <h:NameTitleConverter x:Key="titleConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Style="{StaticResource ControlBorderStyle}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="20pt"/>
-            <RowDefinition Height="20pt"/>
-            <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="20pt"/>
@@ -95,32 +93,64 @@
         </ComboBox>
 
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="お届け先："/>
-        <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding ShippingName}"/>
-        <TextBlock Grid.Row="5" Grid.Column="2" Text="様"/>
-        <Button Grid.Row="5" Grid.Column="4" Content="選択..." Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding ShippingAddressListVisivility, Converter={StaticResource negVisConverter}}"/>
-        <Button Grid.Row="5" Grid.Column="4" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding ShippingAddressListVisivility}"/>
+        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" Margin="0" Visibility="{Binding IsListVisible, Converter={StaticResource negativeConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20pt"/>
+                <RowDefinition Height="20pt"/>
+                <RowDefinition Height="20pt"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120px"/>
+                <ColumnDefinition Width="150px"/>
+                <ColumnDefinition Width="80px"/>
+                <ColumnDefinition Width="150px"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="6" Grid.Column="0" Text="住所1："/>
-        <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding Address1}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="お届け先："/>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ShippingName}"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="様"/>
+            <Button Grid.Row="0" Grid.Column="4" Content="選択..." Command="{Binding Edit}" CommandParameter="{Binding}"/>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Text="住所2："/>
-        <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding Address2}"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="住所1："/>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Address1}"/>
 
-        <ListView Grid.Row="6" Grid.Column="0" Grid.RowSpan="3" Grid.ColumnSpan="5" ItemsSource="{Binding ShippingAddresses}" SelectedItem="{Binding SelectedShippingAddress}" Visibility="{Binding ShippingAddressListVisivility}">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="100px"/>
-                            <ColumnDefinition Width="200px"/>
-                        </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="住所2："/>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Address2}"/>
+        </Grid>
+        
+        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" Margin="0" Visibility="{Binding IsListVisible, Converter={StaticResource positiveConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20pt"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120px"/>
+                <ColumnDefinition Width="150px"/>
+                <ColumnDefinition Width="80px"/>
+                <ColumnDefinition Width="150px"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="{Binding Name, Mode=OneWay, Converter={StaticResource titleConverter}}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding AddressText, Mode=OneWay}" Style="{StaticResource MultiLineTextBlock}"/>
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="お届け先："/>
+            <Button Grid.Row="0" Grid.Column="4" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}"/>
+
+            <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" ItemsSource="{Binding ShippingAddresses}" SelectedItem="{Binding SelectedShippingAddress}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100px"/>
+                                <ColumnDefinition Width="200px"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="{Binding NameOfShipping, Mode=OneWay, Converter={StaticResource titleConverter}}"/>
+                            <TextBlock Grid.Column="1" Text="{Binding AddressText, Mode=OneWay}" Style="{StaticResource MultiLineTextBlock}"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
     </Grid>
 </UserControl>

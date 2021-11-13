@@ -2,7 +2,6 @@
 using MemorieDeFleurs.UI.WPF.Commands;
 
 using System;
-using System.Windows;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
@@ -31,9 +30,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
         private string _key;
 
         /// <summary>
-        /// コマンドボタンの可視性
+        /// ボタンを表示する/しているかどうか
         /// </summary>
-        public Visibility ActionVisivility { get { return _isVisible ? Visibility.Visible : Visibility.Collapsed; } }
+        public bool IsActionVisible
+        {
+            get { return _isVisible; }
+            set { SetProperty(ref _isVisible, value); }
+        }
         private bool _isVisible = false;
         #endregion // プロパティ
 
@@ -41,18 +44,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
         public ICommand Remove { get; } = new DeleteFromDatabase();
         public ICommand Detail { get; private set; }
         #endregion // コマンド
-
-        public void ShowCommandButtons()
-        {
-            _isVisible = true;
-            RaisePropertyChanged(nameof(ActionVisivility));
-        }
-
-        public void HideCommandButtons()
-        {
-            _isVisible = false;
-            RaisePropertyChanged(nameof(ActionVisivility));
-        }
 
         public void RemoveMe()
         {
@@ -69,9 +60,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
 
         protected void Update(string key)
         {
-            _key = key;
-            _isVisible = false;
-            RaisePropertyChanged(nameof(Key), nameof(ActionVisivility));
+            Key = key;
+            IsActionVisible = false;
         }
     }
 }

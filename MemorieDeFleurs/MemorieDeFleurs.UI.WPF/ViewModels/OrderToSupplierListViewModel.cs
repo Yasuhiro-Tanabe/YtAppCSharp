@@ -72,31 +72,26 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
                 if (Orders.Count > 0)
                 {
-                    _from = Orders.FirstOrDefault().OrderedDate;
-                    _to = Orders.LastOrDefault().OrderedDate;
+                    From = Orders.FirstOrDefault().OrderedDate;
+                    To = Orders.LastOrDefault().OrderedDate;
                 }
-
-                RaisePropertyChanged(nameof(Orders), nameof(SelectedOrder), nameof(Suppliers), nameof(SelectedSupplier), nameof(From), nameof(To));
             }
             else
             {
-                if (_from > _to)
+                if (To < From)
                 {
-                    _to = _from;
-                    RaisePropertyChanged(nameof(To));
+                    To = From;
                 }
 
                 if (SelectedSupplier.SupplierCode < 1)
                 {
                     // すべての仕入先を選択した
                     UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier(From, To));
-                    RaisePropertyChanged(nameof(Orders), nameof(SelectedOrder));
                 }
                 else
                 {
                     // 特定の仕入先を選択した
                     UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier(From, To, SelectedSupplier.SupplierCode));
-                    RaisePropertyChanged(nameof(Orders), nameof(SelectedOrder));
                 }
 
             }
@@ -136,7 +131,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 detail = new OrderToSupplierDetailViewModel();
                 mainVM.OpenTabItem(detail);
             }
-            detail.ID = SelectedOrder.OrderID;
+            detail.OrderNo = SelectedOrder.OrderNo;
             detail.Update();
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name, $"{detail.GetType().Name} opened.");
             return detail;
@@ -144,7 +139,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         protected override void RemoveSelectedItem(object sender)
         {
-            MemorieDeFleursUIModel.Instance.CancelOrderToSupplier((sender as OrderToSupplierSummaryViewModel).OrderID);
+            MemorieDeFleursUIModel.Instance.CancelOrderToSupplier((sender as OrderToSupplierSummaryViewModel).OrderNo);
             LoadItems();
         }
     }

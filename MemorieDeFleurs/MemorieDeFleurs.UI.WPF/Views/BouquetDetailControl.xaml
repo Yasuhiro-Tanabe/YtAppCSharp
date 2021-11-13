@@ -11,7 +11,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <h:NegativeVisivilityConverter x:Key="negVisConverter"/>
+            <h:VisibilityConverter x:Key="positiveCovnerter"/>
+            <h:NegativeVisivilityConverter x:Key="negativeConverter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid Style="{StaticResource ControlBorderStyle}">
@@ -52,14 +53,14 @@
         <TextBlock Grid.Row="3" Grid.Column="2" Text="日"/>
 
         <TextBlock Grid.Row="4" Grid.Column="0" Text="商品構成："/>
-        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding PartsListString}" Style="{StaticResource MultiLineTextBlock}"/>
-        <Button Grid.Row="4" Grid.Column="3" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisivility}"/>
-        <Button Grid.Row="4" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding EditingModeVisivility, Converter={StaticResource negVisConverter}}"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding PartsListText}" Style="{StaticResource MultiLineTextBlock}"/>
+        <Button Grid.Row="4" Grid.Column="3" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Mode=OneWay,Converter={StaticResource positiveCovnerter}}"/>
+        <Button Grid.Row="4" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Mode=OneWay, Converter={StaticResource negativeConverter}}"/>
 
         <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4"
               Margin="10"
               HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-              Visibility="{Binding EditingModeVisivility}">
+              Visibility="{Binding IsEditing, Mode=OneWay, Converter={StaticResource positiveCovnerter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20px"/>
                 <RowDefinition Height="220px"/>
@@ -73,7 +74,7 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="現在の商品構成"/>
             <TextBlock Grid.Row="0" Grid.Column="2" Text="単品リスト"/>
             
-            <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding SelectedPartListItem}" SelectedItem="{Binding CurrentSelectedInPartsList}">
+            <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding SelectedPartsList}" SelectedItem="{Binding SelectedParts}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -97,7 +98,7 @@
                 <Button Content="＜" Command="{Binding Append}" CommandParameter="{Binding}" Style="{StaticResource AppendButton}"/>
                 <Button Content="＞" Command="{Binding Remove}" CommandParameter="{Binding}" Style="{StaticResource RemoveButton}"/>
             </StackPanel>
-            <ListView Grid.Row="1" Grid.Column="2" ItemsSource="{Binding SelectableParts}" SelectedItem="{Binding CurrentSelectedInSelectablePartsList}">
+            <ListView Grid.Row="1" Grid.Column="2" ItemsSource="{Binding CandidatePartsList}" SelectedItem="{Binding CandidateParts}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>

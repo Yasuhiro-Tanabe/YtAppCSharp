@@ -36,7 +36,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 現在選択中のタブアイテム
         /// </summary>
-        public TabItemControlViewModelBase CurrentItem { get; set; }
+        public TabItemControlViewModelBase CurrentItem
+        {
+            get { return _item; }
+            set { SetProperty(ref _item, value); }
+        }
+        private TabItemControlViewModelBase _item;
         #endregion // プロパティ
 
         #region コマンド
@@ -71,7 +76,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 if (found is ListViewModelBase) { (found as ListViewModelBase).DetailViewOpening += OpenDetailView; }
             }
             CurrentItem = found;
-            RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
         }
 
         public void CloseTabItem(object sender, EventArgs unused)
@@ -87,7 +91,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     if (found is ListViewModelBase) { (found as ListViewModelBase).DetailViewOpening -= OpenDetailView; }
                 }
                 CurrentItem = TabItemControlCollection.FirstOrDefault();
-                RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
                 vm.TabItemControlClosing -= CloseTabItem;
             }
         }
@@ -105,7 +108,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         private void RefreshLogMessage(object unused1, PropertyChangedEventArgs args)
         {
-            if (args.PropertyName.Equals(nameof(LogUtil.Appender.Notification)))
+            if (args.PropertyName == nameof(LogUtil.Appender.Notification))
             {
                 RaisePropertyChanged(nameof(Message));
             }

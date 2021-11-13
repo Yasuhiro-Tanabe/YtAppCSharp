@@ -4,6 +4,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class SupplierPartsViewModel : NotificationObject
     {
+        #region プロパティ
+        /// <summary>
+        /// 花コード
+        /// </summary>
         public string PartsCode
         {
             get { return _code; }
@@ -11,24 +15,26 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private string _code;
 
+        /// <summary>
+        /// 単品名称
+        /// </summary>
         public string PartsName
         {
             get { return _name; }
             set { SetProperty(ref _name, value); }
         }
         private string _name;
+        #endregion // プロパティ
 
         public SupplierPartsViewModel(BouquetPart parts)
         {
-            _code = parts.Code;
-            _name = parts.Name;
-            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName));
+            PartsCode = parts.Code;
+            PartsName = parts.Name;
         }
         public SupplierPartsViewModel(PartSupplier parts)
         {
-            _code = parts.PartCode;
-            _name = parts.Part.Name;
-            RaisePropertyChanged(nameof(PartsCode), nameof(PartsName));
+            PartsCode = parts.PartCode;
+            PartsName = parts.Part.Name;
         }
     }
 }

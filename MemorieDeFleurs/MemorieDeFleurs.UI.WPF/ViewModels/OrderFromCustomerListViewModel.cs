@@ -43,7 +43,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 現在選択中の得意先：「全得意先」を含む
         /// </summary>
-        public CustomerSummaryViewModel SelectedCustomer { get; set; }
+        public CustomerSummaryViewModel SelectedCustomer
+        {
+            get { return _customer; }
+            set { SetProperty(ref _customer, value); }
+        }
+        private CustomerSummaryViewModel _customer;
 
         /// <summary>
         /// 得意先からの注文一覧
@@ -53,7 +58,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 現在選択中の得意先からの注文
         /// </summary>
-        public OrderFromCustomerSummaryViewModel SelectedOrder { get; set; }
+        public OrderFromCustomerSummaryViewModel SelectedOrder
+        {
+            get { return _order; }
+            set { SetProperty(ref _order, value); }
+        }
+        private OrderFromCustomerSummaryViewModel _order;
         #endregion // プロパティ
 
         public override void LoadItems()
@@ -68,32 +78,27 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
                     if(Orders.Count > 0)
                     {
-                        _from = Orders.FirstOrDefault().OrderDate;
-                        _to = Orders.LastOrDefault().OrderDate;
+                        From = Orders.FirstOrDefault().OrderDate;
+                        To = Orders.LastOrDefault().OrderDate;
                     }
-
-                    RaisePropertyChanged(nameof(Orders), nameof(SelectedOrder), nameof(Customers), nameof(SelectedCustomer), nameof(From), nameof(To));
                 }
                 else
                 {
-                    if(_to < _from)
+                    if(To < From)
                     {
-                        _to = _from;
-                        RaisePropertyChanged(nameof(To));
+                        To = From;
                     }
 
                     if(SelectedCustomer.CustomerID < 1)
                     {
                         // すべての得意先を選択した
-                        UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersFromCustomer(_from, _to));
+                        UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersFromCustomer(From, To));
                     }
                     else
                     {
                         // 特定の仕入先を選択した
-                        UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersFromCustomer(_from, _to, SelectedCustomer.CustomerID));
+                        UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersFromCustomer(From, To, SelectedCustomer.CustomerID));
                     }
-
-                    RaisePropertyChanged(nameof(Orders), nameof(SelectedOrder));
                 }
             }
             finally

@@ -25,7 +25,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 {
                     if (item is ListItemViewModelBase)
                     {
-                        (item as ListItemViewModelBase).HideCommandButtons();
+                        (item as ListItemViewModelBase).IsActionVisible = false;
                     }
                 }
             }
@@ -37,7 +37,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                     if (item is ListItemViewModelBase)
                     {
                         var vm = item as ListItemViewModelBase;
-                        vm.ShowCommandButtons();
+                        vm.IsActionVisible = true;
                         LogUtil.Debug($"[{vm.GetType().Name}] {vm.Key} selected.");
                     }
                 }

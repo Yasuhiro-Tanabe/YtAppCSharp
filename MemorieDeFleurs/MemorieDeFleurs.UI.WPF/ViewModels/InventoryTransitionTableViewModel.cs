@@ -49,10 +49,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// </summary>
         public BouquetPartsDetailViewModel SelectedParts
         {
-            get { return _selected; }
+            get { return _parts; }
             set
             {
-                SetProperty(ref _selected, value);
+                SetProperty(ref _parts, value);
                 if(value != null)
                 {
                     BouquetPartsCode = value.PartsCode;
@@ -60,7 +60,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
-        private BouquetPartsDetailViewModel _selected;
+        private BouquetPartsDetailViewModel _parts;
 
         /// <summary>
         /// 現在表示中の単品の花コード
@@ -81,18 +81,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _expirDate, value); }
         }
         private int _expirDate;
-
-        /// <summary>
-        /// 日別在庫推移を表示するためのデータテンプレート
-        /// 
-        /// 単品によって品質維持可能日数が異なるので、プロパティとして用意し単品を切り替える都度変更する。
-        /// </summary>
-        public DataTemplate ColumnsTemplate
-        {
-            get { return _template; }
-            set { SetProperty(ref _template, value); }
-        }
-        private DataTemplate _template;
 
         /// <summary>
         /// 在庫推移表に表示するデータ
@@ -151,7 +139,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 BouquetParts.Add(new BouquetPartsDetailViewModel(p));
             }
             SelectedParts = null;
-            RaisePropertyChanged(nameof(BouquetParts));
         }
 
         public override void LoadItems()
@@ -205,14 +192,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
-        private double InchToPixcell(double inch)
+        private double InchToPixcel(double inch)
         {
             return inch * 96.0;
         }
 
         private double MmToPixcel(double mm)
         {
-            return InchToPixcell(mm / 24.5);
+            return InchToPixcel(mm / 24.5);
         }
         #endregion // IPrintable
     }

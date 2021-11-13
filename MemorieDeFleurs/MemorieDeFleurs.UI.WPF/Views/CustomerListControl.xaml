@@ -13,6 +13,7 @@
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <h:NameTitleConverter x:Key="titleConverter"/>
+            <h:VisibilityConverter x:Key="positiveCovnerter"/>
         </ResourceDictionary>
     </UserControl.Resources>
     <i:Interaction.Triggers>
@@ -51,8 +52,8 @@
 
                         <TextBlock Grid.Column="0" Text="{Binding CustomerID}"/>
                         <TextBlock Grid.Column="1" Text="{Binding CustomerName, Converter={StaticResource titleConverter}}"/>
-                        <Button Grid.Column="3" Content="詳細..." Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding ActionVisivility}"/>
-                        <Button Grid.Column="4" Content="削除" Command="{Binding Remove}" CommandParameter="{Binding}" Visibility="{Binding ActionVisivility}"/>
+                        <Button Grid.Column="3" Content="詳細..." Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
+                        <Button Grid.Column="4" Content="削除" Command="{Binding Remove}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
