@@ -27,7 +27,8 @@
             <MenuItem Header="File">
                 <MenuItem Header="Open..." Command="{Binding Open}" CommandParameter="{Binding}" />
                 <MenuItem Header="Save" Command="{Binding Save}" CommandParameter="{Binding}" />
-                <MenuItem Header="Save As..." Command="{Binding SaveAs}" CommandParameter="{Binding}" />
+                <MenuItem Header="Save As..." Command="{Binding SaveAs}" CommandParameter="{Binding}"/>
+                <MenuItem Header="Exit" Command="{Binding Exit}" CommandParameter="{Binding}"/>
             </MenuItem>
             <MenuItem Header="View">
                 <MenuItem Header="Reload" Command="{Binding Render}" CommandParameter="{Binding}"/>

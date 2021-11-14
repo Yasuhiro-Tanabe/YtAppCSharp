@@ -71,12 +71,14 @@ namespace SVGEditor
         public RenderCommand Render { get; } = new RenderCommand();
         public SaveToFileCommand Save { get; } = new SaveToFileCommand();
         public SaveAsNewFileCommand SaveAs { get; } = new SaveAsNewFileCommand();
+        public ICommand Exit { get; } = new ExitCommand();
         #endregion // コマンド
 
 
 
         public void LoadFile(string fileName)
         {
+            SvgFileName = fileName;
             LoadFileNameSelected?.Invoke(this, new FileNameSelectedEventArgs() { FileName = fileName });
         }
 
@@ -87,6 +89,7 @@ namespace SVGEditor
 
         public void SaveToFile(string fileName)
         {
+            SvgFileName = fileName;
             SaveFileNameSelected?.Invoke(this, new FileNameSelectedEventArgs() { FileName = fileName });
         }
 
