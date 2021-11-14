@@ -13,6 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\MemorieDeFleurs\MemorieDeFleurs.Logging\MemorieDeFleurs.Logging.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="no_images.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
