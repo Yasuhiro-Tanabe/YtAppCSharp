@@ -17,8 +17,7 @@ namespace SVGEditor
             var result = dialog.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                SVGEditorModel.Instance.Save(dialog.FileName);
-                (parameter as MainWindowViewModel).SvgFileName = dialog.FileName;
+                (parameter as MainWindowViewModel).SaveToFile(dialog.FileName);
             }
         }
     }

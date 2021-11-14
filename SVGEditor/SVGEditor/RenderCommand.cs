@@ -6,7 +6,6 @@ namespace SVGEditor
     {
         public override void Execute(object parameter)
         {
-            SVGEditorModel.Instance.RenderCode((parameter as MainWindowViewModel).SvgCode);
         }
     }
 }

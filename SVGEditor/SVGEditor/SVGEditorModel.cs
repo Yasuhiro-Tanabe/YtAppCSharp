@@ -12,88 +12,55 @@ namespace SVGEditor
     internal class SVGEditorModel : NotificationObject
     {
         /// <summary>
-        /// 表示するイメージが無いときに表示する画像
+        /// 表示するイメージが無いときに表示する画像 (SVGファイル)
         /// </summary>
-        private static string NO_IMAGE = "./no_images.png";
-
-
-        #region プロパティ
-        /// <summary>
-        /// ソース：画面で編集中のSVGコード
-        /// </summary>
-        public string SvgCode
-        {
-            get { return _source; }
-            private set { SetProperty(ref _source, value); }
-        }
-        private string _source;
-
-        /// <summary>
-        /// <see cref="SvgCode"/> をレンダリングしたイメージソース
-        /// </summary>
-        public MemoryStream SvgImage
-        {
-            get { return _image; }
-            private set { SetProperty(ref _image, value); }
-        }
-        private MemoryStream _image;
-        #endregion // プロパティ
+        private static string NO_IMAGE_SVG = "./no_images.svg";
 
         private static SVGEditorModel _singleton = new SVGEditorModel();
 
-        private SVGEditorModel()
-        {
-            SvgImage = Render(Bitmap.FromFile(NO_IMAGE));
-        }
+        private SVGEditorModel() { }
 
         public static SVGEditorModel Instance { get; } = _singleton;
 
-
-        public void Save(string svgFileName)
-        {
-            using (var writer = new StreamWriter(svgFileName))
-            {
-                writer.Write(SvgCode);
-                writer.Flush();
-            }
-        }
-
-        public void Load(string svgFileName)
-        {
-            var doc = new XmlDocument() { PreserveWhitespace = true, XmlResolver = null };
-            doc.Load(svgFileName);
-            SvgCode = doc.InnerXml;
-            SvgImage = Render(SvgDocument.Open(doc).Draw());
-        }
-
-
-        private MemoryStream Render(Bitmap bmp)
+        private MemoryStream RenderToStream(Image image)
         {
             var stream = new MemoryStream();
-            bmp.Save(stream, ImageFormat.Bmp);
+            image.Save(stream, ImageFormat.Png);
             stream.Seek(0, SeekOrigin.Begin);
 
             return stream;
         }
 
-        private MemoryStream Render(Image image)
+        private MemoryStream RenderCode(string code)
         {
-            var stream = new MemoryStream();
-            image.Save(stream, ImageFormat.Bmp);
-            stream.Seek(0, SeekOrigin.Begin);
-
-            return stream;
-        }
-
-        public void RenderCode(string code)
-        {
-            SvgCode = code;
+            //SvgCode = code;
 
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(code);
-            
-            SvgImage = Render(SvgDocument.Open(doc).Draw());
+
+            var svg = SvgDocument.Open(doc).Draw();
+            svg.MakeTransparent();
+            return RenderToStream(svg);
         }
 
+        public BitmapImage RenderToImage(string svgCode)
+        {
+            var im = new BitmapImage();
+            im.BeginInit();
+            im.CacheOption = BitmapCacheOption.OnLoad;
+
+            if (string.IsNullOrWhiteSpace(svgCode))
+            {
+                im.StreamSource =  RenderCode(File.ReadAllText(NO_IMAGE_SVG));
+            }
+            else
+            {
+                im.StreamSource = RenderCode(svgCode);
+            }
+
+            im.EndInit();
+
+            return im;
+        }
     }
 }

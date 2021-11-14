@@ -4,7 +4,7 @@
     {
         public override void Execute(object parameter)
         {
-            SVGEditorModel.Instance.Save((parameter as MainWindowViewModel).SvgFileName);
+            (parameter as MainWindowViewModel).SaveToCurrentFile();
         }
     }
 }

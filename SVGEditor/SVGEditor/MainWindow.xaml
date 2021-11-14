@@ -5,11 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SVGEditor"
         xmlns:avalon="http://icsharpcode.net/sharpdevelop/avalonedit"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         Title="{Binding WindowTitle, Mode=OneWay}" Height="600" Width="800">
     <Window.DataContext>
         <local:MainWindowViewModel/>
     </Window.DataContext>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding Loaded}" PassEventArgsToCommand="True"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
@@ -39,7 +45,7 @@
                       HorizontalAlignment="Center" VerticalAlignment="Center"
                       HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                       HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <Image x:Name="SvgImage" Source="{Binding SvgImage, Mode=OneWay}" />
+                <Image Source="{Binding SvgImage, Mode=OneWay}"/>
             </ScrollViewer>
         </Border>
 
