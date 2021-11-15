@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="MemorieDeFleurs.UI.WPF.Views.OrderSheetToSupplier"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
+             xmlns:h="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000">
+    <UserControl.DataContext>
+        <vm:OrderToSupplierDetailViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <h:NameTitleConverter x:Key="nameConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="40pt"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100px"/>
+            <ColumnDefinition Width="100px"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="100px"/>
+            <ColumnDefinition Width="100px"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="3" Text="発注番号："/>
+        <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding OrderNo}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="発注書" FontSize="38pt" TextAlignment="Center"/>
+        <TextBlock Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Text="フレール・メモワール"/>
+        
+        
+    </Grid>
+</UserControl>

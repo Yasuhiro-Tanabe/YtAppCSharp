@@ -45,6 +45,7 @@
             <Button TabIndex="997" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
             <Button TabIndex="998" Content="発注取消" Command="{Binding Cancel}" CommandParameter="{Binding}"/>
             <Button TabIndex="999" Content="納品予定日変更" Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
+            <Button TabIndex="996" Content="印刷..." Command="{Binding PreviewPrint}" CommandParameter="{Binding}"/>
             <Button TabIndex="1000" Content="発注" Command="{Binding Order}" CommandParameter="{Binding}"/>
         </StackPanel>
 

@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable
+    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable, IDialogUser
     {
         public static string Name { get; } = "仕入先発注詳細";
 
@@ -153,7 +154,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Remove { get; } = new RemoveFromListCommand();
         public ICommand Order { get; } = new OrderCommand();
         public ICommand Cancel { get; } = new CancelOrderCommand();
-        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand(); 
+        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
+        public ICommand PreviewPrint { get; } = new OpenDialogCommand();
         #endregion // コマンド
 
         public void Update(OrdersToSupplier order)
@@ -188,7 +190,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public override void Update()
         {
-            if(string.IsNullOrWhiteSpace(_no))
+            if(string.IsNullOrWhiteSpace(OrderNo))
             {
                 throw new ApplicationException("発注番号が指定されていません。");
             }
@@ -364,5 +366,30 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             IsDirty = false;
         }
+
+        #region IUserbleInDialog
+        public void FillDialogParameters(DialogParameter param)
+        {
+            param.DialogTitle = "発注書印刷";
+            param.OkContent = "印刷";
+            param.CancelContent = "キャンセル";
+        }
+
+        public void DialogOK()
+        {
+            LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
+        }
+
+        public void DialogCancel()
+        {
+            LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
+        }
+
+        public void OnDialogOpened()
+        {
+            LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
+            Update();
+        }
+        #endregion
     }
 }
