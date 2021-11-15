@@ -35,7 +35,7 @@
         <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
     </Style>
     
-    <!-- TextBoxk -->
+    <!-- TextBox -->
     <Style TargetType="TextBox">
         <!-- デフォルト：Style 属性を指定しないときに適用されるスタイル -->
         <Setter Property="Margin" Value="5,1"/>
