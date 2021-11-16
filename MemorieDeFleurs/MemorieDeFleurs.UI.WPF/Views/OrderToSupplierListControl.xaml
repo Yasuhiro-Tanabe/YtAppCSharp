@@ -75,8 +75,11 @@
                         <TextBlock Grid.Column="1" Text="{Binding SupplierName, Converter={StaticResource titleConverter}}"/>
                         <TextBlock Grid.Column="2" Text="{Binding ArrivalDateText}"/>
                         <TextBlock Grid.Column="3" Grid.ColumnSpan="3" Text="{Binding OrderParts}" Style="{StaticResource MultiLineTextBlock}" Visibility="{Binding IsActionVisible, Converter={StaticResource negativeConverter}}" />
-                        <Button Grid.Column="4" Content="詳細..." Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
-                        <Button Grid.Column="5" Content="削除" Command="{Binding Remove}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
+                        <StackPanel Grid.Column="4" Grid.ColumnSpan="2" Orientation="Horizontal" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}">
+                            <Button Content="詳細..." Command="{Binding Detail}" CommandParameter="{Binding}"/>
+                            <Button Content="印刷..." Command="{Binding PrintPreview}" CommandParameter="{Binding}"/>
+                            <Button Content="削除" Command="{Binding Remove}" CommandParameter="{Binding}"/>
+                        </StackPanel>
 
                     </Grid>
                 </DataTemplate>

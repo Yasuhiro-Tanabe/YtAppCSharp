@@ -5,6 +5,7 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
 using System.Linq;
+using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -90,6 +91,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private DateTime _ordered;
         #endregion // プロパティ
+
+        #region コマンド
+        public ICommand PrintPreview { get; } = new OpenDialogCommand();
+        #endregion // コマンド
 
         public void Update(OrdersToSupplier order)
         {
