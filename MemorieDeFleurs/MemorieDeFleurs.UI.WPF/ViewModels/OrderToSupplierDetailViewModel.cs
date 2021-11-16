@@ -5,13 +5,11 @@ using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 using MemorieDeFleurs.UI.WPF.Views;
+using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Printing;
-using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
@@ -405,28 +403,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 LogUtil.DEBUGLOG_BeginMethod();
 
-                var w = (5.0 /* [mm] */).MmToPixcel();
-                var h = (10.0 /* [mm] */).MmToPixcel();
-
-                var control = new OrderSheetToSupplier() { DataContext = this, Margin = new Thickness(w, h, w, h) };
-
-                var doc = new FixedDocument();
-                var page = new FixedPage();
-
-                page.Children.Add(control);
-                doc.Pages.Add(new PageContent() { Child = page });
-
-                PrintDocumentImageableArea area = null;
-                var writer = PrintQueue.CreateXpsDocumentWriter(ref area);
-                if (writer != null)
+                if(UserControlPrinter.PrintDocument<OrderSheetToSupplier>(this))
                 {
-                    writer.Write(doc);
                     LogUtil.Info($"Order to supplier {OrderNo} was printed.");
                 }
                 else
                 {
-                    // 何もしない： プリンタ選択ダイアログをキャンセルで閉じると
-                    // CreateXpsDocumentWriter() の戻り値が null になる。このときは印刷を行わずに処理正常終了する。
                     LogUtil.Debug("Canceled printing.");
                 }
             }
