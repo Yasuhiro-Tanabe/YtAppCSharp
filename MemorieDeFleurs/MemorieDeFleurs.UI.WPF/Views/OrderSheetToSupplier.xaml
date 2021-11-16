@@ -24,9 +24,9 @@
     </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20pt"/>
-            <RowDefinition Height="40pt"/>
             <RowDefinition Height="30pt"/>
+            <RowDefinition Height="50pt"/>
+            <RowDefinition Height="40pt"/>
             <RowDefinition Height="20pt"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
@@ -40,12 +40,11 @@
 
         <TextBlock Grid.Row="0" Grid.Column="3" Text="発注番号：" FontSize="12pt"/>
         <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding OrderNo}" FontSize="12pt"/>
-
-        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="発注書" FontSize="38pt" TextAlignment="Center"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2" Text="発注書" FontSize="38pt" TextAlignment="Center"/>
 
         <TextBlock Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Text="フレール・メモワール" FontSize="18pt" Style="{StaticResource MultiLineTextBlock}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding SupplierName, Converter={StaticResource nameConverter}}" FontSize="25pt" TextDecorations="Underline"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding SupplierName, Converter={StaticResource nameConverter}}" FontSize="25pt" TextDecorations="Underline"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Text="＜発注明細＞" TextAlignment="Center" FontSize="18pt"/>
 
