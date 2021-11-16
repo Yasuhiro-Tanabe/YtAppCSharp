@@ -1,0 +1,58 @@
+﻿<UserControl x:Class="MemorieDeFleurs.UI.WPF.Views.ProcessingInstructionControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
+             xmlns:h="clr-namespace:MemorieDeFleurs.UI.WPF.Views.Helpers"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.DataContext>
+        <vm:ProcessingInstructionViewModel/>
+    </UserControl.DataContext>
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <h:LotToQuantityConverter x:Key="totalConverter"/>
+
+            <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="15pt"/>
+            </Style>
+            <Style TargetType="DataGrid" BasedOn="{StaticResource NotEditableDataGrid}">
+                <Setter Property="FontSize" Value="15pt"/>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25px"/>
+            <RowDefinition Height="25px"/>
+            <RowDefinition Height="25px"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100px"/>
+            <ColumnDefinition Width="200px"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="加工日："/>
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProcessingDate, Mode=OneWay, StringFormat={}{0:yyyy}年{0:MM}月{0:dd}日}"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="花束コード："/>
+        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding SelectedBouquetCode, Mode=OneWay}"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="加工数："/>
+        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding NumberOfBouquet, Mode=OneWay}"/>
+
+        <DataGrid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding Parts}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="花コード" Binding="{Binding PartsCode, Mode=OneWay}"/>
+                <DataGridTextColumn Header="花束1つあたりの本数" TextBlock.TextAlignment="Right" Binding="{Binding Quantity, Mode=OneWay}" ElementStyle="{StaticResource NumericTextBlock}"/>
+                <DataGridTextColumn Header="合計本数" TextBlock.TextAlignment="Right" Binding="{Binding Mode=OneWay, Converter={StaticResource totalConverter}}" ElementStyle="{StaticResource NumericTextBlock}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

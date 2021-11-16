@@ -36,6 +36,7 @@
                 </MenuItem>
                 <MenuItem Header="印刷...">
                     <MenuItem Header="在庫推移表" Command="{Binding OpenInventoryTransactionView}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="加工指示書" Command="{Binding OpenProcessingInstructionsPreview}" CommandParameter="{Binding}"/>
                 </MenuItem>
                 <MenuItem Header="終了" Command="{Binding Exit}" CommandParameter="{Binding}"/>
             </MenuItem>
@@ -102,6 +103,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:InventoryTransitionTableViewModel}">
                     <v:InvenetoryTransitionTablePreviewControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:ProcessingInstructionViewModel}">
+                    <v:ProcessingInstructionPreviewControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>

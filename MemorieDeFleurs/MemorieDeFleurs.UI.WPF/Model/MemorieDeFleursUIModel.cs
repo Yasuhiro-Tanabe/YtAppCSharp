@@ -355,12 +355,21 @@ namespace MemorieDeFleurs.UI.WPF.Model
         }
         #endregion // お届け先の操作
 
-        #region
+        #region 在庫推移表
         public InventoryTransitionTable CreateInventoryTransitionTable(string partsCode, DateTime from, DateTime to)
         {
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             return Model.CreateInventoryTransitionTable(partsCode, from, (to - from).Days);
         }
-        #endregion
+        #endregion // 在庫推移表
+
+        #region 加工指示書
+        public int GetNumberOfProcessingBouquetsOf(string bouquet, DateTime date)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.BouquetModel.GetNumberOfProcessingBouquetsOf(bouquet, date);
+
+        }
+        #endregion // 加工指示書
     }
 }
