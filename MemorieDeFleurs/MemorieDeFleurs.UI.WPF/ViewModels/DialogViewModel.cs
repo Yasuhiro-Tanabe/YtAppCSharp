@@ -41,12 +41,23 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// ダイアログ中に表示するビューのビューモデル
         /// </summary>
-        public IDialogUser ViewModel
+        public NotificationObject ViewModel
         {
             get { return _vm; }
-            set { SetProperty(ref _vm, value); }
+            set {
+                SetProperty(ref _vm, value);
+                RaisePropertyChanged(nameof(DialogUser));
+            }
         }
-        private IDialogUser _vm;
+        private NotificationObject _vm;
+
+        /// <summary>
+        /// ダイアログに関する操作を行うビューモデル：実体は <see cref="ViewModel"/> と同じオブジェクト
+        /// </summary>
+        public IDialogUser DialogUser
+        {
+            get { return _vm as IDialogUser; }
+        }
         #endregion // プロパティ
 
         #region コマンド
@@ -59,13 +70,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             LogUtil.DEBUGLOG_BeginMethod();
             var param = new DialogParameter();
-            ViewModel.FillDialogParameters(param);
+            DialogUser.FillDialogParameters(param);
 
             DialogTitle = param.DialogTitle;
             OkContent = param.OkContent;
             CancelContent = param.CancelContent;
-            RaisePropertyChanged(nameof(ViewModel));
-            ViewModel.OnDialogOpened();
             LogUtil.DEBUGLOG_EndMethod();
         }
     }

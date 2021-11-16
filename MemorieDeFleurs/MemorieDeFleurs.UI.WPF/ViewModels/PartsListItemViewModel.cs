@@ -46,6 +46,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _leadtime, value); }
         }
         private int _leadtime;
+
+        public int QuantityPerLot
+        {
+            get { return _quantityPerLot; }
+            set { SetProperty(ref _quantityPerLot, value); }
+        }
+        private int _quantityPerLot;
         #endregion // プロパティ
 
         public PartsListItemViewModel(BouquetPartsList item)
@@ -54,6 +61,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             PartsName = item.Part.Name;
             Quantity = item.Quantity;
             LeadTime = item.Part.LeadTime;
+            QuantityPerLot = item.Part.QuantitiesPerLot;
         }
 
         public PartsListItemViewModel(BouquetPart parts)
@@ -62,6 +70,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             PartsName = parts.Name;
             Quantity = 0;
             LeadTime = parts.LeadTime;
+            QuantityPerLot = parts.QuantitiesPerLot;
         }
 
         public PartsListItemViewModel(OrderDetailsToSupplier detail)
@@ -70,6 +79,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             PartsName = detail.BouquetPart.Name;
             Quantity = detail.LotCount;
             LeadTime = detail.BouquetPart.LeadTime;
+            QuantityPerLot = detail.BouquetPart.QuantitiesPerLot;
         }
     }
 }

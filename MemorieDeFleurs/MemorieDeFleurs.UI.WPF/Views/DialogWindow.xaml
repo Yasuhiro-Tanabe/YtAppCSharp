@@ -27,15 +27,13 @@
             <RowDefinition Height="20pt"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <UserControl Grid.Row="0" DataContext="{Binding ViewModel}">
-                <UserControl.ContentTemplate>
-                    <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
-                        <v:OrderSheetToSupplier/>
-                    </DataTemplate>
-                </UserControl.ContentTemplate>
-            </UserControl>
-        </ScrollViewer>
+        <ContentControl Grid.Row="0" Content="{Binding ViewModel}">
+            <ContentControl.ContentTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
+                    <v:OrderSheetToSupplier DataContext="{Binding}"/>
+                </DataTemplate>
+            </ContentControl.ContentTemplate>
+        </ContentControl>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
             <Button Content="{Binding OkContent}" Command="{Binding Ok}" CommandParameter="{Binding ElementName=DialogView}"/>

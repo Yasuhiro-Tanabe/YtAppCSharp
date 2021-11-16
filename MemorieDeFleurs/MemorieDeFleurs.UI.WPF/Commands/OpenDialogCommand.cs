@@ -15,7 +15,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                 dialog.DataContext = new DialogViewModel();
             }
 
-            (dialog.DataContext as DialogViewModel).ViewModel = parameter as IDialogUser;
+            (dialog.DataContext as DialogViewModel).ViewModel = parameter as NotificationObject;
             dialog.ShowDialog();
         }
     }

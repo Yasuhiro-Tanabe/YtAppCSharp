@@ -12,7 +12,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             var dialog = parameter as DialogWindow;
             if(dialog != null)
             {
-                (dialog.DataContext as DialogViewModel).ViewModel.DialogOK();
+                (dialog.DataContext as DialogViewModel).DialogUser.DialogOK();
                 dialog.Close();
             }
         }

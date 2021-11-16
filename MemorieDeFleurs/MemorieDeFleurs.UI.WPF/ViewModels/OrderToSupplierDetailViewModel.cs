@@ -204,6 +204,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 else
                 {
                     Update(found);
+                    LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}, {OrderPartsText}");
                 }
             }
         }
