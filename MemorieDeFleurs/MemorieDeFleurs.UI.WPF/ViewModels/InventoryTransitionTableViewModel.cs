@@ -153,9 +153,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if (ExpiryDate == 0) { throw new ApplicationException($"品質維持可能日数が0日です。{BouquetPartsCode} ({SelectedParts.PartsName}) の品質維持可能日数が設定されているか確認してください。"); }
             try
             {
+                LogUtil.DEBUGLOG_BeginMethod();
+
+                var w = (5.0 /* [mm] */).MmToPixcel();
+                var h = (10.0 /* [mm] */).MmToPixcel();
+
                 var control = new InventoryTransitionTableControl();
                 control.DataContext = this;
-                control.Margin = new Thickness(MmToPixcel(5.0), MmToPixcel(10.0), MmToPixcel(5.0), MmToPixcel(10.0));
+                control.Margin = new Thickness(w, h, w, h);
 
                 // control 内の在庫推移表 DataGrid を作り直すため PropertyChanged イベントを強制発行する。
                 RaisePropertyChanged(nameof(InventoryTransitions));
@@ -179,8 +184,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     // CreateXpsDocumentWriter() の戻り値が null になる。このときは印刷を行わずに処理正常終了する。
                     LogUtil.Debug("Canceled printing.");
                 }
-
-                LogUtil.DEBUGLOG_BeginMethod();
             }
             catch(Exception ex)
             {
@@ -190,16 +193,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 LogUtil.DEBUGLOG_EndMethod();
             }
-        }
-
-        private double InchToPixcel(double inch)
-        {
-            return inch * 96.0;
-        }
-
-        private double MmToPixcel(double mm)
-        {
-            return InchToPixcel(mm / 24.5);
         }
         #endregion // IPrintable
     }
