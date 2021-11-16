@@ -4,15 +4,19 @@ using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
+using MemorieDeFleurs.UI.WPF.Views;
 
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Printing;
+using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable, IDialogUser
+    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable, IDialogUser, IPrintable
     {
         public static string Name { get; } = "仕入先発注詳細";
 
@@ -368,7 +372,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             IsDirty = false;
         }
 
-        #region IUserbleInDialog
+        #region IDialogUser
         public void FillDialogParameters(DialogParameter param)
         {
             param.DialogTitle = "発注書印刷";
@@ -379,6 +383,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void DialogOK()
         {
             LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
+            PrintDocument();
         }
 
         public void DialogCancel()
@@ -391,6 +396,50 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
             Update();
         }
-        #endregion
+        #endregion // IDialogUser
+
+        #region IPrintable
+        public void PrintDocument()
+        {
+            try
+            {
+                LogUtil.DEBUGLOG_BeginMethod();
+
+                var w = (5.0 /* [mm] */).MmToPixcel();
+                var h = (10.0 /* [mm] */).MmToPixcel();
+
+                var control = new OrderSheetToSupplier() { DataContext = this, Margin = new Thickness(w, h, w, h) };
+
+                var doc = new FixedDocument();
+                var page = new FixedPage();
+
+                page.Children.Add(control);
+                doc.Pages.Add(new PageContent() { Child = page });
+
+                PrintDocumentImageableArea area = null;
+                var writer = PrintQueue.CreateXpsDocumentWriter(ref area);
+                if (writer != null)
+                {
+                    writer.Write(doc);
+                    LogUtil.Info($"Order to supplier {OrderNo} was printed.");
+                }
+                else
+                {
+                    // 何もしない： プリンタ選択ダイアログをキャンセルで閉じると
+                    // CreateXpsDocumentWriter() の戻り値が null になる。このときは印刷を行わずに処理正常終了する。
+                    LogUtil.Debug("Canceled printing.");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUtil.Warn(ex);
+                throw;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
+        }
+        #endregion // IPrintable
     }
 }
