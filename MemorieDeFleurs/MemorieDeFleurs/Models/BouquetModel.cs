@@ -1421,6 +1421,23 @@ namespace MemorieDeFleurs.Models
 
         #region 出荷数量変更
         /// <summary>
+        /// 指定日の商品加工数量を取得する
+        /// </summary>
+        /// <param name="bouquet">加工対象の花コード</param>
+        /// <param name="date">加工数量取得日</param>
+        /// <returns></returns>
+        public int GetNumberOfProcessingBouquetsOf(string bouquet, DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.OrderFromCustomers
+                    .Where(o => o.ShippingDate == date)
+                    .Where(o => o.BouquetCode == bouquet)
+                    .Count();
+            }
+        }
+
+        /// <summary>
         /// 指定日付の全受注に対し出荷確定処理を行う：
         /// 
         /// 受注ステータスを「出荷済(SHIPPED)」に変更する

@@ -8,6 +8,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MemorieDeFleursTest.ScenarioTest
@@ -21,6 +22,16 @@ namespace MemorieDeFleursTest.ScenarioTest
         private static SqliteConnection TestDB { get; set; }
         private MemorieDeFleursModel Model { get; set; }
 
+        private IDictionary<DateTime, IDictionary<string, int>> ExpectedNumberObOrderedBouquets { get; } = new SortedDictionary<DateTime, IDictionary<string, int>>()
+        {
+            { DateConst.April30th, new SortedDictionary<string,int>() { {"HT001", 5}, {"HT004", 3}, {"HT005", 4} } } ,
+            { DateConst.May1st, new SortedDictionary<string, int>() { {"HT001", 5}, {"HT003",3}, {"HT004",1}, {"HT005", 2}, {"HT006", 5} } },
+            { DateConst.May2nd, new SortedDictionary<string, int>() { { "HT001", 4 }, { "HT002", 2 }, { "HT004", 4 }, { "HT006", 3 }, { "HT007", 1 } }},
+            { DateConst.May3rd, new SortedDictionary<string, int>() { { "HT001", 2 }, { "HT002", 4 }, { "HT003", 2 }, { "HT004", 2 }, { "HT005", 4 } }},
+            { DateConst.May4th, new SortedDictionary<string, int>() { { "HT003", 3 }, { "HT007", 10 } } },
+            { DateConst.May5th, new SortedDictionary<string, int>() { { "HT001", 5 }, { "HT006", 5 }, { "HT007", 3 } } },
+            { DateConst.May6th, new SortedDictionary<string, int>() { { "HT001", 4 }, { "HT004", 6 }, { "HT006", 4 } } },
+        };
 
         #region テストの初期化終了
         [ClassInitialize]
@@ -48,10 +59,25 @@ namespace MemorieDeFleursTest.ScenarioTest
         }
         #endregion // テストの初期化終了
 
+        private void AssertNumberOfOrderedBouquets(DateTime date)
+        {
+            var allBouquets = new string[] { "HT001", "HT002", "HT003", "HT004", "HT005", "HT006", "HT007" };
+            foreach(var expected in ExpectedNumberObOrderedBouquets[date])
+            {
+                Assert.AreEqual(expected.Value, Model.BouquetModel.GetNumberOfProcessingBouquetsOf(expected.Key, date), $"{date:yyyyMMdd}, 商品 {expected.Key} の加工数が一致しない");
+            }
+            foreach (var notExpected in allBouquets.Where(c => !ExpectedNumberObOrderedBouquets[date].ContainsKey(c)))
+            {
+                Assert.AreEqual(0, Model.BouquetModel.GetNumberOfProcessingBouquetsOf(notExpected, date), $"{date:yyyyMMdd}, 商品 {notExpected} が加工されている");
+            }
+
+        }
 
         [TestMethod]
         public void AtApril30th()
         {
+            AssertNumberOfOrderedBouquets(DateConst.April30th);
+
             var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.April30th);
 
             Model.SupplierModel.OrdersAreArrived(DateConst.April30th, orders.ToArray());
@@ -119,6 +145,8 @@ namespace MemorieDeFleursTest.ScenarioTest
         [TestMethod]
         public void AtMay1st()
         {
+            AssertNumberOfOrderedBouquets(DateConst.May1st);
+
             var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May1st);
 
             Model.SupplierModel.OrdersAreArrived(DateConst.May1st, orders.ToArray());
@@ -190,6 +218,8 @@ namespace MemorieDeFleursTest.ScenarioTest
         [TestMethod]
         public void AtMay2nd()
         {
+            AssertNumberOfOrderedBouquets(DateConst.May2nd);
+
             var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May2nd);
 
             Model.SupplierModel.OrdersAreArrived(DateConst.May2nd, orders.ToArray());
@@ -281,6 +311,8 @@ namespace MemorieDeFleursTest.ScenarioTest
         [TestMethod]
         public void AtMay3rd()
         {
+            AssertNumberOfOrderedBouquets(DateConst.May3rd);
+
             var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May3rd);
 
             Model.SupplierModel.OrdersAreArrived(DateConst.May3rd, orders.ToArray());
@@ -398,6 +430,8 @@ namespace MemorieDeFleursTest.ScenarioTest
         [TestMethod]
         public void AtMay4th()
         {
+            AssertNumberOfOrderedBouquets(DateConst.May4th);
+
             var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May4th);
 
             Model.SupplierModel.OrdersAreArrived(DateConst.May4th, orders.ToArray());
@@ -488,6 +522,8 @@ namespace MemorieDeFleursTest.ScenarioTest
         [TestMethod]
         public void AtMay5th()
         {
+            AssertNumberOfOrderedBouquets(DateConst.May5th);
+
             var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May5th);
 
             Model.SupplierModel.OrdersAreArrived(DateConst.May5th, orders.ToArray());
@@ -586,6 +622,8 @@ namespace MemorieDeFleursTest.ScenarioTest
         [TestMethod]
         public void AtMay6th()
         {
+            AssertNumberOfOrderedBouquets(DateConst.May6th);
+
             var orders = Model.SupplierModel.FindAllOrdersAt(DateConst.May6th);
 
             Model.SupplierModel.OrdersAreArrived(DateConst.May6th, orders.ToArray());
