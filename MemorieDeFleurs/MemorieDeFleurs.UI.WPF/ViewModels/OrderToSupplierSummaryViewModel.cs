@@ -9,10 +9,11 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    internal class OrderToSupplierSummaryViewModel : ListItemViewModelBase
+    internal class OrderToSupplierSummaryViewModel : ListItemViewModelBase, IReloadable
     {
         public OrderToSupplierSummaryViewModel(OrdersToSupplier order) : base(new OpenOrderToSupplierDetailViewCommand())
         {
+            OrderNo = order.ID;
             Update(order);
         }
 
@@ -96,13 +97,34 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand PrintPreview { get; } = new OpenDialogCommand();
         #endregion // コマンド
 
-        public void Update(OrdersToSupplier order)
+        #region IReloadabe
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            OrderNo = order.ID;
+            if(string.IsNullOrWhiteSpace(OrderNo))
+            {
+                throw new ApplicationException("発注番号が指定されていません。");
+            }
+            else
+            {
+                var order = MemorieDeFleursUIModel.Instance.FindOrderToSupplier(OrderNo);
+                if(order == null)
+                {
+                    throw new ApplicationException($"該当する発注情報がありません：{OrderNo}");
+                }
+                else
+                {
+                    Update(order);
+                }
+            }
+        }
+        private void Update(OrdersToSupplier order)
+        {
             SupplierName = MemorieDeFleursUIModel.Instance.FindSupplier(order.Supplier).Name;
             OrderParts = string.Join(", ", order.Details.Select(i => $"{i.PartsCode} x{i.LotCount}"));
             ArrivalDate = order.DeliveryDate;
             OrderedDate = order.OrderDate;
         }
+        #endregion // IReloadable
     }
 }

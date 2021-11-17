@@ -16,7 +16,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class ProcessingInstructionViewModel : DetailViewModelBase, IPrintable
+    public class ProcessingInstructionViewModel : DetailViewModelBase, IPrintable, IReloadable
     {
         public ProcessingInstructionViewModel() : base("加工指示書") { }
 
@@ -76,16 +76,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Print { get; } = new PrintCommand();
         #endregion // コマンド
 
-        public override void Update()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(SelectedBouquet == null)
+            if (SelectedBouquet == null)
             {
                 Cleanup();
             }
             else
             {
                 var found = MemorieDeFleursUIModel.Instance.FindBouquet(SelectedBouquet.BouquetCode);
-                if(found == null)
+                if (found == null)
                 {
                     throw new ApplicationException($"該当する商品が見つかりません：{SelectedBouquet.BouquetCode}");
                 }
@@ -107,7 +109,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private void LoadBouquets()
         {
             Bouquets.Clear();
-            foreach(var bouquet in MemorieDeFleursUIModel.Instance.FindAllBouquets())
+            foreach (var bouquet in MemorieDeFleursUIModel.Instance.FindAllBouquets())
             {
                 Bouquets.Add(new BouquetSummaryViewModel(bouquet));
             }
@@ -124,6 +126,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(Parts));
         }
 
+        #endregion // IReloadable
+
         #region IPrintable
         public void PrintDocument()
         {
@@ -131,7 +135,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 LogUtil.DEBUGLOG_BeginMethod();
 
-                if(UserControlPrinter.PrintDocument<ProcessingInstructionControl>(this))
+                if (UserControlPrinter.PrintDocument<ProcessingInstructionControl>(this))
                 {
                     LogUtil.Info($"Processing instructionsheet ({ProcessingDate:yyyyMMdd}, {SelectedBouquetCode}) printed.");
                 }
@@ -140,7 +144,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     LogUtil.Info($"Printing canceled.");
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogUtil.Warn(ex);
             }

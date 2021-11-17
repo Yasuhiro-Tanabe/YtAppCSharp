@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class SupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable
+    public class SupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IReloadable
     {
         public static string Name { get; } = "仕入先詳細";
 
@@ -176,16 +176,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             IsDirty = false;
         }
 
-        public override void Update()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(SupplierCode == 0)
+            if (SupplierCode == 0)
             {
                 throw new ApplicationException($"仕入先コードが指定されていません。");
             }
             else
             {
                 var supplier = MemorieDeFleursUIModel.Instance.FindSupplier(SupplierCode);
-                if(supplier == null)
+                if (supplier == null)
                 {
                     throw new ApplicationException($"該当する仕入先がありません。");
                 }
@@ -195,6 +197,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
+        #endregion // IReloadable
 
         public override void Validate()
         {

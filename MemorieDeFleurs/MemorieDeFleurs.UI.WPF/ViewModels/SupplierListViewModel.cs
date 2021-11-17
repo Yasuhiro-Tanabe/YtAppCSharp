@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
@@ -6,7 +7,7 @@ using System.Collections.ObjectModel;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class SupplierListViewModel : ListViewModelBase
+    public class SupplierListViewModel : ListViewModelBase, IReloadable
     {
         public SupplierListViewModel() : base("仕入先一覧") { }
 
@@ -27,25 +28,28 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private SupplierSummaryViewModel _supplier;
         #endregion // プロパティ
 
-        public override void LoadItems()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
             Suppliers.Clear();
-            foreach(var s in MemorieDeFleursUIModel.Instance.FindAllSuppliers())
+            foreach (var s in MemorieDeFleursUIModel.Instance.FindAllSuppliers())
             {
                 var vm = new SupplierSummaryViewModel(s);
                 Subscribe(vm);
                 Suppliers.Add(vm);
             }
             CurrentSupplier = null;
-            RaisePropertyChanged(nameof(Suppliers), nameof(CurrentSupplier));
+            RaisePropertyChanged(nameof(Suppliers));
         }
+        #endregion // IReloadable
 
         protected override void RemoveSelectedItem(object sender)
         {
             var vm = sender as SupplierSummaryViewModel;
             MemorieDeFleursUIModel.Instance.RemoveSupplier(vm.SupplierCode);
             LogUtil.Debug($"{vm.SupplierCode} deleted.");
-            LoadItems();
+            UpdateProperties();
         }
 
         public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
@@ -58,7 +62,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 mainVM.OpenTabItem(detail);
             }
             detail.SupplierCode = CurrentSupplier.SupplierCode;
-            detail.Update();
+            detail.UpdateProperties();
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name, $"{detail.GetType().Name} opened.");
             return detail;
         }

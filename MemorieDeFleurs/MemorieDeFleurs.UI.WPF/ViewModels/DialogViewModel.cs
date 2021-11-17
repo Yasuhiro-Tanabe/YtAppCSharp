@@ -5,7 +5,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    internal class DialogViewModel : NotificationObject
+    internal class DialogViewModel : NotificationObject, IReloadable
     {
         #region プロパティ
         /// <summary>
@@ -66,16 +66,25 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Cancel { get; } = new DialogCancelCommand();
         #endregion // コマンド
 
-        public void UpdateDialogParameter()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            LogUtil.DEBUGLOG_BeginMethod();
-            var param = new DialogParameter();
-            DialogUser.FillDialogParameters(param);
+            try
+            {
+                LogUtil.DEBUGLOG_BeginMethod();
+                var param = new DialogParameter();
+                DialogUser.FillDialogParameters(param);
 
-            DialogTitle = param.DialogTitle;
-            OkContent = param.OkContent;
-            CancelContent = param.CancelContent;
-            LogUtil.DEBUGLOG_EndMethod();
+                DialogTitle = param.DialogTitle;
+                OkContent = param.OkContent;
+                CancelContent = param.CancelContent;
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
         }
+        #endregion // IReloadable
     }
 }

@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class InventoryTransitionTableViewModel : ListViewModelBase, IPrintable
+    public class InventoryTransitionTableViewModel : ListViewModelBase, IPrintable, IReloadable
     {
         public InventoryTransitionTableViewModel() : base("在庫推移表") { }
 
@@ -91,15 +91,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand UpdateTable { get; } = new InventoryTransitionTableChangedCommand();
         #endregion // コマンド
 
-        public void Update()
+
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(SelectedParts == null)
+            if (SelectedParts == null)
             {
                 Cleanup();
             }
             else
             {
-                if(To < From)
+                if (To < From)
                 {
                     To = From;
                 }
@@ -109,6 +112,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 UpdateInventoryTransitions(table);
             }
         }
+        #endregion // IReloadable
 
         private void UpdateInventoryTransitions(Models.InventoryTransitionTable table)
         {
@@ -137,11 +141,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 BouquetParts.Add(new BouquetPartsDetailViewModel(p));
             }
             SelectedParts = null;
-        }
-
-        public override void LoadItems()
-        {
-            Update();
         }
 
         #region IPrintable

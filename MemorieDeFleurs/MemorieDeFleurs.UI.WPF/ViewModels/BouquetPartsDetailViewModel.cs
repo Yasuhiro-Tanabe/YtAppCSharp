@@ -1,5 +1,6 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
@@ -9,7 +10,7 @@ using System.Windows;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetPartsDetailViewModel : DetailViewModelBase
+    public class BouquetPartsDetailViewModel : DetailViewModelBase, IReloadable
     {
         public static string Name { get; } = "単品詳細";
         public BouquetPartsDetailViewModel() : base(Name) { }
@@ -111,18 +112,20 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if(result.ValidationErrors.Count > 0) { throw result; }
         }
 
-        public override void Update()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(string.IsNullOrWhiteSpace(PartsCode))
+            if (string.IsNullOrWhiteSpace(PartsCode))
             {
-                MessageBox.Show("花コードが指定されていません。", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                throw new ApplicationException("花コードが指定されていません。");
             }
             else
             {
                 var parts = MemorieDeFleursUIModel.Instance.FindBouquetParts(PartsCode);
-                if(parts == null)
+                if (parts == null)
                 {
-                    MessageBox.Show($"花コードに該当する単品が登録されていません：{PartsCode}", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    throw new ApplicationException($"花コードに該当する単品が登録されていません：{PartsCode}");
                 }
                 else
                 {
@@ -130,6 +133,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
+        #endregion // IReloadable
 
         public override void SaveToDatabase()
         {

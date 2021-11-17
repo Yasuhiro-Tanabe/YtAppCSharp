@@ -45,6 +45,6 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             LogUtil.DEBUGLOG_EndMethod();
         }
 
-        private static void ReloadItems(object parameter) => (parameter as OrderToSupplierListViewModel).LoadItems();
+        private static void ReloadItems(object parameter) => (parameter as OrderToSupplierListViewModel).UpdateProperties();
     }
 }

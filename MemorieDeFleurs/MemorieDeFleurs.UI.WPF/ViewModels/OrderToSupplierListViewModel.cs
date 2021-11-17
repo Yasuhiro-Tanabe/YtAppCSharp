@@ -1,5 +1,6 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
@@ -10,7 +11,7 @@ using System.Linq;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    internal class OrderToSupplierListViewModel : ListViewModelBase
+    internal class OrderToSupplierListViewModel : ListViewModelBase, IReloadable
     {
         public OrderToSupplierListViewModel() : base("仕入先発注一覧") { }
 
@@ -61,43 +62,51 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public SupplierSummaryViewModel SelectedSupplier { get; set; }
         #endregion // プロパティ
 
-        public override void LoadItems()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            LogUtil.DEBUGLOG_BeginMethod();
-            if (SelectedSupplier == null)
+            try
             {
-                // 初期表示
-                UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier());
-                UpdateSuppliers();
+                LogUtil.DEBUGLOG_BeginMethod();
+                if (SelectedSupplier == null)
+                {
+                    // 初期表示
+                    UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier());
+                    UpdateSuppliers();
 
-                if (Orders.Count > 0)
-                {
-                    From = Orders.FirstOrDefault().OrderedDate;
-                    To = Orders.LastOrDefault().OrderedDate;
-                }
-            }
-            else
-            {
-                if (To < From)
-                {
-                    To = From;
-                }
-
-                if (SelectedSupplier.SupplierCode < 1)
-                {
-                    // すべての仕入先を選択した
-                    UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier(From, To));
+                    if (Orders.Count > 0)
+                    {
+                        From = Orders.FirstOrDefault().OrderedDate;
+                        To = Orders.LastOrDefault().OrderedDate;
+                    }
                 }
                 else
                 {
-                    // 特定の仕入先を選択した
-                    UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier(From, To, SelectedSupplier.SupplierCode));
+                    if (To < From)
+                    {
+                        To = From;
+                    }
+
+                    if (SelectedSupplier.SupplierCode < 1)
+                    {
+                        // すべての仕入先を選択した
+                        UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier(From, To));
+                    }
+                    else
+                    {
+                        // 特定の仕入先を選択した
+                        UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier(From, To, SelectedSupplier.SupplierCode));
+                    }
+
                 }
-
             }
-            LogUtil.DEBUGLOG_EndMethod(msg: $"{SelectedSupplier.SupplierName}, {From:yyyyMMdd} ～ {To:yyyyMMdd}");
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod(msg: $"{SelectedSupplier.SupplierName}, {From:yyyyMMdd} ～ {To:yyyyMMdd}");
+            }
         }
-
+        #endregion // IReloadable
         private void UpdateSuppliers()
         {
             var foundSuppliers = MemorieDeFleursUIModel.Instance.FindAllSuppliers();
@@ -132,7 +141,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 mainVM.OpenTabItem(detail);
             }
             detail.OrderNo = SelectedOrder.OrderNo;
-            detail.Update();
+            detail.UpdateProperties();
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name, $"{detail.GetType().Name} opened.");
             return detail;
         }
@@ -140,7 +149,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         protected override void RemoveSelectedItem(object sender)
         {
             MemorieDeFleursUIModel.Instance.CancelOrderToSupplier((sender as OrderToSupplierSummaryViewModel).OrderNo);
-            LoadItems();
+            UpdateProperties();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         public OpenDialogCommand() : base()
         {
             AddAction(typeof(IDialogUser), Open);
-            AddAction(typeof(OrderToSupplierSummaryViewModel), OpeOrderToSupplierPrintPreviewDialog);
+            AddAction(typeof(IReloadable), OpeOrderToSupplierPrintPreviewDialog);
         }
 
         private static void Open(object parameter)
@@ -33,7 +33,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
             var summaryVM = parameter as OrderToSupplierSummaryViewModel;
             var detailVM = new OrderToSupplierDetailViewModel() { OrderNo = summaryVM.OrderNo };
-            detailVM.Update();
+            detailVM.UpdateProperties();
 
             (dialog.DataContext as DialogViewModel).ViewModel = detailVM;
             dialog.ShowDialog();

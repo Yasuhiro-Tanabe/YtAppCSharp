@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderFromCustomerDetailViewModel : DetailViewModelBase, IEditableAndFixable, IOrderable
+    public class OrderFromCustomerDetailViewModel : DetailViewModelBase, IEditableAndFixable, IOrderable, IReloadable
     {
         public static string Name { get; } = "得意先受注詳細";
 
@@ -221,16 +221,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
-        public override void Update()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(string.IsNullOrWhiteSpace(OrderNo))
+            if (string.IsNullOrWhiteSpace(OrderNo))
             {
                 throw new ApplicationException("受注番号が指定されていません。");
             }
             else
             {
                 var found = MemorieDeFleursUIModel.Instance.FindOrdersFromCustomer(OrderNo);
-                if(found == null)
+                if (found == null)
                 {
                     throw new ApplicationException($"該当する受注履歴がありません：{OrderNo}");
                 }
@@ -240,6 +242,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
+        #endregion // IReloadable
 
         public override void ClearProperties()
         {
@@ -363,7 +366,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 };
 
                 OrderNo = MemorieDeFleursUIModel.Instance.OrderFromCustomer(order, ArrivalDate);
-                Update();
+                UpdateProperties();
             }
             else
             {

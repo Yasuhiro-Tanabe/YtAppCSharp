@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable
+    public class BouquetDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IReloadable
     {
         public static string Name { get; } = "商品詳細";
         public BouquetDetailViewModel() : base(Name) { }
@@ -236,16 +236,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IAddableRemovbable
 
-        public override void Update()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(string.IsNullOrWhiteSpace(BouquetCode))
+            if (string.IsNullOrWhiteSpace(BouquetCode))
             {
                 throw new ApplicationException("花束コードが指定されていません。");
             }
             else
             {
                 var bouquet = MemorieDeFleursUIModel.Instance.FindBouquet(BouquetCode);
-                if(bouquet == null)
+                if (bouquet == null)
                 {
                     throw new ApplicationException($"花束コードに該当する商品がありません：{BouquetCode}");
                 }
@@ -255,6 +257,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
+        #endregion // IReloadable
 
         public override void SaveToDatabase()
         {

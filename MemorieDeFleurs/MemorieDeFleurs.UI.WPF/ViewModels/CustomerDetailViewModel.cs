@@ -1,5 +1,6 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
@@ -9,7 +10,7 @@ using System.Collections.ObjectModel;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class CustomerDetailViewModel : DetailViewModelBase
+    public class CustomerDetailViewModel : DetailViewModelBase, IReloadable
     {
         public static string Name { get; } = "得意先詳細";
         public CustomerDetailViewModel() : base(Name) { }
@@ -104,16 +105,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if(ex.ValidationErrors.Count > 0) { throw ex; }
         }
 
-        public override void Update()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(CustomerID == 0)
+            if (CustomerID == 0)
             {
                 throw new ApplicationException($"得意先IDが入力されていません。");
             }
             else
             {
                 var customer = MemorieDeFleursUIModel.Instance.FindCustomer(CustomerID);
-                if(customer == null)
+                if (customer == null)
                 {
                     throw new ApplicationException($"該当する得意先がありません: ID={CustomerID}");
                 }
@@ -123,6 +126,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
+        #endregion // IReloadable
 
         public override void SaveToDatabase()
         {

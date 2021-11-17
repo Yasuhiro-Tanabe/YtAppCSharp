@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable, IDialogUser, IPrintable
+    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable, IDialogUser, IPrintable, IReloadable
     {
         public static string Name { get; } = "仕入先発注詳細";
 
@@ -190,16 +190,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
-        public override void Update()
+        #region IReloadable
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(string.IsNullOrWhiteSpace(OrderNo))
+            if (string.IsNullOrWhiteSpace(OrderNo))
             {
                 throw new ApplicationException("発注番号が指定されていません。");
             }
             else
             {
                 var found = MemorieDeFleursUIModel.Instance.FindOrderToSupplier(OrderNo);
-                if(found == null)
+                if (found == null)
                 {
                     throw new ApplicationException($"該当する発注がありません：{OrderNo}");
                 }
@@ -210,6 +212,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
+        #endregion // IReloadable
 
         #region IEditableFixable
         public void OpenEditView()
@@ -285,7 +288,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     order.Details.Add(new OrderDetailsToSupplier() { PartsCode = parts.PartsCode, LotCount = parts.Quantity });
                 }
                 _no = MemorieDeFleursUIModel.Instance.Order(order);
-                Update();
+                UpdateProperties();
             }
             else
             {
@@ -392,7 +395,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void OnDialogOpened()
         {
             LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
-            Update();
+            UpdateProperties();
         }
         #endregion // IDialogUser
 
