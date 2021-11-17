@@ -11,7 +11,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
         protected DetailViewModelBase(string header) : base(header) { }
 
         #region コマンド
-        public ICommand Reload { get; } = new ReloadDetailCommand();
+        public ICommand Reload { get; } = new ReloadCommand();
         public ICommand Clear { get; } = new ClearDetailCommand();
         #endregion // コマンド
 

@@ -13,7 +13,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
         protected ListViewModelBase(string header) : base(header) { }
 
         #region コマンド
-        public ICommand Reload { get; } = new ReloadListCommand();
+        public ICommand Reload { get; } = new ReloadCommand();
         public ICommand Selected { get; } = new SelectionChangedEventCommand();
         #endregion // コマンド
 

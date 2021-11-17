@@ -61,7 +61,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Loaded { get; } = new ReloadDetailCommand();
+        public ICommand Loaded { get; } = new ReloadCommand();
         public ICommand Ok { get; } = new DialogOkCommand();
         public ICommand Cancel { get; } = new DialogCancelCommand();
         #endregion // コマンド
