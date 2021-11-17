@@ -397,6 +397,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IDialogUser
 
         #region IPrintable
+        public DateTime PrintDate { get { return DateTime.Today; } }
         public void PrintDocument()
         {
             try
