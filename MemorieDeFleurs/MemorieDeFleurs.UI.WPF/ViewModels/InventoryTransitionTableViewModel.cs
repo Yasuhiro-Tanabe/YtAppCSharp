@@ -1,9 +1,6 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
-using MemorieDeFleurs.UI.WPF.Views;
-using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
 using System;
 using System.Collections.ObjectModel;
@@ -144,31 +141,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region IPrintable
-        public void PrintDocument()
+        public void ValidateBeforePrinting()
         {
             if (string.IsNullOrWhiteSpace(BouquetPartsCode)) { throw new ApplicationException("印刷対象の花コードが指定されていません。"); }
             if (ExpiryDate == 0) { throw new ApplicationException($"品質維持可能日数が0日です。{BouquetPartsCode} ({SelectedParts.PartsName}) の品質維持可能日数が設定されているか確認してください。"); }
-            try
-            {
-                LogUtil.DEBUGLOG_BeginMethod();
-
-                if(UserControlPrinter.PrintDocument<InventoryTransitionTableControl>(this, () => RaisePropertyChanged(nameof(InventoryTransitions))))
-                {
-                    LogUtil.Info($"Inventory transaction table of parts {BouquetPartsCode} was printed.");
-                }
-                else
-                {
-                    LogUtil.Debug("Canceled printing.");
-                }
-            }
-            catch(Exception ex)
-            {
-                LogUtil.Warn(ex);
-            }
-            finally
-            {
-                LogUtil.DEBUGLOG_EndMethod();
-            }
         }
         #endregion // IPrintable
     }

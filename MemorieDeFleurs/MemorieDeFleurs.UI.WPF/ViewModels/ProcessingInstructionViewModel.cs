@@ -1,17 +1,10 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
-using MemorieDeFleurs.UI.WPF.Views;
-using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
@@ -129,30 +122,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IReloadable
 
         #region IPrintable
-        public void PrintDocument()
-        {
-            try
-            {
-                LogUtil.DEBUGLOG_BeginMethod();
-
-                if (UserControlPrinter.PrintDocument<ProcessingInstructionControl>(this))
-                {
-                    LogUtil.Info($"Processing instructionsheet ({ProcessingDate:yyyyMMdd}, {SelectedBouquetCode}) printed.");
-                }
-                else
-                {
-                    LogUtil.Info($"Printing canceled.");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogUtil.Warn(ex);
-            }
-            finally
-            {
-                LogUtil.DEBUGLOG_EndMethod();
-            }
-        }
+        public void ValidateBeforePrinting() { }
         #endregion // IPrintable
     }
 }

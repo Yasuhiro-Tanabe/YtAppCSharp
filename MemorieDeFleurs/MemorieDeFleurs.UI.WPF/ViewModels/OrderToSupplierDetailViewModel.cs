@@ -4,8 +4,6 @@ using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
-using MemorieDeFleurs.UI.WPF.Views;
-using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
 using System;
 using System.Collections.ObjectModel;
@@ -158,6 +156,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand Cancel { get; } = new CancelOrderCommand();
         public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
         public ICommand PreviewPrint { get; } = new OpenDialogCommand();
+        public ICommand Print { get; } = new PrintCommand();
         #endregion // コマンド
 
         public void Update(OrdersToSupplier order)
@@ -384,7 +383,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void DialogOK()
         {
             LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
-            PrintDocument();
+            Print.Execute(this);
         }
 
         public void DialogCancel()
@@ -401,31 +400,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IPrintable
         public DateTime PrintDate { get { return DateTime.Today; } }
-        public void PrintDocument()
-        {
-            try
-            {
-                LogUtil.DEBUGLOG_BeginMethod();
 
-                if(UserControlPrinter.PrintDocument<OrderSheetToSupplier>(this))
-                {
-                    LogUtil.Info($"Order to supplier {OrderNo} was printed.");
-                }
-                else
-                {
-                    LogUtil.Debug("Canceled printing.");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogUtil.Warn(ex);
-                throw;
-            }
-            finally
-            {
-                LogUtil.DEBUGLOG_EndMethod();
-            }
-        }
+        public void ValidateBeforePrinting() { }
         #endregion // IPrintable
     }
 }
