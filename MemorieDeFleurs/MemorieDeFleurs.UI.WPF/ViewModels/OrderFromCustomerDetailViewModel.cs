@@ -194,6 +194,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             IsDirty = false;
         }
 
+        public void LoadShippingAddresses()
+        {
+            LoadShippingAddresses(SelectedShippingAddress.CustomerID);
+            SelectedShippingAddress = null;
+        }
+
         public void LoadShippingAddresses(int  customerID)
         {
             ShippingAddresses.Clear();
@@ -201,6 +207,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 ShippingAddresses.Add(new ShippingAddressViewModel(addr));
             }
+            RaisePropertyChanged(nameof(ShippingAddress));
         }
 
         private void LoadCustomers()
@@ -210,6 +217,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 Customers.Add(new CustomerSummaryViewModel(customer));
             }
+            RaisePropertyChanged(nameof(Customers));
         }
 
         private void LoadBouquets()
@@ -219,6 +227,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 Bouquets.Add(new BouquetSummaryViewModel(bouquet));
             }
+            RaisePropertyChanged(nameof(Bouquets));
         }
 
         #region IReloadable
