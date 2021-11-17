@@ -39,9 +39,21 @@
         </Grid.ColumnDefinitions>
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="受注日："/>
-        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding From}"/>
+        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding From}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectedDateChanged">
+                    <i:InvokeCommandAction Command="{Binding Reload}" CommandParameter="{Binding}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </DatePicker>
         <TextBlock Grid.Row="0" Grid.Column="2" Text="から"/>
-        <DatePicker Grid.Row="0" Grid.Column="3" SelectedDate="{Binding To}"/>
+        <DatePicker Grid.Row="0" Grid.Column="3" SelectedDate="{Binding To}">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectedDateChanged">
+                    <i:InvokeCommandAction Command="{Binding Reload}" CommandParameter="{Binding}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
+        </DatePicker>
         <TextBlock Grid.Row="0" Grid.Column="4" Text="まで"/>
         <TextBlock Grid.Row="0" Grid.Column="5" Text="得意先："/>
         <ComboBox Grid.Row="0" Grid.Column="6" ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}">
@@ -50,8 +62,12 @@
                     <TextBlock Text="{Binding CustomerName}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="SelectionChanged">
+                    <i:InvokeCommandAction Command="{Binding Reload}" CommandParameter="{Binding}"/>
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
         </ComboBox>
-        <Button Grid.Row="0" Grid.Column="7" Content="更新" Command="{Binding Reload}" CommandParameter="{Binding}"/>
 
         <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="8" ItemsSource="{Binding Orders}" SelectedItem="{Binding SelectedOrder}" Style="{StaticResource SummaryList}">
             <i:Interaction.Triggers>
