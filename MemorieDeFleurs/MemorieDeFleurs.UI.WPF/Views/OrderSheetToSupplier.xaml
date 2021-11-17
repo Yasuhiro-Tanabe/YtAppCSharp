@@ -15,6 +15,28 @@
             </ResourceDictionary.MergedDictionaries>
             <h:NameTitleConverter x:Key="nameConverter"/>
             <h:LotToQuantityConverter x:Key="quantityConverter"/>
+
+            <!-- 印刷用にフォントサイズ変更 -->
+            <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="15pt"/>
+            </Style>
+            <Style x:Key="Title" TargetType="TextBlock">
+                <Setter Property="VerticalAlignment" Value="Top"/>
+                <Setter Property="HorizontalAlignment" Value="Left"/>
+                <Setter Property="FontSize" Value="38pt"/>
+            </Style>
+            <Style x:Key="Supplier" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="25pt"/>
+                <Setter Property="TextDecorations" Value="Underline"/>
+            </Style>
+            <Style x:Key="OrderDetailTitle" TargetType="TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="FontSize" Value="18pt"/>
+            </Style>
+            <Style TargetType="ListViewItem">
+                <Setter Property="Margin" Value="20, 5"/>
+                <Setter Property="FontSize" Value="15pt"/>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <i:Interaction.Triggers>
@@ -27,7 +49,7 @@
             <RowDefinition Height="30pt"/>
             <RowDefinition Height="50pt"/>
             <RowDefinition Height="40pt"/>
-            <RowDefinition Height="20pt"/>
+            <RowDefinition Height="30pt"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -38,27 +60,27 @@
             <ColumnDefinition Width="200px"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="3" Text="発注番号：" FontSize="12pt"/>
-        <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding OrderNo}" FontSize="12pt"/>
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2" Text="発注書" FontSize="38pt" TextAlignment="Center"/>
+        <TextBlock Grid.Row="0" Grid.Column="3" Text="発注番号："/>
+        <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding OrderNo}"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="2" Text="発注書" Style="{StaticResource Title}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Text="フレール・メモワール" FontSize="18pt" Style="{StaticResource MultiLineTextBlock}"/>
+        <TextBlock Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="2" Text="フレール ・ メモワール" FontSize="18pt" Style="{StaticResource MultiLineTextBlock}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding SupplierName, Converter={StaticResource nameConverter}}" FontSize="25pt" TextDecorations="Underline"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding SupplierName, Converter={StaticResource nameConverter}}" Style="{StaticResource Supplier}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Text="＜発注明細＞" TextAlignment="Center" FontSize="18pt"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Text="＜発注明細＞" Style="{StaticResource OrderDetailTitle}"/>
 
-        <ListView Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5" ItemsSource="{Binding OrderParts}" Margin="20,5" FontSize="12pt">
+        <ListView Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5" ItemsSource="{Binding OrderParts}">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="300px"/>
-                            <ColumnDefinition Width="150px"/>
+                            <ColumnDefinition Width="400px"/>
+                            <ColumnDefinition Width="200px"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="{Binding PartsName}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Converter={StaticResource quantityConverter}, ConverterParameter=本}" TextAlignment="Right"/>
+                        <TextBlock Grid.Column="0" Text="{Binding PartsName}" Style="{StaticResource MultiLineTextBlock}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Converter={StaticResource quantityConverter}, ConverterParameter=本}" Style="{StaticResource NumericTextBlock}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

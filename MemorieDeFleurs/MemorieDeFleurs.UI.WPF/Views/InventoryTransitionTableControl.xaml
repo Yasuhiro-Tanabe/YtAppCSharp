@@ -13,6 +13,14 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- 印刷用にフォントサイズ変更 -->
+            <Style TargetType="TextBlock">
+                <Setter Property="FontSize" Value="15pt"/>
+            </Style>
+            <Style TargetType="DataGrid" BasedOn="{StaticResource NotEditableDataGrid}">
+                <Setter Property="FontSize" Value="15pt"/>
+            </Style>
         </ResourceDictionary>
     </UserControl.Resources>
     <i:Interaction.Triggers>
@@ -41,6 +49,6 @@
         <TextBlock Grid.Row="0" Grid.Column="4" Text="日"/>
 
         <DataGrid x:Name="InventoryTransitionTable" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6"
-                  ItemsSource="{Binding InventoryTransitions, Mode=OneWay}" Style="{StaticResource NotEditableDataGrid}"/>
+                  ItemsSource="{Binding InventoryTransitions, Mode=OneWay}"/>
     </Grid>
 </UserControl>

@@ -17,6 +17,7 @@
             </ResourceDictionary.MergedDictionaries>
             <h:LotToQuantityConverter x:Key="totalConverter"/>
 
+            <!-- 印刷用にフォントサイズ変更 -->
             <Style TargetType="TextBlock">
                 <Setter Property="FontSize" Value="15pt"/>
             </Style>
