@@ -1640,5 +1640,41 @@ namespace MemorieDeFleurs.Models
             }
         }
         #endregion // 発注履歴取得
+
+        #region 入荷処理
+        /// <summary>
+        /// 特定仕入先の指定日に入荷する単品とそのロット数を取得する
+        /// </summary>
+        /// <param name="supplier">仕入先</param>
+        /// <param name="date">入荷(予定)日</param>
+        /// <returns>単品毎のロット数一覧：入荷予定のない単品も、入荷ロット数=0で登録されている</returns>
+        public IDictionary<string, int> GetArrivalBouquetPartsCountAt(int supplier, DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                var found = context.OrdersToSuppliers
+                    .Where(o => o.Supplier == supplier)
+                    .Where(o => o.DeliveryDate == date)
+                    .Include(o => o.Details)
+                    .SelectMany(o => o.Details)
+                    .AsEnumerable()
+                    .GroupBy(d => d.PartsCode)
+                    .ToDictionary(g => g.Key, g => g.Sum(d => d.LotCount));
+
+                var all = context.PartsSuppliers
+                    .Where(p => p.SupplierCode == supplier)
+                    .Select(p => p.PartCode);
+
+                foreach(var part in all)
+                {
+                    if(!found.ContainsKey(part))
+                    {
+                        found.Add(part, 0);
+                    }
+                }
+                return found;
+            }
+        }
+        #endregion // 入荷処理
     }
 }

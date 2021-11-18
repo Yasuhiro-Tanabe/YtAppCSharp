@@ -948,5 +948,35 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
         }
         #endregion // 出荷
+
+        #region 加工指示書
+        /// <summary>
+        /// 指定日付の出荷商品数の一覧を取得する
+        /// </summary>
+        /// <param name="date">出荷(予定)日=お届け(予定)日の1日前</param>
+        /// <returns>出荷予定商品数一覧：出荷予定のない商品も、商品数=0で登録されている。</returns>
+        public IDictionary<string, int> GetShippingBouquetCountAt(DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                var found = context.OrderFromCustomers
+                    .Where(o => o.ShippingDate == date)
+                    .AsEnumerable()
+                    .GroupBy(o => o.BouquetCode)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                var all = context.Bouquets.Select(b => b.Code);
+                
+                foreach(var code in all)
+                {
+                    if(!found.ContainsKey(code))
+                    {
+                        found.Add(code, 0);
+                    }
+                }
+                return found;
+            }
+        }
+        #endregion // 加工指示書
     }
 }
