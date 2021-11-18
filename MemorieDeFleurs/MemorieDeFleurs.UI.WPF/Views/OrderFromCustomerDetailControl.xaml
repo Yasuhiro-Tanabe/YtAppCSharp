@@ -66,9 +66,9 @@
         <TextBlock Grid.Row="1" Grid.Column="2" Text="様"/>
 
         <TextBlock Grid.Row="2" Grid.Column="0" Text="受注日："/>
-        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding OrderDateText, Mode=OneWay}"/>
+        <DatePicker Grid.Row="2" Grid.Column="1" SelectedDate="{Binding OrderDate}"/>
         <TextBlock Grid.Row="2" Grid.Column="2" Text="お届け日："/>
-        <DatePicker Grid.Row="2" Grid.Column="3" SelectedDate="{Binding ArrivalDate}"/>
+        <DatePicker Grid.Row="2" Grid.Column="3" SelectedDate="{Binding ArrivalDate}" DisplayDateStart="{Binding OrderDate}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Text="お届けメッセージ："/>
         <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Message}"/>

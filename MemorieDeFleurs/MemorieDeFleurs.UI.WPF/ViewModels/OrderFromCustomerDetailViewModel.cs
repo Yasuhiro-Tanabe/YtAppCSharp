@@ -48,21 +48,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private CustomerSummaryViewModel _customer;
 
         /// <summary>
-        /// 注文日(表示用)
-        /// </summary>
-        public string OrderDateText { get { return OrderDate.ToString("yyyy/MM/dd"); } }
-
-        /// <summary>
         /// 注文日
         /// </summary>
         public DateTime OrderDate
         {
             get { return _ordered; }
-            set
-            {
-                SetProperty(ref _ordered, value);
-                RaisePropertyChanged(nameof(OrderDateText));
-            }
+            set { SetProperty(ref _ordered, value); }
         }
         private DateTime _ordered = DateTime.Today;
 
@@ -196,7 +187,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public void LoadShippingAddresses()
         {
-            LoadShippingAddresses(SelectedShippingAddress.CustomerID);
+            if(SelectedCustomer != null)
+            {
+                LoadShippingAddresses(SelectedCustomer.CustomerID);
+            }
             SelectedShippingAddress = null;
         }
 
@@ -304,7 +298,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
 
-            var nearest = DateTime.Today.AddDays(SelectedBouquet.LeadTime);
+            var nearest = OrderDate.AddDays(SelectedBouquet.LeadTime);
             if (ArrivalDate < nearest)
             {
                 ex.Append($"商品 {SelectedBouquet.BouquetCode} は {nearest:yyyy/MM/dd} 以降でなければお届けできません。");
@@ -329,9 +323,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             // 入力内容が異なる場合は、新規の登録先として扱いたい。
             LoadShippingAddresses(SelectedCustomer.CustomerID);
             SelectedShippingAddress = ShippingAddresses
-                .Where(s => s.NameOfShipping == _shippingName)
-                .Where(s => s.Address1 == _shippingAddress1)
-                .Where(s => s.Address2 == _shippingAddress2)
+                .Where(s => s.NameOfShipping == ShippingName)
+                .Where(s => s.Address1 == Address1)
+                .Where(s => s.Address2 == Address2)
                 .SingleOrDefault();
 
             IsListVisible = true;
@@ -364,7 +358,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     Name = ShippingName,
                     Address1 = Address1,
                     Address2 = Address2,
-                    LatestOrderDate = DateTime.Today
+                    LatestOrderDate = OrderDate
                 };
 
                 var order = new OrderFromCustomer()

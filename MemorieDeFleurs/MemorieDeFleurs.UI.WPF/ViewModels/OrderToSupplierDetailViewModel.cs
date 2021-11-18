@@ -50,24 +50,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         /// <summary>
-        /// 発注日 (表示専用)
-        /// </summary>
-        public string OrderDateText
-        {
-            get { return _orderDate.ToShortDateString(); }
-        }
-
-        /// <summary>
         /// 発注日
         /// </summary>
-        private DateTime OrderDate
+        public DateTime OrderDate
         {
             get { return _orderDate; }
-            set
-            {
-                SetProperty(ref _orderDate, value);
-                RaisePropertyChanged(OrderDateText);
-            }
+            set { SetProperty(ref _orderDate, value); }
         }
         private DateTime _orderDate = DateTime.Today;
 
@@ -145,6 +133,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _editing, value); }
         }
         private bool _editing;
+
+        /// <summary>
+        /// 印刷日
+        /// </summary>
+        public DateTime PrintDate
+        {
+            get { return _print; }
+            set { SetProperty(ref _print, value); }
+        }
+        private DateTime _print = DateTime.Today;
+
+
         #endregion // プロパティ
 
         #region コマンド
@@ -158,36 +158,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ICommand PreviewPrint { get; } = new OpenDialogCommand();
         public ICommand Print { get; } = new PrintCommand();
         #endregion // コマンド
-
-        public void Update(OrdersToSupplier order)
-        {
-            OrderNo = order.ID;
-            OrderDate = order.OrderDate;
-            ArrivalDate = order.DeliveryDate;
-
-            LoadSupplierList();
-            SelectedSupplier = Suppliers.SingleOrDefault(s => s.SupplierCode == order.Supplier);
-
-            OrderParts.Clear();
-            foreach (var item in order.Details)
-            {
-                OrderParts.Add(new PartsListItemViewModel(item));
-            }
-
-            OrderPartsText = string.Join(", ", OrderParts.Select(p => $"{p.PartsCode} x{p.Quantity}"));
-            IsEditing = false;
-
-            IsDirty = false;
-        }
-
-        private void LoadSupplierList()
-        {
-            Suppliers.Clear();
-            foreach (var s in MemorieDeFleursUIModel.Instance.FindAllSuppliers())
-            {
-                Suppliers.Add(new SupplierSummaryViewModel(s));
-            }
-        }
 
         #region IReloadable
         /// <inheritdoc/>
@@ -209,6 +179,34 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     Update(found);
                     LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}, {OrderPartsText}");
                 }
+            }
+        }
+        private void Update(OrdersToSupplier order)
+        {
+            OrderNo = order.ID;
+            OrderDate = order.OrderDate;
+            ArrivalDate = order.DeliveryDate;
+
+            LoadSupplierList();
+            SelectedSupplier = Suppliers.SingleOrDefault(s => s.SupplierCode == order.Supplier);
+
+            OrderParts.Clear();
+            foreach (var item in order.Details)
+            {
+                OrderParts.Add(new PartsListItemViewModel(item));
+            }
+
+            OrderPartsText = string.Join(", ", OrderParts.Select(p => $"{p.PartsCode} x{p.Quantity}"));
+            IsEditing = false;
+
+            IsDirty = false;
+        }
+        private void LoadSupplierList()
+        {
+            Suppliers.Clear();
+            foreach (var s in MemorieDeFleursUIModel.Instance.FindAllSuppliers())
+            {
+                Suppliers.Add(new SupplierSummaryViewModel(s));
             }
         }
         #endregion // IReloadable
@@ -278,7 +276,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 var order = new OrdersToSupplier()
                 {
-                    OrderDate = _orderDate,
+                    OrderDate = OrderDate,
                     DeliveryDate = ArrivalDate,
                     Supplier = SupplierCode
                 };
@@ -286,7 +284,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 {
                     order.Details.Add(new OrderDetailsToSupplier() { PartsCode = parts.PartsCode, LotCount = parts.Quantity });
                 }
-                _no = MemorieDeFleursUIModel.Instance.Order(order);
+                OrderNo = MemorieDeFleursUIModel.Instance.Order(order);
                 UpdateProperties();
             }
             else
@@ -339,7 +337,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 ex.Append("仕入れる単品がありません。");
             }
 
-            var days = (ArrivalDate - DateTime.Today).Days;
+            var days = (ArrivalDate - OrderDate).Days;
             foreach(var parts in OrderParts)
             {
                 if(days < parts.LeadTime)
@@ -399,8 +397,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IDialogUser
 
         #region IPrintable
-        public DateTime PrintDate { get { return DateTime.Today; } }
-
         public void ValidateBeforePrinting() { }
         #endregion // IPrintable
     }
