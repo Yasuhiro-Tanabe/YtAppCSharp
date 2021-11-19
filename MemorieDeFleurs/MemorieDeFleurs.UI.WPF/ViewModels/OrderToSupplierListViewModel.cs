@@ -59,7 +59,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 現在選択中の仕入先：「全仕入先」を含む
         /// </summary>
-        public SupplierSummaryViewModel SelectedSupplier { get; set; }
+        public SupplierSummaryViewModel SelectedSupplier
+        {
+            get { return _supplier; }
+            set { SetProperty(ref _supplier, value); }
+        }
+        private SupplierSummaryViewModel _supplier;
         #endregion // プロパティ
 
         #region IReloadable
@@ -72,8 +77,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 if (SelectedSupplier == null)
                 {
                     // 初期表示
-                    UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier());
                     UpdateSuppliers();
+                    UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersToSupplier());
 
                     if (Orders.Count > 0)
                     {
@@ -109,10 +114,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IReloadable
         private void UpdateSuppliers()
         {
-            var foundSuppliers = MemorieDeFleursUIModel.Instance.FindAllSuppliers();
             Suppliers.Clear();
             Suppliers.Add(new SupplierSummaryViewModel() { SupplierCode = -1, SupplierName = "すべての仕入先" });
-            foreach (var supplier in foundSuppliers)
+            foreach (var supplier in MemorieDeFleursUIModel.Instance.FindAllSuppliers())
             {
                 Suppliers.Add(new SupplierSummaryViewModel(supplier));
             }
