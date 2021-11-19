@@ -142,11 +142,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 if (detail == null)
                 {
                     detail = new OrderFromCustomerDetailViewModel();
-                    mainVM.OpenTabItem(detail);
                 }
 
                 detail.OrderNo = SelectedOrder.OrderNo;
                 detail.UpdateProperties();
+
+                mainVM.OpenTabItem(detail);
                 return detail;
             }
             finally

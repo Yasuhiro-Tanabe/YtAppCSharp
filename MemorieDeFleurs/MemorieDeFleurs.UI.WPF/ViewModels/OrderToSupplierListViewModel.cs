@@ -132,20 +132,22 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 Subscribe(summary);
                 Orders.Add(summary);
             }
-            SelectedOrder = null;
         }
 
         public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
         {
             LogUtil.DEBUGLOG_BeginMethod(mainVM.GetType().Name);
+            
             var detail = mainVM.FindTabItem(OrderToSupplierDetailViewModel.Name) as OrderToSupplierDetailViewModel;
             if(detail == null)
             {
                 detail = new OrderToSupplierDetailViewModel();
-                mainVM.OpenTabItem(detail);
             }
+
             detail.OrderNo = SelectedOrder.OrderNo;
             detail.UpdateProperties();
+
+            mainVM.OpenTabItem(detail);
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name, $"{detail.GetType().Name} opened.");
             return detail;
         }
