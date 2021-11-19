@@ -370,6 +370,12 @@ namespace MemorieDeFleurs.UI.WPF.Model
             return Model.BouquetModel.GetNumberOfProcessingBouquetsOf(bouquet, date);
 
         }
+
+        public IDictionary<string, int> GetShippingBouquetCountAt(DateTime date)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.CustomerModel.GetShippingBouquetCountAt(date);
+        }
         #endregion // 加工指示書
     }
 }

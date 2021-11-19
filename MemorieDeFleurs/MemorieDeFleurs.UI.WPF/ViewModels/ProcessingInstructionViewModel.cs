@@ -1,10 +1,10 @@
-﻿using MemorieDeFleurs.Models.Entities;
-using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
@@ -67,20 +67,50 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region コマンド
         public ICommand Print { get; } = new PrintCommand();
+        public ICommand ChangeDate { get; } = new ChangeProcessingDateCommand();
+        public ICommand ChangeBouquet { get; } = new ChangeProcessingBouquetCommand();
         #endregion // コマンド
 
         #region IReloadable
         /// <inheritdoc/>
         public void UpdateProperties()
         {
+            // 無条件更新は行わない：画面更新は日付と商品が選択されたタイミングで必要な箇所だけ行う。
+        }
+        #endregion // IReloadable
+
+        #region IPrintable
+        public void ValidateBeforePrinting() { }
+        #endregion // IPrintable
+
+        public void ChangeProcessingDate()
+        {
+            Bouquets.Clear();
+
+            var found = MemorieDeFleursUIModel.Instance.GetShippingBouquetCountAt(ProcessingDate);
+            foreach (var bouquet in MemorieDeFleursUIModel.Instance.FindAllBouquets().Where(b => found[b.Code] > 0))
+            {
+                // 当日出荷予定 (found[花コード] > 0) の花コードだけ追加
+                Bouquets.Add(new BouquetSummaryViewModel(bouquet));
+            }
+
+            SelectedBouquet = null;
+            RaisePropertyChanged(nameof(Bouquets));
+        }
+
+        public void ChangeProcessingBouquet()
+        {
+            Parts.Clear();
+
             if (SelectedBouquet == null)
             {
-                Cleanup();
+                SelectedBouquetCode = string.Empty;
+                NumberOfBouquet = 0;
             }
             else
             {
-                var found = MemorieDeFleursUIModel.Instance.FindBouquet(SelectedBouquet.BouquetCode);
-                if (found == null)
+                var bouquet = MemorieDeFleursUIModel.Instance.FindBouquet(SelectedBouquet.BouquetCode);
+                if (bouquet == null)
                 {
                     throw new ApplicationException($"該当する商品が見つかりません：{SelectedBouquet.BouquetCode}");
                 }
@@ -88,41 +118,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 {
                     SelectedBouquetCode = SelectedBouquet.BouquetCode;
                     NumberOfBouquet = MemorieDeFleursUIModel.Instance.GetNumberOfProcessingBouquetsOf(SelectedBouquetCode, ProcessingDate);
-                    LoadParts(found);
+                    foreach (var parts in bouquet.PartsList)
+                    {
+                        Parts.Add(new PartsListItemViewModel(parts) { QuantityPerLot = NumberOfBouquet });
+                    }
                 }
             }
-        }
-        private void Cleanup()
-        {
-            Parts.Clear();
-            NumberOfBouquet = 0;
 
-            LoadBouquets();
-        }
-        private void LoadBouquets()
-        {
-            Bouquets.Clear();
-            foreach (var bouquet in MemorieDeFleursUIModel.Instance.FindAllBouquets())
-            {
-                Bouquets.Add(new BouquetSummaryViewModel(bouquet));
-            }
-            SelectedBouquet = null;
-            RaisePropertyChanged(nameof(Bouquets));
-        }
-        private void LoadParts(Bouquet bouquet)
-        {
-            Parts.Clear();
-            foreach (var parts in bouquet.PartsList)
-            {
-                Parts.Add(new PartsListItemViewModel(parts) { QuantityPerLot = NumberOfBouquet });
-            }
             RaisePropertyChanged(nameof(Parts));
         }
-
-        #endregion // IReloadable
-
-        #region IPrintable
-        public void ValidateBeforePrinting() { }
-        #endregion // IPrintable
     }
 }
