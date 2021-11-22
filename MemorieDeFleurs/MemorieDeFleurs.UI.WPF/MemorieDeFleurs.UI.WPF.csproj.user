@@ -46,6 +46,9 @@
     <Compile Update="Views\OrderToSupplierDetailControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\OrderToSupplierInspectionListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\OrderToSupplierListControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -103,6 +106,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\OrderToSupplierDetailControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\OrderToSupplierInspectionListControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\OrderToSupplierListControl.xaml">

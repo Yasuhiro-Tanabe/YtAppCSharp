@@ -57,6 +57,7 @@
             <MenuItem Header="受発注">
                 <MenuItem Header="仕入先発注一覧" Command="{Binding OpenOrderToSupplierListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="仕入先発注登録" Command="{Binding OpenOrderToSupplierDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="入荷検品" Command="{Binding OpenOrderToSupplierInspectionList}" CommandParameter="{Binding}"/>
                 <MenuItem Header="得意先受注一覧" Command="{Binding OpenOrderFromCustomerListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="得意先受注登録" Command="{Binding OpenOrderFromCustomerDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
@@ -106,6 +107,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:ProcessingInstructionViewModel}">
                     <v:ProcessingInstructionPreviewControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierInspectionListViewModel}">
+                    <v:OrderToSupplierInspectionListControl/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>
