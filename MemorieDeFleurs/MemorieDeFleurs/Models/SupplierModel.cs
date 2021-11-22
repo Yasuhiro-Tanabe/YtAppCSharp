@@ -1384,6 +1384,29 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
         }
 
+        public void OrderIsArrived(DateTime date, string orderNo)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            using (var transaction = context.Database.BeginTransaction())
+            {
+                try
+                {
+                    LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, {orderNo}");
+                    OrderIsArrived(context, date, orderNo);
+                    transaction.Commit();
+                }
+                catch(Exception ex)
+                {
+                    transaction.Rollback();
+                    LogUtil.Warn(ex);
+                }
+                finally
+                {
+                    LogUtil.DEBUGLOG_EndMethod($"{date:yyyyMMdd}, {orderNo}");
+                }
+            }
+        }
+
         private void OrderIsArrived(MemorieDeFleursDbContext context, DateTime date, string orderNo)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, {orderNo}");
@@ -1492,7 +1515,7 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <param name="orderNo">対象発注番号</param>
         /// <param name="newQuantites">単品毎の更新後の数量：変更のある単品だけでも良い。</param>
-        public void ChangeArrivedQuantities(string orderNo, ICollection<Tuple<BouquetPart, int>> newQuantites)
+        public void ChangeArrivedQuantities(string orderNo, IEnumerable<Tuple<BouquetPart, int>> newQuantites)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
             using (var transaction = context.Database.BeginTransaction())
@@ -1518,7 +1541,7 @@ namespace MemorieDeFleurs.Models
         /// <param name="context">トランザクション中のDBコンテキスト</param>
         /// <param name="orderNo">対象発注番号</param>
         /// <param name="newQuantites">単品毎の更新後の数量：ロット数ではなく入荷した数量を指定する。変更のある単品だけでも良い。</param>
-        public void ChangeArrivedQuantities(MemorieDeFleursDbContext context, string orderNo, ICollection<Tuple<BouquetPart, int>> newQuantites)
+        public void ChangeArrivedQuantities(MemorieDeFleursDbContext context, string orderNo, IEnumerable<Tuple<BouquetPart, int>> newQuantites)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{orderNo}, [{string.Join(", ", newQuantites.Select(t => $"{t.Item1.Code} x {t.Item2}"))}]");
             try
