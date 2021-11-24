@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
@@ -9,7 +10,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class OrderToSupplierInspectionSummaryViewModel : ListItemViewModelBase
     {
-        public OrderToSupplierInspectionSummaryViewModel() : base(null) { }
+        public OrderToSupplierInspectionSummaryViewModel() : base(new OpenDialogCommand()) { }
 
         public OrderToSupplierInspectionSummaryViewModel(OrdersToSupplier order) : this()
         {

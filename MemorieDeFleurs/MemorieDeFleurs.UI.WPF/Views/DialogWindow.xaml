@@ -14,6 +14,14 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            
+            <!-- ContentControl の、 Content プロパティで指定したビューモデルと実際に表示するビューの関連付け -->
+            <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
+                <v:OrderSheetToSupplier DataContext="{Binding}"/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:OrderToSupplierInspectionDetailViewModel}">
+                <v:OrderToSupplierInspectionDetailControl/>
+            </DataTemplate>
         </ResourceDictionary>
     </Window.Resources>
     <i:Interaction.Triggers>
@@ -27,13 +35,7 @@
             <RowDefinition Height="20pt"/>
         </Grid.RowDefinitions>
 
-        <ContentControl Grid.Row="0" Content="{Binding ViewModel}">
-            <ContentControl.ContentTemplate>
-                <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
-                    <v:OrderSheetToSupplier DataContext="{Binding}"/>
-                </DataTemplate>
-            </ContentControl.ContentTemplate>
-        </ContentControl>
+        <ContentControl Grid.Row="0" Content="{Binding ViewModel}"/>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
             <Button Content="{Binding OkContent}" Command="{Binding Ok}" CommandParameter="{Binding ElementName=DialogView}"/>

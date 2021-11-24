@@ -9,6 +9,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         {
             AddAction(typeof(IDialogUser), Open);
             AddAction(typeof(IReloadable), OpeOrderToSupplierPrintPreviewDialog);
+            AddAction(typeof(OrderToSupplierInspectionSummaryViewModel), OpenDetailView);
         }
 
         private static void Open(object parameter)
@@ -37,6 +38,15 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
             (dialog.DataContext as DialogViewModel).ViewModel = detailVM;
             dialog.ShowDialog();
+        }
+
+        private static void OpenDetailView(object parameter)
+        {
+            var summary = parameter as OrderToSupplierInspectionSummaryViewModel;
+            var detail = new OrderToSupplierInspectionDetailViewModel() { OrderNo = summary.OrderNo };
+            detail.UpdateProperties();
+
+            Open(detail);
         }
     }
 }

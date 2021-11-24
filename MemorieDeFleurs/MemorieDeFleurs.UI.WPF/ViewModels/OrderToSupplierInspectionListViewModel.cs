@@ -180,10 +180,34 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             Orders.Clear();
             foreach (var o in orders)
             {
-                Orders.Add(new OrderToSupplierInspectionSummaryViewModel(o));
+                var summary = new OrderToSupplierInspectionSummaryViewModel(o);
+                Subscribe(summary);
+                Orders.Add(summary);
             }
             RaisePropertyChanged(nameof(Orders));
         }
 
+        //public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
+        //{
+        //    try
+        //    {
+        //        LogUtil.DEBUGLOG_BeginMethod();
+
+        //        var detail = mainVM.FindTabItem(OrderToSupplierInspectionDetailViewModel.Name) as OrderToSupplierInspectionDetailViewModel;
+        //        if (detail == null)
+        //        {
+        //            detail = new OrderToSupplierInspectionDetailViewModel();
+        //        }
+
+        //        detail.OrderNo = SelectedOrder.OrderNo;
+        //        detail.UpdateProperties();
+        //        mainVM.OpenTabItem(detail);
+        //        return detail;
+        //    }
+        //    finally
+        //    {
+        //        LogUtil.DEBUGLOG_EndMethod();
+        //    }
+        //}
     }
 }
