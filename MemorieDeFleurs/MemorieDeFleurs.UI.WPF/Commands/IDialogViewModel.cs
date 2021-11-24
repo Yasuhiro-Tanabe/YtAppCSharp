@@ -3,14 +3,12 @@
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
-    /// DialogWindow に表示するビューモデルが実装すべきインタフェース
+    /// DialogWindow 内に表示するビューモデルが実装すべきインタフェース
     /// </summary>
-    internal interface IDialogUser
+    internal interface IDialogViewModel
     {
         public void FillDialogParameters(DialogParameter param);
         public void DialogOK();
         public void DialogCancel();
-
-        public void OnDialogOpened();
     }
 }

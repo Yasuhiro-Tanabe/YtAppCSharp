@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    internal class OrderToSupplierSummaryViewModel : ListItemViewModelBase, IReloadable
+    internal class OrderToSupplierSummaryViewModel : ListItemViewModelBase, IReloadable, IDialogCaller
     {
         public OrderToSupplierSummaryViewModel(OrdersToSupplier order) : base(new OpenOrderToSupplierDetailViewCommand())
         {
@@ -126,5 +126,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             OrderedDate = order.OrderDate;
         }
         #endregion // IReloadable
+
+        #region IDialogCaller
+        public NotificationObject DialogViewModel
+        {
+            get
+            {
+                var vm = new OrderToSupplierDetailViewModel() { OrderNo = OrderNo };
+                vm.UpdateProperties();
+                return vm;
+            }
+        }
+        #endregion // IDialogCaller
     }
 }

@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable, IDialogUser, IPrintable, IReloadable
+    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable, IDialogViewModel, IPrintable, IReloadable
     {
         public static string Name { get; } = "仕入先発注詳細";
 
@@ -370,7 +370,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             IsDirty = false;
         }
 
-        #region IDialogUser
+        #region IDialogViewModel
         public void FillDialogParameters(DialogParameter param)
         {
             param.DialogTitle = "発注書印刷";
@@ -388,13 +388,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
         }
-
-        public void OnDialogOpened()
-        {
-            LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
-            UpdateProperties();
-        }
-        #endregion // IDialogUser
+        #endregion // IDialogViewModel
 
         #region IPrintable
         public void ValidateBeforePrinting() { }

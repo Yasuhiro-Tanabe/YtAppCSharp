@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderToSupplierInspectionDetailViewModel : DetailViewModelBase, IReloadable, IDialogUser
+    public class OrderToSupplierInspectionDetailViewModel : DetailViewModelBase, IReloadable, IDialogViewModel
     {
         public static string Name = "検品";
 
@@ -85,7 +85,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ObservableCollection<InspectionPartsListItemViewModel> Parts { get; } = new ObservableCollection<InspectionPartsListItemViewModel>();
         #endregion // プロパティ
 
-        #region IDialogUser
+        #region IDialogViewModel
         public void DialogCancel()
         {
             // 何もしない
@@ -102,12 +102,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             param.OkContent = "確定";
             param.CancelContent = "キャンセル";
         }
-
-        public void OnDialogOpened()
-        {
-            UpdateProperties();
-        }
-        #endregion // IDialogUser
+        #endregion // IDialogViewModel
 
         #region IReloadable
         public void UpdateProperties()

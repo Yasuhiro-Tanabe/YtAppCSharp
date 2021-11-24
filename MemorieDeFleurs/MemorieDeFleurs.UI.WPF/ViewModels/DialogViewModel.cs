@@ -54,9 +54,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// ダイアログに関する操作を行うビューモデル：実体は <see cref="ViewModel"/> と同じオブジェクト
         /// </summary>
-        public IDialogUser DialogUser
+        public IDialogViewModel DialogUser
         {
-            get { return _vm as IDialogUser; }
+            get { return _vm as IDialogViewModel; }
         }
         #endregion // プロパティ
 

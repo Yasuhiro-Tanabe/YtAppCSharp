@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderToSupplierInspectionSummaryViewModel : ListItemViewModelBase
+    public class OrderToSupplierInspectionSummaryViewModel : ListItemViewModelBase, IDialogCaller
     {
         public OrderToSupplierInspectionSummaryViewModel() : base(new OpenDialogCommand()) { }
 
@@ -88,5 +88,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             ArrivalDate = order.DeliveryDate;
             OrderParts = string.Join(", ", order.Details.Select(d => $"{d.PartsCode}x{d.LotCount}"));
         }
+
+        #region IDialogCaller
+        public NotificationObject DialogViewModel
+        {
+            get
+            {
+                var vm = new OrderToSupplierInspectionDetailViewModel() { OrderNo = OrderNo };
+                vm.UpdateProperties();
+                return vm;
+            }
+        }
+        #endregion // IDialogCaller
     }
 }
