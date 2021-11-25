@@ -90,6 +90,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _bouquet, value); }
         }
         private string _bouquet;
+
+        /// <summary>
+        /// 受注状態：出荷済かどうか
+        /// </summary>
+        public bool IsShipped
+        {
+            get { return _shipped; }
+            set { SetProperty(ref _shipped, value); }
+        }
+        private bool _shipped;
         #endregion // プロパティ
 
 
@@ -106,6 +116,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             ShippingDate = order.ShippingDate;
             BouquetName = order.Bouquet.Name;
             OrderDate = order.OrderDate;
+            IsShipped = order.Status == OrderFromCustomerStatus.SHIPPED;
         }
     }
 }

@@ -347,6 +347,12 @@ namespace MemorieDeFleurs.UI.WPF.Model
             if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
             Model.CustomerModel.ChangeArrivalDate(DateTime.Today, orderNo, arrivalDate);
         }
+
+        public void ShipBouquetOrders(DateTime date, params string[] orders)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.CustomerModel.ShipOrders(date, orders);
+        }
         #endregion // 得意先受注情報の操作
 
         #region お届け先の操作

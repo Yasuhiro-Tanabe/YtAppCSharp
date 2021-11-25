@@ -1,4 +1,6 @@
-﻿using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
@@ -63,12 +65,23 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// 商品構成
         /// </summary>
         public ObservableCollection<PartsListItemViewModel> Parts { get; } = new ObservableCollection<PartsListItemViewModel>();
+
+        /// <summary>
+        /// 選択中の商品の加工日当日分の商品をすべて発送したかどうか
+        /// </summary>
+        public bool IsShippedAll
+        {
+            get { return _shippedAll; }
+            set { SetProperty(ref _shippedAll, value); }
+        }
+        private bool _shippedAll = false;
         #endregion // プロパティ
 
         #region コマンド
         public ICommand Print { get; } = new PrintCommand();
         public ICommand ChangeDate { get; } = new ChangeProcessingDateCommand();
         public ICommand ChangeBouquet { get; } = new ChangeProcessingBouquetCommand();
+        public ICommand Ship { get; } = new ShippingOrdersCommand();
         #endregion // コマンド
 
         #region IReloadable
@@ -95,6 +108,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
 
             SelectedBouquet = null;
+            IsShippedAll = false;
             RaisePropertyChanged(nameof(Bouquets));
         }
 
@@ -106,6 +120,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 SelectedBouquetCode = string.Empty;
                 NumberOfBouquet = 0;
+                IsShippedAll = false;
             }
             else
             {
@@ -122,10 +137,35 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                     {
                         Parts.Add(new PartsListItemViewModel(parts) { QuantityPerLot = NumberOfBouquet });
                     }
+                    UpdateShippedAll();
                 }
             }
 
             RaisePropertyChanged(nameof(Parts));
+        }
+
+        public void ShipBouquets()
+        {
+            if(!IsShippedAll)
+            {
+                var orders = MemorieDeFleursUIModel.Instance.FindAllOrdersFromCustomer()
+                    .Where(o => o.ShippingDate == ProcessingDate)
+                    .Where(o => o.BouquetCode == SelectedBouquetCode)
+                    .Where(o => o.Status != OrderFromCustomerStatus.SHIPPED)
+                    .Select(o => o.ID)
+                    .ToArray();
+                MemorieDeFleursUIModel.Instance.ShipBouquetOrders(ProcessingDate, orders);
+                UpdateShippedAll();
+                LogUtil.Info($"{ProcessingDate:yyyyMMdd}, {SelectedBouquetCode}, Shiped orders: {string.Join(", ", orders)}");
+            }
+        }
+
+        private void UpdateShippedAll()
+        {
+            IsShippedAll = MemorieDeFleursUIModel.Instance.FindAllOrdersFromCustomer()
+                .Where(o => o.BouquetCode == SelectedBouquetCode)
+                .Where(o => o.ShippingDate == ProcessingDate)
+                .All(o => o.Status == OrderFromCustomerStatus.SHIPPED);
         }
     }
 }
