@@ -38,6 +38,7 @@
         <ContentControl Grid.Row="0" Content="{Binding ViewModel}"/>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <!-- コマンド実行時にダイアログを閉じるため、CommandParameter には View (このウィンドウ) を渡す -->
             <Button Content="{Binding OkContent}" Command="{Binding Ok}" CommandParameter="{Binding ElementName=DialogView}"/>
             <Button Content="{Binding CancelContent}" Command="{Binding Cancel}" CommandParameter="{Binding ElementName=DialogView}"/>
         </StackPanel>
