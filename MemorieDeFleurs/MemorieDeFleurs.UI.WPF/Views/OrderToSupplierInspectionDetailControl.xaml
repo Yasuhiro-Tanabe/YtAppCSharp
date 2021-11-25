@@ -36,6 +36,7 @@
 
         <TextBlock Grid.Row="0" Grid.Column="0" Text="発注ID："/>
         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding OrderNo}"/>
+        <TextBlock Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Text="検品済" Foreground="Red" Visibility="{Binding IsInspected, Converter={StaticResource positiveConverter}}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="発注日："/>
         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding OrderDate, Mode=OneWay, StringFormat={}{0:yyyy.MM.dd}}"/>
@@ -63,7 +64,8 @@
 
                         <TextBlock Grid.Column="0" Text="{Binding PartsCode, Mode=OneWay}"/>
                         <TextBlock Grid.Column="1" Text="{Binding PartsName, Mode=OneWay}"/>
-                        <TextBox Grid.Column="2" Text="{Binding ActualQuantity}" Style="{StaticResource NumericTextBox}"/>
+                        <TextBox Grid.Column="2" Text="{Binding ActualQuantity}" Visibility="{Binding IsInspected, Converter={StaticResource negativeConverter}}" Style="{StaticResource NumericTextBox}"/>
+                        <TextBlock Grid.Column="2" Text="{Binding ActualQuantity}" Visibility="{Binding IsInspected, Converter={StaticResource positiveConverter}}" Style="{StaticResource NumericTextBlock}"/>
                         <TextBlock Grid.Column="3" Text="／"/>
                         <TextBlock Grid.Column="4" Text="{Binding OrderedQuantity, Mode=OneWay}" Style="{StaticResource NumericTextBlock}"/>
                         <TextBlock Grid.Column="5" Text="本"/>

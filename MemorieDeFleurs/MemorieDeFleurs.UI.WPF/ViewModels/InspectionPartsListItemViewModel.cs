@@ -73,6 +73,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             get { return OrderedQuantity != ActualQuantity; }
         }
+
+        /// <summary>
+        /// この単品を含む発注履歴が検品済かどうか
+        /// </summary>
+        public bool IsInspected
+        {
+            get { return _inspected; }
+            set { SetProperty(ref _inspected, value); }
+        }
+        private bool _inspected;
         #endregion // プロパティ
 
         public InspectionPartsListItemViewModel(OrderDetailsToSupplier order)

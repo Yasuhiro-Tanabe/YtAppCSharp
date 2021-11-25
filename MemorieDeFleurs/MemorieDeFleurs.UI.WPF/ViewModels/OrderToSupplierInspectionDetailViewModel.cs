@@ -93,7 +93,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         public void DialogOK()
         {
-            MemorieDeFleursUIModel.Instance.InspectArrivedOrder(OrderNo, InspectionDate, Parts.Where(d => d.IsQuantityChanged).Select(d => Tuple.Create(d.BouquetPart, d.ActualQuantity)));
+            if(!IsInspected)
+            {
+                var changed = Parts.Where(d => d.IsQuantityChanged).Select(d => Tuple.Create(d.BouquetPart, d.ActualQuantity));
+                MemorieDeFleursUIModel.Instance.InspectArrivedOrder(OrderNo, InspectionDate, changed);
+            }
         }
 
         public void FillDialogParameters(DialogParameter param)
@@ -134,7 +138,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             Parts.Clear();
             foreach(var detail in order.Details)
             {
-                Parts.Add(new InspectionPartsListItemViewModel(detail));
+                Parts.Add(new InspectionPartsListItemViewModel(detail) { IsInspected = IsInspected });
             }
             RaisePropertyChanged(nameof(Parts));
         }

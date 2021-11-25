@@ -77,6 +77,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _parts, value); }
         }
         private string _parts;
+
+        /// <summary>
+        /// 検品済かどうか
+        /// </summary>
+        public bool IsInspected
+        {
+            get { return _inspected; }
+            set { SetProperty(ref _inspected, value); }
+        }
+        private bool _inspected;
         #endregion // プロパティ
 
         private void Update(OrdersToSupplier order)
@@ -87,6 +97,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             OrderDate = order.OrderDate;
             ArrivalDate = order.DeliveryDate;
             OrderParts = string.Join(", ", order.Details.Select(d => $"{d.PartsCode}x{d.LotCount}"));
+            IsInspected = order.Status == OrderToSupplierStatus.ARRIVED;
         }
 
         #region IDialogCaller
