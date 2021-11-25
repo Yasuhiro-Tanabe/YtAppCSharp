@@ -1362,7 +1362,7 @@ namespace MemorieDeFleurs.Models
                 LogUtil.DEBUGLOG_BeginMethod($"{date:yyyyMMdd}, {string.Join(", ", otherOrders)}");
                 try
                 {
-                    OrdersAreArrived(context, date, otherOrders);
+                    foreach (var order in otherOrders) { OrderIsArrived(context, date, order); }
                     transaction.Commit();
                 }
                 catch(Exception e)
@@ -1376,12 +1376,6 @@ namespace MemorieDeFleurs.Models
                     LogUtil.DEBUGLOG_EndMethod();
                 }
             }
-        }
-
-        private void OrdersAreArrived(MemorieDeFleursDbContext context, DateTime date, params string[] otherOrders)
-        {
-            foreach(var order in otherOrders) { OrderIsArrived(context, date, order); }
-            context.SaveChanges();
         }
 
         public void OrderIsArrived(DateTime date, string orderNo)
@@ -1431,7 +1425,7 @@ namespace MemorieDeFleurs.Models
 
                 order.Status = OrderToSupplierStatus.ARRIVED;
                 context.OrdersToSuppliers.Update(order);
-
+                context.SaveChanges();
             }
             catch(Exception)
             {
