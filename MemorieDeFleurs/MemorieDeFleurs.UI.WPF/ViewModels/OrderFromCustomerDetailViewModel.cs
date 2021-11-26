@@ -23,16 +23,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region プロパティ
         /// <summary>
-        /// 受注番号
-        /// </summary>
-        public string OrderNo
-        {
-            get { return _orderNo; }
-            set { SetProperty(ref _orderNo, value); }
-        }
-        private string _orderNo;
-
-        /// <summary>
         /// 得意先一覧
         /// </summary>
         public ObservableCollection<CustomerSummaryViewModel> Customers { get; } = new ObservableCollection<CustomerSummaryViewModel>();
@@ -136,24 +126,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _shippingAddress2, value); }
         }
         private string _shippingAddress2;
-
-        /// <summary>
-        /// お届け先選択モードかどうか
-        /// </summary>
-        public bool IsListVisible
-        {
-            get { return _listVisible; }
-            set { SetProperty(ref _listVisible, value); }
-        }
-        private bool _listVisible;
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Edit { get; } = new EditCommand();
-        public ICommand Fix { get; } = new FixCommand();
-        public ICommand Order { get; } = new OrderCommand();
-        public ICommand Cancel { get; } = new CancelOrderCommand();
-        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
         public ICommand ChangeShippingAddress { get; } = new ChangeShippingAddressCommand();
         #endregion // コマンド
 
@@ -180,7 +155,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 Address2 = order.ShippingAddress.Address2;
             }
 
-            IsListVisible = false;
+            IsEditing = false;
 
             IsDirty = false;
         }
@@ -226,6 +201,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IReloadable
         /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
         public void UpdateProperties()
         {
             if (string.IsNullOrWhiteSpace(OrderNo))
@@ -266,7 +244,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedShippingAddress = null;
             ShippingAddresses.Clear();
 
-            IsListVisible = false;
+            IsEditing = false;
 
             IsDirty = false;
         }
@@ -311,6 +289,21 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region IEditableFixable
+        /// <inheritdoc/>
+        public ICommand Edit { get; } = new EditCommand();
+
+        /// <inheritdoc/>
+        public ICommand Fix { get; } = new FixCommand();
+
+        /// <inheritdoc/>
+        public bool IsEditing
+        {
+            get { return _editing; }
+            set { SetProperty(ref _editing, value); }
+        }
+        private bool _editing;
+
+        /// <inheritdoc/>
         public void OpenEditView()
         {
             if(SelectedCustomer == null)
@@ -328,9 +321,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 .Where(s => s.Address2 == Address2)
                 .SingleOrDefault();
 
-            IsListVisible = true;
+            IsEditing = true;
         }
 
+        /// <inheritdoc/>
         public void FixEditing()
         {
             if(SelectedShippingAddress != null)
@@ -340,11 +334,30 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 Address2 = SelectedShippingAddress.Address2;
             }
 
-            IsListVisible = false;
+            IsEditing = false;
         }
         #endregion // IEditableFixable
 
         #region IOrderable
+        /// <inheritdoc/>
+        public ICommand Order { get; } = new OrderCommand();
+
+        /// <inheritdoc/>
+        public ICommand Cancel { get; } = new CancelOrderCommand();
+
+        /// <inheritdoc/>
+        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
+
+        /// <inheritdoc/>
+        public string OrderNo
+        {
+            get { return _orderNo; }
+            set { SetProperty(ref _orderNo, value); }
+        }
+        private string _orderNo;
+
+
+        /// <inheritdoc/>
         public void OrderMe()
         {
             if(string.IsNullOrWhiteSpace(OrderNo))
@@ -377,6 +390,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public void CancelMe()
         {
             if(string.IsNullOrWhiteSpace(OrderNo))
@@ -390,6 +404,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public void ChangeMyArrivalDate()
         {
             if (string.IsNullOrWhiteSpace(OrderNo))

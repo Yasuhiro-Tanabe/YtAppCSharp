@@ -78,13 +78,15 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Print { get; } = new PrintCommand();
         public ICommand ChangeDate { get; } = new ChangeProcessingDateCommand();
         public ICommand ChangeBouquet { get; } = new ChangeProcessingBouquetCommand();
         public ICommand Ship { get; } = new ShippingOrdersCommand();
         #endregion // コマンド
 
         #region IReloadable
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
         /// <inheritdoc/>
         public void UpdateProperties()
         {
@@ -93,6 +95,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IReloadable
 
         #region IPrintable
+        /// <inheritdoc/>
+        public ICommand Print { get; } = new PrintCommand();
+
+        /// <inheritdoc/>
         public void ValidateBeforePrinting() { }
         #endregion // IPrintable
 

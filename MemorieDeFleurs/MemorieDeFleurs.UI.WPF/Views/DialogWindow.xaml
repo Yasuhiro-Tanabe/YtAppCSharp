@@ -14,14 +14,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/Style.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            
-            <!-- ContentControl の、 Content プロパティで指定したビューモデルと実際に表示するビューの関連付け -->
-            <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
-                <v:OrderSheetToSupplier DataContext="{Binding}"/>
-            </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:OrderToSupplierInspectionDetailViewModel}">
-                <v:OrderToSupplierInspectionDetailControl/>
-            </DataTemplate>
         </ResourceDictionary>
     </Window.Resources>
     <i:Interaction.Triggers>
@@ -35,7 +27,17 @@
             <RowDefinition Height="20pt"/>
         </Grid.RowDefinitions>
 
-        <ContentControl Grid.Row="0" Content="{Binding ViewModel}"/>
+        <ContentControl Grid.Row="0" Content="{Binding ViewModel}">
+            <ContentControl.Resources>
+                <!-- Content プロパティで指定したビューモデルと実際に表示するビューの関連付け -->
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
+                    <v:OrderSheetToSupplier DataContext="{Binding}"/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierInspectionDetailViewModel}">
+                    <v:OrderToSupplierInspectionDetailControl/>
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
             <!-- コマンド実行時にダイアログを閉じるため、CommandParameter には View (このウィンドウ) を渡す -->

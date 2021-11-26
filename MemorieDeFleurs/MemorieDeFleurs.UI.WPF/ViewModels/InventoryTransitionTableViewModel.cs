@@ -84,12 +84,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion
 
         #region コマンド
-        public ICommand Print { get; } = new PrintCommand();
         public ICommand UpdateTable { get; } = new InventoryTransitionTableChangedCommand();
         #endregion // コマンド
 
 
         #region IReloadable
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
         /// <inheritdoc/>
         public void UpdateProperties()
         {
@@ -141,6 +143,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region IPrintable
+        /// <inheritdoc/>
+        public ICommand Print { get; } = new PrintCommand();
+
+        /// <inheritdoc/>
         public void ValidateBeforePrinting()
         {
             if (string.IsNullOrWhiteSpace(BouquetPartsCode)) { throw new ApplicationException("印刷対象の花コードが指定されていません。"); }

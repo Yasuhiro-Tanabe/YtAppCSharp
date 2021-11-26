@@ -93,7 +93,7 @@
         </ComboBox>
 
 
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" Margin="0" Visibility="{Binding IsListVisible, Converter={StaticResource negativeConverter}}">
+        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" Margin="0" Visibility="{Binding IsEditing, Converter={StaticResource negativeConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20pt"/>
                 <RowDefinition Height="20pt"/>
@@ -120,7 +120,7 @@
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Address2}"/>
         </Grid>
         
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" Margin="0" Visibility="{Binding IsListVisible, Converter={StaticResource positiveConverter}}">
+        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" Margin="0" Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20pt"/>
                 <RowDefinition Height="*"/>

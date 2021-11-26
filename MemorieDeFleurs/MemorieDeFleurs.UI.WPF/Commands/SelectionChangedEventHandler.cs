@@ -6,9 +6,9 @@ using System.Windows.Controls;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class SelectionChangedEventCommand : CommandBase
+    internal class SelectionChangedEventHandler : CommandBase
     {
-        public SelectionChangedEventCommand() : base()
+        public SelectionChangedEventHandler() : base()
         {
             AddAction(typeof(SelectionChangedEventArgs), ChangeCommandButtonVisibility);
             AddAction(typeof(OrderToSupplierListViewModel), ReloadItems);

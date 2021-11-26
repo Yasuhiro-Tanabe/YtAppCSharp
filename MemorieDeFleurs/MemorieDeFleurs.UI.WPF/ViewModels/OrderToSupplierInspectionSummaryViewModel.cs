@@ -5,12 +5,26 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
 using System.Linq;
+using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class OrderToSupplierInspectionSummaryViewModel : ListItemViewModelBase, IDialogCaller
     {
-        public OrderToSupplierInspectionSummaryViewModel() : base(new OpenDialogCommand()) { }
+        public event EventHandler Inspected;
+
+        public OrderToSupplierInspectionSummaryViewModel() : base(null)
+        {
+            (OpenDialog as OpenDialogCommand).DialogClosing += NotifyInspected;
+        }
+
+        private void NotifyInspected(object sender, DialogClosingEventArgs args)
+        {
+            if (args.Status == DialogClosingStatus.OK)
+            {
+                Inspected?.Invoke(this, null);
+            }
+        }
 
         public OrderToSupplierInspectionSummaryViewModel(OrdersToSupplier order) : this()
         {
@@ -101,6 +115,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region IDialogCaller
+        public ICommand OpenDialog { get; } = new OpenDialogCommand();
+
         public NotificationObject DialogViewModel
         {
             get

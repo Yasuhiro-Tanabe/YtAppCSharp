@@ -93,11 +93,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private DateTime _ordered;
         #endregion // プロパティ
 
-        #region コマンド
-        public ICommand PrintPreview { get; } = new OpenDialogCommand();
-        #endregion // コマンド
-
         #region IReloadabe
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
         /// <inheritdoc/>
         public void UpdateProperties()
         {
@@ -128,6 +127,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IReloadable
 
         #region IDialogCaller
+        /// <inheritdoc/>
+        public ICommand OpenDialog { get; } = new OpenDialogCommand();
+
+        /// <inheritdoc/>
         public NotificationObject DialogViewModel
         {
             get

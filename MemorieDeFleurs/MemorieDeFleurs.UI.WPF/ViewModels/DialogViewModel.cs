@@ -1,12 +1,29 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.UI.WPF.Commands;
 
+using System;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     internal class DialogViewModel : NotificationObject, IReloadable
     {
+        public event EventHandler<DialogClosingEventArgs> DialogClosing;
+
+        public DialogViewModel()
+        {
+            (Ok as DialogOkCommand).DialogClosing += DialogClosingOk;
+            (Cancel as DialogCancelCommand).DialogCloing += DialogClosingCancel;
+        }
+        private void DialogClosingOk(object sender, EventArgs unused)
+        {
+            DialogClosing?.Invoke(this, new DialogClosingEventArgs(DialogClosingStatus.OK, ViewModel));
+        }
+        private void DialogClosingCancel(object sender, EventArgs unused)
+        {
+            DialogClosing?.Invoke(this, new DialogClosingEventArgs(DialogClosingStatus.CANCEL, ViewModel));
+        }
+
         #region プロパティ
         /// <summary>
         /// ダイアログタイトル
@@ -67,6 +84,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // コマンド
 
         #region IReloadable
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
         /// <inheritdoc/>
         public void UpdateProperties()
         {

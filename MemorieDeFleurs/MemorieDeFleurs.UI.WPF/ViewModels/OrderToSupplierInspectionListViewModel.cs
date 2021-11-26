@@ -100,7 +100,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             try
             {
-                LogUtil.DEBUGLOG_BeginMethod(msg: $"{SelectedSupplier.SupplierName}, {SelectedKey.Key}, {From:yyyyMMdd} - {To:yyyyMMdd}");
+                LogUtil.DEBUGLOG_BeginMethod(msg: $"{SelectedSupplier?.SupplierName}, {SelectedKey.Key}, {From:yyyyMMdd} - {To:yyyyMMdd}");
 
                 if(To < From)
                 {
@@ -148,6 +148,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
 
         #region IReloadable
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
         public void UpdateProperties()
         {
             LoadSuppliers();
@@ -177,37 +181,25 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         private void ReloadOrders(IEnumerable<OrdersToSupplier> orders)
         {
+            foreach(var o in Orders)
+            {
+                o.Inspected -= HandleReloadOrders;
+            }
             Orders.Clear();
+
             foreach (var o in orders)
             {
                 var summary = new OrderToSupplierInspectionSummaryViewModel(o);
                 Subscribe(summary);
+                summary.Inspected += HandleReloadOrders;
                 Orders.Add(summary);
             }
             RaisePropertyChanged(nameof(Orders));
         }
 
-        //public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
-        //{
-        //    try
-        //    {
-        //        LogUtil.DEBUGLOG_BeginMethod();
-
-        //        var detail = mainVM.FindTabItem(OrderToSupplierInspectionDetailViewModel.Name) as OrderToSupplierInspectionDetailViewModel;
-        //        if (detail == null)
-        //        {
-        //            detail = new OrderToSupplierInspectionDetailViewModel();
-        //        }
-
-        //        detail.OrderNo = SelectedOrder.OrderNo;
-        //        detail.UpdateProperties();
-        //        mainVM.OpenTabItem(detail);
-        //        return detail;
-        //    }
-        //    finally
-        //    {
-        //        LogUtil.DEBUGLOG_EndMethod();
-        //    }
-        //}
+        private void HandleReloadOrders(object sender, EventArgs unused)
+        {
+            ReloadOrders();
+        }
     }
 }

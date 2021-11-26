@@ -7,6 +7,7 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
 using System.Windows;
+using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -113,6 +114,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region IReloadable
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
         /// <inheritdoc/>
         public void UpdateProperties()
         {

@@ -24,16 +24,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region プロパティ
         /// <summary>
-        /// 発注番号
-        /// </summary>
-        public string OrderNo
-        {
-            get { return _no; }
-            set { SetProperty(ref _no, value); }
-        }
-        private string _no;
-
-        /// <summary>
         /// 仕入先ID (表示専用)
         /// </summary>
         public int SupplierCode
@@ -125,16 +115,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private PartsListItemViewModel _orderParts;
 
         /// <summary>
-        /// 商品構成編集中かどうか
-        /// </summary>
-        public bool IsEditing
-        {
-            get { return _editing; }
-            set { SetProperty(ref _editing, value); }
-        }
-        private bool _editing;
-
-        /// <summary>
         /// 印刷日
         /// </summary>
         public DateTime PrintDate
@@ -143,23 +123,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _print, value); }
         }
         private DateTime _print = DateTime.Today;
-
-
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Edit { get; } = new EditCommand();
-        public ICommand Fix { get; } = new FixCommand();
-        public ICommand Append { get; } = new AppendToListCommand();
-        public ICommand Remove { get; } = new RemoveFromListCommand();
-        public ICommand Order { get; } = new OrderCommand();
-        public ICommand Cancel { get; } = new CancelOrderCommand();
-        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
+        /// <inheritdoc/>
         public ICommand PreviewPrint { get; } = new OpenDialogCommand();
-        public ICommand Print { get; } = new PrintCommand();
         #endregion // コマンド
 
         #region IReloadable
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
         /// <inheritdoc/>
         public void UpdateProperties()
         {
@@ -212,6 +186,21 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IReloadable
 
         #region IEditableFixable
+        /// <inheritdoc/>
+        public ICommand Edit { get; } = new EditCommand();
+
+        /// <inheritdoc/>
+        public ICommand Fix { get; } = new FixCommand();
+
+        /// <inheritdoc/>
+        public bool IsEditing
+        {
+            get { return _editing; }
+            set { SetProperty(ref _editing, value); }
+        }
+        private bool _editing;
+
+        /// <inheritdoc/>
         public void OpenEditView()
         {
             if(SelectedSupplier == null)
@@ -236,6 +225,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             IsEditing = true;
         }
 
+        /// <inheritdoc/>
         public void FixEditing()
         {
             IsEditing = false;
@@ -243,7 +233,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IEditableFixable
 
-        #region IAddableRemovable
+        #region IAppendableRemovable
+        /// <inheritdoc/>
+        public ICommand Append { get; } = new AppendToListCommand();
+
+        /// <inheritdoc/>
+        public ICommand Remove { get; } = new RemoveFromListCommand();
+
+        /// <inheritdoc/>
         public void AppendToList()
         {
             // SupplyParts から OrderParts への移動
@@ -256,6 +253,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedSupplyParts = null;
         }
 
+        /// <inheritdoc/>
         public void RemoveFromList()
         {
             // OrderParts から SupplyParts への移動
@@ -267,9 +265,27 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             OrderParts.Remove(parts);
             SelectedOrderParts = null;
         }
-        #endregion // IAddableRemovable
+        #endregion // IAppendableRemovable
 
         #region IOrderable
+        /// <inheritdoc/>
+        public ICommand Order { get; } = new OrderCommand();
+
+        /// <inheritdoc/>
+        public ICommand Cancel { get; } = new CancelOrderCommand();
+
+        /// <inheritdoc/>
+        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
+
+        /// <inheritdoc/>
+        public string OrderNo
+        {
+            get { return _no; }
+            set { SetProperty(ref _no, value); }
+        }
+        private string _no;
+
+        /// <inheritdoc/>
         public void OrderMe()
         {
             if(string.IsNullOrWhiteSpace(_no))
@@ -293,6 +309,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public void CancelMe()
         {
             if(string.IsNullOrWhiteSpace(_no))
@@ -306,6 +323,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public void ChangeMyArrivalDate()
         {
             if (string.IsNullOrWhiteSpace(_no))
@@ -391,6 +409,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IDialogViewModel
 
         #region IPrintable
+        public ICommand Print { get; } = new PrintCommand();
+
+        /// <inheritdoc/>
         public void ValidateBeforePrinting() { }
         #endregion // IPrintable
     }

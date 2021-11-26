@@ -37,6 +37,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // コマンド
 
         #region IReloadable
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
         public void UpdateProperties()
         {
             Inventories.Clear();

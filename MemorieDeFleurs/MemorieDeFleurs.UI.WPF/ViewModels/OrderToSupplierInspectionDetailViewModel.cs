@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -109,6 +110,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IDialogViewModel
 
         #region IReloadable
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
         public void UpdateProperties()
         {
             if(string.IsNullOrWhiteSpace(OrderNo))

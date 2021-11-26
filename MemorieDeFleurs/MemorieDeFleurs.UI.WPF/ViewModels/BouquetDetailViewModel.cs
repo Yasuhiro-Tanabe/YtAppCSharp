@@ -74,16 +74,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private string _text;
 
         /// <summary>
-        /// 商品構成編集中かどうか
-        /// </summary>
-        public bool IsEditing
-        {
-            get { return _editing; }
-            set { SetProperty(ref _editing, value); }
-        }
-        private bool _editing = false;
-
-        /// <summary>
         /// 編集中の商品構成
         /// </summary>
         public ObservableCollection<PartsListItemViewModel> SelectedPartsList { get; } = new ObservableCollection<PartsListItemViewModel>();
@@ -116,10 +106,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region コマンド
         public ICommand FindImageSource { get; } = new FindImageSourceFileCommand();
-        public ICommand Edit { get; } = new EditCommand();
-        public ICommand Fix { get; } = new FixCommand();
-        public ICommand Append { get; } = new AppendToListCommand();
-        public ICommand Remove { get; } = new RemoveFromListCommand();
         #endregion // コマンド
 
         /// <summary>
@@ -182,6 +168,21 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region IEditableFixable
+        /// <inheritdoc/>
+        public ICommand Edit { get; } = new EditCommand();
+
+        /// <inheritdoc/>
+        public ICommand Fix { get; } = new FixCommand();
+
+        /// <inheritdoc/>
+        public bool IsEditing
+        {
+            get { return _editing; }
+            set { SetProperty(ref _editing, value); }
+        }
+        private bool _editing = false;
+
+        /// <inheritdoc/>
         public void OpenEditView()
         {
             IsEditing = true;
@@ -190,6 +191,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedParts = null;
         }
 
+        /// <inheritdoc/>
         private void LoadCandidatePartsList()
         {
             CandidatePartsList.Clear();
@@ -213,6 +215,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IEditableFixable
 
         #region IAddableRemovable
+        /// <inheritdoc/>
+        public ICommand Append { get; } = new AppendToListCommand();
+        /// <inheritdoc/>
+        public ICommand Remove { get; } = new RemoveFromListCommand();
+
+        /// <inheritdoc/>
         public void AppendToList()
         {
             var item = CandidateParts;
@@ -224,6 +232,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             CandidatePartsList.Remove(item);
         }
 
+        /// <inheritdoc/>
         public void RemoveFromList()
         {
             var item = SelectedParts;
@@ -237,6 +246,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IAddableRemovbable
 
         #region IReloadable
+        /// <inheritdoc/>
+        public ICommand Reload { get; } = new ReloadCommand();
+
         /// <inheritdoc/>
         public void UpdateProperties()
         {
