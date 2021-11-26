@@ -27,6 +27,10 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                     {
                         (item as ListItemViewModelBase).IsActionVisible = false;
                     }
+                    if(item is InventorySummaryViewModel)
+                    {
+                        (item as InventorySummaryViewModel).IsSelected = false;
+                    }
                 }
             }
 
@@ -39,6 +43,10 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                         var vm = item as ListItemViewModelBase;
                         vm.IsActionVisible = true;
                         LogUtil.Debug($"[{vm.GetType().Name}] {vm.Key} selected.");
+                    }
+                    if(item is InventorySummaryViewModel)
+                    {
+                        (item as InventorySummaryViewModel).IsSelected = true;
                     }
                 }
             }

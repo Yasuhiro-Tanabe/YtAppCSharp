@@ -1816,6 +1816,20 @@ namespace MemorieDeFleurs.Models
             return (lhs.Quantity != rhs.Quantity)
                 || (lhs.Remain != rhs.Remain);
         }
+
+        public IDictionary<string, int> FindInventoriesAt(DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                return context.InventoryActions
+                    .Include(a => a.BouquetPart)
+                    .Where(a => a.ActionDate == date)
+                    .Where(a => a.Action == InventoryActionType.SCHEDULED_TO_USE)
+                    .AsEnumerable()
+                    .GroupBy(o => o.PartsCode)
+                    .ToDictionary(g => g.Key, g => g.Sum(o => o.Quantity));
+            }
+        }
         #endregion // 単品破棄
     }
 }

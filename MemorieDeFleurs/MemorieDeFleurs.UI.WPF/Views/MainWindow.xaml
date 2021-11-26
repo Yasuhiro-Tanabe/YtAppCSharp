@@ -49,6 +49,7 @@
                 <MenuItem Header="商品登録" Command="{Binding OpenBouquetDetailView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="単品一覧" Command="{Binding OpenPartsListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="単品登録" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="単品在庫破棄" Command="{Binding OpenInventoryDiscardView}" CommandParameter="{Binding}"/>
             </MenuItem>
             <MenuItem Header="得意先">
                 <MenuItem Header="得意先一覧" Command="{Binding OpenCustomerListView}" CommandParameter="{Binding}"/>
@@ -110,6 +111,9 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:OrderToSupplierInspectionListViewModel}">
                     <v:OrderToSupplierInspectionListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:InventoryViewModel}">
+                    <v:InventoryDiscardView/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>

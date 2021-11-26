@@ -391,5 +391,19 @@ namespace MemorieDeFleurs.UI.WPF.Model
             return Model.CustomerModel.GetShippingBouquetCountAt(date);
         }
         #endregion // 加工指示書
+
+        #region 在庫の操作、破棄
+        public IDictionary<string, int> FindInventoriesAt(DateTime date)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            return Model.BouquetModel.FindInventoriesAt(date);
+        }
+
+        public void DiscardInventoruies(DateTime date, params Tuple<string, int>[] discardParts)
+        {
+            if (DbConnection == null) { throw new NotConnectedToDatabaseException(); }
+            Model.BouquetModel.DiscardBouquetParts(date, discardParts);
+        }
+        #endregion // 在庫の操作、破棄
     }
 }
