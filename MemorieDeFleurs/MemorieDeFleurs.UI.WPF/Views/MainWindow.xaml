@@ -30,6 +30,7 @@
             <MenuItem Header="画面" HorizontalAlignment="Left">
                 <MenuItem Header="DB接続...">
                     <MenuItem Header="SQLite">
+                        <MenuItem Header="新規" Command="{Binding SQLiteNew}" CommandParameter="{Binding}"/>
                         <MenuItem Header="読込..." Command="{Binding SQLiteLoad}" CommandParameter="{Binding}"/>
                         <MenuItem Header="保存..." Command="{Binding SQLiteSave}" CommandParameter="{Binding}"/>
                     </MenuItem>
