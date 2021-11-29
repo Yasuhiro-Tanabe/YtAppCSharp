@@ -8,7 +8,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class OrderFromCustomerSummaryViewModel : ListItemViewModelBase
     {
-        public OrderFromCustomerSummaryViewModel() : base(new OpenOrderFromCustomerDetailViewCommand()) { }
+        public OrderFromCustomerSummaryViewModel() : base(new OpenDetailViewCommand<OrderFromCustomerDetailViewModel>()) { }
 
         #region プロパティ
         /// <summary>

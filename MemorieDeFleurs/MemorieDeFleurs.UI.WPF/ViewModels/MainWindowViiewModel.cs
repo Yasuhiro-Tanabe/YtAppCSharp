@@ -46,21 +46,21 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region コマンド
         public ICommand Exit { get; } = new ExitCommand();
-        public ICommand OpenPartsDetailView { get; } = new OpenPartsDetailViewCommand();
-        public ICommand OpenPartsListView { get; } = new OpenPartListViewCommand();
-        public ICommand OpenBouquetDetailView { get; } = new OpenBouquetDetailViewCommand();
-        public ICommand OpenBouquetListView { get; } = new OpenBouquetListViewCommand();
-        public ICommand OpenSupplierListView { get; } = new OpenSupplierListViewCommand();
-        public ICommand OpenSupplierDetailView { get; } = new OpenSupplierDetailViewCommand();
-        public ICommand OpenCustomerListView { get; } = new OpenCustomerListViewCommand();
-        public ICommand OpenCustomerDetailView { get; } = new OpenCustomerDetailViewCommand();
-        public ICommand OpenOrderToSupplierListView { get; } = new OpenOrderToSupplierListViewCommand();
-        public ICommand OpenOrderToSupplierDetailView { get; } = new OpenOrderToSupplierDetailViewCommand();
-        public ICommand OpenOrderFromCustomerListView { get; } = new OpenOrderFromCustomerListViewCommand();
-        public ICommand OpenOrderFromCustomerDetailView { get; } = new OpenOrderFromCustomerDetailViewCommand();
+        public ICommand OpenPartsDetailView { get; } = new OpenDetailViewCommand<BouquetPartsDetailViewModel>();
+        public ICommand OpenPartsListView { get; } = new OpenListViewCommand<BouquetPartsListViewModel>();
+        public ICommand OpenBouquetDetailView { get; } = new OpenDetailViewCommand<BouquetDetailViewModel>();
+        public ICommand OpenBouquetListView { get; } = new OpenListViewCommand<BouquetListViewModel>();
+        public ICommand OpenSupplierListView { get; } = new OpenListViewCommand<SupplierListViewModel>();
+        public ICommand OpenSupplierDetailView { get; } = new OpenDetailViewCommand<SupplierDetailViewModel>();
+        public ICommand OpenCustomerListView { get; } = new OpenListViewCommand<CustomerListViewModel>();
+        public ICommand OpenCustomerDetailView { get; } = new OpenDetailViewCommand<CustomerDetailViewModel>();
+        public ICommand OpenOrderToSupplierListView { get; } = new OpenListViewCommand<OrderToSupplierListViewModel>();
+        public ICommand OpenOrderToSupplierDetailView { get; } = new OpenDetailViewCommand<OrderToSupplierDetailViewModel>();
+        public ICommand OpenOrderFromCustomerListView { get; } = new OpenListViewCommand<OrderFromCustomerListViewModel>();
+        public ICommand OpenOrderFromCustomerDetailView { get; } = new OpenDetailViewCommand<OrderFromCustomerDetailViewModel>();
         public ICommand OpenInventoryTransactionView { get; } = new OpenInventoryTransitionViewCommand();
         public ICommand OpenProcessingInstructionsPreview { get; } = new OpenProcessingInstructionsPreviewCommand();
-        public ICommand OpenOrderToSupplierInspectionList { get; } = new OpenOrderToSupplierInspectionListCommand();
+        public ICommand OpenOrderToSupplierInspectionList { get; } = new OpenListViewCommand<OrderToSupplierInspectionListViewModel>();
         public ICommand OpenInventoryDiscardView { get; } = new OpenInventoryDiscardViewCommand();
         public ICommand SQLiteNew { get; } = new SQLiteNewDbCommand();
         public ICommand SQLiteLoad { get; } = new SQLiteOpenDbFileCommand();

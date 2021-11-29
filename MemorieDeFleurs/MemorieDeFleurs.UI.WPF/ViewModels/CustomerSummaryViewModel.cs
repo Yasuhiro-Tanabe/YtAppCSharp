@@ -7,9 +7,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class CustomerSummaryViewModel : ListItemViewModelBase
     {
-        public CustomerSummaryViewModel() : base(new OpenCustomerDetailViewCommand()) { }
+        public CustomerSummaryViewModel() : base(new OpenDetailViewCommand<CustomerDetailViewModel>()) { }
 
-        public CustomerSummaryViewModel(Customer customer) : base(new OpenCustomerDetailViewCommand())
+        public CustomerSummaryViewModel(Customer customer) : this()
         {
             Update(customer);
         }

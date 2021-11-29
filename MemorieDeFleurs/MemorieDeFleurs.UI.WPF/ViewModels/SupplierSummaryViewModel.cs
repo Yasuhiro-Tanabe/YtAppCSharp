@@ -6,8 +6,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class SupplierSummaryViewModel : ListItemViewModelBase
     {
-        public SupplierSummaryViewModel() : base(new OpenSupplierDetailViewCommand()) { }
-        public SupplierSummaryViewModel(Supplier supplier) : base(new OpenSupplierDetailViewCommand())
+        public SupplierSummaryViewModel() : base(new OpenDetailViewCommand<SupplierDetailViewModel>()) { }
+        public SupplierSummaryViewModel(Supplier supplier) : this()
         {
             Update(supplier);
         }

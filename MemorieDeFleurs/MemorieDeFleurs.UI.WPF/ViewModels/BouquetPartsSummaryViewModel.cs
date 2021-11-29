@@ -6,7 +6,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetPartsSummaryViewModel : ListItemViewModelBase
     {
-        public BouquetPartsSummaryViewModel(BouquetPart part) : base(new OpenPartsDetailViewCommand())
+        public BouquetPartsSummaryViewModel(BouquetPart part) : base(new OpenDetailViewCommand<BouquetPartsDetailViewModel>())
         {
             Update(part);
         }

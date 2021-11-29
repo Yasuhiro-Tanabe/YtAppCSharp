@@ -11,7 +11,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     internal class OrderToSupplierSummaryViewModel : ListItemViewModelBase, IReloadable, IDialogCaller
     {
-        public OrderToSupplierSummaryViewModel(OrdersToSupplier order) : base(new OpenOrderToSupplierDetailViewCommand())
+        public OrderToSupplierSummaryViewModel(OrdersToSupplier order) : base(new OpenDetailViewCommand<OrderToSupplierDetailViewModel>())
         {
             OrderNo = order.ID;
             Update(order);

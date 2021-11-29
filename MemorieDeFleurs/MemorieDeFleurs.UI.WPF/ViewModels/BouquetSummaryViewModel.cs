@@ -8,7 +8,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     public class BouquetSummaryViewModel : ListItemViewModelBase
     {
-        public BouquetSummaryViewModel(Bouquet bouquet) : base(new OpenBouquetDetailViewCommand())
+        public BouquetSummaryViewModel(Bouquet bouquet) : base(new OpenDetailViewCommand<BouquetDetailViewModel>())
         {
             Update(bouquet);
         }

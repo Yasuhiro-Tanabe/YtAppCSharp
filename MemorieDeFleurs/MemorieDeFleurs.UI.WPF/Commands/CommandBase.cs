@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class CommandBase : ICommand
+    public class CommandBase : ICommand
     {
         public event EventHandler CanExecuteChanged;
 
