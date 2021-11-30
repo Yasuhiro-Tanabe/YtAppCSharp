@@ -7,14 +7,24 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 得意先受注詳細画面のビューモデル
+    /// </summary>
     public class OrderFromCustomerDetailViewModel : DetailViewModelBase, IEditableAndFixable, IOrderable, IReloadable
     {
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
         public static string Name { get; } = "得意先受注詳細";
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OrderFromCustomerDetailViewModel() : base(Name)
         {
             LoadCustomers();
@@ -129,9 +139,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
+        /// <summary>
+        /// お届け先変更時に実行するコマンド
+        /// </summary>
         public ICommand ChangeShippingAddress { get; } = new ChangeShippingAddressCommand();
         #endregion // コマンド
 
+        /// <summary>
+        /// 画面の表示内容を指定された受注情報のそれに更新する
+        /// </summary>
+        /// <param name="order">受注情報</param>
         public void Update(OrderFromCustomer order)
         {
             OrderNo = order.ID;
@@ -160,6 +177,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             IsDirty = false;
         }
 
+        /// <summary>
+        /// お届け先を変更する
+        /// 
+        /// <see cref="ChangeShippingAddress"/> コマンド実行時に呼び出される
+        /// </summary>
         public void LoadShippingAddresses()
         {
             if(SelectedCustomer != null)
@@ -169,7 +191,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedShippingAddress = null;
         }
 
-        public void LoadShippingAddresses(int  customerID)
+        private  void LoadShippingAddresses(int  customerID)
         {
             ShippingAddresses.Clear();
             foreach (var addr in MemorieDeFleursUIModel.Instance.FindAllShippingAddressOfCustomer(customerID))
@@ -225,6 +247,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IReloadable
 
+        /// <inheritdoc/>
         public override void ClearProperties()
         {
             OrderNo = string.Empty;
@@ -249,6 +272,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             IsDirty = false;
         }
 
+        /// <inheritdoc/>
         public override void Validate()
         {
             var ex = new ValidateFailedException();

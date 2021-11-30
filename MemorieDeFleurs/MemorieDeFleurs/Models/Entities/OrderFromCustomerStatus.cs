@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace MemorieDeFleurs.Models.Entities
 {
+    /// <summary>
+    /// 得意先からの受注情報の現在の状態
+    /// </summary>
     public enum OrderFromCustomerStatus
     {
         /// <summary>

@@ -9,10 +9,19 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 入荷検品一覧画面内に一覧表示する各検品対象受注情報のビューモデル
+    /// </summary>
     public class OrderToSupplierInspectionSummaryViewModel : ListItemViewModelBase, IDialogCaller
     {
+        /// <summary>
+        /// この受注情報の検品が終了したことを通知する
+        /// </summary>
         public event EventHandler Inspected;
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OrderToSupplierInspectionSummaryViewModel() : base(null)
         {
             (OpenDialog as OpenDialogCommand).DialogClosing += NotifyInspected;
@@ -26,6 +35,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="order">表示する受注情報</param>
         public OrderToSupplierInspectionSummaryViewModel(OrdersToSupplier order) : this()
         {
             Update(order);
@@ -115,8 +128,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region IDialogCaller
+        /// <inheritdoc/>
         public ICommand OpenDialog { get; } = new OpenDialogCommand();
 
+        /// <inheritdoc/>
         public NotificationObject DialogViewModel
         {
             get

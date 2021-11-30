@@ -1,7 +1,15 @@
 ﻿namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 単品破棄画面内の各単品ビューモデル
+    /// </summary>
     public class InventorySummaryViewModel : NotificationObject
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="code">花コード</param>
+        /// <param name="quantity">現在の在庫数量</param>
         public InventorySummaryViewModel(string code, int quantity)
         {
             PartsCode = code;

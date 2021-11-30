@@ -41,7 +41,7 @@ namespace MemorieDeFleurs.Models
         /// テスト・デバッグの利便性を考慮し、操作するデータベースを
         /// 外部から指定できるようにしている。
         /// </summary>
-        /// <param name="db"></param>
+        /// <param name="connection">操作するデータベースの接続オブジェクト</param>
         public MemorieDeFleursModel(DbConnection connection)
         {
             DbConnection = connection;

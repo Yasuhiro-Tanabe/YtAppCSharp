@@ -13,22 +13,41 @@ namespace MemorieDeFleurs
     {
         private DbConnection Connection { get; set; }
 
+        /// <summary>
+        /// シーケンスの値管理クラス
+        /// </summary>
         public class SequenceValueManager
         {
             private string Name { get; set; }
 
             private SequenceUtil Util { get; set; }
 
+            /// <summary>
+            /// 次のシーケンス値を返す
+            /// </summary>
+            /// <returns>次の値</returns>
             public int Next()
             {
                 return Util.Next(Name);
             }
 
+            /// <summary>
+            /// 次のシーケンス値を返す
+            /// 
+            /// トランザクション内での呼出用
+            /// </summary>
+            /// <param name="context">トランザクション中のDBコンテキスト</param>
+            /// <returns>次の値</returns>
             public int Next(MemorieDeFleursDbContext context)
             {
                 return Util.Next(context, Name);
             }
 
+            /// <summary>
+            /// コンストラクタ
+            /// </summary>
+            /// <param name="name">シーケンスの名前</param>
+            /// <param name="parent">この管理オブジェクトを管理しているシーケンスユーティリティ</param>
             public SequenceValueManager(string name, SequenceUtil parent)
             {
                 Name = name;
@@ -64,11 +83,22 @@ namespace MemorieDeFleurs
         /// </summary>
         public SequenceValueManager SEQ_SESSION { get; private set; }
 
+        /// <summary>
+        /// シーケンス SEQ_INVENTORY_LOT_NUMER
+        /// 
+        /// SEQ_SESSION.Next で次の連番を自動採番・取得できる。
+        /// </summary>
         public SequenceValueManager SEQ_INVENTORY_LOT_NUMBER { get; private set; }
 
+        /// <summary>
+        /// このシーケンスユーティリティを管理しているモデルオブジェクト
+        /// </summary>
         private MemorieDeFleursModel Parent { get; set; }
-        public object SingleOrDefault { get; private set; }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="model"></param>
         public SequenceUtil(MemorieDeFleursModel model)
         {
             Parent = model;
@@ -107,7 +137,9 @@ namespace MemorieDeFleurs
             return sequenceValue.Value;
         }
 
-
+        /// <summary>
+        /// データベースに登録されている全シーケンスの値を初期化する
+        /// </summary>
         public void Clear()
         {
             using (var cmd = Connection.CreateCommand())

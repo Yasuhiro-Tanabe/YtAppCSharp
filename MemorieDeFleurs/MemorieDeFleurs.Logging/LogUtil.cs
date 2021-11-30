@@ -8,8 +8,12 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace MemorieDeFleurs.Logging
-
 {
+    /// <summary>
+    /// 汎用ログユーティリティ
+    /// 
+    /// 初期化や終了のことを考えずに log4net (http://logging.apache.org/log4net/) のログ出力機能を使うためのユーティリティメソッド集
+    /// </summary>
     public static class LogUtil
     {
         private static ILog _logger;
@@ -40,26 +44,140 @@ namespace MemorieDeFleurs.Logging
         }
 
         #region 基本のログ出力メソッド
+        /// <summary>
+        /// DEBUG レベルのログを出力する
+        /// </summary>
+        /// <param name="msg">ログ出力メッセージ</param>
+        /// <param name="caller">(通常は省略)このメソッドの呼び出し元メソッド/プロパティ名</param>
+        /// <param name="path">(通常は省略)このメソッドの呼び出し元メソッド/プロパティが記述されているファイル名</param>
+        /// <param name="line">(通常は省略)このログメソッドを記述したファイル内の行番号</param>
         public static void Debug(string msg, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0) => _logger.DebugFormat("{0}{1} ({2},{3}:{4})", Indent, msg, caller, Path.GetFileName(path), line);
+
+        /// <summary>
+        /// DEBUG レベルのを出力する
+        /// 
+        /// フォーマットの記述方法は <see cref="string.Format(string, object?[])"/> 参照。
+        /// </summary>
+        /// <param name="fmt">ログ出力フォーマット</param>
+        /// <param name="args">フォーマットに埋め込むパラメータ、fmt に記述した可変部分の数に合わせて指定する</param>
         public static void DebugFormat(string fmt, params object[] args) => _logger.DebugFormat(fmt, args);
+
+        /// <summary>
+        /// 例外の内容をDEBUG レベルのログとして出力する
+        /// </summary>
+        /// <param name="ex">出力する例外</param>
+        /// <param name="caller">(通常は省略)このメソッドの呼び出し元メソッド/プロパティ名</param>
+        /// <param name="path">(通常は省略)このメソッドの呼び出し元メソッド/プロパティが記述されているファイル名</param>
+        /// <param name="line">(通常は省略)このログメソッドを記述したファイル内の行番号</param>
         public static void Debug(Exception ex, [CallerMemberName] string caller = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0) => Debug(ex.ToString(), caller, path, line);
+
+        /// <summary>
+        /// INFO レベルのログを出力する
+        /// </summary>
+        /// <param name="msg">出力メッセージ</param>
         public static void Info(string msg) => _logger.Info(msg);
+
+        /// <summary>
+        /// 例外の内容を INFO レベルのログとして出力する
+        /// </summary>
+        /// <param name="ex">出力する例外</param>
         public static void Info(Exception ex) => Info(ex.ToString());
+
+        /// <summary>
+        /// INFO レベルのログを出力する
+        /// 
+        /// フォーマットの記述方法は <see cref="string.Format(string, object?[])"/> 参照。
+        /// </summary>
+        /// <param name="fmt">ログ出力フォーマット</param>
+        /// <param name="args">フォーマットに埋め込むパラメータ、fmt に記述した可変部分の数に合わせて指定する</param>
         public static void InfoFormat(string fmt, params object[] args) => _logger.InfoFormat(fmt, args);
+
+        /// <summary>
+        /// WARN レベルのログを出力する
+        /// </summary>
+        /// <param name="msg">出力メッセージ</param>
         public static void Warn(string msg) => _logger.Warn(msg);
+
+        /// <summary>
+        /// 例外の内容を WARN レベルのログとして出力する
+        /// </summary>
+        /// <param name="ex">出力する例外</param>
         public static void Warn(Exception ex) => Warn(ex.ToString());
+
+        /// <summary>
+        /// WARN レベルのログを出力する
+        /// 
+        /// フォーマットの記述方法は <see cref="string.Format(string, object?[])"/> 参照。
+        /// </summary>
+        /// <param name="fmt">ログ出力フォーマット</param>
+        /// <param name="args">フォーマットに埋め込むパラメータ、fmt に記述した可変部分の数に合わせて指定する</param>
         public static void WarnFormat(string fmt, params object[] args) => _logger.WarnFormat(fmt, args);
+
+        /// <summary>
+        /// ERROR レベルのログを出力する
+        /// </summary>
+        /// <param name="msg">出力メッセージ</param>
         public static void Error(string msg) => _logger.Error(msg);
+
+        /// <summary>
+        /// 例外の内容を ERROR レベルのログとして出力する
+        /// </summary>
+        /// <param name="ex">出力する例外</param>
         public static void Error(Exception ex) => Error(ex.ToString());
+
+        /// <summary>
+        /// ERROR レベルのログを出力する
+        /// 
+        /// フォーマットの記述方法は <see cref="string.Format(string, object?[])"/> 参照。
+        /// </summary>
+        /// <param name="fmt">ログ出力フォーマット</param>
+        /// <param name="args">フォーマットに埋め込むパラメータ、fmt に記述した可変部分の数に合わせて指定する</param>
         public static void ErrorFormat(string fmt, params object[] args) => _logger.ErrorFormat(fmt, args);
+
+        /// <summary>
+        /// FATAL レベルのログを出力する
+        /// </summary>
+        /// <param name="msg">出力メッセージ</param>
         public static void Fatal(string msg) => _logger.Fatal(msg);
+
+        /// <summary>
+        /// 例外の内容を FATAL レベルのログとして出力する
+        /// </summary>
+        /// <param name="ex">出力する例外</param>
         public static void Fatal(Exception ex) => Fatal(ex.ToString());
+
+        /// <summary>
+        /// FATAL レベルのログを出力する
+        /// 
+        /// フォーマットの記述方法は <see cref="string.Format(string, object?[])"/> 参照。
+        /// </summary>
+        /// <param name="fmt">ログ出力フォーマット</param>
+        /// <param name="args">フォーマットに埋め込むパラメータ、fmt に記述した可変部分の数に合わせて指定する</param>
         public static void FatalFormat(string fmt, params object[] args) => _logger.FatalFormat(fmt, args);
 
+        /// <summary>
+        /// 現在の設定で DEBUG レベルのログが出力されるかどうか
+        /// </summary>
         public static bool IsDebugEnabled { get { return _logger.IsDebugEnabled; } }
+
+        /// <summary>
+        /// 現在の設定で INFO レベルのログが出力されるかどうか
+        /// </summary>
         public static bool IsInfoEnabled { get { return _logger.IsInfoEnabled; } }
+
+        /// <summary>
+        /// 現在の設定で WARN レベルのログが出力されるかどうか
+        /// </summary>
         public static bool IsWarnEnabled { get { return _logger.IsWarnEnabled; } }
+
+        /// <summary>
+        /// 現在の設定で ERROR レベルのログが出力されるかどうか
+        /// </summary>
         public static bool IsErrorEnabled { get { return _logger.IsErrorEnabled; } }
+
+        /// <summary>
+        /// 現在の設定で FATAL レベルのログが出力されるかどうか
+        /// </summary>
         public static bool IsFatalEnabled { get { return _logger.IsFatalEnabled; } }
         #endregion
 

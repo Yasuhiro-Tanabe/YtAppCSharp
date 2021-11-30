@@ -13,11 +13,25 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 商品詳細画面のビューモデル
+    /// </summary>
     public class BouquetDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IReloadable
     {
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
         public static string Name { get; } = "商品詳細";
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public BouquetDetailViewModel() : base(Name) { }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="b">詳細表示する商品エンティティオブジェクト</param>
         public BouquetDetailViewModel(Bouquet b) : this() { Update(b); }
 
         #region プロパティ
@@ -105,6 +119,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
+        /// <summary>
+        /// 画像ファイル検索ボタン押下時に実行されるコマンド
+        /// </summary>
         public ICommand FindImageSource { get; } = new FindImageSourceFileCommand();
         #endregion // コマンド
 
@@ -206,6 +223,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             CandidateParts = null;
         }
 
+        /// <inheritdoc/>
         public void FixEditing()
         {
             IsEditing = false;
@@ -271,6 +289,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IReloadable
 
+        /// <inheritdoc/>
         public override void SaveToDatabase()
         {
             try
@@ -306,6 +325,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public override void ClearProperties()
         {
             BouquetCode = string.Empty;

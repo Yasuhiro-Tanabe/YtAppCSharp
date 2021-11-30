@@ -160,7 +160,6 @@ namespace MemorieDeFleurs.Models
         /// <summary>
         /// 単品オブジェクト生成器を取得する
         /// </summary>
-        /// <typeparam name="BouquetPart">単品オブジェクト生成器が生成するオブジェクト：単品</typeparam>
         /// <returns>単品オブジェクト生成器</returns>
         public BouquetPartBuilder GetBouquetPartBuilder()
         {
@@ -181,6 +180,11 @@ namespace MemorieDeFleurs.Models
             private string _image;
             private IDictionary<string, int> _partsList = new Dictionary<string, int>();
 
+            /// <summary>
+            /// 商品オブジェクト生成器を作成する
+            /// </summary>
+            /// <param name="parent">モデルオブジェクト</param>
+            /// <returns>商品オブジェクト生成器</returns>
             public static BouquetBuilder GetInstance(BouquetModel parent)
             {
                 return new BouquetBuilder(parent);
@@ -405,6 +409,11 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 単品をデータベースに登録する
+        /// </summary>
+        /// <param name="parts">登録対象の単品</param>
+        /// <returns>登録後にデータベースから再取得した、他エンティティとの関連が適切に設定されたオブジェクトを返す。</returns>
         public BouquetPart Save(BouquetPart parts)
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -554,6 +563,11 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
         }
 
+        /// <summary>
+        /// 商品をデータベースに登録する
+        /// </summary>
+        /// <param name="bouquet">登録する商品</param>
+        /// <returns>登録完了した bouquet：引数で渡したオブジェクトそのものではなく、DB登録後にDBから取得した、関連データへの参照が適切に設定されたオブジェクトを返す。</returns>
         public Bouquet Save(Bouquet bouquet)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -721,6 +735,17 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 指定数量を指定された在庫ロットから引き当てる
+        /// 
+        /// トランザクション内での呼出用
+        /// 
+        /// 指定日以降にこの在庫ロットからの引当残が発生した場合は、 usedLot にないロットから引当を行う。
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="today">在庫引当日の在庫アクション：この在庫アクションから quantity 本を引当、この日以降の残数を更新する</param>
+        /// <param name="quantity">引当数量</param>
+        /// <param name="usedLot">これまでに引当実施済のロット一覧：ここで指定された在庫ロットへの在庫振替は行わない</param>
         public void UseFromThisLot(MemorieDeFleursDbContext context, InventoryAction today, int quantity, Stack<int> usedLot)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{today.ToString("s")}, {quantity}, [ {string.Join(",", usedLot)} ]");
@@ -846,6 +871,16 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 指定数量を別の在庫から引き当てる
+        /// 
+        /// トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="inventory">直前に引当てした在庫ロットの在庫アクション</param>
+        /// <param name="quantity">引当数量</param>
+        /// <param name="usedLot">これまでに引当を行ったロットのロット番号一覧：咲き引当はこれら以外のロットから行う。</param>
+        /// <exception cref="InventoryShortageException">当日分の在庫が足りずに引当ができなかった</exception>
         public void UseFromOtherLot(MemorieDeFleursDbContext context, InventoryAction inventory, int quantity, Stack<int> usedLot)
         {
             LogUtil.DEBUGLOG_BeginMethod($"inventory={inventory.ToString("s")}, quantity={quantity}, usedLot={string.Join(",", usedLot)}");
@@ -993,6 +1028,15 @@ namespace MemorieDeFleurs.Models
 
         }
 
+        /// <summary>
+        /// 指定日の使用数を指定された数量在庫に戻し、指定日以降の在庫引当をやり直す
+        /// 
+        /// トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="today">数量変更日</param>
+        /// <param name="quantityToReturn">在庫に戻す数量</param>
+        /// <param name="returnedLot">すでに在庫再引当済のロット：これらのロットに対する在庫再引当は行わない</param>
         public void ReturnToThisLot(MemorieDeFleursDbContext context, InventoryAction today, int quantityToReturn, Stack<int> returnedLot)
         {
             LogUtil.DEBUGLOG_BeginMethod($"{today.ToString("s")}, {today:yyyyMMdd}, {quantityToReturn}, [{string.Join(", ", returnedLot)}]");
@@ -1186,7 +1230,7 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <param name="bouquetCode">花束コード：商品はあらかじめ登録されていなければならない。</param>
         /// <param name="partsList">単品の花コードと使用数量の一覧：単品はあらかじめ登録されていなければならない。</param>
-        /// <remarks><see cref="BouquetBuilder"/> を使って商品を登録する時は <see cref="BouquetBuilder.Uses(string, int))"/>
+        /// <remarks><see cref="BouquetBuilder"/> を使って商品を登録する時は <see cref="BouquetBuilder.Uses(string, int)"/>
         /// または <see cref="BouquetBuilder.Uses(BouquetPart, int)"/> を使用する。
         /// </remarks>
         public void CreatePartsListOf(string bouquetCode, IEnumerable<KeyValuePair<string, int>> partsList)
@@ -1308,13 +1352,6 @@ namespace MemorieDeFleurs.Models
                 }
             }
         }
-
-        /// <summary>
-        /// 指定商品の商品構成をすべて破棄する
-        /// 
-        /// トランザクション内での呼出用。
-        /// </summary>
-        /// <param name="bouquetCode">花束コード</param>
         private void RemoveAllPartsFrom(MemorieDeFleursDbContext context, string bouquetCode)
         {
             var pats = context.PartsList.Where(item => item.BouquetCode == bouquetCode).ToList();
@@ -1603,6 +1640,13 @@ namespace MemorieDeFleurs.Models
         #endregion // 出荷数量変更
 
         #region 単品破棄
+        /// <summary>
+        /// 単品を破棄する
+        /// </summary>
+        /// <param name="date">破棄実施日</param>
+        /// <param name="discardParts">破棄対象単品の花コードおよび破棄数量
+        /// 
+        /// 花コードと破棄数量のペアは複数指定可能。</param>
         public void DiscardBouquetParts(DateTime date, params Tuple<string, int>[] discardParts)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -1817,6 +1861,11 @@ namespace MemorieDeFleurs.Models
                 || (lhs.Remain != rhs.Remain);
         }
 
+        /// <summary>
+        /// 指定日の各単品在庫数を取得する
+        /// </summary>
+        /// <param name="date">単品在庫数取得日</param>
+        /// <returns>date で指定された日の各単品在庫数量一覧</returns>
         public IDictionary<string, int> FindInventoriesAt(DateTime date)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))

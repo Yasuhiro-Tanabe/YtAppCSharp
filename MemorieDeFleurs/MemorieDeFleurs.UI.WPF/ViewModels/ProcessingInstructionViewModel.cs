@@ -3,6 +3,7 @@ using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
+using MemorieDeFleurs.UI.WPF.Views;
 
 using System;
 using System.Collections.ObjectModel;
@@ -11,8 +12,17 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 加工指示書のビューモデル
+    /// 
+    /// 加工指示書選択画面 (タブ要素として表示する <see cref="ProcessingInstructionPreviewControl"/>) と
+    /// 加工指示書 (印刷テンプレート兼用の <see cref="ProcessingInstructionControl"/> ) の両方の機能を同一ビューモデルで処理する
+    /// </summary>
     public class ProcessingInstructionViewModel : DetailViewModelBase, IPrintable, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public ProcessingInstructionViewModel() : base("加工指示書") { }
 
         #region プロパティ
@@ -78,8 +88,17 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
+        /// <summary>
+        /// 加工指示書の日付選択時に実行するコマンド
+        /// </summary>
         public ICommand ChangeDate { get; } = new ChangeProcessingDateCommand();
+        /// <summary>
+        /// 加工対象商品変更時に実行するコマンド
+        /// </summary>
         public ICommand ChangeBouquet { get; } = new ChangeProcessingBouquetCommand();
+        /// <summary>
+        /// 出荷指示の際実行するコマンド
+        /// </summary>
         public ICommand Ship { get; } = new ShippingOrdersCommand();
         #endregion // コマンド
 
@@ -102,6 +121,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public void ValidateBeforePrinting() { }
         #endregion // IPrintable
 
+        /// <summary>
+        /// 変更された日付で、データベースから加工指示内容を再読込する
+        /// </summary>
         public void ChangeProcessingDate()
         {
             Bouquets.Clear();
@@ -118,6 +140,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(Bouquets));
         }
 
+        /// <summary>
+        /// 指定された商品で、データベースから加工指示内容を再読込する
+        /// </summary>
+        /// <exception cref="ApplicationException"></exception>
         public void ChangeProcessingBouquet()
         {
             Parts.Clear();
@@ -150,6 +176,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             RaisePropertyChanged(nameof(Parts));
         }
 
+        /// <summary>
+        /// 出荷処理を行う
+        /// </summary>
         public void ShipBouquets()
         {
             if(!IsShippedAll)

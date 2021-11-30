@@ -2,6 +2,9 @@
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 様々なビューで利用する、単品一覧の各要素である単品の内容を表示するビューモデル
+    /// </summary>
     public class PartsListItemViewModel : NotificationObject
     {
         #region プロパティ
@@ -47,6 +50,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         private int _leadtime;
 
+        /// <summary>
+        /// 購入単位数
+        /// </summary>
         public int QuantityPerLot
         {
             get { return _quantityPerLot; }
@@ -55,6 +61,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private int _quantityPerLot;
         #endregion // プロパティ
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="item">商品を構成する単品</param>
         public PartsListItemViewModel(BouquetPartsList item)
         {
             PartsCode = item.PartsCode;
@@ -64,6 +74,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             QuantityPerLot = item.Part.QuantitiesPerLot;
         }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="parts">単品</param>
         public PartsListItemViewModel(BouquetPart parts)
         {
             PartsCode = parts.Code;
@@ -73,6 +87,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             QuantityPerLot = parts.QuantitiesPerLot;
         }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="detail">仕入先発注明細としての単品</param>
         public PartsListItemViewModel(OrderDetailsToSupplier detail)
         {
             PartsCode = detail.PartsCode;

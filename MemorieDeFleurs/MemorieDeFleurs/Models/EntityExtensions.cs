@@ -1,11 +1,32 @@
 ﻿using MemorieDeFleurs.Models.Entities;
 
+using Microsoft.EntityFrameworkCore;
+
 using System;
 
 namespace MemorieDeFleurs.Models
 {
+    /// <summary>
+    /// 花束問題で作成する各エンティティオブジェクトの、データ変更有無検証用の拡張メソッド
+    /// 
+    /// 各メソッドは以下のロジックで呼び出す：
+    /// <list type="number">
+    /// <item>データベースから newValue のキー情報を使って inDB を取得する</item>
+    /// <item>拡張メソッドを呼出し、newValue と inDB の再検出および inDB の内容更新</item>
+    /// <item>拡張メソッドの戻り値が真だったら <see cref="DbContext.Update(object)"/> ないし同等のメソッドを呼びだし、データベースにある inDB の内容を更新する</item>
+    /// </list>
+    /// </summary>
     public static class EntityExtensions
     {
+        /// <summary>
+        /// 得意先エンティティオブジェクトの各プロパティが変更されたかをチェックし、差異があるときはそれを反映する
+        /// </summary>
+        /// <param name="inDB">データベースに登録されている現在のエンティティ</param>
+        /// <param name="newValue">画面操作等の反映により差異があるかもしれないエンティティ</param>
+        /// <returns>inDB と newValue のプロパティに一つでも差異があれば真、すべて同じだったら偽
+        /// 
+        /// 各プロパティ毎に差異があるとわかった時点で inDB の内容を newValue の値で変更するので、
+        /// メソッドが呼び出し元に復帰後は newValue の値は inDB に反映済</returns>
         public static bool CheckAndModify(this Customer inDB, Customer newValue)
         {
             return CheckAndModify(() => inDB.Name == newValue.Name, () => inDB.Name = newValue.Name)
@@ -14,6 +35,15 @@ namespace MemorieDeFleurs.Models
                 || CheckAndModify(() => inDB.CardNo == newValue.CardNo, () => inDB.CardNo = newValue.CardNo);
         }
 
+        /// <summary>
+        /// お届け先エンティティオブジェクトの各プロパティが変更されたかをチェックし、差異があるときはそれを反映する
+        /// </summary>
+        /// <param name="inDB">データベースに登録されている現在のエンティティ</param>
+        /// <param name="newValue">画面操作等の反映により差異があるかもしれないエンティティ</param>
+        /// <returns>inDB と newValue のプロパティに一つでも差異があれば真、すべて同じだったら偽
+        /// 
+        /// 各プロパティ毎に差異があるとわかった時点で inDB の内容を newValue の値で変更するので、
+        /// メソッドが呼び出し元に復帰後は newValue の値は inDB に反映済</returns>
         public static bool CheckAndModify(this ShippingAddress inDB, ShippingAddress newValue)
         {
             return CheckAndModify(() => inDB.Name == newValue.Name, () => inDB.Name = newValue.Name)
@@ -22,6 +52,12 @@ namespace MemorieDeFleurs.Models
                 || CheckAndModify(() => inDB.LatestOrderDate == newValue.LatestOrderDate, () => inDB.LatestOrderDate = newValue.LatestOrderDate);
         }
 
+        /// <summary>
+        /// お届け先エンティティオブジェクト間に差異があるかどうかだけをチェックする
+        /// </summary>
+        /// <param name="inDB">データベースに登録されている現在のエンティティ</param>
+        /// <param name="newValue">画面操作等の反映により差異があるかもしれないエンティティ</param>
+        /// <returns>inDB と newValue のプロパティに一つでも差異があれば真、すべて同じだったら偽</returns>
         public static bool IsModified(this ShippingAddress inDB, ShippingAddress newValue)
         {
             return inDB.Name != newValue.Name
@@ -30,6 +66,15 @@ namespace MemorieDeFleurs.Models
                 || inDB.LatestOrderDate != newValue.LatestOrderDate;
         }
 
+        /// <summary>
+        /// 仕入先エンティティオブジェクトの各プロパティが変更されたかをチェックし、差異があるときはそれを反映する
+        /// </summary>
+        /// <param name="inDB">データベースに登録されている現在のエンティティ</param>
+        /// <param name="newValue">画面操作等の反映により差異があるかもしれないエンティティ</param>
+        /// <returns>inDB と newValue のプロパティに一つでも差異があれば真、すべて同じだったら偽
+        /// 
+        /// 各プロパティ毎に差異があるとわかった時点で inDB の内容を newValue の値で変更するので、
+        /// メソッドが呼び出し元に復帰後は newValue の値は inDB に反映済</returns>
         public static bool CheckAndModify(this Supplier inDB, Supplier newValue)
         {
             return CheckAndModify(() => inDB.Name == newValue.Name, () => inDB.Name = newValue.Name)
@@ -40,6 +85,15 @@ namespace MemorieDeFleurs.Models
                 || CheckAndModify(() => inDB.Fax == newValue.Fax, () => inDB.Fax = newValue.Fax);
         }
 
+        /// <summary>
+        /// 単品エンティティオブジェクトの各プロパティが変更されたかをチェックし、差異があるときはそれを反映する
+        /// </summary>
+        /// <param name="inDB">データベースに登録されている現在のエンティティ</param>
+        /// <param name="newValue">画面操作等の反映により差異があるかもしれないエンティティ</param>
+        /// <returns>inDB と newValue のプロパティに一つでも差異があれば真、すべて同じだったら偽
+        /// 
+        /// 各プロパティ毎に差異があるとわかった時点で inDB の内容を newValue の値で変更するので、
+        /// メソッドが呼び出し元に復帰後は newValue の値は inDB に反映済</returns>
         public static bool CheckAndModify(this BouquetPart inDB, BouquetPart newValue)
         {
             return CheckAndModify(() => inDB.Name == newValue.Name, () => inDB.Name = newValue.Name)
@@ -48,6 +102,15 @@ namespace MemorieDeFleurs.Models
                 || CheckAndModify(() => inDB.ExpiryDate == newValue.ExpiryDate, () => inDB.ExpiryDate = newValue.ExpiryDate);
         }
 
+        /// <summary>
+        /// 商品エンティティオブジェクトの各プロパティが変更されたかをチェックし、差異があるときはそれを反映する
+        /// </summary>
+        /// <param name="inDB">データベースに登録されている現在のエンティティ</param>
+        /// <param name="newValue">画面操作等の反映により差異があるかもしれないエンティティ</param>
+        /// <returns>inDB と newValue のプロパティに一つでも差異があれば真、すべて同じだったら偽
+        /// 
+        /// 各プロパティ毎に差異があるとわかった時点で inDB の内容を newValue の値で変更するので、
+        /// メソッドが呼び出し元に復帰後は newValue の値は inDB に反映済</returns>
         public static bool CheckAndModify(this Bouquet inDB, Bouquet newValue)
         {
             return CheckAndModify(() => inDB.Name == newValue.Name, () => inDB.Name = newValue.Name)
@@ -55,6 +118,15 @@ namespace MemorieDeFleurs.Models
                 || CheckAndModify(() => inDB.LeadTime == newValue.LeadTime, () => inDB.LeadTime = newValue.LeadTime);
         }
 
+        /// <summary>
+        /// 商品構成エンティティオブジェクトの各プロパティが変更されたかをチェックし、差異があるときはそれを反映する
+        /// </summary>
+        /// <param name="inDB">データベースに登録されている現在のエンティティ</param>
+        /// <param name="newValue">画面操作等の反映により差異があるかもしれないエンティティ</param>
+        /// <returns>inDB と newValue のプロパティに一つでも差異があれば真、すべて同じだったら偽
+        /// 
+        /// 各プロパティ毎に差異があるとわかった時点で inDB の内容を newValue の値で変更するので、
+        /// メソッドが呼び出し元に復帰後は newValue の値は inDB に反映済</returns>
         public static bool CheckAndModify(this BouquetPartsList inDB, BouquetPartsList newValue)
         {
             return CheckAndModify(() => inDB.Quantity == newValue.Quantity, () => inDB.Quantity = newValue.Quantity);

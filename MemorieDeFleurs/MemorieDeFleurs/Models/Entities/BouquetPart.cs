@@ -4,6 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MemorieDeFleurs.Models.Entities
 {
+    /// <summary>
+    /// 単品エンティティ
+    /// </summary>
     [Table("BOUQUET_PARTS")]
     public class BouquetPart
     {

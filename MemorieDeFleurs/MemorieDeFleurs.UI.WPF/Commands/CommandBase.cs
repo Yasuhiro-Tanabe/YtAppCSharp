@@ -9,23 +9,44 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
+    /// <summary>
+    /// ボタン押下時やイベント発行時に実行するコマンドのベースクラス
+    /// </summary>
     public class CommandBase : ICommand
     {
+        /// <summary>
+        /// コマンドの実行可否が変わったことを通知する
+        /// </summary>
         public event EventHandler CanExecuteChanged;
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         protected CommandBase() { }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="type">このコマンドが扱うコマンドパラメータのデータ型</param>
+        /// <param name="action">指定データ型のコマンドパラメータを受け取ったときに実行する処理</param>
         protected CommandBase(Type type, Action<object> action)
         {
             AddAction(type, action);
         }
 
-        protected CommandBase(Type type, Action<object> action, Func<object, bool> cheker)
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="type">このコマンドが扱うコマンドパラメータのデータ型</param>
+        /// <param name="action">指定データ型のコマンドパラメータを受け取ったときに実行する処理</param>
+        /// <param name="checker">指定データ型のコマンドパラメータを受け取ったときに実行するコマンド実行可否判定処理</param>
+        protected CommandBase(Type type, Action<object> action, Func<object, bool> checker)
         {
             AddAction(type, action);
-            AddChecker(type, cheker);
+            AddChecker(type, checker);
         }
 
+        /// <inheritdoc/>
         public bool CanExecute(object parameter)
         {
             if(parameter == null) { return true; }
@@ -55,6 +76,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             return FindChecker(type.BaseType);
         }
 
+        /// <inheritdoc/>
         public void Execute(object parameter)
         {
             try
@@ -114,6 +136,11 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
         }
 
+        /// <summary>
+        /// このコマンドが受け付けるコマンドパラメータのデータ型とそのデータ型のコマンドパラメータを受け取ったときに実行する処理を登録する
+        /// </summary>
+        /// <param name="type">このコマンドが扱うコマンドパラメータのデータ型</param>
+        /// <param name="action">指定データ型のコマンドパラメータを受け取ったときに実行する処理</param>
         protected void AddAction(Type type, Action<object> action)
         {
             if(Actions.ContainsKey(type))
@@ -134,6 +161,11 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             }
         }
 
+        /// <summary>
+        /// このコマンドが受け付けるコマンドパラメータのデータ型とそのデータ型のコマンドパラメータを受け取ったときに実行するコマンド実行可否判定処理を登録する
+        /// </summary>
+        /// <param name="type">このコマンドが扱うコマンドパラメータのデータ型</param>
+        /// <param name="checker">指定データ型のコマンドパラメータを受け取ったときに実行するコマンド実行可否判定処理</param>
         protected void AddChecker(Type type, Func<object, bool> checker)
         {
             if (Checkers.ContainsKey(type))
@@ -156,6 +188,9 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         private IDictionary<Type, Action<object>> Actions { get; } = new Dictionary<Type, Action<object>>();
         private IDictionary<Type, Func<object, bool>> Checkers { get; } = new Dictionary<Type, Func<object, bool>>();
 
+        /// <summary>
+        /// コマンド実行可否変更イベントを通知する
+        /// </summary>
         protected void RaiseStatusChanged()
         {
             CanExecuteChanged?.Invoke(this, null);

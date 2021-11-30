@@ -4,8 +4,14 @@ using static MemorieDeFleurs.Models.InventoryTransitionTable;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 在庫推移一日分のビューモデル
+    /// </summary>
     public class InventoryTransitionRowViewModel : NotificationObject
     {
+        /// <summary>
+        /// 残数表示：○日前残～当日残を保持する
+        /// </summary>
         public class InventoryRemains
         {
             internal InventoryRemains(int size) 
@@ -14,6 +20,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
             private int[] _remains;
 
+            /// <summary>
+            /// i 日前残を取得する
+            /// </summary>
+            /// <param name="i">何日前か：0=当日残、1=前日残、...</param>
+            /// <returns>残数</returns>
             public int this[int i] 
             {
                 get { return _remains[i]; }
@@ -80,6 +91,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public InventoryRemains Remains { get; }
         #endregion // プロパティ
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="date">日付</param>
+        /// <param name="row">表示する在庫推移一日分の情報</param>
+        /// <param name="size">残数表示の幅：品質維持可能日数</param>
         public InventoryTransitionRowViewModel(DateTime date, InventoryTransitionOfTheDay row, int size)
         {
             Date = date;

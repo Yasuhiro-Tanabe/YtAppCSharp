@@ -8,8 +8,14 @@ namespace MemorieDeFleurs.UI.WPF.Model.Exceptions
     /// </summary>
     public class ValidateFailedException : ApplicationException
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public ValidateFailedException() : base("検証に失敗しました。") { }
 
+        /// <summary>
+        /// 検証中に見つかったエラーの一覧：アプリケーション例外の一覧
+        /// </summary>
         public IReadOnlyList<ApplicationException> ValidationErrors { get { return _errors.AsReadOnly(); } }
 
         private List<ApplicationException> _errors = new List<ApplicationException>();
@@ -17,7 +23,7 @@ namespace MemorieDeFleurs.UI.WPF.Model.Exceptions
         /// <summary>
         /// 検証エラーメッセージを追加する
         /// </summary>
-        /// <param name="msg"></param>
+        /// <param name="msg">エラーメッセージ</param>
         public void Append(string msg)
         {
             _errors.Add(new ApplicationException(msg));

@@ -1,13 +1,10 @@
 ﻿using MemorieDeFleurs.Models.Entities;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 検品対象単品のビューモデル
+    /// </summary>
     public class InspectionPartsListItemViewModel : NotificationObject
     {
         #region プロパティ
@@ -85,6 +82,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private bool _inspected;
         #endregion // プロパティ
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="order">検品対象として表示する仕入先発注明細エンティティ</param>
         public InspectionPartsListItemViewModel(OrderDetailsToSupplier order)
         {
             BouquetPart = order.BouquetPart;

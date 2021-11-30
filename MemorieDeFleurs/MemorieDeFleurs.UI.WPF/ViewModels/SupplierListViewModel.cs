@@ -8,8 +8,14 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 仕入先一覧画面のビューモデル
+    /// </summary>
     public class SupplierListViewModel : ListViewModelBase, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public SupplierListViewModel() : base("仕入先一覧") { }
 
         #region プロパティ
@@ -48,6 +54,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IReloadable
 
+        /// <inheritdoc/>
         protected override void RemoveSelectedItem(object sender)
         {
             var vm = sender as SupplierSummaryViewModel;
@@ -56,6 +63,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             UpdateProperties();
         }
 
+        /// <inheritdoc/>
         public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
         {
             LogUtil.DEBUGLOG_BeginMethod(mainVM.GetType().Name);

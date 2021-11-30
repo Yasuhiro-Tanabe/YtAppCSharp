@@ -11,10 +11,25 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 単品詳細画面のビューモデル
+    /// </summary>
     public class BouquetPartsDetailViewModel : DetailViewModelBase, IReloadable
     {
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
         public static string Name { get; } = "単品詳細";
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public BouquetPartsDetailViewModel() : base(Name) { }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="parts">詳細表示する単品エンティティオブジェクト</param>
         public BouquetPartsDetailViewModel(BouquetPart parts) : base(Name) { Update(parts); }
 
         #region プロパティ
@@ -69,6 +84,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private int _expriy;
         #endregion // プロパティ
 
+        /// <summary>
+        /// 自分自身のプロパティを指定された単品エンティティの値に変更する
+        /// </summary>
+        /// <param name="part">変更元の単品エンティティオブジェクト</param>
         public void Update(BouquetPart part)
         {
             PartsCode = part.Code;
@@ -139,6 +158,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IReloadable
 
+        /// <inheritdoc/>
         public override void SaveToDatabase()
         {
             try
@@ -172,6 +192,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public override void ClearProperties()
         {
             PartsCode = string.Empty;

@@ -16,6 +16,9 @@ namespace MemorieDeFleurs.UI.WPF.Views
     /// </summary>
     public partial class InventoryTransitionTableControl : UserControl
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public InventoryTransitionTableControl()
         {
             InitializeComponent();

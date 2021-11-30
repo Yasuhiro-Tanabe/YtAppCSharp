@@ -13,10 +13,19 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 仕入先詳細画面のビューモデル
+    /// </summary>
     public class SupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IReloadable
     {
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
         public static string Name { get; } = "仕入先詳細";
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public SupplierDetailViewModel() : base(Name) { }
 
         #region プロパティ
@@ -99,11 +108,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         /// <summary>
-        /// 現在仕入先に登録されている仕入可能な単品一覧 (データベース参照更新用)
-        /// </summary>
-        private ISet<string> _parts = new SortedSet<string>();
-
-        /// <summary>
         /// 現在仕入先に登録されている仕入可能な単品一覧 (一覧表示用)
         /// </summary>
         public ObservableCollection<SupplierPartsViewModel> SupplingParts { get; } = new ObservableCollection<SupplierPartsViewModel>();
@@ -134,7 +138,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private SupplierPartsViewModel _candidate;
         #endregion // プロパティ
 
-        public void Update(Supplier supplier)
+        private void Update(Supplier supplier)
         {
             SupplierCode = supplier.Code;
             SupplierName = supplier.Name;
@@ -185,6 +189,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IReloadable
 
+        /// <inheritdoc/>
         public override void Validate()
         {
             var result = new ValidateFailedException();
@@ -275,6 +280,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IAddableRemovable
 
+        /// <inheritdoc/>
         public override void SaveToDatabase()
         {
             try
@@ -314,6 +320,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public override void ClearProperties()
         {
             SupplierCode = 0;

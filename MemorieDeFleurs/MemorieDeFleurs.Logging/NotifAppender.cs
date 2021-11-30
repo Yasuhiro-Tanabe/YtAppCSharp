@@ -7,16 +7,21 @@ using System.IO;
 
 namespace MemorieDeFleurs.Logging
 {
+    /// <summary>
+    /// <see cref="INotifyPropertyChanged.PropertyChanged"/> イベントハンドラを通じて購読しているクラスにログ出力の変更を通知するログアペンダ
+    /// </summary>
     public class NotifyAppender : AppenderSkeleton, INotifyPropertyChanged
 
     {
+        /// <summary>
+        /// ログ出力が変更されたことを通知する
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
         private static string _notification = "";
         /// <summary>
         /// 通知された文字列＝ログ出力内容。
         /// これまでに通知されたログ文言を含む最新ログを出力する。
-        /// 文言は無限に増え続けるので、適宜クリアが必要。
         /// </summary>
         public string Notification
         {

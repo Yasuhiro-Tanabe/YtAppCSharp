@@ -13,10 +13,19 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 入荷検品ダイアログ内で表示するビューモデル
+    /// </summary>
     public class OrderToSupplierInspectionDetailViewModel : DetailViewModelBase, IReloadable, IDialogViewModel
     {
-        public static string Name = "検品";
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
+        public static string Name { get; } = "検品";
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OrderToSupplierInspectionDetailViewModel() : base(Name) { }
 
         #region プロパティ
@@ -87,11 +96,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region IDialogViewModel
+        /// <inheritdoc/>
         public void DialogCancel()
         {
             // 何もしない
         }
 
+        /// <inheritdoc/>
         public void DialogOK()
         {
             if(!IsInspected)
@@ -101,6 +112,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public void FillDialogParameters(DialogParameter param)
         {
             param.DialogTitle = $"検品：{OrderNo}";

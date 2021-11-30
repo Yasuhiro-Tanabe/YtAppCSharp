@@ -3,11 +3,19 @@ using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System.Linq;
+using System.Windows.Controls;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 商品一覧画面内の <see cref="ListView"/> に表示する各商品ビューモデル
+    /// </summary>
     public class BouquetSummaryViewModel : ListItemViewModelBase
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="bouquet">表示する商品エンティティオブジェクト</param>
         public BouquetSummaryViewModel(Bouquet bouquet) : base(new OpenDetailViewCommand<BouquetDetailViewModel>())
         {
             Update(bouquet);
@@ -67,6 +75,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private int _lead;
         #endregion // プロパティ
 
+        /// <summary>
+        /// このビューモデルのプロパティを指定された商品エンティティオブジェクトの値で更新する
+        /// </summary>
+        /// <param name="bouquet">更新元の商品エンティティ</param>
         public void Update(Bouquet bouquet)
         {
             BouquetCode = bouquet.Code;

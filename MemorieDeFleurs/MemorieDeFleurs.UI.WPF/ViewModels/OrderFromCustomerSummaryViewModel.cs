@@ -6,8 +6,14 @@ using System;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 得意先受注一覧画面内の各受注情報を表示するビューモデル
+    /// </summary>
     public class OrderFromCustomerSummaryViewModel : ListItemViewModelBase
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OrderFromCustomerSummaryViewModel() : base(new OpenDetailViewCommand<OrderFromCustomerDetailViewModel>()) { }
 
         #region プロパティ
@@ -103,6 +109,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="order">表示する受注情報</param>
         public OrderFromCustomerSummaryViewModel(OrderFromCustomer order) : this()
         {
             Update(order);

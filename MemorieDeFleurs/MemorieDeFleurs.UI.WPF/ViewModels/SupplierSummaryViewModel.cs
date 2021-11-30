@@ -4,9 +4,20 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 仕入先一覧画面内の各仕入先を表示するビューモデル
+    /// </summary>
     public class SupplierSummaryViewModel : ListItemViewModelBase
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public SupplierSummaryViewModel() : base(new OpenDetailViewCommand<SupplierDetailViewModel>()) { }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="supplier">仕入先情報</param>
         public SupplierSummaryViewModel(Supplier supplier) : this()
         {
             Update(supplier);
@@ -36,7 +47,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
 
-        public void Update(Supplier supplier)
+        private void Update(Supplier supplier)
         {
             Update(supplier.Code.ToString());
             SupplierCode = supplier.Code;

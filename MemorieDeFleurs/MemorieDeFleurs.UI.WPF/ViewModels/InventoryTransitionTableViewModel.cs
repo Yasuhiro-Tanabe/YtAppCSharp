@@ -9,8 +9,14 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 在庫推移表画面 (タブ要素画面) のビューモデル
+    /// </summary>
     public class InventoryTransitionTableViewModel : ListViewModelBase, IPrintable, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public InventoryTransitionTableViewModel() : base("在庫推移表") { }
 
         #region プロパティ
@@ -84,6 +90,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion
 
         #region コマンド
+        /// <summary>
+        /// 在庫推移表の表示範囲(開始日終了日、対象単品)が変更されたときに実行されるコマンド
+        /// </summary>
         public ICommand UpdateTable { get; } = new InventoryTransitionTableChangedCommand();
         #endregion // コマンド
 

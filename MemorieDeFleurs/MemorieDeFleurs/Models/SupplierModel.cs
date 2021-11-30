@@ -131,6 +131,11 @@ namespace MemorieDeFleurs.Models
                 return this;
             }
 
+            /// <summary>
+            /// この仕入先が提供する単品を登録する
+            /// </summary>
+            /// <param name="partsCodes">仕入先が提供する単品：複数指定可能</param>
+            /// <returns></returns>
             public SupplierBuilder SupplyParts(params string[] partsCodes)
             {
                 foreach(var code in partsCodes)
@@ -206,7 +211,6 @@ namespace MemorieDeFleurs.Models
         /// <summary>
         /// DB登録オブジェクト生成器を取得する
         /// </summary>
-        /// <typeparam name="Sypplier">DB登録オブジェクト生成器が生成するオブジェクト：仕入先</typeparam>
         /// <returns>仕入先オブジェクト生成器</returns>
         public SupplierBuilder GetSupplierBuilder()
         {
@@ -215,6 +219,9 @@ namespace MemorieDeFleurs.Models
         #endregion // SupplierBuilder
 
         #region OrderToSupplierBuilder
+        /// <summary>
+        /// 仕入先発注オブジェクト生成器
+        /// </summary>
         public class OrderToSupplierBuilder
         {
             private class OrderDetail
@@ -237,24 +244,46 @@ namespace MemorieDeFleurs.Models
                 _model = model;
             }
 
+            /// <summary>
+            /// 発注する仕入先を指定する
+            /// </summary>
+            /// <param name="supplier">仕入先ID</param>
+            /// <returns>仕入先発注オブジェクト生成器(自分自身)</returns>
             public OrderToSupplierBuilder SupplierTo(Supplier supplier)
             {
                 _supplier = supplier;
                 return this;
             }
 
+            /// <summary>
+            /// 発注日を指定する
+            /// </summary>
+            /// <param name="orderDate">発注日</param>
+            /// <returns>仕入先発注オブジェクト生成器(自分自身)</returns>
             public OrderToSupplierBuilder OrderAt(DateTime orderDate)
             {
                 _orderDate = orderDate;
                 return this;
             }
 
+            /// <summary>
+            /// 入荷予定日を指定する
+            /// </summary>
+            /// <param name="derivalyDate">入荷予定日</param>
+            /// <returns>仕入先発注オブジェクト生成器(自分自身)</returns>
             public OrderToSupplierBuilder DerivalyAt(DateTime derivalyDate)
             {
                 _delivaryDate = derivalyDate;
                 return this;
             }
 
+            /// <summary>
+            /// 発注する単品と数量を指定する
+            /// </summary>
+            /// <param name="part">発注する単品</param>
+            /// <param name="count">発注ロット数</param>
+            /// <param name="lotNo">(省略可)発注ロット番号：省略された場合は内部で自動採番する</param>
+            /// <returns></returns>
             public OrderToSupplierBuilder Order(BouquetPart part, int count, int lotNo = 0)
             {
                 if(_details.ContainsKey(part.Code))
@@ -268,6 +297,10 @@ namespace MemorieDeFleurs.Models
                 return this;
             }
 
+            /// <summary>
+            /// 仕入先発注情報をデータベースに登録する
+            /// </summary>
+            /// <returns>登録した仕入先発注情報</returns>
             public OrdersToSupplier Create()
             {
                 using (var context = new MemorieDeFleursDbContext(_model.Parent.DbConnection))
@@ -287,6 +320,13 @@ namespace MemorieDeFleurs.Models
                 }
             }
 
+            /// <summary>
+            /// 仕入先発注情報をデータベースに登録する
+            /// 
+            /// トランザクション内での呼出用
+            /// </summary>
+            /// <param name="context">トランザクション中のDBコンテキスト</param>
+            /// <returns>生成した仕入先発注情報</returns>
             public OrdersToSupplier Create(MemorieDeFleursDbContext context)
             {
                 var currentOrders = context.OrdersToSuppliers
@@ -324,6 +364,10 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 仕入先発注オブジェクト生成器を取得する
+        /// </summary>
+        /// <returns>仕入先発注オブジェクト生成器</returns>
         public OrderToSupplierBuilder GetOrderToSupplierBuilder()
         {
             return OrderToSupplierBuilder.GetInstance(this);
@@ -506,6 +550,14 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 仕入先情報をデータベースから削除する
+        /// 
+        /// トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="supplierCode">仕入先ID</param>
+        /// <exception cref="ApplicationException"></exception>
         public void RemoveSupplier(MemorieDeFleursDbContext context, int supplierCode)
         {
             if(context.OrdersToSuppliers.Count(o => o.Supplier == supplierCode) > 0)
@@ -521,6 +573,11 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 仕入先情報をデータベースに登録する
+        /// </summary>
+        /// <param name="supplier">仕入先情報</param>
+        /// <returns>データベースから再取得した、関連情報が適切に設定された仕入先情報</returns>
         public Supplier Save(Supplier supplier)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -923,6 +980,7 @@ namespace MemorieDeFleurs.Models
         /// </summary>
         /// <param name="context">トランザクション中のDBコンテキスト</param>
         /// <param name="orderParam">新規登録したロットの情報</param>
+        /// <param name="usedLot">在庫不足解消済のロット一覧：指定されたロットへの在庫振替は行わない</param>
         private void EliminateInventoryShortages(MemorieDeFleursDbContext context, InventoryAction orderParam, Stack<int> usedLot)
         {
             LogUtil.DEBUGLOG_BeginMethod($"param=[{orderParam.BouquetPart.Code}, Lot{orderParam.InventoryLotNo}, ArriveAt({orderParam.ArrivalDate:yyyyMMdd}]");
@@ -1033,6 +1091,10 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
         }
 
+        /// <summary>
+        /// 在庫ロット番号指定で注文をキャンセルする
+        /// </summary>
+        /// <param name="lotNo">キャンセルする注文の在庫ロット番号</param>
         public void CancelOrder(int lotNo)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -1057,6 +1119,13 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 在庫ロット番号指定で注文をキャンセルする
+        /// 
+        /// トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="lotNo">キャンセルする注文の在庫ロット番号</param>
         public void CancelOrder(MemorieDeFleursDbContext context, int lotNo)
         {
             LogUtil.DEBUGLOG_BeginMethod($"lotNo={lotNo}");
@@ -1320,7 +1389,7 @@ namespace MemorieDeFleurs.Models
         /// 仕入先が部品の提供を停止する、トランザクション内での呼出用
         /// </summary>
         /// <param name="context">トランザクション中のDBコンテキスト</param>
-        /// <param name="supplieerCode">仕入先コード</param>
+        /// <param name="supplierCode">仕入先コード</param>
         /// <param name="partsCode">花コード</param>
         public void StopProvidingParts(MemorieDeFleursDbContext context, int supplierCode, string partsCode)
         {
@@ -1352,7 +1421,6 @@ namespace MemorieDeFleurs.Models
         /// 指定日に指定された発注が指定数量通り入荷されたことを登録する。
         /// </summary>
         /// <param name="date">入荷日</param>
-        /// <param name="orderNo">入荷された発注番号</param>
         /// <param name="otherOrders">入荷された発注番号：複数指定した場合の2つめ以降の発注番号</param>
         public void OrdersAreArrived(DateTime date, params string[] otherOrders)
         {
@@ -1378,6 +1446,11 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 発注情報の入荷処理を行う
+        /// </summary>
+        /// <param name="date">入荷日</param>
+        /// <param name="orderNo">仕入先への発注番号</param>
         public void OrderIsArrived(DateTime date, string orderNo)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -1571,6 +1644,11 @@ namespace MemorieDeFleurs.Models
         #endregion // 入荷予定数量変更
 
         #region 発注履歴の取得
+        /// <summary>
+        /// 発注履歴を取得する
+        /// </summary>
+        /// <param name="orderNo">発注番号</param>
+        /// <returns>発注番号に該当する発注履歴</returns>
         public OrdersToSupplier FindOrder(string orderNo)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -1582,6 +1660,12 @@ namespace MemorieDeFleurs.Models
                     .SingleOrDefault();
             }
         }
+
+        /// <summary>
+        /// 指定日に入荷する(予定の)発注番号の一覧を取得する
+        /// </summary>
+        /// <param name="arrivalDate">入荷(予定)日</param>
+        /// <returns>指定日に入荷する仕入先発注番号一覧</returns>
         public IEnumerable<string> FindAllOrdersAt(DateTime arrivalDate)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))

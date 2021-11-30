@@ -1,13 +1,16 @@
 ﻿using MemorieDeFleurs.UI.WPF.Model;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 日付区分(受発注日、入荷予定日、出荷予定日などの種別)を表示する際のビューモデル
+    /// 
+    /// コード上区別しやすい列挙型 <see cref="DateSelectionKey"/> の値と
+    /// <see cref="ComboBox"/> 等の選択肢として表示する際の表示文字列を持たせることで、
+    /// 画面表示時の選択・視認容易性とコード上の使いやすさを両立させる。
+    /// </summary>
     public class DateSelectionKeyViewModel : NotificationObject
     {
         #region プロパティ

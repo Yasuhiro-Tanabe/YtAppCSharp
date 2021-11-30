@@ -12,8 +12,14 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 得意先受注一覧画面のビューモデル
+    /// </summary>
     public class OrderFromCustomerListViewModel : ListViewModelBase, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OrderFromCustomerListViewModel() : base("得意先受注一覧") { }
 
         #region プロパティ
@@ -136,6 +142,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IReloadable
 
+        /// <inheritdoc/>
         public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
         {
             OrderFromCustomerDetailViewModel detail = null;
@@ -160,6 +167,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         protected override void RemoveSelectedItem(object sender)
         {
             MemorieDeFleursUIModel.Instance.CancelOrderFromCustomer(SelectedOrder.OrderNo);

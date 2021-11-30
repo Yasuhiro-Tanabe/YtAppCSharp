@@ -16,11 +16,16 @@ namespace MemorieDeFleurs.Databese.SQLite
     {
         private DbConnection Connection { get; set; }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="conn">データベース接続オブジェクト</param>
         public MemorieDeFleursDbContext(DbConnection conn)
         {
             Connection = conn;
         }
 
+        /// <inheritdoc/>
         protected override void OnConfiguring(DbContextOptionsBuilder builder)
         {
             if(Connection is SqliteConnection)
@@ -31,6 +36,7 @@ namespace MemorieDeFleurs.Databese.SQLite
             }
         }
 
+        /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             var converter = new DateTimeConverter();

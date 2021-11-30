@@ -14,8 +14,14 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 入荷検品一覧画面のビューモデル
+    /// </summary>
     public class OrderToSupplierInspectionListViewModel : ListViewModelBase, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OrderToSupplierInspectionListViewModel() : base("入荷検品一覧")
         {
             SelectedKey = DateKeies[0];
@@ -92,10 +98,19 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
+        /// <summary>
+        /// 日付区分および期間の開始終了日が変更された際に実行するコマンド
+        /// </summary>
         public ICommand DateChanged { get; } = new ChangeInspectionDateCommand();
+        /// <summary>
+        /// 仕入先変更時に実行するコマンド
+        /// </summary>
         public ICommand SupplierChanged { get; } = new ChangeInspectionSupplierCommand();
         #endregion // コマンド
 
+        /// <summary>
+        /// 発注情報を読み込む
+        /// </summary>
         public void ReloadOrders()
         {
             try

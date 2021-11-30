@@ -1,13 +1,13 @@
 ﻿using MemorieDeFleurs.Models.Entities;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace MemorieDeFleurs.Logging
 {
+    /// <summary>
+    /// 花束問題で作成するエンティティオブジェクトをデバッグ等で文字列出力する場合の拡張メソッド
+    /// </summary>
     public static class EntityToStringExtensions
     {
         /// <summary>

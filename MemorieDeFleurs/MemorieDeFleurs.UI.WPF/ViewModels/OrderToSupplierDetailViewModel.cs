@@ -12,10 +12,19 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 仕入先発注詳細画面のビューモデル
+    /// </summary>
     public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable, IDialogViewModel, IPrintable, IReloadable
     {
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
         public static string Name { get; } = "仕入先発注詳細";
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OrderToSupplierDetailViewModel() : base(Name)
         {
             LoadSupplierList();
@@ -337,12 +346,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IOrderable
 
+        /// <inheritdoc/>
         public override void SaveToDatabase()
         {
             // 使用しない：「発注」、「納期変更」、発注取消」で操作させる。
             base.SaveToDatabase();
         }
 
+        /// <inheritdoc/>
         public override void Validate()
         {
             var ex = new ValidateFailedException();
@@ -367,6 +378,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if(ex.ValidationErrors.Count >0) { throw ex; }
         }
 
+        /// <inheritdoc/>
         public override void ClearProperties()
         {
             OrderNo = string.Empty;
@@ -389,6 +401,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region IDialogViewModel
+        /// <inheritdoc/>
         public void FillDialogParameters(DialogParameter param)
         {
             param.DialogTitle = "発注書印刷";
@@ -396,12 +409,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             param.CancelContent = "キャンセル";
         }
 
+        /// <inheritdoc/>
         public void DialogOK()
         {
             LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
             Print.Execute(this);
         }
 
+        /// <inheritdoc/>
         public void DialogCancel()
         {
             LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
@@ -409,6 +424,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IDialogViewModel
 
         #region IPrintable
+        /// <inheritdoc/>
         public ICommand Print { get; } = new PrintCommand();
 
         /// <inheritdoc/>

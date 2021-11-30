@@ -2,7 +2,6 @@
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 
-using System;
 using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,12 +9,15 @@ using System.Windows.Documents;
 
 namespace MemorieDeFleurs.UI.WPF.Views.Helpers
 {
+    /// <summary>
+    /// 印刷実行クラス
+    /// </summary>
     public class UserControlPrinter
     {
         /// <summary>
         /// データを指定された書式で印刷する
         /// </summary>
-        /// <typeparam name="ViewModel"><see cref="viewModel"/> で渡す印刷対象データのクラス名を指定する</typeparam>
+        /// <typeparam name="ViewModel">viewModel で渡す印刷対象データのクラス名を指定する</typeparam>
         /// <typeparam name="View">印刷書式：XAMLで記載したユーザコントロールクラスのクラス名を指定する</typeparam>
         /// <param name="viewModel">印刷対象データ</param>
         public static void PrintDocument<ViewModel, View>(ViewModel viewModel) where ViewModel:NotificationObject, IPrintable, IReloadable where View : UserControl, new()

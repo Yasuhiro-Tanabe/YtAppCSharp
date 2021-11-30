@@ -39,10 +39,15 @@ namespace MemorieDeFleurs.Models.Entities
         [Column("INVENTORY_LOT_NO")]
         public int InventoryLotNo { get; set; }
 
-        
+        /// <summary>
+        /// 受注オブジェクト：このオブジェクトをリスト要素として持つ、受注番号で関連付けられたエンティティオブジェクト
+        /// </summary>
         [ForeignKey(nameof(OrderToSupplierID))]
         public OrdersToSupplier Order { get; set; }
 
+        /// <summary>
+        /// 単品オブジェクト：このオブジェクトの花コードで関連付けられたエンティティオブジェクト
+        /// </summary>
         [ForeignKey(nameof(PartsCode))]
         public BouquetPart BouquetPart { get; set; }
     }

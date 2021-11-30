@@ -18,7 +18,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
 
         /// <summary>
         /// 追加表示領域を隠す。
-        /// 具体的には <see cref="IsEditiong"/> を false に変更し <see cref="FixEditing"/> を呼び出す。
+        /// 具体的には <see cref="IsEditing"/> を false に変更し <see cref="FixEditing"/> を呼び出す。
         /// </summary>
         public ICommand Fix { get; }
 

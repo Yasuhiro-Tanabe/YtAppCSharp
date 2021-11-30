@@ -1,5 +1,8 @@
 ﻿namespace MemorieDeFleurs.UI.WPF.Model
 {
+    /// <summary>
+    /// 幅や高さのピクセル数計算用拡張メソッド
+    /// </summary>
     public static class NumericExtensions
     {
         /// <summary>
@@ -7,7 +10,7 @@
         /// </summary>
         /// <param name="inch">変換元[インチ]</param>
         /// <param name="dpi">Dot per Pixcel 値：デフォルトでは 96.0 DPI</param>
-        /// <returns>変換した値[px] = <see cref="inch"/> * <see cref="dpi"/></returns>
+        /// <returns>変換した値[px] = inch * dpi</returns>
         public static double InchToPixcel(this double inch, double dpi = 96.0)
         {
             return inch * dpi;

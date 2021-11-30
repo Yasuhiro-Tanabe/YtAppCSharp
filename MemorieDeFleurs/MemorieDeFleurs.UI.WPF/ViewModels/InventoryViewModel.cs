@@ -11,8 +11,14 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 単品破棄画面 (タブ要素画面) のビューモデル
+    /// </summary>
     public class InventoryViewModel : ListViewModelBase, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public InventoryViewModel() : base("単品破棄") { }
 
         #region プロパティ
@@ -33,6 +39,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
+        /// <summary>
+        /// 破棄実行ボタン押下時に実行されるコマンド
+        /// </summary>
         public ICommand Discard { get; } = new DiscardBouquetPartsCommand();
         #endregion // コマンド
 
@@ -52,6 +61,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion IReloadable
 
+        /// <summary>
+        /// <see cref="Discard"/> コマンドが実行する処理：指定された単品の破棄を行う
+        /// </summary>
         public void DiscardBouquetParts()
         {
             var discardParts = Inventories.Where(p => p.IsChaned).Select(p => Tuple.Create(p.PartsCode, p.DiscardQuantity)).ToArray();

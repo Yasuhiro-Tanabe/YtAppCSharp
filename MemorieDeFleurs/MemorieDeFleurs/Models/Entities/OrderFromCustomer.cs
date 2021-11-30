@@ -66,13 +66,21 @@ namespace MemorieDeFleurs.Models.Entities
         [Column("STATUS")]
         public OrderFromCustomerStatus Status { get; set; }
 
-
+        /// <summary>
+        /// 注文した商品：花コードで関連付けられたエンティティオブジェクト
+        /// </summary>
         [ForeignKey(nameof(BouquetCode))]
         public Bouquet Bouquet { set; get; }
 
+        /// <summary>
+        /// 注文主の得意先：得意先IDで関連付けられたエンティティオブジェクト
+        /// </summary>
         [ForeignKey(nameof(CustomerID))]
         public Customer Customer { get; set; }
 
+        /// <summary>
+        /// お届け先：お届け先番号で関連付けられたエンティティオブジェクト
+        /// </summary>
         [ForeignKey(nameof(ShippingAddressID))]
         public ShippingAddress ShippingAddress { get; set; }
     }

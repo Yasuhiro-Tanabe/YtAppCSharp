@@ -11,9 +11,19 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 得意先詳細画面のビューモデル
+    /// </summary>
     public class CustomerDetailViewModel : DetailViewModelBase, IReloadable
     {
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
         public static string Name { get; } = "得意先詳細";
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public CustomerDetailViewModel() : base(Name) { }
 
 
@@ -74,7 +84,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         public ObservableCollection<ShippingAddressViewModel> ShippingAddresses { get; } = new ObservableCollection<ShippingAddressViewModel>();
         #endregion // プロパティ
 
-        public void Update(Customer c)
+        private void Update(Customer c)
         {
             CustomerID = c.ID;
             EmailAddress = c.EmailAddress;
@@ -91,6 +101,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             IsDirty = false;
         }
 
+        /// <summary>
+        /// 現在保持している値の妥当性を検証する
+        /// </summary>
         public override void Validate()
         {
             var ex = new ValidateFailedException();
@@ -132,6 +145,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IReloadable
 
+        /// <inheritdoc/>
         public override void SaveToDatabase()
         {
             try
@@ -181,6 +195,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public override void ClearProperties()
         {
             CustomerID = 0;
