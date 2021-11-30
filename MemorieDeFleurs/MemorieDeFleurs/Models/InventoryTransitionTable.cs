@@ -65,6 +65,12 @@ namespace MemorieDeFleurs.Models
                     }
                 }
 
+                /// <summary>
+                /// 取得した在庫アクションの一覧を元に在庫推移表を埋める
+                /// </summary>
+                /// <param name="actions">在庫アクション一覧</param>
+                /// <param name="date">推移表の起点となる日付</param>
+                /// <param name="expiry">在庫推移表の対象単品が持つ品質維持可能日数</param>
                 public void Fill(IList<InventoryAction> actions, DateTime date, int expiry)
                 {
                     ExpiryDays = expiry;

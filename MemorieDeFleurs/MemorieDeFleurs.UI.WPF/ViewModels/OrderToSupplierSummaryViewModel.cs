@@ -8,10 +8,11 @@ using System.Linq;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    internal class OrderToSupplierSummaryViewModel : ListItemViewModelBase
+    internal class OrderToSupplierSummaryViewModel : ListItemViewModelBase, IReloadable, IDialogCaller
     {
-        public OrderToSupplierSummaryViewModel(OrdersToSupplier order) : base(new OpenOrderToSupplierDetailViewCommand())
+        public OrderToSupplierSummaryViewModel(OrdersToSupplier order) : base(new OpenDetailViewCommand<OrderToSupplierDetailViewModel>())
         {
+            OrderNo = order.ID;
             Update(order);
         }
 
@@ -91,13 +92,53 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private DateTime _ordered;
         #endregion // プロパティ
 
-        public void Update(OrdersToSupplier order)
+        #region IReloadabe
+        /// <inheritdoc/>
+        public ReloadCommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            OrderNo = order.ID;
+            if(string.IsNullOrWhiteSpace(OrderNo))
+            {
+                throw new ApplicationException("発注番号が指定されていません。");
+            }
+            else
+            {
+                var order = MemorieDeFleursUIModel.Instance.FindOrderToSupplier(OrderNo);
+                if(order == null)
+                {
+                    throw new ApplicationException($"該当する発注情報がありません：{OrderNo}");
+                }
+                else
+                {
+                    Update(order);
+                }
+            }
+        }
+        private void Update(OrdersToSupplier order)
+        {
             SupplierName = MemorieDeFleursUIModel.Instance.FindSupplier(order.Supplier).Name;
             OrderParts = string.Join(", ", order.Details.Select(i => $"{i.PartsCode} x{i.LotCount}"));
             ArrivalDate = order.DeliveryDate;
             OrderedDate = order.OrderDate;
         }
+        #endregion // IReloadable
+
+        #region IDialogCaller
+        /// <inheritdoc/>
+        public OpenDialogCommand OpenDialog { get; } = new OpenDialogCommand();
+
+        /// <inheritdoc/>
+        public NotificationObject DialogViewModel
+        {
+            get
+            {
+                var vm = new OrderToSupplierDetailViewModel() { OrderNo = OrderNo };
+                vm.UpdateProperties();
+                return vm;
+            }
+        }
+        #endregion // IDialogCaller
     }
 }

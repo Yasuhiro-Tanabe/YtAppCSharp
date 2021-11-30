@@ -1,18 +1,33 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
-using System.Windows;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetPartsDetailViewModel : DetailViewModelBase
+    /// <summary>
+    /// 単品詳細画面のビューモデル
+    /// </summary>
+    public class BouquetPartsDetailViewModel : DetailViewModelBase, IReloadable
     {
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
         public static string Name { get; } = "単品詳細";
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public BouquetPartsDetailViewModel() : base(Name) { }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="parts">詳細表示する単品エンティティオブジェクト</param>
         public BouquetPartsDetailViewModel(BouquetPart parts) : base(Name) { Update(parts); }
 
         #region プロパティ
@@ -67,6 +82,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private int _expriy;
         #endregion // プロパティ
 
+        /// <summary>
+        /// 自分自身のプロパティを指定された単品エンティティの値に変更する
+        /// </summary>
+        /// <param name="part">変更元の単品エンティティオブジェクト</param>
         public void Update(BouquetPart part)
         {
             PartsCode = part.Code;
@@ -111,18 +130,23 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if(result.ValidationErrors.Count > 0) { throw result; }
         }
 
-        public override void Update()
+        #region IReloadable
+        /// <inheritdoc/>
+        public ReloadCommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(string.IsNullOrWhiteSpace(PartsCode))
+            if (string.IsNullOrWhiteSpace(PartsCode))
             {
-                MessageBox.Show("花コードが指定されていません。", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                throw new ApplicationException("花コードが指定されていません。");
             }
             else
             {
                 var parts = MemorieDeFleursUIModel.Instance.FindBouquetParts(PartsCode);
-                if(parts == null)
+                if (parts == null)
                 {
-                    MessageBox.Show($"花コードに該当する単品が登録されていません：{PartsCode}", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    throw new ApplicationException($"花コードに該当する単品が登録されていません：{PartsCode}");
                 }
                 else
                 {
@@ -130,7 +154,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
+        #endregion // IReloadable
 
+        /// <inheritdoc/>
         public override void SaveToDatabase()
         {
             try
@@ -164,6 +190,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public override void ClearProperties()
         {
             PartsCode = string.Empty;

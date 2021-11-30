@@ -6,9 +6,9 @@ using System.Windows.Controls;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class SelectionChangedEventCommand : CommandBase
+    internal class SelectionChangedEventHandler : CommandBase
     {
-        public SelectionChangedEventCommand() : base()
+        public SelectionChangedEventHandler() : base()
         {
             AddAction(typeof(SelectionChangedEventArgs), ChangeCommandButtonVisibility);
             AddAction(typeof(OrderToSupplierListViewModel), ReloadItems);
@@ -27,6 +27,10 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                     {
                         (item as ListItemViewModelBase).IsActionVisible = false;
                     }
+                    if(item is InventorySummaryViewModel)
+                    {
+                        (item as InventorySummaryViewModel).IsSelected = false;
+                    }
                 }
             }
 
@@ -40,11 +44,15 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                         vm.IsActionVisible = true;
                         LogUtil.Debug($"[{vm.GetType().Name}] {vm.Key} selected.");
                     }
+                    if(item is InventorySummaryViewModel)
+                    {
+                        (item as InventorySummaryViewModel).IsSelected = true;
+                    }
                 }
             }
             LogUtil.DEBUGLOG_EndMethod();
         }
 
-        private static void ReloadItems(object parameter) => (parameter as OrderToSupplierListViewModel).LoadItems();
+        private static void ReloadItems(object parameter) => (parameter as OrderToSupplierListViewModel).UpdateProperties();
     }
 }

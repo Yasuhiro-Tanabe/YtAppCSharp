@@ -1,9 +1,27 @@
-﻿namespace MemorieDeFleurs.UI.WPF.Commands
-{
-    internal class PrintCommand : CommandBase
-    {
-        public PrintCommand() : base(typeof(IPrintable), Print) { }
+﻿using MemorieDeFleurs.UI.WPF.ViewModels;
+using MemorieDeFleurs.UI.WPF.Views;
+using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
-        private static void Print(object parameter) => (parameter as IPrintable).PrintDocument();
+using System.Windows.Controls;
+
+namespace MemorieDeFleurs.UI.WPF.Commands
+{
+    /// <summary>
+    /// <see cref="IPrintable"/> 実装に必要な印刷コマンド
+    /// </summary>
+    public class PrintCommand : CommandBase
+    {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public PrintCommand() : base()
+        {
+            AddAction(typeof(ProcessingInstructionViewModel), Print<ProcessingInstructionViewModel, ProcessingInstructionControl>);
+            AddAction(typeof(OrderToSupplierDetailViewModel), Print<OrderToSupplierDetailViewModel, OrderSheetToSupplier>);
+            AddAction(typeof(InventoryTransitionTableViewModel), Print<InventoryTransitionTableViewModel, InventoryTransitionTableControl>);
+        }
+
+        private static void Print<VM, V>(object parameter) where VM : NotificationObject, IPrintable, IReloadable where V : UserControl, new()
+            => UserControlPrinter.PrintDocument<VM, V>(parameter as VM);
     }
 }

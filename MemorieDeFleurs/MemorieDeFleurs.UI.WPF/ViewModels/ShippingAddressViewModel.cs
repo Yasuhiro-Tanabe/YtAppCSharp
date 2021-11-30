@@ -4,6 +4,9 @@ using System;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 各お届け先情報を表示するビューモデル
+    /// </summary>
     public class ShippingAddressViewModel : NotificationObject
     {
         #region プロパティ
@@ -103,12 +106,16 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private DateTime _date;
         #endregion // プロパティ
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="sa">表示するお届け先情報</param>
         public ShippingAddressViewModel(ShippingAddress sa)
         {
             Update(sa);
         }
 
-        public void Update(ShippingAddress sa)
+        private void Update(ShippingAddress sa)
         {
             ShippingID = sa.ID;
             CustomerID = sa.CustomerID;

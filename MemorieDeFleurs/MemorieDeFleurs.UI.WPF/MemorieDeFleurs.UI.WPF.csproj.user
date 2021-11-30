@@ -25,7 +25,13 @@
     <Compile Update="Views\CustomerListControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\DialogWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\InvenetoryTransitionTablePreviewControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\InventoryDiscardView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\InventoryTransitionTableControl.xaml.cs">
@@ -37,10 +43,22 @@
     <Compile Update="Views\OrderFromCustomerListControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\OrderSheetToSupplier.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\OrderToSupplierDetailControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Views\OrderToSupplierInspectionListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Views\OrderToSupplierListControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\ProcessingInstructionControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Views\ProcessingInstructionPreviewControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Views\SupplierDetailControl.xaml.cs">
@@ -69,7 +87,13 @@
     <Page Update="Views\CustomerListControl.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Views\DialogWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\InvenetoryTransitionTablePreviewControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\InventoryDiscardView.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\InventoryTransitionTableControl.xaml">
@@ -84,10 +108,22 @@
     <Page Update="Views\OrderFromCustomerListControl.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Views\OrderSheetToSupplier.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\OrderToSupplierDetailControl.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Views\OrderToSupplierInspectionListControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Views\OrderToSupplierListControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\ProcessingInstructionControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Views\ProcessingInstructionPreviewControl.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Views\Style.xaml">

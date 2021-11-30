@@ -6,6 +6,6 @@ namespace MemorieDeFleurs.UI.WPF.Commands
     {
         public InventoryTransitionTableChangedCommand() : base(typeof(InventoryTransitionTableViewModel), UpdateTable) { }
 
-        private static void UpdateTable(object parameter) => (parameter as InventoryTransitionTableViewModel).Update();
+        private static void UpdateTable(object parameter) => (parameter as InventoryTransitionTableViewModel).UpdateProperties();
     }
 }

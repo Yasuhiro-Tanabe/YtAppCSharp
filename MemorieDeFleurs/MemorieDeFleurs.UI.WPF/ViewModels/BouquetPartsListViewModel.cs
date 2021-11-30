@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
@@ -6,8 +7,14 @@ using System.Collections.ObjectModel;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetPartsListViewModel : ListViewModelBase
+    /// <summary>
+    /// 単品一覧画面のビューモデル
+    /// </summary>
+    public class BouquetPartsListViewModel : ListViewModelBase, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public BouquetPartsListViewModel() : base("単品一覧") { }
 
         #region プロパティ
@@ -27,10 +34,15 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private BouquetPartsSummaryViewModel _parts;
         #endregion // プロパティ
 
-        public override void LoadItems()
+        #region IReloadable
+        /// <inheritdoc/>
+        public ReloadCommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
             BouquetParts.Clear();
-            foreach(var p in MemorieDeFleursUIModel.Instance.FindAllBouquetParts())
+            foreach (var p in MemorieDeFleursUIModel.Instance.FindAllBouquetParts())
             {
                 var vm = new BouquetPartsSummaryViewModel(p);
                 Subscribe(vm);
@@ -39,15 +51,18 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedParts = null;
             RaisePropertyChanged(nameof(BouquetParts));
         }
+        #endregion // IReloadable
 
+        /// <inheritdoc/>
         protected override void RemoveSelectedItem(object sender)
         {
             var vm = sender as BouquetPartsSummaryViewModel;
             MemorieDeFleursUIModel.Instance.RemoveBouquetParts(vm.PartsCode);
             LogUtil.Debug($"{vm.PartsCode} deleted.");
-            LoadItems();
+            UpdateProperties();
         }
 
+        /// <inheritdoc/>
         public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
         {
             LogUtil.DEBUGLOG_BeginMethod(mainVM.GetType().Name);
@@ -58,7 +73,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 mainVM.OpenTabItem(detail);
             }
             detail.PartsCode = SelectedParts.PartsCode;
-            detail.Update();
+            detail.UpdateProperties();
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name);
             return detail;
         }

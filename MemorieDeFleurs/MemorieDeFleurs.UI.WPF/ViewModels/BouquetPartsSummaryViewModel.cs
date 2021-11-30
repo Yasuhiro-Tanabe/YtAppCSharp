@@ -2,15 +2,28 @@
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
+using System.Windows.Controls;
+
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 単品一覧画面内の <see cref="ListView"/> に表示する単品のビューモデル
+    /// </summary>
     public class BouquetPartsSummaryViewModel : ListItemViewModelBase
     {
-        public BouquetPartsSummaryViewModel(BouquetPart part) : base(new OpenPartsDetailViewCommand())
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="part"></param>
+        public BouquetPartsSummaryViewModel(BouquetPart part) : base(new OpenDetailViewCommand<BouquetPartsDetailViewModel>())
         {
             Update(part);
         }
 
+        /// <summary>
+        /// 指定された単品の内容にこのビューモデルのプロパティを更新する
+        /// </summary>
+        /// <param name="part">更新元の単品エンティティ</param>
         public void Update(BouquetPart part)
         {
             PartsCode = part.Code;

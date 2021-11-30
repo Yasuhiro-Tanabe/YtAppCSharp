@@ -1,21 +1,22 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
-using MemorieDeFleurs.UI.WPF.Views;
 
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Printing;
-using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class InventoryTransitionTableViewModel : ListViewModelBase, IPrintable
+    /// <summary>
+    /// 在庫推移表画面 (タブ要素画面) のビューモデル
+    /// </summary>
+    public class InventoryTransitionTableViewModel : ListViewModelBase, IPrintable, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public InventoryTransitionTableViewModel() : base("在庫推移表") { }
 
         #region プロパティ
@@ -89,19 +90,27 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion
 
         #region コマンド
-        public ICommand Print { get; } = new PrintCommand();
+        /// <summary>
+        /// 在庫推移表の表示範囲(開始日終了日、対象単品)が変更されたときに実行されるコマンド
+        /// </summary>
         public ICommand UpdateTable { get; } = new InventoryTransitionTableChangedCommand();
         #endregion // コマンド
 
-        public void Update()
+
+        #region IReloadable
+        /// <inheritdoc/>
+        public ReloadCommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(SelectedParts == null)
+            if (SelectedParts == null)
             {
                 Cleanup();
             }
             else
             {
-                if(To < From)
+                if (To < From)
                 {
                     To = From;
                 }
@@ -111,6 +120,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 UpdateInventoryTransitions(table);
             }
         }
+        #endregion // IReloadable
 
         private void UpdateInventoryTransitions(Models.InventoryTransitionTable table)
         {
@@ -141,65 +151,15 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedParts = null;
         }
 
-        public override void LoadItems()
-        {
-            Update();
-        }
-
         #region IPrintable
-        public void PrintDocument()
+        /// <inheritdoc/>
+        public PrintCommand Print { get; } = new PrintCommand();
+
+        /// <inheritdoc/>
+        public void ValidateBeforePrinting()
         {
             if (string.IsNullOrWhiteSpace(BouquetPartsCode)) { throw new ApplicationException("印刷対象の花コードが指定されていません。"); }
             if (ExpiryDate == 0) { throw new ApplicationException($"品質維持可能日数が0日です。{BouquetPartsCode} ({SelectedParts.PartsName}) の品質維持可能日数が設定されているか確認してください。"); }
-            try
-            {
-                var control = new InventoryTransitionTableControl();
-                control.DataContext = this;
-                control.Margin = new Thickness(MmToPixcel(5.0), MmToPixcel(10.0), MmToPixcel(5.0), MmToPixcel(10.0));
-
-                // control 内の在庫推移表 DataGrid を作り直すため PropertyChanged イベントを強制発行する。
-                RaisePropertyChanged(nameof(InventoryTransitions));
-
-                var doc = new FixedDocument();
-                var page = new FixedPage();
-
-                page.Children.Add(control);
-                doc.Pages.Add(new PageContent() { Child = page });
-
-                PrintDocumentImageableArea area = null;
-                var writer = PrintQueue.CreateXpsDocumentWriter(ref area);
-                if(writer != null)
-                {
-                    writer.Write(doc);
-                    LogUtil.Info($"Inventory transaction table of parts {BouquetPartsCode} was printed.");
-                }
-                else
-                {
-                    // 何もしない： プリンタ選択ダイアログをキャンセルで閉じると
-                    // CreateXpsDocumentWriter() の戻り値が null になる。このときは印刷を行わずに処理正常終了する。
-                    LogUtil.Debug("Canceled printing.");
-                }
-
-                LogUtil.DEBUGLOG_BeginMethod();
-            }
-            catch(Exception ex)
-            {
-                LogUtil.Warn(ex);
-            }
-            finally
-            {
-                LogUtil.DEBUGLOG_EndMethod();
-            }
-        }
-
-        private double InchToPixcel(double inch)
-        {
-            return inch * 96.0;
-        }
-
-        private double MmToPixcel(double mm)
-        {
-            return InchToPixcel(mm / 24.5);
         }
         #endregion // IPrintable
     }

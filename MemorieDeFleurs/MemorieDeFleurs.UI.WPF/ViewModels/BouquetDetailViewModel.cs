@@ -13,10 +13,26 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable
+    /// <summary>
+    /// 商品詳細画面のビューモデル
+    /// </summary>
+    public class BouquetDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IReloadable
     {
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
         public static string Name { get; } = "商品詳細";
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public BouquetDetailViewModel() : base(Name) { }
+
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="b">詳細表示する商品エンティティオブジェクト</param>
+        public BouquetDetailViewModel(Bouquet b) : this() { Update(b); }
 
         #region プロパティ
         /// <summary>
@@ -72,16 +88,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private string _text;
 
         /// <summary>
-        /// 商品構成編集中かどうか
-        /// </summary>
-        public bool IsEditing
-        {
-            get { return _editing; }
-            set { SetProperty(ref _editing, value); }
-        }
-        private bool _editing = false;
-
-        /// <summary>
         /// 編集中の商品構成
         /// </summary>
         public ObservableCollection<PartsListItemViewModel> SelectedPartsList { get; } = new ObservableCollection<PartsListItemViewModel>();
@@ -113,11 +119,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // プロパティ
 
         #region コマンド
+        /// <summary>
+        /// 画像ファイル検索ボタン押下時に実行されるコマンド
+        /// </summary>
         public ICommand FindImageSource { get; } = new FindImageSourceFileCommand();
-        public ICommand Edit { get; } = new EditCommand();
-        public ICommand Fix { get; } = new FixCommand();
-        public ICommand Append { get; } = new AppendToListCommand();
-        public ICommand Remove { get; } = new RemoveFromListCommand();
         #endregion // コマンド
 
         /// <summary>
@@ -180,6 +185,21 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region IEditableFixable
+        /// <inheritdoc/>
+        public EditCommand Edit { get; } = new EditCommand();
+
+        /// <inheritdoc/>
+        public FixCommand Fix { get; } = new FixCommand();
+
+        /// <inheritdoc/>
+        public bool IsEditing
+        {
+            get { return _editing; }
+            set { SetProperty(ref _editing, value); }
+        }
+        private bool _editing = false;
+
+        /// <inheritdoc/>
         public void OpenEditView()
         {
             IsEditing = true;
@@ -188,6 +208,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedParts = null;
         }
 
+        /// <inheritdoc/>
         private void LoadCandidatePartsList()
         {
             CandidatePartsList.Clear();
@@ -202,6 +223,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             CandidateParts = null;
         }
 
+        /// <inheritdoc/>
         public void FixEditing()
         {
             IsEditing = false;
@@ -211,6 +233,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         #endregion // IEditableFixable
 
         #region IAddableRemovable
+        /// <inheritdoc/>
+        public AppendToListCommand Append { get; } = new AppendToListCommand();
+        /// <inheritdoc/>
+        public RemoveFromListCommand Remove { get; } = new RemoveFromListCommand();
+
+        /// <inheritdoc/>
         public void AppendToList()
         {
             var item = CandidateParts;
@@ -222,6 +250,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             CandidatePartsList.Remove(item);
         }
 
+        /// <inheritdoc/>
         public void RemoveFromList()
         {
             var item = SelectedParts;
@@ -234,16 +263,21 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IAddableRemovbable
 
-        public override void Update()
+        #region IReloadable
+        /// <inheritdoc/>
+        public ReloadCommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
-            if(string.IsNullOrWhiteSpace(BouquetCode))
+            if (string.IsNullOrWhiteSpace(BouquetCode))
             {
                 throw new ApplicationException("花束コードが指定されていません。");
             }
             else
             {
                 var bouquet = MemorieDeFleursUIModel.Instance.FindBouquet(BouquetCode);
-                if(bouquet == null)
+                if (bouquet == null)
                 {
                     throw new ApplicationException($"花束コードに該当する商品がありません：{BouquetCode}");
                 }
@@ -253,7 +287,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
             }
         }
+        #endregion // IReloadable
 
+        /// <inheritdoc/>
         public override void SaveToDatabase()
         {
             try
@@ -289,6 +325,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public override void ClearProperties()
         {
             BouquetCode = string.Empty;

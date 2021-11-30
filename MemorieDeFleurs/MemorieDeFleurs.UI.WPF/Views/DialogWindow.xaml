@@ -1,0 +1,48 @@
+﻿<Window x:Class="MemorieDeFleurs.UI.WPF.Views.DialogWindow"
+        x:Name="DialogView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:MemorieDeFleurs.UI.WPF.ViewModels"
+        xmlns:v="clr-namespace:MemorieDeFleurs.UI.WPF.Views"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d"
+        Title="{Binding DialogTitle}" Height="450" Width="800">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Views/Style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding Loaded}" CommandParameter="{Binding}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20pt"/>
+        </Grid.RowDefinitions>
+
+        <ContentControl Grid.Row="0" Content="{Binding ViewModel}">
+            <ContentControl.Resources>
+                <!-- Content プロパティで指定したビューモデルと実際に表示するビューの関連付け -->
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierDetailViewModel}">
+                    <v:OrderSheetToSupplier DataContext="{Binding}"/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierInspectionDetailViewModel}">
+                    <v:OrderToSupplierInspectionDetailControl/>
+                </DataTemplate>
+            </ContentControl.Resources>
+        </ContentControl>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <!-- コマンド実行時にダイアログを閉じるため、CommandParameter には View (このウィンドウ) を渡す -->
+            <Button Content="{Binding OkContent}" Command="{Binding Ok}" CommandParameter="{Binding ElementName=DialogView}"/>
+            <Button Content="{Binding CancelContent}" Command="{Binding Cancel}" CommandParameter="{Binding ElementName=DialogView}"/>
+        </StackPanel>
+    </Grid>
+</Window>

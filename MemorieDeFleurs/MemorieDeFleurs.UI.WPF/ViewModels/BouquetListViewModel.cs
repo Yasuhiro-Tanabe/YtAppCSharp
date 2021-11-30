@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
@@ -6,8 +7,14 @@ using System.Collections.ObjectModel;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class BouquetListViewModel : ListViewModelBase
+    /// <summary>
+    /// 商品一覧画面のビューモデル
+    /// </summary>
+    public class BouquetListViewModel : ListViewModelBase, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public BouquetListViewModel() : base("商品一覧") { }
 
         #region プロパティ
@@ -27,26 +34,35 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private BouquetSummaryViewModel _bouquet;
         #endregion // プロパティ
 
-        public override void LoadItems()
+        #region IReloadable
+        /// <inheritdoc/>
+        public ReloadCommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
             Bouquets.Clear();
-            foreach(var b in MemorieDeFleursUIModel.Instance.FindAllBouquets())
+            foreach (var b in MemorieDeFleursUIModel.Instance.FindAllBouquets())
             {
                 var vm = new BouquetSummaryViewModel(b);
                 Subscribe(vm);
                 Bouquets.Add(vm);
             }
             SelectedBouquet = null;
+            RaisePropertyChanged(nameof(Bouquets));
         }
+        #endregion // IReloadable
 
+        /// <inheritdoc/>
         protected override void RemoveSelectedItem(object sender)
         {
             var vm = sender as BouquetSummaryViewModel;
             MemorieDeFleursUIModel.Instance.RemoveBouquet(vm.BouquetCode);
             LogUtil.Debug($"{vm.BouquetCode} deleted.");
-            LoadItems();
+            UpdateProperties();
         }
 
+        /// <inheritdoc/>
         public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
         {
             LogUtil.DEBUGLOG_BeginMethod(mainVM.GetType().Name);
@@ -59,7 +75,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
 
             detail.BouquetCode = SelectedBouquet.BouquetCode;
-            detail.Update();
+            detail.UpdateProperties();
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name);
             return detail;
         }

@@ -1,4 +1,5 @@
-﻿using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
@@ -11,10 +12,19 @@ using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable
+    /// <summary>
+    /// 仕入先発注詳細画面のビューモデル
+    /// </summary>
+    public class OrderToSupplierDetailViewModel : DetailViewModelBase, IEditableAndFixable, IAppendableRemovable, IOrderable, IDialogViewModel, IPrintable, IReloadable
     {
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
         public static string Name { get; } = "仕入先発注詳細";
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OrderToSupplierDetailViewModel() : base(Name)
         {
             LoadSupplierList();
@@ -22,16 +32,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         #region プロパティ
-        /// <summary>
-        /// 発注番号
-        /// </summary>
-        public string OrderNo
-        {
-            get { return _no; }
-            set { SetProperty(ref _no, value); }
-        }
-        private string _no;
-
         /// <summary>
         /// 仕入先ID (表示専用)
         /// </summary>
@@ -49,24 +49,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
 
         /// <summary>
-        /// 発注日 (表示専用)
-        /// </summary>
-        public string OrderDateText
-        {
-            get { return _orderDate.ToShortDateString(); }
-        }
-
-        /// <summary>
         /// 発注日
         /// </summary>
-        private DateTime OrderDate
+        public DateTime OrderDate
         {
             get { return _orderDate; }
-            set
-            {
-                SetProperty(ref _orderDate, value);
-                RaisePropertyChanged(OrderDateText);
-            }
+            set { SetProperty(ref _orderDate, value); }
         }
         private DateTime _orderDate = DateTime.Today;
 
@@ -136,27 +124,47 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private PartsListItemViewModel _orderParts;
 
         /// <summary>
-        /// 商品構成編集中かどうか
+        /// 印刷日
         /// </summary>
-        public bool IsEditing
+        public DateTime PrintDate
         {
-            get { return _editing; }
-            set { SetProperty(ref _editing, value); }
+            get { return _print; }
+            set { SetProperty(ref _print, value); }
         }
-        private bool _editing;
+        private DateTime _print = DateTime.Today;
         #endregion // プロパティ
 
         #region コマンド
-        public ICommand Edit { get; } = new EditCommand();
-        public ICommand Fix { get; } = new FixCommand();
-        public ICommand Append { get; } = new AppendToListCommand();
-        public ICommand Remove { get; } = new RemoveFromListCommand();
-        public ICommand Order { get; } = new OrderCommand();
-        public ICommand Cancel { get; } = new CancelOrderCommand();
-        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand(); 
+        /// <inheritdoc/>
+        public ICommand PreviewPrint { get; } = new OpenDialogCommand();
         #endregion // コマンド
 
-        public void Update(OrdersToSupplier order)
+        #region IReloadable
+        /// <inheritdoc/>
+        public ReloadCommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
+        public void UpdateProperties()
+        {
+            if (string.IsNullOrWhiteSpace(OrderNo))
+            {
+                throw new ApplicationException("発注番号が指定されていません。");
+            }
+            else
+            {
+                var found = MemorieDeFleursUIModel.Instance.FindOrderToSupplier(OrderNo);
+                if (found == null)
+                {
+                    throw new ApplicationException($"該当する発注がありません：{OrderNo}");
+                }
+                else
+                {
+                    Update(found);
+                    LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}, {OrderPartsText}");
+                }
+            }
+        }
+        private void Update(OrdersToSupplier order)
         {
             OrderNo = order.ID;
             OrderDate = order.OrderDate;
@@ -176,7 +184,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             IsDirty = false;
         }
-
         private void LoadSupplierList()
         {
             Suppliers.Clear();
@@ -185,28 +192,24 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 Suppliers.Add(new SupplierSummaryViewModel(s));
             }
         }
-
-        public override void Update()
-        {
-            if(string.IsNullOrWhiteSpace(_no))
-            {
-                throw new ApplicationException("発注番号が指定されていません。");
-            }
-            else
-            {
-                var found = MemorieDeFleursUIModel.Instance.FindOrderToSupplier(OrderNo);
-                if(found == null)
-                {
-                    throw new ApplicationException($"該当する発注がありません：{OrderNo}");
-                }
-                else
-                {
-                    Update(found);
-                }
-            }
-        }
+        #endregion // IReloadable
 
         #region IEditableFixable
+        /// <inheritdoc/>
+        public EditCommand Edit { get; } = new EditCommand();
+
+        /// <inheritdoc/>
+        public FixCommand Fix { get; } = new FixCommand();
+
+        /// <inheritdoc/>
+        public bool IsEditing
+        {
+            get { return _editing; }
+            set { SetProperty(ref _editing, value); }
+        }
+        private bool _editing;
+
+        /// <inheritdoc/>
         public void OpenEditView()
         {
             if(SelectedSupplier == null)
@@ -231,6 +234,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             IsEditing = true;
         }
 
+        /// <inheritdoc/>
         public void FixEditing()
         {
             IsEditing = false;
@@ -238,7 +242,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IEditableFixable
 
-        #region IAddableRemovable
+        #region IAppendableRemovable
+        /// <inheritdoc/>
+        public AppendToListCommand Append { get; } = new AppendToListCommand();
+
+        /// <inheritdoc/>
+        public RemoveFromListCommand Remove { get; } = new RemoveFromListCommand();
+
+        /// <inheritdoc/>
         public void AppendToList()
         {
             // SupplyParts から OrderParts への移動
@@ -251,6 +262,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             SelectedSupplyParts = null;
         }
 
+        /// <inheritdoc/>
         public void RemoveFromList()
         {
             // OrderParts から SupplyParts への移動
@@ -262,16 +274,34 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             OrderParts.Remove(parts);
             SelectedOrderParts = null;
         }
-        #endregion // IAddableRemovable
+        #endregion // IAppendableRemovable
 
         #region IOrderable
+        /// <inheritdoc/>
+        public OrderCommand Order { get; } = new OrderCommand();
+
+        /// <inheritdoc/>
+        public CancelOrderCommand Cancel { get; } = new CancelOrderCommand();
+
+        /// <inheritdoc/>
+        public ChangeArrivalDateCommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
+
+        /// <inheritdoc/>
+        public string OrderNo
+        {
+            get { return _no; }
+            set { SetProperty(ref _no, value); }
+        }
+        private string _no;
+
+        /// <inheritdoc/>
         public void OrderMe()
         {
             if(string.IsNullOrWhiteSpace(_no))
             {
                 var order = new OrdersToSupplier()
                 {
-                    OrderDate = _orderDate,
+                    OrderDate = OrderDate,
                     DeliveryDate = ArrivalDate,
                     Supplier = SupplierCode
                 };
@@ -279,8 +309,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 {
                     order.Details.Add(new OrderDetailsToSupplier() { PartsCode = parts.PartsCode, LotCount = parts.Quantity });
                 }
-                _no = MemorieDeFleursUIModel.Instance.Order(order);
-                Update();
+                OrderNo = MemorieDeFleursUIModel.Instance.Order(order);
+                UpdateProperties();
             }
             else
             {
@@ -288,6 +318,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public void CancelMe()
         {
             if(string.IsNullOrWhiteSpace(_no))
@@ -301,6 +332,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         public void ChangeMyArrivalDate()
         {
             if (string.IsNullOrWhiteSpace(_no))
@@ -314,12 +346,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         }
         #endregion // IOrderable
 
+        /// <inheritdoc/>
         public override void SaveToDatabase()
         {
             // 使用しない：「発注」、「納期変更」、発注取消」で操作させる。
             base.SaveToDatabase();
         }
 
+        /// <inheritdoc/>
         public override void Validate()
         {
             var ex = new ValidateFailedException();
@@ -332,7 +366,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 ex.Append("仕入れる単品がありません。");
             }
 
-            var days = (ArrivalDate - DateTime.Today).Days;
+            var days = (ArrivalDate - OrderDate).Days;
             foreach(var parts in OrderParts)
             {
                 if(days < parts.LeadTime)
@@ -344,6 +378,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             if(ex.ValidationErrors.Count >0) { throw ex; }
         }
 
+        /// <inheritdoc/>
         public override void ClearProperties()
         {
             OrderNo = string.Empty;
@@ -364,5 +399,36 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             IsDirty = false;
         }
+
+        #region IDialogViewModel
+        /// <inheritdoc/>
+        public void FillDialogParameters(DialogParameter param)
+        {
+            param.DialogTitle = "発注書印刷";
+            param.OkContent = "印刷";
+            param.CancelContent = "キャンセル";
+        }
+
+        /// <inheritdoc/>
+        public void DialogOK()
+        {
+            LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
+            Print.Execute(this);
+        }
+
+        /// <inheritdoc/>
+        public void DialogCancel()
+        {
+            LogUtil.DEBUGLOG_MethodCalled(msg: $"Order={OrderNo}");
+        }
+        #endregion // IDialogViewModel
+
+        #region IPrintable
+        /// <inheritdoc/>
+        public PrintCommand Print { get; } = new PrintCommand();
+
+        /// <inheritdoc/>
+        public void ValidateBeforePrinting() { }
+        #endregion // IPrintable
     }
 }

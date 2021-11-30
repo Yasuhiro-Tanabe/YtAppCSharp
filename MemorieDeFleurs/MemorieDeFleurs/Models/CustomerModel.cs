@@ -10,6 +10,9 @@ using System.Linq;
 
 namespace MemorieDeFleurs.Models
 {
+    /// <summary>
+    /// 得意先および得意先受注情報の操作モデル
+    /// </summary>
     public class CustomerModel
     {
         private MemorieDeFleursModel Parent { get; set; }
@@ -184,6 +187,10 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 得意先オブジェクト生成器を取得する
+        /// </summary>
+        /// <returns>得意先オブジェクト生成器</returns>
         public CustomerBuilder GetCustomerBuilder()
         {
             return CustomerBuilder.GetInstance(this);
@@ -204,6 +211,11 @@ namespace MemorieDeFleurs.Models
 
             private Customer _sendFrom;
 
+            /// <summary>
+            /// お届け先オブジェクト生成器を生成して返す
+            /// </summary>
+            /// <param name="parent">内部で参照する得意先・受注情報操作モデル</param>
+            /// <returns></returns>
             public static ShippingAddressBuilder GetInstance(CustomerModel parent)
             {
                 return new ShippingAddressBuilder(parent);
@@ -303,6 +315,10 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// お届け先オブジェクト生成器を取得する
+        /// </summary>
+        /// <returns>お届け先オブジェクト生成器</returns>
         public ShippingAddressBuilder GetShippingAddressBuilder()
         {
             return ShippingAddressBuilder.GetInstance(this);
@@ -310,6 +326,11 @@ namespace MemorieDeFleurs.Models
         #endregion // ShippingAddressBuilder
 
         #region 得意先の登録改廃
+        /// <summary>
+        /// 指定の得意先IDを持つ得意先エンティティオブジェクトを取得する
+        /// </summary>
+        /// <param name="id">得意先ID</param>
+        /// <returns></returns>
         public Customer FindCustomer(int id)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -324,6 +345,10 @@ namespace MemorieDeFleurs.Models
                 .SingleOrDefault(c => c.ID == id);
         }
 
+        /// <summary>
+        /// 登録されている全得意先の一覧を取得する
+        /// </summary>
+        /// <returns>得意先の一覧</returns>
         public IEnumerable<Customer> FindAllCustomers()
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -334,6 +359,10 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 指定IDの得意先情報をデータベースから削除する
+        /// </summary>
+        /// <param name="customerID">得意先ID</param>
         public void RemoveCustomer(int customerID)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -380,6 +409,11 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 得意先をデータベースに保存する
+        /// </summary>
+        /// <param name="customer">保存する得意先情報</param>
+        /// <returns>データベースから再取得した</returns>
         public Customer Save(Customer customer)
         {
             using(var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -455,6 +489,11 @@ namespace MemorieDeFleurs.Models
         #endregion // 得意先の登録改廃
 
         #region お届け先の登録改廃
+        /// <summary>
+        /// お届け先をデータベースに保存する
+        /// </summary>
+        /// <param name="address">お届け先情報</param>
+        /// <returns>データベースに登録した、関連する参照先が適切に設定されているお届け先情報</returns>
         public ShippingAddress Save(ShippingAddress address)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -514,7 +553,11 @@ namespace MemorieDeFleurs.Models
             return FindShippingAddress(context, found.ID);
         }
 
-
+        /// <summary>
+        /// 得意先が過去に商品を贈ったお届け先を取得する
+        /// </summary>
+        /// <param name="customer">得意先ID</param>
+        /// <returns>お届け先一覧</returns>
         public IEnumerable<ShippingAddress> FindAllShippingAddressesOfCustomer(int customer)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -538,6 +581,10 @@ namespace MemorieDeFleurs.Models
         #endregion // お届け先の登録改廃
 
         #region 受注履歴の登録改廃
+        /// <summary>
+        /// 登録されている全得意先受注履歴を取得する
+        /// </summary>
+        /// <returns>得意先受注履歴の一覧</returns>
         public IEnumerable<OrderFromCustomer> FindAllOrders()
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -555,6 +602,12 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 期間指定で得意先受注履歴を取得する
+        /// </summary>
+        /// <param name="from">期間の開始日</param>
+        /// <param name="to">期間の終了日</param>
+        /// <returns>得意先受注履歴の一覧</returns>
         public IEnumerable<OrderFromCustomer> FindAllOrders(DateTime from, DateTime to)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -573,6 +626,13 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 期間と得意先を指定して受注履歴を取得する
+        /// </summary>
+        /// <param name="from">期間の開始日</param>
+        /// <param name="to">期間の終了日</param>
+        /// <param name="customerID">得意先ID</param>
+        /// <returns>得意先受注履歴の一覧</returns>
         public IEnumerable<OrderFromCustomer> FindAllOrders(DateTime from, DateTime to, int customerID)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -591,6 +651,11 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 得意先を指定して受注履歴を取得する
+        /// </summary>
+        /// <param name="orderID">得意先</param>
+        /// <returns>得意先受注履歴の一覧</returns>
         public OrderFromCustomer FindOrder(string orderID)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -608,6 +673,11 @@ namespace MemorieDeFleurs.Models
                 .SingleOrDefault(o => o.ID == orderID);
         }
 
+        /// <summary>
+        /// 指定日に発送した／発送予定の受注番号を取得する
+        /// </summary>
+        /// <param name="date">発送(予定)日</param>
+        /// <returns>受注番号一覧</returns>
         public IEnumerable<string> FindAllOrdersShippingAt(DateTime date)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -653,6 +723,18 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 得意先からの商品受注を処理する
+        /// 
+        /// トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderDate">受注日</param>
+        /// <param name="bouquet">受注商品</param>
+        /// <param name="sendTo">お届け先</param>
+        /// <param name="arrivalDate">お届け日</param>
+        /// <param name="message">(省略可) お届けメッセージ</param>
+        /// <returns>受注番号</returns>
         public string Order(MemorieDeFleursDbContext context, DateTime orderDate, Bouquet bouquet, ShippingAddress sendTo, DateTime arrivalDate, string message = "")
         {
             // 在庫アクションの登録改訂に関する検証用、暫定実装
@@ -721,6 +803,10 @@ namespace MemorieDeFleurs.Models
         #endregion // 注文
 
         #region 注文取消
+        /// <summary>
+        /// 受注を取り消す
+        /// </summary>
+        /// <param name="orderNo">受注番号</param>
         public void CancelOrder(string orderNo)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -740,6 +826,13 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 受注を取り消す
+        /// 
+        /// トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderNo">受注番号</param>
         public void CancelOrder(MemorieDeFleursDbContext context, string orderNo)
         {
             LogUtil.DEBUGLOG_BeginMethod($"order={orderNo}");
@@ -784,6 +877,12 @@ namespace MemorieDeFleurs.Models
         #endregion // 注文取消
 
         #region お届け日変更
+        /// <summary>
+        /// 得意先から受注した商品のお届け日を変更する
+        /// </summary>
+        /// <param name="orderChangeDate">お届け日変更の発生日=この処理を呼び出した日</param>
+        /// <param name="orderNo">受注番号</param>
+        /// <param name="newArrivalDate">変更後のお届け日</param>
         public void ChangeArrivalDate(DateTime orderChangeDate, string orderNo, DateTime newArrivalDate)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -809,6 +908,17 @@ namespace MemorieDeFleurs.Models
             }
         }
 
+        /// <summary>
+        /// 得意先から受注した商品のお届け日を変更する
+        /// 
+        /// トランザクション内での呼出用
+        /// </summary>
+        /// <param name="context">トランザクション中のDBコンテキスト</param>
+        /// <param name="orderChangeDate">お届け日変更の発生日=この処理を呼び出した日</param>
+        /// <param name="orderNo">受注番号</param>
+        /// <param name="newArrivalDate">変更後のお届け日</param>
+        /// <exception cref="NotImplementedException">処理未実装：機能考慮されていないパターンがあったときのガードとして、</exception>
+        /// <exception cref="ApplicationException">お届け日を変更できない：変更後のお届け日が当日以前の場合など。</exception>
         public void ChangeArrivalDate(MemorieDeFleursDbContext context, DateTime orderChangeDate, string orderNo, DateTime newArrivalDate)
         {
 
@@ -853,6 +963,10 @@ namespace MemorieDeFleurs.Models
         #endregion // お届け日変更
 
         #region 出荷
+        /// <summary>
+        /// 日付指定で当日出荷予定の全受注履歴を出荷済に変更する
+        /// </summary>
+        /// <param name="date"></param>
         public void ShipAllBouquets(DateTime date)
         {
             using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
@@ -948,5 +1062,35 @@ namespace MemorieDeFleurs.Models
             context.SaveChanges();
         }
         #endregion // 出荷
+
+        #region 加工指示書
+        /// <summary>
+        /// 指定日付の出荷商品数の一覧を取得する
+        /// </summary>
+        /// <param name="date">出荷(予定)日=お届け(予定)日の1日前</param>
+        /// <returns>出荷予定商品数一覧：出荷予定のない商品も、商品数=0で登録されている。</returns>
+        public IDictionary<string, int> GetShippingBouquetCountAt(DateTime date)
+        {
+            using (var context = new MemorieDeFleursDbContext(Parent.DbConnection))
+            {
+                var found = context.OrderFromCustomers
+                    .Where(o => o.ShippingDate == date)
+                    .AsEnumerable()
+                    .GroupBy(o => o.BouquetCode)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                var all = context.Bouquets.Select(b => b.Code);
+                
+                foreach(var code in all)
+                {
+                    if(!found.ContainsKey(code))
+                    {
+                        found.Add(code, 0);
+                    }
+                }
+                return found;
+            }
+        }
+        #endregion // 加工指示書
     }
 }

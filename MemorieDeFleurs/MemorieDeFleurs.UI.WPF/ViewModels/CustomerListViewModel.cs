@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
@@ -6,8 +7,14 @@ using System.Collections.ObjectModel;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class CustomerListViewModel : ListViewModelBase
+    /// <summary>
+    /// 得意先一覧画面のビューモデル
+    /// </summary>
+    public class CustomerListViewModel : ListViewModelBase, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public CustomerListViewModel() : base("得意先一覧") { }
 
         #region プロパティ
@@ -27,28 +34,43 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private CustomerSummaryViewModel _customer;
         #endregion // プロパティ
 
-        public override void LoadItems()
-        {
-            LogUtil.DEBUGLOG_BeginMethod();
-            Customers.Clear();
-            foreach(var c in MemorieDeFleursUIModel.Instance.FindAllCustomers())
-            {
-                var vm = new CustomerSummaryViewModel(c);
-                Subscribe(vm);
-                Customers.Add(vm);
-                LogUtil.Debug($"[#{c.ID}:{c.Name}]");
-            }
-            SelectedCustomer = null;
-            LogUtil.DEBUGLOG_EndMethod();
-        }
+        #region IReloadable
+        /// <inheritdoc/>
+        public ReloadCommand Reload { get; } = new ReloadCommand();
 
+        /// <inheritdoc/>
+        public void UpdateProperties()
+        {
+            try
+            {
+                LogUtil.DEBUGLOG_BeginMethod();
+                Customers.Clear();
+                foreach (var c in MemorieDeFleursUIModel.Instance.FindAllCustomers())
+                {
+                    var vm = new CustomerSummaryViewModel(c);
+                    Subscribe(vm);
+                    Customers.Add(vm);
+                    LogUtil.Debug($"[#{c.ID}:{c.Name}]");
+                }
+                SelectedCustomer = null;
+                RaisePropertyChanged(nameof(Customers));
+            }
+            finally
+            {
+                LogUtil.DEBUGLOG_EndMethod();
+            }
+        }
+        #endregion // IReloadable
+
+        /// <inheritdoc/>
         protected override void RemoveSelectedItem(object sender)
         {
             var vm = sender as CustomerSummaryViewModel;
             MemorieDeFleursUIModel.Instance.RemoveCustomer(vm.CustomerID);
-            LoadItems();
+            UpdateProperties();
         }
 
+        /// <inheritdoc/>
         public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
         {
             LogUtil.DEBUGLOG_BeginMethod(mainVM.GetType().Name);
@@ -59,7 +81,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 mainVM.OpenTabItem(detail);
             }
             detail.CustomerID = SelectedCustomer.CustomerID;
-            detail.Update();
+            detail.UpdateProperties();
             LogUtil.DEBUGLOG_EndMethod(mainVM.GetType().Name);
             return detail;
         }

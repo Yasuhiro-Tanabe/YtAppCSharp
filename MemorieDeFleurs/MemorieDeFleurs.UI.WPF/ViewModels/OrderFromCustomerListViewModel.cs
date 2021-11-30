@@ -1,5 +1,6 @@
 ﻿using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models.Entities;
+using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
@@ -10,8 +11,14 @@ using System.Linq;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
-    public class OrderFromCustomerListViewModel : ListViewModelBase
+    /// <summary>
+    /// 得意先受注一覧画面のビューモデル
+    /// </summary>
+    public class OrderFromCustomerListViewModel : ListViewModelBase, IReloadable
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OrderFromCustomerListViewModel() : base("得意先受注一覧") { }
 
         #region プロパティ
@@ -66,17 +73,22 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private OrderFromCustomerSummaryViewModel _order;
         #endregion // プロパティ
 
-        public override void LoadItems()
+        #region IReloadable
+        /// <inheritdoc/>
+        public ReloadCommand Reload { get; } = new ReloadCommand();
+
+        /// <inheritdoc/>
+        public void UpdateProperties()
         {
             try
             {
                 LogUtil.DEBUGLOG_BeginMethod();
-                if(SelectedCustomer == null)
+                if (SelectedCustomer == null)
                 {
                     UpdateCustomers();
                     UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersFromCustomer());
 
-                    if(Orders.Count > 0)
+                    if (Orders.Count > 0)
                     {
                         From = Orders.FirstOrDefault().OrderDate;
                         To = Orders.LastOrDefault().OrderDate;
@@ -84,12 +96,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 }
                 else
                 {
-                    if(To < From)
+                    if (To < From)
                     {
                         To = From;
                     }
 
-                    if(SelectedCustomer.CustomerID < 1)
+                    if (SelectedCustomer.CustomerID < 1)
                     {
                         // すべての得意先を選択した
                         UpdateOrders(MemorieDeFleursUIModel.Instance.FindAllOrdersFromCustomer(From, To));
@@ -110,7 +122,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         {
             Customers.Clear();
             Customers.Add(new CustomerSummaryViewModel() { CustomerID = -1, CustomerName = "すべての得意先" });
-            foreach(var customer in MemorieDeFleursUIModel.Instance.FindAllCustomers())
+            foreach (var customer in MemorieDeFleursUIModel.Instance.FindAllCustomers())
             {
                 Customers.Add(new CustomerSummaryViewModel(customer));
             }
@@ -119,7 +131,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private void UpdateOrders(IEnumerable<OrderFromCustomer> orders)
         {
             Orders.Clear();
-            foreach(var order in orders)
+            foreach (var order in orders)
             {
                 var item = new OrderFromCustomerSummaryViewModel(order);
                 Subscribe(item);
@@ -127,7 +139,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
             SelectedOrder = null;
         }
+        #endregion // IReloadable
 
+        /// <inheritdoc/>
         public override DetailViewModelBase OpenDetailTabItem(MainWindowViiewModel mainVM)
         {
             OrderFromCustomerDetailViewModel detail = null;
@@ -135,14 +149,15 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             {
                 LogUtil.DEBUGLOG_BeginMethod(mainVM.GetType().Name);
                 detail = mainVM.FindTabItem(OrderFromCustomerDetailViewModel.Name) as OrderFromCustomerDetailViewModel;
-                if(detail == null)
+                if (detail == null)
                 {
                     detail = new OrderFromCustomerDetailViewModel();
-                    mainVM.OpenTabItem(detail);
                 }
 
                 detail.OrderNo = SelectedOrder.OrderNo;
-                detail.Update();
+                detail.UpdateProperties();
+
+                mainVM.OpenTabItem(detail);
                 return detail;
             }
             finally
@@ -151,10 +166,11 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
         }
 
+        /// <inheritdoc/>
         protected override void RemoveSelectedItem(object sender)
         {
             MemorieDeFleursUIModel.Instance.CancelOrderFromCustomer(SelectedOrder.OrderNo);
-            LoadItems();
+            UpdateProperties();
         }
 
     }

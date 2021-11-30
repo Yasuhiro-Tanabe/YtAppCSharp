@@ -5,11 +5,21 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 得意先詳細画面のビューモデル
+    /// </summary>
     public class CustomerSummaryViewModel : ListItemViewModelBase
     {
-        public CustomerSummaryViewModel() : base(new OpenCustomerDetailViewCommand()) { }
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public CustomerSummaryViewModel() : base(new OpenDetailViewCommand<CustomerDetailViewModel>()) { }
 
-        public CustomerSummaryViewModel(Customer customer) : base(new OpenCustomerDetailViewCommand())
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="customer">表示する得意先エンティティ</param>
+        public CustomerSummaryViewModel(Customer customer) : this()
         {
             Update(customer);
         }
@@ -36,7 +46,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private string _name;
         #endregion // プロパティ
 
-        public void Update(Customer customer)
+        private void Update(Customer customer)
         {
             Update(customer.ID.ToString());
             CustomerID = customer.ID;

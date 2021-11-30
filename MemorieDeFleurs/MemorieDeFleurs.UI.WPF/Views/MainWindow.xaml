@@ -30,12 +30,14 @@
             <MenuItem Header="画面" HorizontalAlignment="Left">
                 <MenuItem Header="DB接続...">
                     <MenuItem Header="SQLite">
+                        <MenuItem Header="新規" Command="{Binding SQLiteNew}" CommandParameter="{Binding}"/>
                         <MenuItem Header="読込..." Command="{Binding SQLiteLoad}" CommandParameter="{Binding}"/>
                         <MenuItem Header="保存..." Command="{Binding SQLiteSave}" CommandParameter="{Binding}"/>
                     </MenuItem>
                 </MenuItem>
                 <MenuItem Header="印刷...">
                     <MenuItem Header="在庫推移表" Command="{Binding OpenInventoryTransactionView}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="加工指示書" Command="{Binding OpenProcessingInstructionsPreview}" CommandParameter="{Binding}"/>
                 </MenuItem>
                 <MenuItem Header="終了" Command="{Binding Exit}" CommandParameter="{Binding}"/>
             </MenuItem>
@@ -48,6 +50,7 @@
                 <MenuItem Header="商品登録" Command="{Binding OpenBouquetDetailView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="単品一覧" Command="{Binding OpenPartsListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="単品登録" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="単品在庫破棄" Command="{Binding OpenInventoryDiscardView}" CommandParameter="{Binding}"/>
             </MenuItem>
             <MenuItem Header="得意先">
                 <MenuItem Header="得意先一覧" Command="{Binding OpenCustomerListView}" CommandParameter="{Binding}"/>
@@ -56,6 +59,7 @@
             <MenuItem Header="受発注">
                 <MenuItem Header="仕入先発注一覧" Command="{Binding OpenOrderToSupplierListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="仕入先発注登録" Command="{Binding OpenOrderToSupplierDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="入荷検品" Command="{Binding OpenOrderToSupplierInspectionList}" CommandParameter="{Binding}"/>
                 <MenuItem Header="得意先受注一覧" Command="{Binding OpenOrderFromCustomerListView}" CommandParameter="{Binding}"/>
                 <MenuItem Header="得意先受注登録" Command="{Binding OpenOrderFromCustomerDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
@@ -102,6 +106,15 @@
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:InventoryTransitionTableViewModel}">
                     <v:InvenetoryTransitionTablePreviewControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:ProcessingInstructionViewModel}">
+                    <v:ProcessingInstructionPreviewControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:OrderToSupplierInspectionListViewModel}">
+                    <v:OrderToSupplierInspectionListControl/>
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:InventoryViewModel}">
+                    <v:InventoryDiscardView/>
                 </DataTemplate>
             </TabControl.Resources>
             <TabControl.ItemTemplate>

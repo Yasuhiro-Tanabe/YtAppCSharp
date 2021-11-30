@@ -35,7 +35,7 @@
         <Setter Property="TextWrapping" Value="WrapWithOverflow"/>
     </Style>
     
-    <!-- TextBoxk -->
+    <!-- TextBox -->
     <Style TargetType="TextBox">
         <!-- デフォルト：Style 属性を指定しないときに適用されるスタイル -->
         <Setter Property="Margin" Value="5,1"/>
@@ -124,7 +124,7 @@
     <!-- DataGrid (表示専用) -->
     <Style x:Key="NotEditableDataGrid" TargetType="DataGrid">
         <Setter Property="AutoGenerateColumns" Value="False"/>
-        <Setter Property="IsEnabled" Value="False"/>
+        <Setter Property="IsEnabled" Value="True"/><!-- 縦横スクロールできるようにするため False にしない -->
         <Setter Property="IsReadOnly" Value="True"/>
         <Setter Property="HeadersVisibility" Value="Column"/>
         <Setter Property="GridLinesVisibility" Value="None"/>

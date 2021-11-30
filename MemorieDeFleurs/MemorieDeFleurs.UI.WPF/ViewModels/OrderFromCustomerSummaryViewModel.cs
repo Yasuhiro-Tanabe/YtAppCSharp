@@ -6,9 +6,15 @@ using System;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
+    /// <summary>
+    /// 得意先受注一覧画面内の各受注情報を表示するビューモデル
+    /// </summary>
     public class OrderFromCustomerSummaryViewModel : ListItemViewModelBase
     {
-        public OrderFromCustomerSummaryViewModel() : base(new OpenOrderFromCustomerDetailViewCommand()) { }
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        public OrderFromCustomerSummaryViewModel() : base(new OpenDetailViewCommand<OrderFromCustomerDetailViewModel>()) { }
 
         #region プロパティ
         /// <summary>
@@ -90,9 +96,23 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             set { SetProperty(ref _bouquet, value); }
         }
         private string _bouquet;
+
+        /// <summary>
+        /// 受注状態：出荷済かどうか
+        /// </summary>
+        public bool IsShipped
+        {
+            get { return _shipped; }
+            set { SetProperty(ref _shipped, value); }
+        }
+        private bool _shipped;
         #endregion // プロパティ
 
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="order">表示する受注情報</param>
         public OrderFromCustomerSummaryViewModel(OrderFromCustomer order) : this()
         {
             Update(order);
@@ -106,6 +126,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             ShippingDate = order.ShippingDate;
             BouquetName = order.Bouquet.Name;
             OrderDate = order.OrderDate;
+            IsShipped = order.Status == OrderFromCustomerStatus.SHIPPED;
         }
     }
 }
