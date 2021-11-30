@@ -1,6 +1,4 @@
-﻿using System.Windows.Input;
-
-namespace MemorieDeFleurs.UI.WPF.Commands
+﻿namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// 受発注処理を行うビューモデルが実装すべきインタフェース。

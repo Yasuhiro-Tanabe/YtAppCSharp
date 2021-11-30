@@ -1,6 +1,4 @@
-﻿using System.Windows.Input;
-
-namespace MemorieDeFleurs.UI.WPF.Commands
+﻿namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// Reload ボタンやLoadedイベントハンドラを持つビューモデルに実装すべきインタフェース

@@ -1,6 +1,4 @@
-﻿using System.Windows.Input;
-
-namespace MemorieDeFleurs.UI.WPF.Commands
+﻿namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// ダイアログを開く側が実装しなければならないビューモデル

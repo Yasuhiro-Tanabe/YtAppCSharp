@@ -1,7 +1,5 @@
 ﻿using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
-using System.Windows.Input;
-
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>

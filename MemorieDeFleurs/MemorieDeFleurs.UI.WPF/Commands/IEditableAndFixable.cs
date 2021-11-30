@@ -1,6 +1,4 @@
-﻿using System.Windows.Input;
-
-namespace MemorieDeFleurs.UI.WPF.Commands
+﻿namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// ビューモデル内の一部を「追加編集領域」として普段は隠しておき、

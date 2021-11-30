@@ -5,7 +5,6 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
 using System.Linq;
-using System.Windows.Input;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
