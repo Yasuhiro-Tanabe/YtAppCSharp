@@ -24,12 +24,12 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         /// <summary>
         /// <see cref="ObservableCollection{T}"/> の要素を一方の他方へ移動する
         /// </summary>
-        public ICommand Append { get; }
+        public AppendToListCommand Append { get; }
 
         /// <summary>
         /// <see cref="ObservableCollection{T}"/> の要素を <see cref="Append"/> とは逆方向へ移動する
         /// </summary>
-        public ICommand Remove { get; }
+        public RemoveFromListCommand Remove { get; }
 
         /// <summary>
         /// <see cref="Append"/> が実行されたときに呼び出される処理を記述する

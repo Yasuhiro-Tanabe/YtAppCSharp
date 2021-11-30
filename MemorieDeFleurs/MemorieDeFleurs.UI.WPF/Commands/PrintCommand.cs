@@ -6,8 +6,14 @@ using System.Windows.Controls;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class PrintCommand : CommandBase
+    /// <summary>
+    /// <see cref="IPrintable"/> 実装に必要な印刷コマンド
+    /// </summary>
+    public class PrintCommand : CommandBase
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public PrintCommand() : base()
         {
             AddAction(typeof(ProcessingInstructionViewModel), Print<ProcessingInstructionViewModel, ProcessingInstructionControl>);

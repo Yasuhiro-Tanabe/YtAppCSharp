@@ -37,7 +37,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IReloadable
         /// <inheritdoc/>
-        public ICommand Reload { get; } = new ReloadCommand();
+        public ReloadCommand Reload { get; } = new ReloadCommand();
 
         /// <inheritdoc/>
         public void UpdateProperties()

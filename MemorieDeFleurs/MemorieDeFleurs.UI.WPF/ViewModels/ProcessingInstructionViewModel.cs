@@ -104,7 +104,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IReloadable
         /// <inheritdoc/>
-        public ICommand Reload { get; } = new ReloadCommand();
+        public ReloadCommand Reload { get; } = new ReloadCommand();
 
         /// <inheritdoc/>
         public void UpdateProperties()
@@ -115,7 +115,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IPrintable
         /// <inheritdoc/>
-        public ICommand Print { get; } = new PrintCommand();
+        public PrintCommand Print { get; } = new PrintCommand();
 
         /// <inheritdoc/>
         public void ValidateBeforePrinting() { }

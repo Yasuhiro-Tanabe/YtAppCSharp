@@ -15,7 +15,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         /// <summary>
         /// 印刷する
         /// </summary>
-        public ICommand Print { get; }
+        public PrintCommand Print { get; }
 
         /// <summary>
         /// 印刷前にビューモデルが保持している情報が印刷可能であることを検証する

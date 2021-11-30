@@ -13,17 +13,17 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         /// <summary>
         /// 受注または発注を行う
         /// </summary>
-        public ICommand Order { get; }
+        public OrderCommand Order { get; }
 
         /// <summary>
         /// 受発注を取り消す
         /// </summary>
-        public ICommand Cancel { get; }
+        public CancelOrderCommand Cancel { get; }
 
         /// <summary>
         /// 入荷日またはお届け日を変更する
         /// </summary>
-        public ICommand ChangeArrivalDate { get; }
+        public ChangeArrivalDateCommand ChangeArrivalDate { get; }
 
         /// <summary>
         /// 受注番号または発注番号

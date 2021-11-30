@@ -15,7 +15,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         /// <summary>
         /// ダイアログを開く
         /// </summary>
-        ICommand OpenDialog { get; }
+        OpenDialogCommand OpenDialog { get; }
         
         /// <summary>
         /// ダイアログ内で表示するビューモデル

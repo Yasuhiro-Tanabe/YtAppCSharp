@@ -3,8 +3,14 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class ReloadCommand : CommandBase
+    /// <summary>
+    /// <see cref="IReloadable"/> 実装に必要なプロパティ更新コマンド
+    /// </summary>
+    public class ReloadCommand : CommandBase
     {
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public ReloadCommand() : base()
         {
             AddAction(typeof(IReloadable), UpdateDetailView);

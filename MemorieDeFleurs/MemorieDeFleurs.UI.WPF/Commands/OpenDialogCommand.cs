@@ -5,10 +5,19 @@ using System;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class OpenDialogCommand : CommandBase
+    /// <summary>
+    /// <see cref="IDialogCaller"/> の実装に必要な、ダイアログを開くコマンド
+    /// </summary>
+    public class OpenDialogCommand : CommandBase
     {
+        /// <summary>
+        /// ダイアログが閉じようとしていることを通知する
+        /// </summary>
         public event EventHandler<DialogClosingEventArgs> DialogClosing;
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public OpenDialogCommand() : base()
         {
             AddAction(typeof(IDialogCaller), Open);

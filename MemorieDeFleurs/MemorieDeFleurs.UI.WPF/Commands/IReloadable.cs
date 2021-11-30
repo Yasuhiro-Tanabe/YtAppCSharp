@@ -10,7 +10,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         /// <summary>
         /// ビューモデルの内容を洗い替えする
         /// </summary>
-        public ICommand Reload { get; }
+        public ReloadCommand Reload { get; }
 
         /// <summary>
         /// ビューモデルの持つプロパティを更新する

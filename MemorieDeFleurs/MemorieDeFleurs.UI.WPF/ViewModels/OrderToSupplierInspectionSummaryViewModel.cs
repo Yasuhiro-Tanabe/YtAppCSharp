@@ -24,7 +24,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// </summary>
         public OrderToSupplierInspectionSummaryViewModel() : base(null)
         {
-            (OpenDialog as OpenDialogCommand).DialogClosing += NotifyInspected;
+            OpenDialog.DialogClosing += NotifyInspected;
         }
 
         private void NotifyInspected(object sender, DialogClosingEventArgs args)
@@ -129,7 +129,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IDialogCaller
         /// <inheritdoc/>
-        public ICommand OpenDialog { get; } = new OpenDialogCommand();
+        public OpenDialogCommand OpenDialog { get; } = new OpenDialogCommand();
 
         /// <inheritdoc/>
         public NotificationObject DialogViewModel

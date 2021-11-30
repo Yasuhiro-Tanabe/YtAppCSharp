@@ -14,13 +14,13 @@ namespace MemorieDeFleurs.UI.WPF.Commands
         /// 追加表示領域を開く。
         /// 具体的には <see cref="IsEditing"/> を true に変更し <see cref="OpenEditView"/> を呼び出す。
         /// </summary>
-        public ICommand Edit { get; }
+        public EditCommand Edit { get; }
 
         /// <summary>
         /// 追加表示領域を隠す。
         /// 具体的には <see cref="IsEditing"/> を false に変更し <see cref="FixEditing"/> を呼び出す。
         /// </summary>
-        public ICommand Fix { get; }
+        public FixCommand Fix { get; }
 
         /// <summary>
         /// 追加表示領域を表示するかどうか

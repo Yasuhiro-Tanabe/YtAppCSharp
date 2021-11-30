@@ -95,7 +95,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IReloadabe
         /// <inheritdoc/>
-        public ICommand Reload { get; } = new ReloadCommand();
+        public ReloadCommand Reload { get; } = new ReloadCommand();
 
         /// <inheritdoc/>
         public void UpdateProperties()
@@ -128,7 +128,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IDialogCaller
         /// <inheritdoc/>
-        public ICommand OpenDialog { get; } = new OpenDialogCommand();
+        public OpenDialogCommand OpenDialog { get; } = new OpenDialogCommand();
 
         /// <inheritdoc/>
         public NotificationObject DialogViewModel

@@ -223,7 +223,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IReloadable
         /// <inheritdoc/>
-        public ICommand Reload { get; } = new ReloadCommand();
+        public ReloadCommand Reload { get; } = new ReloadCommand();
 
         /// <inheritdoc/>
         public void UpdateProperties()
@@ -314,10 +314,10 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IEditableFixable
         /// <inheritdoc/>
-        public ICommand Edit { get; } = new EditCommand();
+        public EditCommand Edit { get; } = new EditCommand();
 
         /// <inheritdoc/>
-        public ICommand Fix { get; } = new FixCommand();
+        public FixCommand Fix { get; } = new FixCommand();
 
         /// <inheritdoc/>
         public bool IsEditing
@@ -364,13 +364,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IOrderable
         /// <inheritdoc/>
-        public ICommand Order { get; } = new OrderCommand();
+        public OrderCommand Order { get; } = new OrderCommand();
 
         /// <inheritdoc/>
-        public ICommand Cancel { get; } = new CancelOrderCommand();
+        public CancelOrderCommand Cancel { get; } = new CancelOrderCommand();
 
         /// <inheritdoc/>
-        public ICommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
+        public ChangeArrivalDateCommand ChangeArrivalDate { get; } = new ChangeArrivalDateCommand();
 
         /// <inheritdoc/>
         public string OrderNo
