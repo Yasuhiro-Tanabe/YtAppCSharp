@@ -19,7 +19,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
         /// </summary>
-        public static string Name { get; } = "得意先受注詳細";
+        public static string Name { get { return TextResourceFinder.FindText("Customer_Detail"); } }
 
         /// <summary>
         /// コンストラクタ

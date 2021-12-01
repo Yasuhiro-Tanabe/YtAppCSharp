@@ -13,7 +13,12 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     internal class OrderToSupplierListViewModel : ListViewModelBase, IReloadable
     {
-        public OrderToSupplierListViewModel() : base("仕入先発注一覧") { }
+        /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
+        public static string Name { get { return TextResourceFinder.FindText("OrderToSupplier_List"); } }
+
+        public OrderToSupplierListViewModel() : base(Name) { }
 
         #region プロパティ
         /// <summary>
@@ -111,7 +116,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             }
             finally
             {
-                LogUtil.DEBUGLOG_EndMethod(msg: $"{SelectedSupplier.SupplierName}, {From:yyyyMMdd} ～ {To:yyyyMMdd}");
+                LogUtil.DEBUGLOG_EndMethod(msg: $"{SelectedSupplier?.SupplierName}, {From:yyyyMMdd} ～ {To:yyyyMMdd}");
             }
         }
         #endregion // IReloadable

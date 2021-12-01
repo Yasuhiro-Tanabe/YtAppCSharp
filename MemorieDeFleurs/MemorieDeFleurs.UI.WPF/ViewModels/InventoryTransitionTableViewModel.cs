@@ -15,9 +15,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     public class InventoryTransitionTableViewModel : ListViewModelBase, IPrintable, IReloadable
     {
         /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
+        public static string Name { get { return TextResourceFinder.FindText("InventoryTransitionTable"); } }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
-        public InventoryTransitionTableViewModel() : base("在庫推移表") { }
+        public InventoryTransitionTableViewModel() : base(Name) { }
 
         #region プロパティ
         /// <summary>

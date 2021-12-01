@@ -42,11 +42,11 @@
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
-            <Button TabIndex="997" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button TabIndex="998" Content="発注取消" Command="{Binding Cancel}" CommandParameter="{Binding}"/>
-            <Button TabIndex="999" Content="納品予定日変更" Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
-            <Button TabIndex="996" Content="印刷..." Command="{Binding PreviewPrint}" CommandParameter="{Binding}"/>
-            <Button TabIndex="1000" Content="発注" Command="{Binding Order}" CommandParameter="{Binding}"/>
+            <Button TabIndex="997" Content="{DynamicResource Clear}" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="{DynamicResource CancelOrderToSupplier}" Command="{Binding Cancel}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="{DynamicResource ChangeArrivalDateOfOrderToSupplier}" Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
+            <Button TabIndex="996" Content="{DynamicResource PreviewPrint}" Command="{Binding PreviewPrint}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="{DynamicResource OrderToSupplier}" Command="{Binding Order}" CommandParameter="{Binding}"/>
         </StackPanel>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="発注日："/>
@@ -65,8 +65,8 @@
 
         <TextBlock Grid.Row="3" Grid.Column="0" Text="発注内容："/>
         <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding OrderPartsText, Mode=OneWay}" Visibility="{Binding IsEditing, Converter={StaticResource negativeConverter}}" Style="{StaticResource MultiLineTextBlock}"/>
-        <Button Grid.Row="3" Grid.Column="3" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}"  Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}"/>
-        <Button Grid.Row="3" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Converter={StaticResource negativeConverter}}"/>
+        <Button Grid.Row="3" Grid.Column="3" Content="{DynamicResource Fix}" Command="{Binding Fix}" CommandParameter="{Binding}"  Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}"/>
+        <Button Grid.Row="3" Grid.Column="3" Content="{DynamicResource Edit}" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Converter={StaticResource negativeConverter}}"/>
 
         <Grid Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5"
               Margin="10"
@@ -106,8 +106,8 @@
             </ListView>
 
             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical">
-                <Button Content="＜" Command="{Binding Append}" CommandParameter="{Binding}" Style="{StaticResource AppendButton}"/>
-                <Button Content="＞" Command="{Binding Remove}" CommandParameter="{Binding}" Style="{StaticResource RemoveButton}"/>
+                <Button Content="{DynamicResource AppendToList}" Command="{Binding Append}" CommandParameter="{Binding}" Style="{StaticResource AppendButton}"/>
+                <Button Content="{DynamicResource RemoveFromList}" Command="{Binding Remove}" CommandParameter="{Binding}" Style="{StaticResource RemoveButton}"/>
             </StackPanel>
 
             <ListView Grid.Row="1" Grid.Column="2" ItemsSource="{Binding SupplyParts}" SelectedItem="{Binding SelectedSupplyParts}">

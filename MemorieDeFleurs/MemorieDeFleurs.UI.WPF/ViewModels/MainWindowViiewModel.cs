@@ -126,9 +126,13 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// </summary>
         public ICommand SQLiteLoad { get; } = new SQLiteOpenDbFileCommand();
         /// <summary>
-        /// SQLite保存メニュー選択時に事項するコマンド
+        /// SQLite保存メニュー選択時に実行するコマンド
         /// </summary>
         public ICommand SQLiteSave { get; } = new SQLiteSaveToDbFileCommand();
+        /// <summary>
+        /// 画面表示言語切替メニュー選択時に実行するコマンド
+        /// </summary>
+        public ICommand ChangeCulture { get; } = new ChangeCurrentCultureCommand();
         #endregion // コマンド
 
         #region ビューの生成・切替

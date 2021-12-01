@@ -44,10 +44,10 @@
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
-            <Button TabIndex="997" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button TabIndex="998" Content="受注取消" Command="{Binding Cancel}" CommandParameter="{Binding}"/>
-            <Button TabIndex="999" Content="お届け日変更" Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
-            <Button TabIndex="1000" Content="受注" Command="{Binding Order}" CommandParameter="{Binding}"/>
+            <Button TabIndex="997" Content="{DynamicResource Clear}" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="{DynamicResource CancelOrderFromCustomer}" Command="{Binding Cancel}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="{DynamicResource ChangeArrivalDateOfOrderFromCustomer}" Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="{DynamicResource OrderFromCustomer}" Command="{Binding Order}" CommandParameter="{Binding}"/>
         </StackPanel>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="得意先："/>
@@ -111,7 +111,7 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="お届け先："/>
             <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ShippingName}"/>
             <TextBlock Grid.Row="0" Grid.Column="2" Text="様"/>
-            <Button Grid.Row="0" Grid.Column="4" Content="選択..." Command="{Binding Edit}" CommandParameter="{Binding}"/>
+            <Button Grid.Row="0" Grid.Column="4" Content="{DynamicResource Edit}" Command="{Binding Edit}" CommandParameter="{Binding}"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="住所1："/>
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Address1}"/>
@@ -134,7 +134,7 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock Grid.Row="0" Grid.Column="0" Text="お届け先："/>
-            <Button Grid.Row="0" Grid.Column="4" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}"/>
+            <Button Grid.Row="0" Grid.Column="4" Content="{DynamicResource Fix}" Command="{Binding Fix}" CommandParameter="{Binding}"/>
 
             <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" ItemsSource="{Binding ShippingAddresses}" SelectedItem="{Binding SelectedShippingAddress}">
                 <ListView.ItemTemplate>

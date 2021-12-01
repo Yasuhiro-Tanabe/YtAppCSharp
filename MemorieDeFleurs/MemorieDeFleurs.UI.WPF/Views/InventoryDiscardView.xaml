@@ -43,7 +43,7 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DatePicker>
-        <Button Grid.Row="0" Grid.Column="3" Content="破棄" Command="{Binding Discard}" CommandParameter="{Binding}"/>
+        <Button Grid.Row="0" Grid.Column="3" Content="{DynamicResource Discard}" Command="{Binding Discard}" CommandParameter="{Binding}"/>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="破棄数量／在庫数量："/>
 

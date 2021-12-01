@@ -33,9 +33,9 @@
         <TextBox Grid.Row="0" Grid.Column="1" TabIndex="1" Text="{Binding PartsCode}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal"
                     HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button TabIndex="998" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button TabIndex="999" Content="検索..." Command="{Binding Reload}" CommandParameter="{Binding}"/>
-            <Button TabIndex="1000" Content="登録" Command="{Binding Register}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="{DynamicResource Clear}" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="{DynamicResource Find}" Command="{Binding Reload}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="{DynamicResource Register}" Command="{Binding Register}" CommandParameter="{Binding}"/>
         </StackPanel>
 
         <TextBlock Grid.Row="1" Grid.Column="0" Text="名称:"/>

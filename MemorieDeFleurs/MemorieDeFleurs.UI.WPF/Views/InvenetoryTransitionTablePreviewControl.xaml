@@ -64,7 +64,7 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DatePicker>
-        <Button Grid.Row="0" Grid.Column="6" Content="印刷" Command="{Binding Print}" CommandParameter="{Binding}"/>
+        <Button Grid.Row="0" Grid.Column="6" Content="{DynamicResource Print}" Command="{Binding Print}" CommandParameter="{Binding}"/>
 
         <v:InventoryTransitionTableControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="7"/>
     </Grid>

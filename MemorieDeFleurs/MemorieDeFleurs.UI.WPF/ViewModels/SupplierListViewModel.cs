@@ -13,9 +13,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     public class SupplierListViewModel : ListViewModelBase, IReloadable
     {
         /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
+        public static string Name { get { return TextResourceFinder.FindText("Supplier_List"); } }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
-        public SupplierListViewModel() : base("仕入先一覧") { }
+        public SupplierListViewModel() : base(Name) { }
 
         #region プロパティ
         /// <summary>

@@ -4,6 +4,11 @@
              xmlns:local="clr-namespace:MemorieDeFleurs.UI.WPF"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
-         
+         <!-- デフォルトロケールは ja-JP -->
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/ja-JP/Text.ja-JP.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

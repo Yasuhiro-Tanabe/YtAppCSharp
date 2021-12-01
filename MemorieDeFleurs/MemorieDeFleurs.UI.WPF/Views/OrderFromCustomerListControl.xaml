@@ -98,8 +98,8 @@
                         <TextBlock Grid.Column="4" Text="{Binding ShippingTo}"/>
                         <TextBlock Grid.Column="5" Text="{Binding ArrivalDateText}"/>
                         <TextBlock Grid.Column="6" Text="{Binding BouquetName}" Visibility="{Binding IsActionVisible, Converter={StaticResource negativeConverter}}"/>
-                        <Button Grid.Column="7" Content="詳細..." Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
-                        <Button Grid.Column="8" Content="削除" Command="{Binding Remove}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
+                        <Button Grid.Column="7" Content="{DynamicResource Detail}" Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
+                        <Button Grid.Column="8" Content="{DynamicResource Remove}" Command="{Binding Remove}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

@@ -32,7 +32,7 @@
             <ColumnDefinition Width="100px"/>
         </Grid.ColumnDefinitions>
 
-        <Button Grid.Row="0" Grid.Column="1" Content="更新" Command="{Binding Reload}" CommandParameter="{Binding}"/>
+        <Button Grid.Row="0" Grid.Column="1" Content="{DynamicResource Reload}" Command="{Binding Reload}" CommandParameter="{Binding}"/>
 
         <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" ItemsSource="{Binding Bouquets}" SelectedItem="{Binding SelectedBouquet}" Style="{StaticResource SummaryList}">
             <i:Interaction.Triggers>
@@ -55,8 +55,8 @@
                         <TextBlock Grid.Column="0" Text="{Binding BouquetCode}"/>
                         <TextBlock Grid.Column="1" Text="{Binding BouquetName}"/>
                         <TextBlock Grid.Column="2" Text="{Binding PartsList}"/>
-                        <Button Grid.Column="4" Content="詳細..." Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
-                        <Button Grid.Column="5" Content="削除" Command="{Binding Remove}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
+                        <Button Grid.Column="4" Content="{DynamicResource Detail}" Command="{Binding Detail}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
+                        <Button Grid.Column="5" Content="{DynamicResource Remove}" Command="{Binding Remove}" CommandParameter="{Binding}" Visibility="{Binding IsActionVisible, Converter={StaticResource positiveCovnerter}}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

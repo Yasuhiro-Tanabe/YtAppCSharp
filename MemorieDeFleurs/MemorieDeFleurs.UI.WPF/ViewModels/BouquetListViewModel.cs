@@ -13,9 +13,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     public class BouquetListViewModel : ListViewModelBase, IReloadable
     {
         /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
+        public static string Name { get { return TextResourceFinder.FindText("Bouquet_List"); } }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
-        public BouquetListViewModel() : base("商品一覧") { }
+        public BouquetListViewModel() : base(Name) { }
 
         #region プロパティ
         /// <summary>
