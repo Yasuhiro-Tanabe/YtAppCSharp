@@ -35,7 +35,7 @@
             <ColumnDefinition Width="100px"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="破棄対象日："/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource DiscardDate}"/>
         <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding ActionDate}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectedDateChanged">
@@ -45,7 +45,7 @@
         </DatePicker>
         <Button Grid.Row="0" Grid.Column="3" Content="{DynamicResource Discard}" Command="{Binding Discard}" CommandParameter="{Binding}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="破棄数量／在庫数量："/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="{DynamicResource DiscardAndInventoryQuantity_Collon}"/>
 
         <ListView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" ItemsSource="{Binding Inventories}" Style="{StaticResource SummaryList}">
             <i:Interaction.Triggers>
@@ -68,9 +68,9 @@
                         <TextBlock Grid.Column="0" Text="{Binding PartsCode}"/>
                         <TextBlock Grid.Column="1" Text="{Binding DiscardQuantity}" Visibility="{Binding IsSelected, Converter={StaticResource negativeConverter}}" Style="{StaticResource NumericTextBlock}"/>
                         <TextBox Grid.Column="1" Text="{Binding DiscardQuantity}" Visibility="{Binding IsSelected, Converter={StaticResource positiveCovnerter}}" Style="{StaticResource NumericTextBox}"/>
-                        <TextBlock Grid.Column="2" Text="／"/>
+                        <TextBlock Grid.Column="2" Text="{DynamicResource Slash}"/>
                         <TextBlock Grid.Column="3" Text="{Binding InitialQuantity}" Style="{StaticResource NumericTextBlock}"/>
-                        <TextBlock Grid.Column="4" Text="本"/>
+                        <TextBlock Grid.Column="4" Text="{DynamicResource Unit_Parts}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

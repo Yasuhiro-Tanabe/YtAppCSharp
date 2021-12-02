@@ -1,4 +1,5 @@
 ﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels;
 using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
@@ -55,17 +56,17 @@ namespace MemorieDeFleurs.UI.WPF.Views
                 var style = new Style();
                 style.Setters.Add(new Setter() { Property = DataGridCell.HorizontalAlignmentProperty, Value = HorizontalAlignment.Right });
 
-                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = "日付", Binding = new Binding("DateText") });
-                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = "入荷予定数", Binding = new Binding("Arrived"), ElementStyle = style });
-                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = "加工予定数", Binding = new Binding("Used"), ElementStyle = style });
+                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = TextResourceFinder.FindText("Header_Date"), Binding = new Binding("DateText") });
+                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = TextResourceFinder.FindText("Header_Arriving"), Binding = new Binding("Arrived"), ElementStyle = style });
+                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = TextResourceFinder.FindText("Header_Using"), Binding = new Binding("Used"), ElementStyle = style });
                 for (var i = vm.ExpiryDate; i > 3; i--)
                 {
-                    InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = $"{i - 1}日前残", Binding = new Binding($"Remains[{i - 1}]"), ElementStyle = style });
+                    InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = TextResourceFinder.FindText("Header_3OrMore", i-1), Binding = new Binding($"Remains[{i - 1}]"), ElementStyle = style });
                 }
-                if (vm.ExpiryDate > 2) { InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = "前々日残", Binding = new Binding("Remains[2]"), ElementStyle = style }); }
-                if (vm.ExpiryDate > 1) { InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = "前日残", Binding = new Binding("Remains[1]"), ElementStyle = style }); }
-                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = "当日残", Binding = new Binding("Remains[0]"), ElementStyle = style });
-                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = "破棄", Binding = new Binding("Discarded") { Converter = converter }, ElementStyle = style });
+                if (vm.ExpiryDate > 2) { InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = TextResourceFinder.FindText("Header_2DaysAgo"), Binding = new Binding("Remains[2]"), ElementStyle = style }); }
+                if (vm.ExpiryDate > 1) { InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = TextResourceFinder.FindText("Header_Yesterday"), Binding = new Binding("Remains[1]"), ElementStyle = style }); }
+                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = TextResourceFinder.FindText("Header_Yesterday"), Binding = new Binding("Remains[0]"), ElementStyle = style });
+                InventoryTransitionTable.Columns.Add(new DataGridTextColumn() { Header = TextResourceFinder.FindText("Header_Discarding"), Binding = new Binding("Discarded") { Converter = converter }, ElementStyle = style });
 
                 LogUtil.DEBUGLOG_MethodCalled($"{sender.GetType().Name}, {args.PropertyName}",
                     $"{vm.BouquetPartsCode}, {vm.ExpiryDate}: {string.Join(" ,", InventoryTransitionTable.Columns.Select(col => col.Header))}");

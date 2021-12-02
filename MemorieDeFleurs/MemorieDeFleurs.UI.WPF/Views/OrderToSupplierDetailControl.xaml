@@ -35,7 +35,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="発注ID："/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource OrderNumberToSupplier_Collon}"/>
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding OrderNo}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3"
                     Orientation="Horizontal"
@@ -49,12 +49,12 @@
             <Button TabIndex="1000" Content="{DynamicResource OrderToSupplier}" Command="{Binding Order}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="発注日："/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource OrderDateToSupplier_Collon}"/>
         <DatePicker Grid.Row="1" Grid.Column="1" SelectedDate="{Binding OrderDate}"/>
-        <TextBlock Grid.Row="1" Grid.Column="2" Text="納品希望日："/>
+        <TextBlock Grid.Row="1" Grid.Column="2" Text="{DynamicResource ArrivalDateFromSupplier_Collon}"/>
         <DatePicker Grid.Row="1" Grid.Column="3" SelectedDate="{Binding ArrivalDate}" DisplayDateStart="{Binding OrderDate}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="仕入先："/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Supplier_Collon}"/>
         <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -63,7 +63,7 @@
             </ComboBox.ItemTemplate>
         </ComboBox>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="発注内容："/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource OrderFromSupplierDetails_Collon}"/>
         <TextBlock Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding OrderPartsText, Mode=OneWay}" Visibility="{Binding IsEditing, Converter={StaticResource negativeConverter}}" Style="{StaticResource MultiLineTextBlock}"/>
         <Button Grid.Row="3" Grid.Column="3" Content="{DynamicResource Fix}" Command="{Binding Fix}" CommandParameter="{Binding}"  Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}"/>
         <Button Grid.Row="3" Grid.Column="3" Content="{DynamicResource Edit}" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Converter={StaticResource negativeConverter}}"/>
@@ -82,8 +82,8 @@
                 <ColumnDefinition Width="200pt"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="発注する単品"/>
-            <TextBlock Grid.Row="0" Grid.Column="2" Text="発注可能な単品と最短納期"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource OrderPartsToSupplier}"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource CandidatePartsToOrderAndLeadTime}"/>
 
             <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding OrderParts}" SelectedItem="{Binding SelectedOrderParts}">
                 <ListView.ItemTemplate>
@@ -98,7 +98,7 @@
 
                             <TextBlock Grid.Column="0" Text="{Binding PartsCode, Mode=OneWay}"/>
                             <TextBox Grid.Column="1" Text="{Binding Quantity}" Style="{StaticResource NumericTextBox}"/>
-                            <TextBlock Grid.Column="2" Text="ロット"/>
+                            <TextBlock Grid.Column="2" Text="{DynamicResource Unit_Lot}"/>
                             <TextBlock Grid.Column="3" Text="{Binding PartsName, Mode=OneWay}"/>
                         </Grid>
                     </DataTemplate>

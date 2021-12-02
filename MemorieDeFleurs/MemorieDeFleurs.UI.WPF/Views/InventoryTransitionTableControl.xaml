@@ -34,19 +34,19 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="140px"/>
+            <ColumnDefinition Width="80px"/>
+            <ColumnDefinition Width="180px"/>
             <ColumnDefinition Width="80px"/>
             <ColumnDefinition Width="80px"/>
-            <ColumnDefinition Width="120px"/>
-            <ColumnDefinition Width="80px"/>
-            <ColumnDefinition Width="40px"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="花コード："/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource BouquetCode_Collon}"/>
         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding BouquetPartsCode}"/>
-        <TextBlock Grid.Row="0" Grid.Column="2" Text="品質維持可能日数："/>
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource ExpiryDays_Collon}"/>
         <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding ExpiryDate}" TextAlignment="Right"/>
-        <TextBlock Grid.Row="0" Grid.Column="4" Text="日"/>
+        <TextBlock Grid.Row="0" Grid.Column="4" Text="{DynamicResource Unit_Days}"/>
 
         <DataGrid x:Name="InventoryTransitionTable" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6"
                   ItemsSource="{Binding InventoryTransitions, Mode=OneWay}"/>

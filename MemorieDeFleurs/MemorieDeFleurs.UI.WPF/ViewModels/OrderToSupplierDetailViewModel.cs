@@ -404,9 +404,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <inheritdoc/>
         public void FillDialogParameters(DialogParameter param)
         {
-            param.DialogTitle = "発注書印刷";
-            param.OkContent = "印刷";
-            param.CancelContent = "キャンセル";
+            param.DialogTitle = TextResourceFinder.FindText("Title_OrderToSupplier_PrintPreview");
+            param.OkContent = TextResourceFinder.FindText("Print");
+            param.CancelContent = TextResourceFinder.FindText("Cancel");
         }
 
         /// <inheritdoc/>

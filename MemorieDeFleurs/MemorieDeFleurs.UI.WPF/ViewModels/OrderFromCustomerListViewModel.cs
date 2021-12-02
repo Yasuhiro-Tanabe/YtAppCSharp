@@ -126,7 +126,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private void UpdateCustomers()
         {
             Customers.Clear();
-            Customers.Add(new CustomerSummaryViewModel() { CustomerID = -1, CustomerName = "すべての得意先" });
+            Customers.Add(new CustomerSummaryViewModel() { CustomerID = -1, CustomerName = TextResourceFinder.FindText("AllCustomers") });
             foreach (var customer in MemorieDeFleursUIModel.Instance.FindAllCustomers())
             {
                 Customers.Add(new CustomerSummaryViewModel(customer));

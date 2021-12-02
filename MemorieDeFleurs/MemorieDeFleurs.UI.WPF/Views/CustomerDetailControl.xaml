@@ -30,7 +30,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="得意先ID："/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource CustomerID_Collon}"/>
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding CustomerID}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal"
                     VerticalAlignment="Center" HorizontalAlignment="Right">
@@ -39,20 +39,19 @@
             <Button TabIndex="1000" Content="{DynamicResource Register}" Command="{Binding Register}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="名前："/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource CustomerName_Collon}"/>
         <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding CustomerName}"/>
-        <TextBlock Grid.Row="1" Grid.Column="2" Text="様"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="e-メールアドレス："/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource EMailAddress_Collon}"/>
         <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding EmailAddress}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="パスワード："/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Password_Collon}"/>
         <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Password}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="カード番号"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource CardNo_Collon}"/>
         <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding CardNumber}"/>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="登録済みのお届け先："/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="{DynamicResource ShippingAddress_Collon}"/>
 
         <ListView Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="3" ItemsSource="{Binding ShippingAddresses}">
             <ListView.ItemTemplate>

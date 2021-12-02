@@ -123,7 +123,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private void UpdateSuppliers()
         {
             Suppliers.Clear();
-            Suppliers.Add(new SupplierSummaryViewModel() { SupplierCode = -1, SupplierName = "すべての仕入先" });
+            Suppliers.Add(new SupplierSummaryViewModel() { SupplierCode = -1, SupplierName = TextResourceFinder.FindText("AllSuppliers") });
             foreach (var supplier in MemorieDeFleursUIModel.Instance.FindAllSuppliers())
             {
                 Suppliers.Add(new SupplierSummaryViewModel(supplier));

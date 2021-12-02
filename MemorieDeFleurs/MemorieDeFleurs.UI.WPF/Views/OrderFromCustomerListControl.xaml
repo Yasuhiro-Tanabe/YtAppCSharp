@@ -29,33 +29,33 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="80px"/>
+            <ColumnDefinition Width="80px"/>
             <ColumnDefinition Width="120px"/>
-            <ColumnDefinition Width="40px"/>
+            <ColumnDefinition Width="80px"/>
             <ColumnDefinition Width="120px"/>
-            <ColumnDefinition Width="40px"/>
             <ColumnDefinition Width="80px"/>
             <ColumnDefinition Width="120px"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="受注日："/>
-        <DatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding From}">
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource OrderDateFromCustomer_Collon}"/>
+        <TextBlock Grid.Row="0" Grid.Column="1" Text="{DynamicResource DaysFrom_Collon}"/>
+        <DatePicker Grid.Row="0" Grid.Column="2" SelectedDate="{Binding From}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectedDateChanged">
                     <i:InvokeCommandAction Command="{Binding Reload}" CommandParameter="{Binding}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DatePicker>
-        <TextBlock Grid.Row="0" Grid.Column="2" Text="から"/>
-        <DatePicker Grid.Row="0" Grid.Column="3" SelectedDate="{Binding To}">
+        <TextBlock Grid.Row="0" Grid.Column="3" Text="{DynamicResource DaysTo_Collon}"/>
+        <DatePicker Grid.Row="0" Grid.Column="4" SelectedDate="{Binding To}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectedDateChanged">
                     <i:InvokeCommandAction Command="{Binding Reload}" CommandParameter="{Binding}"/>
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DatePicker>
-        <TextBlock Grid.Row="0" Grid.Column="4" Text="まで"/>
-        <TextBlock Grid.Row="0" Grid.Column="5" Text="得意先："/>
+        <TextBlock Grid.Row="0" Grid.Column="5" Text="{DynamicResource Customer_Collon}"/>
         <ComboBox Grid.Row="0" Grid.Column="6" ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -91,7 +91,7 @@
                             <ColumnDefinition Width="80px"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Grid.Column="0" Text="発送済" Foreground="Red" Visibility="{Binding IsShipped, Converter={StaticResource positiveCovnerter}}"/>
+                        <TextBlock Grid.Column="0" Text="{DynamicResource OrderFromCustomer_Shipped}" Foreground="Red" Visibility="{Binding IsShipped, Converter={StaticResource positiveCovnerter}}"/>
                         <TextBlock Grid.Column="1" Text="{Binding OrderDateText}"/>
                         <TextBlock Grid.Column="2" Text="{Binding CustomerName}"/>
                         <TextBlock Grid.Column="3" Text="→"/>
