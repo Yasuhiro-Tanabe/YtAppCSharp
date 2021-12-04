@@ -61,7 +61,7 @@
         </ComboBox>
         <TextBlock Grid.Row="0" Grid.Column="5" Text="出荷済" Foreground="Red" Visibility="{Binding IsShippedAll, Converter={StaticResource positiveConverter}}"/>
         <Button Grid.Row="0" Grid.Column="5" HorizontalAlignment="Right" Content="出荷" Command="{Binding Ship}" CommandParameter="{Binding}" Visibility="{Binding IsShippedAll, Converter={StaticResource negativeConverter}}"/>
-        <Button Grid.Row="0" Grid.Column="6" HorizontalContentAlignment="Right" Content="印刷" Command="{Binding Print}" CommandParameter="{Binding}"/>
+        <Button Grid.Row="0" Grid.Column="6" HorizontalContentAlignment="Right" Content="{DynamicResource Print}" Command="{Binding Print}" CommandParameter="{Binding}"/>
 
         <v:ProcessingInstructionControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="7" DataContext="{Binding}"/>
 

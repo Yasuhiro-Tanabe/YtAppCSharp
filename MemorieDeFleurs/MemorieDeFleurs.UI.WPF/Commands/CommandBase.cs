@@ -1,5 +1,7 @@
 ﻿using MemorieDeFleurs.Logging;
+using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
+using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
 using System;
 using System.Collections.Generic;
@@ -101,12 +103,12 @@ namespace MemorieDeFleurs.UI.WPF.Commands
             catch (NotConnectedToDatabaseException ex)
             {
                 LogUtil.Warn(ex);
-                PopupWarningDialog(ex.Message, $"DB未接続");
+                PopupWarningDialog(ex.Message, TextResourceFinder.FindText("Title_DbConnectionError"));
             }
             catch(Exception ex)
             {
                 LogUtil.Warn(ex);
-                PopupErrorDialog(ex.InnerException == null ? ex.Message : ex.InnerException.Message, "システムエラー");
+                PopupErrorDialog(ex.InnerException == null ? ex.Message : ex.InnerException.Message, TextResourceFinder.FindText("Title_SystemError"));
             }
         }
 

@@ -1,0 +1,164 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+    <s:String x:Key="Message_NotConnectedToDb">Not connected to database.</s:String>
+
+    <!-- Common: Menu items -->
+    <s:String x:Key="Title_DbConnectionError">DB connection error</s:String>
+    <s:String x:Key="Lang_Japanese">Japanese</s:String>
+    <s:String x:Key="Lang_English">English</s:String>
+    <s:String x:Key="Lang_Unknown">(Unknown, for test and debug)</s:String>
+    <s:String x:Key="Menu_View">Display</s:String>
+    <s:String x:Key="Menu_Db">Database...</s:String>
+    <s:String x:Key="Menu_Db_SQLite">SQLite</s:String>
+    <s:String x:Key="Menu_Db_New">New</s:String>
+    <s:String x:Key="Menu_Db_Load">Open...</s:String>
+    <s:String x:Key="Menu_Db_Save">Save...</s:String>
+    <s:String x:Key="Menu_Print">Print...</s:String>
+    <s:String x:Key="InventoryTransitionTable">Inventory Transition Table</s:String>
+    <s:String x:Key="ProcessingInstructionSheet">Processing Istruction Sheet</s:String>
+    <s:String x:Key="Menu_Lang">Language...</s:String>
+    <s:String x:Key="Menu_Exit">Exit</s:String>
+    <s:String x:Key="Supplier">Supplier</s:String>
+    <s:String x:Key="Supplier_List">Supplier List</s:String>
+    <s:String x:Key="SUpplier_Detail">Supplier Details</s:String>
+    <s:String x:Key="Menu_Bouquet">Bouquet</s:String>
+    <s:String x:Key="Bouquet_List">Bouquet List</s:String>
+    <s:String x:Key="Bouquet_Detail">Bouquet Details</s:String>
+    <s:String x:Key="Parts_List">Bouquet Parts List</s:String>
+    <s:String x:Key="Parts_Detail">Bouquet Parts Details</s:String>
+    <s:String x:Key="DiscardParts">Discard Parts Inventories</s:String>
+    <s:String x:Key="Customer">Customer</s:String>
+    <s:String x:Key="Customer_List">Customer List</s:String>
+    <s:String x:Key="Customer_Detail">Customer Details</s:String>
+    <s:String x:Key="Menu_Orders">Orders</s:String>
+    <s:String x:Key="OrderToSupplier_List">Orders to Supplier List</s:String>
+    <s:String x:Key="OrderToSupplier_Detail">Orders to Supplier Details</s:String>
+    <s:String x:Key="OrderFromCustomer_List">Orders from Customer List</s:String>
+    <s:String x:Key="OrderFromCustomer_Detail">Orders from Customer Details</s:String>
+    <s:String x:Key="Menu_Inspection">Bouquet Parts Inspection</s:String>
+    <s:String x:Key="Title_Inspection">Inspection</s:String>
+    <s:String x:Key="PartsInspection_List">Bouquet Parts Inspection List</s:String>
+    <s:String x:Key="PartsInspection_Detail">Bouquet Parts Inspection Details</s:String>
+    <s:String x:Key="Title_SystemError">System Error</s:String>
+
+    <!-- Common: Button texts -->
+    <s:String x:Key="Clear">Clear</s:String>
+    <s:String x:Key="Find">Find...</s:String>
+    <s:String x:Key="Register">Register</s:String>
+    <s:String x:Key="Edit">Edit</s:String>
+    <s:String x:Key="Fix">Fix</s:String>
+    <s:String x:Key="AppendToList">&lt;</s:String>
+    <s:String x:Key="RemoveFromList">&gt;</s:String>
+    <s:String x:Key="Reload">Reload</s:String>
+    <s:String x:Key="Detail">Detail...</s:String>
+    <s:String x:Key="Remove">Remove</s:String>
+    <s:String x:Key="Print">Print</s:String>
+    <s:String x:Key="PreviewPrint">Print...</s:String>
+    <s:String x:Key="Discard">Discard</s:String>
+    <s:String x:Key="OrderToSupplier">Send Order</s:String>
+    <s:String x:Key="CancelOrderToSupplier">Cancel Order</s:String>
+    <s:String x:Key="ChangeArrivalDateOfOrderToSupplier">Change Arrival Date</s:String>
+    <s:String x:Key="Inspection">Inspect...</s:String>
+    <s:String x:Key="Ship">Ship</s:String>
+    <s:String x:Key="OrderFromCustomer">Reveice Order</s:String>
+    <s:String x:Key="CancelOrderFromCustomer">Cancel Order</s:String>
+    <s:String x:Key="ChangeArrivalDateOfOrderFromCustomer">Change Arrival Date</s:String>
+    <s:String x:Key="Cancel">Cancel</s:String>
+
+    <!-- DialogParameter (IDialogViewModel) -->
+    <s:String x:Key="Title_OrderToSupplier_PrintPreview">Print Order Sheet</s:String>
+    <s:String x:Key="Title_OrderToSupplier_Inspection">Inspection：{0}</s:String>
+
+    <!-- Common Texts in several views -->
+    <s:String x:Key="BouquetCode_Collon">Bouquet Code:</s:String>
+    <s:String x:Key="BouquetName_Collon">Bouquet Name:</s:String>
+    <s:String x:Key="LeadTime_Collon">Lead Time:</s:String>
+    <s:String x:Key="PartsList_Collon">Parts List:</s:String>
+    <s:String x:Key="BouquetPartsCode_Collon">Bouquet Parts Code:</s:String>
+    <s:String x:Key="BouquetPartsName_Collon">Bouquet Parts Name:</s:String>
+    <s:String x:Key="QuantitiesPerLot_Collon">Quantities Per Lot:</s:String>
+    <s:String x:Key="ExpiryDays_Collon">Expiry Days:</s:String>
+    <s:String x:Key="Unit_Days">Days</s:String>
+    <s:String x:Key="Unit_Parts">Pts.</s:String>
+    <s:String x:Key="Unit_Lot">Lots</s:String>
+    <s:String x:Key="Unit_PartsParLot">Pts./Lot</s:String>
+    <s:String x:Key="CustomerID_Collon">Customer ID:</s:String>
+    <s:String x:Key="CustomerName_Collon">Customer Name</s:String>
+    <s:String x:Key="ShippingAddress_Collon">Shipping Address:</s:String>
+    <s:String x:Key="SupplierCode_Collon">Supplier Code:</s:String>
+    <s:String x:Key="SupplierName_Collon">Supplier Name:</s:String>
+    <s:String x:Key="Address1_Collon">Address 1:</s:String>
+    <s:String x:Key="Address2_Collon">Address 2:</s:String>
+    <s:String x:Key="Parts_Collon">Parts:</s:String>
+    <s:String x:Key="DaysFrom_Collon">From:</s:String>
+    <s:String x:Key="DaysTo_Collon">To:</s:String>
+    <s:String x:Key="Supplier_Collon">Supplier:</s:String>
+    <s:String x:Key="Customer_Collon">Customer:</s:String>
+    <s:String x:Key="OrderNumberFromCustoemr_Collon">Order No.:</s:String>
+    <s:String x:Key="OrderNumberToSupplier_Collon">Order No.:</s:String>
+
+    <!-- BouquetDetailControl -->
+    <s:String x:Key="ImageFileName_Collon">Image File Name:</s:String>
+    <s:String x:Key="CurrentPartsList">Using Parts</s:String>
+    <s:String x:Key="CandidatePartsList">Candidate Parts</s:String>
+
+    <!-- CustomerDetailControl -->
+    <s:String x:Key="Password_Collon">Password:</s:String>
+    <s:String x:Key="CardNo_Collon">Credit Card No.:</s:String>
+    <s:String x:Key="EMailAddress_Collon">e-Mail Address:</s:String>
+
+    <!-- SupplierDetailControl -->
+    <s:String x:Key="TelephoneNumber_Collon">Telephone Number:</s:String>
+    <s:String x:Key="FaxNumber_Collon">Fax Number</s:String>
+    <s:String x:Key="PurchasableParts_Collon">Purchasable Bouquet Parts:</s:String>
+    <s:String x:Key="CurrentPurchasedPartsList">Purchasing</s:String>
+    <s:String x:Key="CandidatePurchasablePartsList">Candidates to Purchase</s:String>
+
+    <!-- InventoryDiscardView -->
+    <s:String x:Key="DiscardDate">Date to Discard:</s:String>
+    <s:String x:Key="DiscardAndInventoryQuantity_Collon">Quantitys of: Discarded/Inventory</s:String>
+    <s:String x:Key="Slash">/</s:String>
+
+    <!-- InventoryTransitionTableControl -->
+    <s:String x:Key="Header_Date">Date</s:String>
+    <s:String x:Key="Header_Arriving">Arriving</s:String>
+    <s:String x:Key="Header_Using">Using</s:String>
+    <s:String x:Key="Header_3DaysOrMore">{0} Days Ago</s:String>
+    <s:String x:Key="Header_2DaysAgo">2 Days Ago</s:String>
+    <s:String x:Key="Header_Yesterday">Yesterday</s:String>
+    <s:String x:Key="Header_Today">Today</s:String>
+    <s:String x:Key="Header_Discarding">Discarding</s:String>
+
+    <!-- OrderFromCustomerDetailControl -->
+    <s:String x:Key="OrderDateFromCustomer_Collon">Order Date:</s:String>
+    <s:String x:Key="ArrivalDateToCustomer_Collon">Arrival Date</s:String>
+    <s:String x:Key="Message_Collon">Message:</s:String>
+    <s:String x:Key="BouquetAndLeadTime_Collon">Bouquets (Shortest Derivery Date)：</s:String>
+
+    <!-- OrderFromCustomerListControl -->
+    <s:String x:Key="OrderFromCustomer_Shipped">SHIPPED</s:String>
+
+    <!-- OrderSheetToSupplier -->
+    <s:String x:Key="OrderSheet_DateFormat">d</s:String>
+    <s:String x:Key="OrderSheetTitle">Order Sheet</s:String>
+    <s:String x:Key="MemorieDeFleurs">Frère Mémoire</s:String>
+    <s:String x:Key="OrderDetaislTitle">&lt;Order Details&gt;</s:String>
+
+    <!-- OrderToSupplierDetailControl -->
+    <s:String x:Key="OrderDateToSupplier_Collon">Order Date:</s:String>
+    <s:String x:Key="ArrivalDateFromSupplier_Collon">Delivery Date:</s:String>
+    <s:String x:Key="OrderFromSupplierDetails_Collon">Order Details:</s:String>
+    <s:String x:Key="OrderPartsToSupplier">Ordering Parts</s:String>
+    <s:String x:Key="CandidatePartsToOrderAndLeadTime">Orderable Parts (Shortest Derivery Date)</s:String>
+
+    <!-- OrderToSupplierInspectionDetailControl -->
+    <s:String x:Key="Inspected">INSPECTED</s:String>
+    <s:String x:Key="InspectedDate_Collon">Inspected Date:</s:String>
+    <s:String x:Key="InspectedPartsList_Collon">Inspected Parts:</s:String>
+
+    <!-- Others -->
+    <s:String x:Key="AllSuppliers">All Suppliers</s:String>
+    <s:String x:Key="AllCustomers">All Customers</s:String>
+
+</ResourceDictionary>

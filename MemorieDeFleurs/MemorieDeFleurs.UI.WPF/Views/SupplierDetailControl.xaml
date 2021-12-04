@@ -34,40 +34,40 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="仕入先コード："/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource SupplierCode_Collon}"/>
         <TextBox Grid.Row="0" Grid.Column="1" TabIndex="1" Text="{Binding SupplierCode}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
                     Orientation="Horizontal"
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
-            <Button TabIndex="998" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button TabIndex="999" Content="検索..." Command="{Binding Reload}" CommandParameter="{Binding}"/>
-            <Button TabIndex="1000" Content="登録" Command="{Binding Register}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="{DynamicResource Clear}" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="{DynamicResource Find}" Command="{Binding Reload}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="{DynamicResource Register}" Command="{Binding Register}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="仕入先名称："/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource SupplierName_Collon}"/>
         <TextBox Grid.Row="1" Grid.Column="1" TabIndex="2" Text="{Binding SupplierName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="仕入先住所1："/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Address1_Collon}"/>
         <TextBox Grid.Row="2" Grid.Column="1" TabIndex="3" Text="{Binding Address1}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="仕入先住所2："/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Address2_Collon}"/>
         <TextBox Grid.Row="3" Grid.Column="1" TabIndex="4" Text="{Binding Address2}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="e-メールアドレス："/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource EMailAddress_Collon}"/>
         <TextBox Grid.Row="4" Grid.Column="1" TabIndex="5" Text="{Binding EmailAddress}"/>
 
-        <TextBlock Grid.Row="5" Grid.Column="0" Text="電話番号："/>
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="{DynamicResource TelephoneNumber_Collon}"/>
         <TextBox Grid.Row="5" Grid.Column="1" TabIndex="6" Text="{Binding TelephoneNumber}"/>
 
-        <TextBlock Grid.Row="6" Grid.Column="0" Text="FAX 番号："/>
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="{DynamicResource FaxNumber_Collon}"/>
         <TextBox Grid.Row="6" Grid.Column="1" TabIndex="7" Text="{Binding FaxNumber}"/>
 
-        <TextBlock Grid.Row="7" Grid.Column="0" Text="仕入可能な単品："/>
+        <TextBlock Grid.Row="7" Grid.Column="0" Text="{DynamicResource PurchasableParts_Collon}"/>
         <TextBlock Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding PartsText}" Style="{StaticResource MultiLineTextBlock}"/>
-        <Button Grid.Row="7" Grid.Column="3" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}"/>
-        <Button Grid.Row="7" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Converter={StaticResource negativeConverter}}"/>
+        <Button Grid.Row="7" Grid.Column="3" Content="{DynamicResource Fix}" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}"/>
+        <Button Grid.Row="7" Grid.Column="3" Content="{DynamicResource Edit}" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Converter={StaticResource negativeConverter}}"/>
 
 
         <Grid Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="4"
@@ -84,8 +84,8 @@
                 <ColumnDefinition Width="200pt"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="現在仕入れている単品"/>
-            <TextBlock Grid.Row="0" Grid.Column="2" Text="単品リスト"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource CurrentPurchasedPartsList}"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource CandidatePurchasablePartsList}"/>
 
             <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding SupplingParts}" SelectedItem="{Binding SelectedSuppling}">
                 <ListView.ItemTemplate>
@@ -103,8 +103,8 @@
                 </ListView.ItemTemplate>
             </ListView>
             <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical">
-                <Button Content="＜" Command="{Binding Append}" CommandParameter="{Binding}" Style="{StaticResource AppendButton}"/>
-                <Button Content="＞" Command="{Binding Remove}" CommandParameter="{Binding}" Style="{StaticResource RemoveButton}"/>
+                <Button Content="{DynamicResource AppendToList}" Command="{Binding Append}" CommandParameter="{Binding}" Style="{StaticResource AppendButton}"/>
+                <Button Content="{DynamicResource RemoveFromList}" Command="{Binding Remove}" CommandParameter="{Binding}" Style="{StaticResource RemoveButton}"/>
             </StackPanel>
             <ListView Grid.Row="1" Grid.Column="2" ItemsSource="{Binding PartsCandidate}" SelectedItem="{Binding SelectedCandidate}">
                 <ListView.ItemTemplate>

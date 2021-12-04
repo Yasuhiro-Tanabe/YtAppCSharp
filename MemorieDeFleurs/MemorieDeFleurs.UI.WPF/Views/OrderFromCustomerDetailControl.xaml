@@ -37,20 +37,20 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="受注番号："/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource OrderNumberFromCustoemr_Collon}"/>
         <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding OrderNo}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3"
                     Orientation="Horizontal"
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center">
-            <Button TabIndex="997" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button TabIndex="998" Content="受注取消" Command="{Binding Cancel}" CommandParameter="{Binding}"/>
-            <Button TabIndex="999" Content="お届け日変更" Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
-            <Button TabIndex="1000" Content="受注" Command="{Binding Order}" CommandParameter="{Binding}"/>
+            <Button TabIndex="997" Content="{DynamicResource Clear}" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="{DynamicResource CancelOrderFromCustomer}" Command="{Binding Cancel}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="{DynamicResource ChangeArrivalDateOfOrderFromCustomer}" Command="{Binding ChangeArrivalDate}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="{DynamicResource OrderFromCustomer}" Command="{Binding Order}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="得意先："/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Customer_Collon}"/>
         <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectionChanged">
@@ -59,21 +59,20 @@
             </i:Interaction.Triggers>
             <ComboBox.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding CustomerName}"/>
+                    <TextBlock Text="{Binding CustomerName, Converter={StaticResource titleConverter}}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <TextBlock Grid.Row="1" Grid.Column="2" Text="様"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="受注日："/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource OrderDateFromCustomer_Collon}"/>
         <DatePicker Grid.Row="2" Grid.Column="1" SelectedDate="{Binding OrderDate}"/>
-        <TextBlock Grid.Row="2" Grid.Column="2" Text="お届け日："/>
+        <TextBlock Grid.Row="2" Grid.Column="2" Text="{DynamicResource ArrivalDateToCustomer_Collon}"/>
         <DatePicker Grid.Row="2" Grid.Column="3" SelectedDate="{Binding ArrivalDate}" DisplayDateStart="{Binding OrderDate}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="お届けメッセージ："/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Message_Collon}"/>
         <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding Message}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="商品(最短お届け日)："/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource BouquetAndLeadTime_Collon}"/>
         <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding Bouquets}" SelectedItem="{Binding SelectedBouquet}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -102,25 +101,23 @@
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120px"/>
-                <ColumnDefinition Width="150px"/>
-                <ColumnDefinition Width="80px"/>
+                <ColumnDefinition Width="200px"/>
                 <ColumnDefinition Width="150px"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="お届け先："/>
-            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ShippingName}"/>
-            <TextBlock Grid.Row="0" Grid.Column="2" Text="様"/>
-            <Button Grid.Row="0" Grid.Column="4" Content="選択..." Command="{Binding Edit}" CommandParameter="{Binding}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource ShippingAddress_Collon}"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding ShippingName, Converter={StaticResource titleConverter}}"/>
+            <Button Grid.Row="0" Grid.Column="3" Content="{DynamicResource Edit}" Command="{Binding Edit}" CommandParameter="{Binding}"/>
 
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="住所1："/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Address1_Collon}"/>
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Address1}"/>
 
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="住所2："/>
+            <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Address2_Collon}"/>
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding Address2}"/>
         </Grid>
         
-        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" Margin="0" Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}">
+        <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4" Margin="0" Visibility="{Binding IsEditing, Converter={StaticResource positiveConverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="20pt"/>
                 <RowDefinition Height="*"/>
@@ -133,8 +130,8 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="お届け先："/>
-            <Button Grid.Row="0" Grid.Column="4" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource ShippingAddress_Collon}"/>
+            <Button Grid.Row="0" Grid.Column="4" Content="{DynamicResource Fix}" Command="{Binding Fix}" CommandParameter="{Binding}"/>
 
             <ListView Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" ItemsSource="{Binding ShippingAddresses}" SelectedItem="{Binding SelectedShippingAddress}">
                 <ListView.ItemTemplate>

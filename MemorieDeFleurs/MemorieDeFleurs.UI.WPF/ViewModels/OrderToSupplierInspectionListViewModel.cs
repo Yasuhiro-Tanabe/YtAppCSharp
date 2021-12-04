@@ -18,9 +18,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     public class OrderToSupplierInspectionListViewModel : ListViewModelBase, IReloadable
     {
         /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
+        public static string Name { get { return TextResourceFinder.FindText("PartsInspection_List"); } }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
-        public OrderToSupplierInspectionListViewModel() : base("入荷検品一覧")
+        public OrderToSupplierInspectionListViewModel() : base(Name)
         {
             SelectedKey = DateKeies[0];
         }
@@ -45,8 +50,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// 日付選択肢の一覧：<see cref="From"/> と <see cref="To"/> が発注日か入荷予定日かの選択肢
         /// </summary>
         public IList<DateSelectionKeyViewModel> DateKeies { get; } = new List<DateSelectionKeyViewModel>() {
-            new DateSelectionKeyViewModel() { Key=DateSelectionKey.ORDERED, ContentText = "発注日：" },
-            new DateSelectionKeyViewModel() { Key =DateSelectionKey.ARRIVED, ContentText ="入荷予定日："}
+            new DateSelectionKeyViewModel() { Key=DateSelectionKey.ORDERED, ContentText = TextResourceFinder.FindText("OrderDateToSupplier_Collon") },
+            new DateSelectionKeyViewModel() { Key =DateSelectionKey.ARRIVED, ContentText = TextResourceFinder.FindText("ArrivalDateFromSupplier_Collon")}
         };
 
         /// <summary>
@@ -183,7 +188,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private void LoadSuppliers()
         {
             Suppliers.Clear();
-            Suppliers.Add(new SupplierSummaryViewModel() { SupplierCode = -1, SupplierName = "すべての仕入先" });
+            Suppliers.Add(new SupplierSummaryViewModel() { SupplierCode = -1, SupplierName = TextResourceFinder.FindText("AllSuppliers") });
             foreach (var s in MemorieDeFleursUIModel.Instance.FindAllSuppliers())
             {
                 Suppliers.Add(new SupplierSummaryViewModel(s));

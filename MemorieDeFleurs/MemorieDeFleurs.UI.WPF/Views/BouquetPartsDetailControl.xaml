@@ -29,29 +29,29 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="花コード:"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource BouquetPartsCode_Collon}"/>
         <TextBox Grid.Row="0" Grid.Column="1" TabIndex="1" Text="{Binding PartsCode}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Orientation="Horizontal"
                     HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button TabIndex="998" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button TabIndex="999" Content="検索..." Command="{Binding Reload}" CommandParameter="{Binding}"/>
-            <Button TabIndex="1000" Content="登録" Command="{Binding Register}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="{DynamicResource Clear}" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="{DynamicResource Find}" Command="{Binding Reload}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="{DynamicResource Register}" Command="{Binding Register}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="名称:"/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource BouquetPartsName_Collon}"/>
         <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" TabIndex="2" Text="{Binding PartsName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="購入単位数:"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource QuantitiesPerLot_Collon}"/>
         <TextBox Grid.Row="2" Grid.Column="1" TabIndex="3" Text="{Binding QuantitiesParLot}" Style="{StaticResource NumericTextBox}"/>
-        <TextBlock Grid.Row="2" Grid.Column="2" Text="本/ロット"/>
+        <TextBlock Grid.Row="2" Grid.Column="2" Text="{DynamicResource Unit_PartsParLot}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="リードタイム:"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource LeadTime_Collon}"/>
         <TextBox Grid.Row="3" Grid.Column="1" TabIndex="4" Text="{Binding LeadTime}" Style="{StaticResource NumericTextBox}"/>
-        <TextBlock Grid.Row="3" Grid.Column="2" Text="日"/>
+        <TextBlock Grid.Row="3" Grid.Column="2" Text="{DynamicResource Unit_Days}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="品質維持可能日数:"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource ExpiryDays_Collon}"/>
         <TextBox Grid.Row="4" Grid.Column="1" TabIndex="5" Text="{Binding ExpiryDate}" Style="{StaticResource NumericTextBox}"/>
-        <TextBlock Grid.Row="4" Grid.Column="2" Text="日"/>
+        <TextBlock Grid.Row="4" Grid.Column="2" Text="{DynamicResource Unit_Days}"/>
 
     </Grid>
 </UserControl>

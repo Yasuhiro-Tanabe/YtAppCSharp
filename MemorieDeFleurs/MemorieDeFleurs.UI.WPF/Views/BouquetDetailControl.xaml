@@ -31,31 +31,31 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="花束コード："/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource BouquetCode_Collon}"/>
         <TextBox Grid.Row="0" Grid.Column="1" TabIndex="1" Text="{Binding BouquetCode}"/>
         <StackPanel Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="3" Orientation="Horizontal"
                     Margin="5, 0, 10, 0"
                     HorizontalAlignment="Right" VerticalAlignment="Center">
-            <Button TabIndex="998" Content="クリア" Command="{Binding Clear}" CommandParameter="{Binding}"/>
-            <Button TabIndex="999" Content="検索..." Command="{Binding Reload}" CommandParameter="{Binding}"/>
-            <Button TabIndex="1000" Content="登録" Command="{Binding Register}" CommandParameter="{Binding}"/>
+            <Button TabIndex="998" Content="{DynamicResource Clear}" Command="{Binding Clear}" CommandParameter="{Binding}"/>
+            <Button TabIndex="999" Content="{DynamicResource Find}" Command="{Binding Reload}" CommandParameter="{Binding}"/>
+            <Button TabIndex="1000" Content="{DynamicResource Register}" Command="{Binding Register}" CommandParameter="{Binding}"/>
         </StackPanel>
 
-        <TextBlock Grid.Row="1" Grid.Column="0" Text="花束名称："/>
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource BouquetName_Collon}"/>
         <TextBox Grid.Row="1" Grid.Column="1" TabIndex="2" Text="{Binding BouquetName}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="イメージファイル名："/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource ImageFileName_Collon}"/>
         <TextBox Grid.Row="2" Grid.Column="1" TabIndex="3" Text="{Binding ImageFileName}"/>
         <Button Grid.Row="2" Grid.Column="2" TabIndex="1001" Content="..." Command="{Binding FindImageSource}" CommandParameter="{Binding}"/>
 
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="受注リードタイム"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource LeadTime_Collon}"/>
         <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding LeadTime}" Style="{StaticResource NumericTextBlock}"/>
-        <TextBlock Grid.Row="3" Grid.Column="2" Text="日"/>
+        <TextBlock Grid.Row="3" Grid.Column="2" Text="{DynamicResource Unit_Days}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Text="商品構成："/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="{DynamicResource PartsList_Collon}"/>
         <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding PartsListText}" Style="{StaticResource MultiLineTextBlock}"/>
-        <Button Grid.Row="4" Grid.Column="3" Content="確定" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Mode=OneWay,Converter={StaticResource positiveCovnerter}}"/>
-        <Button Grid.Row="4" Grid.Column="3" Content="編集" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Mode=OneWay, Converter={StaticResource negativeConverter}}"/>
+        <Button Grid.Row="4" Grid.Column="3" Content="{DynamicResource Fix}" Command="{Binding Fix}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Mode=OneWay,Converter={StaticResource positiveCovnerter}}"/>
+        <Button Grid.Row="4" Grid.Column="3" Content="{DynamicResource Edit}" Command="{Binding Edit}" CommandParameter="{Binding}" Visibility="{Binding IsEditing, Mode=OneWay, Converter={StaticResource negativeConverter}}"/>
 
         <Grid Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="4"
               Margin="10"
@@ -71,8 +71,8 @@
                 <ColumnDefinition Width="200pt"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="現在の商品構成"/>
-            <TextBlock Grid.Row="0" Grid.Column="2" Text="単品リスト"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource CurrentPartsList}"/>
+            <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource CandidatePartsList}"/>
             
             <ListView Grid.Row="1" Grid.Column="0" ItemsSource="{Binding SelectedPartsList}" SelectedItem="{Binding SelectedParts}">
                 <ListView.ItemTemplate>
@@ -87,7 +87,7 @@
 
                             <TextBlock Grid.Column="0" Text="{Binding PartsCode}"/>
                             <TextBox Grid.Column="1" Text="{Binding Quantity}" Style="{StaticResource NumericTextBox}"/>
-                            <TextBlock Grid.Column="2" Text="本"/>
+                            <TextBlock Grid.Column="2" Text="{DynamicResource Unit_Parts}"/>
                             <TextBlock Grid.Column="3" Text="{Binding PartsName}"/>
                         </Grid>
                     </DataTemplate>
@@ -95,8 +95,8 @@
             </ListView>
             <StackPanel Grid.Row="1" Grid.Column="1"
                         Orientation="Vertical">
-                <Button Content="＜" Command="{Binding Append}" CommandParameter="{Binding}" Style="{StaticResource AppendButton}"/>
-                <Button Content="＞" Command="{Binding Remove}" CommandParameter="{Binding}" Style="{StaticResource RemoveButton}"/>
+                <Button Content="{DynamicResource AppendToList}" Command="{Binding Append}" CommandParameter="{Binding}" Style="{StaticResource AppendButton}"/>
+                <Button Content="{DynamicResource RemoveFromList}" Command="{Binding Remove}" CommandParameter="{Binding}" Style="{StaticResource RemoveButton}"/>
             </StackPanel>
             <ListView Grid.Row="1" Grid.Column="2" ItemsSource="{Binding CandidatePartsList}" SelectedItem="{Binding CandidateParts}">
                 <ListView.ItemTemplate>

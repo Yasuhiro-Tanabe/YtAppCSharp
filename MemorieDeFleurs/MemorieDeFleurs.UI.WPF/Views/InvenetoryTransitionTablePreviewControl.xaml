@@ -35,7 +35,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="0" Text="単品："/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource Parts_Collon}"/>
         <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding BouquetParts}" SelectedItem="{Binding SelectedParts}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
@@ -48,7 +48,7 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </ComboBox>
-        <TextBlock Grid.Row="0" Grid.Column="2" Text="開始日：" TextAlignment="Right"/>
+        <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource DaysFrom_Collon}" TextAlignment="Right"/>
         <DatePicker Grid.Row="0" Grid.Column="3" SelectedDate="{Binding From}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectedDateChanged">
@@ -56,7 +56,7 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DatePicker>
-        <TextBlock Grid.Row="0" Grid.Column="4" Text="終了日：" TextAlignment="Right"/>
+        <TextBlock Grid.Row="0" Grid.Column="4" Text="{DynamicResource DaysTo_Collon}" TextAlignment="Right"/>
         <DatePicker Grid.Row="0" Grid.Column="5" DisplayDateStart="{Binding From}" SelectedDate="{Binding To}">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="SelectedDateChanged">
@@ -64,7 +64,7 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
         </DatePicker>
-        <Button Grid.Row="0" Grid.Column="6" Content="印刷" Command="{Binding Print}" CommandParameter="{Binding}"/>
+        <Button Grid.Row="0" Grid.Column="6" Content="{DynamicResource Print}" Command="{Binding Print}" CommandParameter="{Binding}"/>
 
         <v:InventoryTransitionTableControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="7"/>
     </Grid>

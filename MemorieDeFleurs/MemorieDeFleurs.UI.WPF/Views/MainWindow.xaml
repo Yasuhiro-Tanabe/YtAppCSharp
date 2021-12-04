@@ -28,41 +28,46 @@
         </Grid.RowDefinitions>
 
         <Menu Grid.Row="0" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-            <MenuItem Header="画面" HorizontalAlignment="Left">
-                <MenuItem Header="DB接続...">
-                    <MenuItem Header="SQLite">
-                        <MenuItem Header="新規" Command="{Binding SQLiteNew}" CommandParameter="{Binding}"/>
-                        <MenuItem Header="読込..." Command="{Binding SQLiteLoad}" CommandParameter="{Binding}"/>
-                        <MenuItem Header="保存..." Command="{Binding SQLiteSave}" CommandParameter="{Binding}"/>
+            <MenuItem Header="{DynamicResource Menu_View}" HorizontalAlignment="Left">
+                <MenuItem Header="{DynamicResource Menu_Db}">
+                    <MenuItem Header="{DynamicResource Menu_Db_SQLite}">
+                        <MenuItem Header="{DynamicResource Menu_Db_New}" Command="{Binding SQLiteNew}" CommandParameter="{Binding}"/>
+                        <MenuItem Header="{DynamicResource Menu_Db_Load}" Command="{Binding SQLiteLoad}" CommandParameter="{Binding}"/>
+                        <MenuItem Header="{DynamicResource Menu_Db_Save}" Command="{Binding SQLiteSave}" CommandParameter="{Binding}"/>
                     </MenuItem>
                 </MenuItem>
-                <MenuItem Header="印刷...">
-                    <MenuItem Header="在庫推移表" Command="{Binding OpenInventoryTransactionView}" CommandParameter="{Binding}"/>
-                    <MenuItem Header="加工指示書" Command="{Binding OpenProcessingInstructionsPreview}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource Menu_Print}">
+                    <MenuItem Header="{DynamicResource InventoryTransitionTable}" Command="{Binding OpenInventoryTransactionView}" CommandParameter="{Binding}"/>
+                    <MenuItem Header="{DynamicResource ProcessingInstructionSheet}" Command="{Binding OpenProcessingInstructionsPreview}" CommandParameter="{Binding}"/>
                 </MenuItem>
-                <MenuItem Header="終了" Command="{Binding Exit}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource Menu_Lang}">
+                    <MenuItem Header="{DynamicResource Lang_English}" Command="{Binding ChangeCulture}" CommandParameter="en-US"/>
+                    <MenuItem Header="{DynamicResource Lang_Japanese}" Command="{Binding ChangeCulture}" CommandParameter="ja-JP"/>
+                    <MenuItem Header="{DynamicResource Lang_Unknown}" Command="{Binding ChangeCulture}" CommandParameter="zz-ZZ"/>
+                </MenuItem>
+                <MenuItem Header="{DynamicResource Menu_Exit}" Command="{Binding Exit}" CommandParameter="{Binding}"/>
             </MenuItem>
-            <MenuItem Header="仕入先">
-                <MenuItem Header="仕入先一覧" Command="{Binding OpenSupplierListView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="仕入先登録" Command="{Binding OpenSupplierDetailView}" CommandParameter="{Binding}"/>
+            <MenuItem Header="{DynamicResource Supplier}">
+                <MenuItem Header="{DynamicResource Supplier_List}" Command="{Binding OpenSupplierListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource SUpplier_Detail}" Command="{Binding OpenSupplierDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
-            <MenuItem Header="商品">
-                <MenuItem Header="商品一覧" Command="{Binding OpenBouquetListView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="商品登録" Command="{Binding OpenBouquetDetailView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="単品一覧" Command="{Binding OpenPartsListView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="単品登録" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="単品在庫破棄" Command="{Binding OpenInventoryDiscardView}" CommandParameter="{Binding}"/>
+            <MenuItem Header="{DynamicResource Menu_Bouquet}">
+                <MenuItem Header="{DynamicResource Bouquet_List}" Command="{Binding OpenBouquetListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource Bouquet_Detail}" Command="{Binding OpenBouquetDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource Parts_List}" Command="{Binding OpenPartsListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource Parts_Detail}" Command="{Binding OpenPartsDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource DiscardParts}" Command="{Binding OpenInventoryDiscardView}" CommandParameter="{Binding}"/>
             </MenuItem>
-            <MenuItem Header="得意先">
-                <MenuItem Header="得意先一覧" Command="{Binding OpenCustomerListView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="得意先登録" Command="{Binding OpenCustomerDetailView}" CommandParameter="{Binding}"/>
+            <MenuItem Header="{DynamicResource Customer}">
+                <MenuItem Header="{DynamicResource Customer_List}" Command="{Binding OpenCustomerListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource Customer_Detail}" Command="{Binding OpenCustomerDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
-            <MenuItem Header="受発注">
-                <MenuItem Header="仕入先発注一覧" Command="{Binding OpenOrderToSupplierListView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="仕入先発注登録" Command="{Binding OpenOrderToSupplierDetailView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="入荷検品" Command="{Binding OpenOrderToSupplierInspectionList}" CommandParameter="{Binding}"/>
-                <MenuItem Header="得意先受注一覧" Command="{Binding OpenOrderFromCustomerListView}" CommandParameter="{Binding}"/>
-                <MenuItem Header="得意先受注登録" Command="{Binding OpenOrderFromCustomerDetailView}" CommandParameter="{Binding}"/>
+            <MenuItem Header="{DynamicResource Menu_Orders}">
+                <MenuItem Header="{DynamicResource OrderToSupplier_List}" Command="{Binding OpenOrderToSupplierListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource OrderToSupplier_Detail}" Command="{Binding OpenOrderToSupplierDetailView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource Menu_Inspection}" Command="{Binding OpenOrderToSupplierInspectionList}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource OrderFromCustomer_List}" Command="{Binding OpenOrderFromCustomerListView}" CommandParameter="{Binding}"/>
+                <MenuItem Header="{DynamicResource OrderFromCustomer_Detail}" Command="{Binding OpenOrderFromCustomerDetailView}" CommandParameter="{Binding}"/>
             </MenuItem>
         </Menu>
 

@@ -17,9 +17,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     public class OrderFromCustomerListViewModel : ListViewModelBase, IReloadable
     {
         /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
+        public static string Name { get { return TextResourceFinder.FindText("Customer_List"); } }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
-        public OrderFromCustomerListViewModel() : base("得意先受注一覧") { }
+        public OrderFromCustomerListViewModel() : base(Name) { }
 
         #region プロパティ
         /// <summary>
@@ -121,7 +126,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         private void UpdateCustomers()
         {
             Customers.Clear();
-            Customers.Add(new CustomerSummaryViewModel() { CustomerID = -1, CustomerName = "すべての得意先" });
+            Customers.Add(new CustomerSummaryViewModel() { CustomerID = -1, CustomerName = TextResourceFinder.FindText("AllCustomers") });
             foreach (var customer in MemorieDeFleursUIModel.Instance.FindAllCustomers())
             {
                 Customers.Add(new CustomerSummaryViewModel(customer));

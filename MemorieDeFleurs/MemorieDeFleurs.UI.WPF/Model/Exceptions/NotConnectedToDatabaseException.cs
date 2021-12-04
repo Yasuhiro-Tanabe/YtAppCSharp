@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MemorieDeFleurs.UI.WPF.Views.Helpers;
+
+using System;
 
 namespace MemorieDeFleurs.UI.WPF.Model.Exceptions
 {
@@ -10,6 +12,6 @@ namespace MemorieDeFleurs.UI.WPF.Model.Exceptions
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public NotConnectedToDatabaseException() : base("データベースに接続されていません。") { }
+        public NotConnectedToDatabaseException() : base(TextResourceFinder.FindText("Message_NotConnectedToDb")) { }
     }
 }

@@ -66,17 +66,17 @@
             <ColumnDefinition Width="200px"/>
         </Grid.ColumnDefinitions>
 
-        <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding PrintDate, StringFormat={}{0:yyyy}年{0:MM}月{0:dd}日}" Style="{StaticResource PrintDate}"/>
-        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="3" Text="発注書" Style="{StaticResource Title}"/>
+        <TextBlock Grid.Row="0" Grid.Column="4" Text="{Binding PrintDate, StringFormat={StaticResource OrderSheet_DateFormat}}" Style="{StaticResource PrintDate}"/>
+        <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Grid.RowSpan="3" Text="{DynamicResource OrderSheetTitle}" Style="{StaticResource Title}"/>
 
-        <TextBlock Grid.Row="1" Grid.Column="3" Text="発注番号："/>
+        <TextBlock Grid.Row="1" Grid.Column="3" Text="{DynamicResource OrderNumberFromCustoemr_Collon}"/>
         <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding OrderNo}"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="2" Text="フレール ・ メモワール" FontSize="18pt" Style="{StaticResource MultiLineTextBlock}"/>
+        <TextBlock Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="2" Text="{DynamicResource MemorieDeFleurs}" FontSize="18pt" Style="{StaticResource MultiLineTextBlock}"/>
 
         <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding SupplierName, Converter={StaticResource nameConverter}}" Style="{StaticResource Supplier}"/>
 
-        <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5" Text="＜発注明細＞" Style="{StaticResource OrderDetailTitle}"/>
+        <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="5" Text="{DynamicResource OrderDetaislTitle}" Style="{StaticResource OrderDetailTitle}"/>
 
         <ListView Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="5" ItemsSource="{Binding OrderParts}">
             <ListView.ItemTemplate>
@@ -88,7 +88,7 @@
                         </Grid.ColumnDefinitions>
 
                         <TextBlock Grid.Column="0" Text="{Binding PartsName}" Style="{StaticResource MultiLineTextBlock}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Converter={StaticResource quantityConverter}, ConverterParameter=本}" Style="{StaticResource NumericTextBlock}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Converter={StaticResource quantityConverter}, ConverterParameter={StaticResource Unit_Parts}}" Style="{StaticResource NumericTextBlock}"/>
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>

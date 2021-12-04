@@ -17,7 +17,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
         /// </summary>
-        public static string Name { get; } = "検品";
+        public static string Name { get { return TextResourceFinder.FindText("PartsInspection_Detail"); } }
 
         /// <summary>
         /// コンストラクタ
@@ -111,9 +111,9 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <inheritdoc/>
         public void FillDialogParameters(DialogParameter param)
         {
-            param.DialogTitle = $"検品：{OrderNo}";
-            param.OkContent = "確定";
-            param.CancelContent = "キャンセル";
+            param.DialogTitle = TextResourceFinder.FindText("Title_OrderToSupplier_Inspection", OrderNo);
+            param.OkContent = TextResourceFinder.FindText("Fix");
+            param.CancelContent = TextResourceFinder.FindText("Cancel");
         }
         #endregion // IDialogViewModel
 

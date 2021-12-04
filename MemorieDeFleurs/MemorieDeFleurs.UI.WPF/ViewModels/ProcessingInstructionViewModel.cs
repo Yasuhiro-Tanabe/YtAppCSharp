@@ -21,9 +21,14 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
     public class ProcessingInstructionViewModel : DetailViewModelBase, IPrintable, IReloadable
     {
         /// <summary>
+        /// ビューモデルの名称：<see cref="TabItemControlViewModelBase.Header"/> や <see cref="MainWindowViiewModel.FindTabItem(string)"/> に渡すクラス定数として使用する。
+        /// </summary>
+        public static string Name { get { return TextResourceFinder.FindText("ProcessingInstructionSheet"); } }
+
+        /// <summary>
         /// コンストラクタ
         /// </summary>
-        public ProcessingInstructionViewModel() : base("加工指示書") { }
+        public ProcessingInstructionViewModel() : base(Name) { }
 
         #region プロパティ
         /// <summary>
