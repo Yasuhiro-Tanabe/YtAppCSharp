@@ -12,6 +12,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Views/Style.xaml"/>
+                <ResourceDictionary Source="/Views/Icons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
@@ -125,7 +126,8 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="{Binding Header}"/>
-                        <Button Grid.Column="1" Content="x" Command="{Binding Close}" CommandParameter="{Binding}"/>
+                        <Button Grid.Column="1" Width="9pt" Height="9pt" Content="{StaticResource CloseIcon}" Command="{Binding Close}" CommandParameter="{Binding}"
+                                Margin="5,0,0,0" Padding="0" Background="White"/>
                     </Grid>
                 </DataTemplate>
             </TabControl.ItemTemplate>
