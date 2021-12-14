@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MemorieDeFleurs.Logging;
+
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Input;
@@ -57,13 +59,27 @@ namespace SVGEditor
             set { SetProperty(ref _image, value); }
         }
         private BitmapImage _image;
+
+        /// <summary>
+        /// ログ出力内容
+        /// </summary>
+        public string LogMessage { get { return LogUtil.Appender?.Notification; } }
         #endregion // プロパティ
 
         public MainWindowViewModel() : base()
         {
+            LogUtil.Appender.PropertyChanged += LogNotified;
             Loaded = new LoadedEventHandler(this);
             SvgImage = SVGEditorModel.Instance.RenderToImage(string.Empty);
         }
+        private void LogNotified(object sender, PropertyChangedEventArgs args)
+        {
+            if(args.PropertyName == nameof(LogUtil.Appender.Notification))
+            {
+                RaisePropertyChanged(nameof(LogMessage));
+            }
+        }
+
 
         #region コマンド
         public ICommand Loaded { get; }

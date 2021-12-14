@@ -3,7 +3,6 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml;
 
@@ -33,8 +32,6 @@ namespace SVGEditor
 
         private MemoryStream RenderCode(string code)
         {
-            //SvgCode = code;
-
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(code);
 
