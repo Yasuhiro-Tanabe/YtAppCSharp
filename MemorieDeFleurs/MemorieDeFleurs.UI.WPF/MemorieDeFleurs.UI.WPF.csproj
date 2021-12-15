@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Views\icons\CloseButton.ico" />
+    <None Remove="Views\icons\Close_16x16.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.37" />
     <PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="2.10.2" />
   </ItemGroup>
@@ -18,7 +23,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Views\icons\CloseButton.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\icons\Close_128x128.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\icons\close_24x24.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Views\icons\Close_32x32.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
