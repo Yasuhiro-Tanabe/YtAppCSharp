@@ -1,0 +1,12 @@
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\bin\Debug\net5.0\BookMgr.SQLite.deps.json
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\bin\Debug\net5.0\BookMgr.SQLite.dll
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\bin\Debug\net5.0\ref\BookMgr.SQLite.dll
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\bin\Debug\net5.0\BookMgr.SQLite.pdb
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\obj\Debug\net5.0\BookMgr.SQLite.GeneratedMSBuildEditorConfig.editorconfig
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\obj\Debug\net5.0\BookMgr.SQLite.AssemblyInfoInputs.cache
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\obj\Debug\net5.0\BookMgr.SQLite.AssemblyInfo.cs
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\obj\Debug\net5.0\BookMgr.SQLite.csproj.CoreCompileInputs.cache
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\obj\Debug\net5.0\BookMgr.SQLite.dll
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\obj\Debug\net5.0\ref\BookMgr.SQLite.dll
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\obj\Debug\net5.0\BookMgr.SQLite.pdb
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.SQLite\obj\Debug\net5.0\BookMgr.SQLite.csproj.AssemblyReference.cache

@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "gMie9sRfEKue9hcgWW5y3XsmZdZuf/p7SxoOWUBieFGQ1yxY9jt4n2jPr6R0jug83O/b8S51hSLo+4vTb8xEUA==",
+  "success": true,
+  "projectFilePath": "D:\\C#Dev\\GitHub\\YtAppCSharp\\BookManager\\BookMgr.Logging\\BookMgr.Logging.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\yas-t\\.nuget\\packages\\nlog\\4.7.11\\nlog.4.7.11.nupkg.sha512"
+  ],
+  "logs": []
+}

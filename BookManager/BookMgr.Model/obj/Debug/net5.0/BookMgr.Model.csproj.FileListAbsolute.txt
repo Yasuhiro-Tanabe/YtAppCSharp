@@ -1,0 +1,12 @@
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\bin\Debug\net5.0\BookMgr.Model.deps.json
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\bin\Debug\net5.0\BookMgr.Model.dll
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\bin\Debug\net5.0\ref\BookMgr.Model.dll
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\bin\Debug\net5.0\BookMgr.Model.pdb
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\obj\Debug\net5.0\BookMgr.Model.GeneratedMSBuildEditorConfig.editorconfig
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\obj\Debug\net5.0\BookMgr.Model.AssemblyInfoInputs.cache
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\obj\Debug\net5.0\BookMgr.Model.AssemblyInfo.cs
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\obj\Debug\net5.0\BookMgr.Model.csproj.CoreCompileInputs.cache
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\obj\Debug\net5.0\BookMgr.Model.dll
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\obj\Debug\net5.0\ref\BookMgr.Model.dll
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\obj\Debug\net5.0\BookMgr.Model.pdb
+D:\C#Dev\GitHub\YtAppCSharp\BookManager\BookMgr.Model\obj\Debug\net5.0\BookMgr.Model.csproj.AssemblyReference.cache
