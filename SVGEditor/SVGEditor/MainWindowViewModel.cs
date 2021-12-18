@@ -88,6 +88,7 @@ namespace SVGEditor
         public SaveToFileCommand Save { get; } = new SaveToFileCommand();
         public SaveAsNewFileCommand SaveAs { get; } = new SaveAsNewFileCommand();
         public ICommand Exit { get; } = new ExitCommand();
+        public IconiseCommand Iconise { get; } = new IconiseCommand();
         #endregion // コマンド
 
 

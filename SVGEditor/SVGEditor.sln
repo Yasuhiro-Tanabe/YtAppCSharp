@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SVGEditor", "SVGEditor\SVGE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MemorieDeFleurs.Logging", "..\MemorieDeFleurs\MemorieDeFleurs.Logging\MemorieDeFleurs.Logging.csproj", "{EA2EC7D9-C99D-4BEF-91D6-AA1AF5C11D36}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupSVGEditor", "SetupSVGEditor\SetupSVGEditor.vdproj", "{AA461DBC-1312-4226-A8C2-7F185DD1F635}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,8 @@ Global
 		{EA2EC7D9-C99D-4BEF-91D6-AA1AF5C11D36}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA2EC7D9-C99D-4BEF-91D6-AA1AF5C11D36}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA2EC7D9-C99D-4BEF-91D6-AA1AF5C11D36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA461DBC-1312-4226-A8C2-7F185DD1F635}.Debug|Any CPU.ActiveCfg = Debug
+		{AA461DBC-1312-4226-A8C2-7F185DD1F635}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
