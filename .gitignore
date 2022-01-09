@@ -40,3 +40,7 @@
 /SVGEditor/SVGEditor/obj
 /SVGEditor/SetupSVGEditor/Debug
 /SVGEditor/SetupSVGEditor/Release
+
+/YasT.Framework/.vs
+/YasT.Framework/YasT.Framework.Logging/bin
+/YasT.Framework/YasT.Framework.Logging/obj
