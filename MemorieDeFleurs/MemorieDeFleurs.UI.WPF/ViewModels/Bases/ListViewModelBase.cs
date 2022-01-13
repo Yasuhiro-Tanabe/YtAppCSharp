@@ -1,8 +1,9 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.UI.WPF.Commands;
 
 using System;
 using System.Windows.Input;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
 {

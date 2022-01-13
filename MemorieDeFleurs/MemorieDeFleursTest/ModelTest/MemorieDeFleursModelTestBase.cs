@@ -5,9 +5,10 @@ using MemorieDeFleurs.Models;
 using System;
 using System.Data.Common;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleursTest.ModelTest
 {

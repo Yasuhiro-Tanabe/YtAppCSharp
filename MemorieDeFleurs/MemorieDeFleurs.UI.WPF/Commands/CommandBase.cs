@@ -1,13 +1,13 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Model;
+﻿using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
-using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {

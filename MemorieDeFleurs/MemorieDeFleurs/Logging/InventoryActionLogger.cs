@@ -1,8 +1,9 @@
-﻿
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.Logging
 

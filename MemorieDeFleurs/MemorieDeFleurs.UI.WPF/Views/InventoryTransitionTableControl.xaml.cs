@@ -1,14 +1,14 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Model;
+﻿using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels;
 using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
-using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.Views
 {

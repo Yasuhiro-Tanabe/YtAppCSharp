@@ -1,11 +1,12 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {

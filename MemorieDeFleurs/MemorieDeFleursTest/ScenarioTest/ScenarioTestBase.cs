@@ -16,6 +16,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
+using YasT.Framework.Logging;
+
 namespace MemorieDeFleursTest.ScenarioTest
 {
     /// <summary>

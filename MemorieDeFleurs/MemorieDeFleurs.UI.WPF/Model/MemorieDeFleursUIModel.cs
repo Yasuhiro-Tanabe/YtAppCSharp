@@ -1,5 +1,4 @@
 ﻿using MemorieDeFleurs.Database.SQLite;
-using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Models;
 using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Model.Exceptions;
@@ -10,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.Model
 {

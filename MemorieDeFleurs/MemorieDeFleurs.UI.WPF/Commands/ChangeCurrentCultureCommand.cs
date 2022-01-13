@@ -1,7 +1,8 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Views.Helpers;
+﻿using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
 using System.Globalization;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {

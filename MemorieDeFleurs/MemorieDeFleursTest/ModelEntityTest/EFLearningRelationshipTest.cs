@@ -1,6 +1,4 @@
-﻿using MemorieDeFleurs.Logging;
-
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -11,8 +9,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Common;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleursTest.ModelEntityTest
 {

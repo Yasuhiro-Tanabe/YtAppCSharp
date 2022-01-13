@@ -1,9 +1,10 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System.Collections.ObjectModel;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {

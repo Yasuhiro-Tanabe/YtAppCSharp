@@ -1,11 +1,12 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 
 using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.Views.Helpers
 {
