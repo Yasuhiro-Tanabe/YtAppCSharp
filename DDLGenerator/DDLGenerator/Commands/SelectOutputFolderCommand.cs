@@ -1,5 +1,4 @@
-﻿
-using DDLGenerator.Models.Logging;
+﻿using YasT.Framework.Logging;
 using DDLGenerator.ViewModels;
 
 using Microsoft.WindowsAPICodePack.Dialogs;

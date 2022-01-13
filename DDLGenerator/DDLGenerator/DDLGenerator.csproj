@@ -2,11 +2,12 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>DDLGenerator.ico</ApplicationIcon>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <AssemblyVersion>2.1.0.0</AssemblyVersion>
+    <FileVersion>2.1.0.0</FileVersion>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,9 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="log4net" Version="2.0.12" />
+    <PackageReference Include="log4net" Version="2.0.14" />
     <PackageReference Include="SpreadsheetLight" Version="3.5.0" />
-    <PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="2.8.0" />
+    <PackageReference Include="WinCopies.WindowsAPICodePack.Shell" Version="2.10.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +35,10 @@
 
   <ItemGroup>
     <Folder Include="doc\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\YasT.Framework\YasT.Framework.Logging\YasT.Framework.Logging.csproj" />
   </ItemGroup>
 
 </Project>
