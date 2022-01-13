@@ -1,4 +1,4 @@
-﻿using MemorieDeFleurs.Logging;
+﻿using YasT.Framework.Logging;
 
 using Microsoft.Win32;
 
