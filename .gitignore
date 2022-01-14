@@ -24,8 +24,6 @@
 /MemorieDeFleurs/MemorieDeFleursTest/obj
 /MemorieDeFleurs/MemorieDeFleurs.UI.WPF/bin
 /MemorieDeFleurs/MemorieDeFleurs.UI.WPF/obj
-/MemorieDeFleurs/MemorieDeFleurs.Logging/bin
-/MemorieDeFleurs/MemorieDeFleurs.Logging/obj
 
 /GameOfLife/.vs
 /GameOfLife/GameOfLife/bin
@@ -44,3 +42,5 @@
 /YasT.Framework/.vs
 /YasT.Framework/YasT.Framework.Logging/bin
 /YasT.Framework/YasT.Framework.Logging/obj
+/YasT.Framework/YasT.Framework.WPF/bin
+/YasT.Framework/YasT.Framework.WPF/obj
