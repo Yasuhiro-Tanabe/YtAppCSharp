@@ -2,6 +2,8 @@
 
 using System;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     /// <summary>

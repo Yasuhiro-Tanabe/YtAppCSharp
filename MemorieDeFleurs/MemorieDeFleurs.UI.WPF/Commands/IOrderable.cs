@@ -6,7 +6,7 @@
     /// 受発注処理を同じインタフェースで処理する必然性はないが、機能がほぼ同じ
     /// ①発注(受注)、②発注(受注)取消、および③到着日(入荷日またはお届け日)変更、の3つについて同一インタフェースで取り扱う。
     /// </summary>
-    internal interface IOrderable
+    public interface IOrderable
     {
         /// <summary>
         /// 受注または発注を行う

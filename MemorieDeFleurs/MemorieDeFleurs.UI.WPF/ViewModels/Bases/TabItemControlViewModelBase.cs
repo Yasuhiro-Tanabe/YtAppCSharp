@@ -4,6 +4,8 @@ using System;
 using System.ComponentModel;
 using System.Windows.Input;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.ViewModels.Bases
 {
     /// <summary>

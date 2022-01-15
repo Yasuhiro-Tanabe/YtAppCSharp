@@ -6,11 +6,13 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 using System;
 using System.Linq;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     internal class OrderToSupplierSummaryViewModel : ListItemViewModelBase, IReloadable, IDialogCaller
     {
-        public OrderToSupplierSummaryViewModel(OrdersToSupplier order) : base(new OpenDetailViewCommand<OrderToSupplierDetailViewModel>())
+        public OrderToSupplierSummaryViewModel(OrdersToSupplier order) : base(new OpenDetailViewCommand())
         {
             OrderNo = order.ID;
             Update(order);

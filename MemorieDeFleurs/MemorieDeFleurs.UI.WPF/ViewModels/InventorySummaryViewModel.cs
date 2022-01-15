@@ -1,4 +1,6 @@
-﻿namespace MemorieDeFleurs.UI.WPF.ViewModels
+﻿using YasT.Framework.WPF;
+
+namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     /// <summary>
     /// 単品破棄画面内の各単品ビューモデル

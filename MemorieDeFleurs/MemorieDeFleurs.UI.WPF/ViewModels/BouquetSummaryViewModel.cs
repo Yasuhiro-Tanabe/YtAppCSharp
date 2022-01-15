@@ -16,7 +16,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// コンストラクタ
         /// </summary>
         /// <param name="bouquet">表示する商品エンティティオブジェクト</param>
-        public BouquetSummaryViewModel(Bouquet bouquet) : base(new OpenDetailViewCommand<BouquetDetailViewModel>())
+        public BouquetSummaryViewModel(Bouquet bouquet) : base(new OpenDetailViewCommand())
         {
             Update(bouquet);
         }

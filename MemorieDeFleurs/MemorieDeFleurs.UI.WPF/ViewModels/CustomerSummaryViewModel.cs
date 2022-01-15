@@ -14,7 +14,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public CustomerSummaryViewModel() : base(new OpenDetailViewCommand<CustomerDetailViewModel>()) { }
+        public CustomerSummaryViewModel() : base(new OpenDetailViewCommand()) { }
 
         /// <summary>
         /// コンストラクタ

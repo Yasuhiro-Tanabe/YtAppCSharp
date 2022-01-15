@@ -158,7 +158,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IPrintable
         /// <inheritdoc/>
-        public PrintCommand Print { get; } = new PrintCommand();
+        public PrintCommand Print { get; } = new PrintInventoryTransitionTableCommand();
 
         /// <inheritdoc/>
         public void ValidateBeforePrinting()

@@ -15,7 +15,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// コンストラクタ
         /// </summary>
         /// <param name="part"></param>
-        public BouquetPartsSummaryViewModel(BouquetPart part) : base(new OpenDetailViewCommand<BouquetPartsDetailViewModel>())
+        public BouquetPartsSummaryViewModel(BouquetPart part) : base(new OpenDetailViewCommand())
         {
             Update(part);
         }

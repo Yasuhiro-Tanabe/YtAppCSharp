@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class ChangeProcessingBouquetCommand : CommandBase
+    internal class ChangeProcessingBouquetCommand : CommandBase<ProcessingInstructionViewModel>
     {
-        public ChangeProcessingBouquetCommand() : base(typeof(ProcessingInstructionViewModel), ChangeProcessingBouquet) { }
-
-        private static void ChangeProcessingBouquet(object parameter) => (parameter as ProcessingInstructionViewModel).ChangeProcessingBouquet();
+        protected override void Execute(ProcessingInstructionViewModel parameter) => parameter.ChangeProcessingBouquet();
     }
 }

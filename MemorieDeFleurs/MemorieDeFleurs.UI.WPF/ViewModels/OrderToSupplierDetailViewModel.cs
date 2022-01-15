@@ -426,7 +426,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IPrintable
         /// <inheritdoc/>
-        public PrintCommand Print { get; } = new PrintCommand();
+        public PrintCommand Print { get; } = new PrintOrderToSupplierCommand();
 
         /// <inheritdoc/>
         public void ValidateBeforePrinting() { }

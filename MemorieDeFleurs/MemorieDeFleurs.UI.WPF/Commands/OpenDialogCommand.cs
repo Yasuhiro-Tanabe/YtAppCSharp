@@ -3,39 +3,34 @@ using MemorieDeFleurs.UI.WPF.Views;
 
 using System;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// <see cref="IDialogCaller"/> の実装に必要な、ダイアログを開くコマンド
     /// </summary>
-    public class OpenDialogCommand : CommandBase
+    public class OpenDialogCommand : CommandBase<IDialogCaller>
     {
         /// <summary>
         /// ダイアログが閉じようとしていることを通知する
         /// </summary>
         public event EventHandler<DialogClosingEventArgs> DialogClosing;
 
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public OpenDialogCommand() : base()
+        private void NotifyDialogClosing(object sender, DialogClosingEventArgs args)
         {
-            AddAction(typeof(IDialogCaller), Open);
+            DialogClosing?.Invoke(this, args);
         }
 
-        private void Open(object parameter)
+        /// <inheritdoc/>
+        protected override void Execute(IDialogCaller parameter)
         {
-            var vm = new DialogViewModel() { ViewModel = (parameter as IDialogCaller).DialogViewModel };
+            var vm = new DialogViewModel() { ViewModel = parameter.DialogViewModel };
             vm.DialogClosing += NotifyDialogClosing;
 
             var dialog = new DialogWindow() { DataContext = vm };
 
             dialog.ShowDialog();
-        }
-
-        private void NotifyDialogClosing(object sender, DialogClosingEventArgs args)
-        {
-            DialogClosing?.Invoke(this, args);
         }
     }
 }

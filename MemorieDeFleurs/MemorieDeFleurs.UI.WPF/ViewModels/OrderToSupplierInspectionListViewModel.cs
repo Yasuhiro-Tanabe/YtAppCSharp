@@ -179,9 +179,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             if(Orders.Count > 0)
             {
-                _from = Orders.FirstOrDefault().OrderDate;
-                _to = Orders.LastOrDefault().OrderDate;
-                RaisePropertyChanged(nameof(From), nameof(To));
+                From = Orders.FirstOrDefault().OrderDate;
+                To = Orders.LastOrDefault().OrderDate;
             }
 
             SelectedSupplier = Suppliers[0];

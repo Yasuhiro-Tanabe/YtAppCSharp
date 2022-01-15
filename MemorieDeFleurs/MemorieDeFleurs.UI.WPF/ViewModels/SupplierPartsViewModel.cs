@@ -1,5 +1,7 @@
 ﻿using MemorieDeFleurs.Models.Entities;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     /// <summary>

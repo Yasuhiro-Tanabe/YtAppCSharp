@@ -1,15 +1,13 @@
-﻿namespace MemorieDeFleurs.UI.WPF.Commands
+﻿using YasT.Framework.WPF;
+
+namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// <see cref="IOrderable"/> 実装に必要な発注コマンド
     /// </summary>
-    public class OrderCommand : CommandBase
+    public class OrderCommand : CommandBase<IOrderable>
     {
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public OrderCommand() : base(typeof(IOrderable), Order) { }
-
-        private static void Order(object parameter) => (parameter as IOrderable).OrderMe();
+        /// <inheritdoc/>
+        protected override void Execute(IOrderable parameter) => parameter.OrderMe();
     }
 }

@@ -12,7 +12,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public SupplierSummaryViewModel() : base(new OpenDetailViewCommand<SupplierDetailViewModel>()) { }
+        public SupplierSummaryViewModel() : base(new OpenDetailViewCommand()) { }
 
         /// <summary>
         /// コンストラクタ
@@ -52,7 +52,6 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
             Update(supplier.Code.ToString());
             SupplierCode = supplier.Code;
             SupplierName = supplier.Name;
-            RaisePropertyChanged(nameof(SupplierCode), nameof(SupplierName));
         }
     }
 }

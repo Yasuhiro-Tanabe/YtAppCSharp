@@ -9,7 +9,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
     /// ダイアログ(<see cref="DialogWindow"/>) 自体は別のビューモデル (<see cref="DialogViewModel"/>) を DataContext として保持し、
     /// このインタフェースを実装したビューモデルはダイアログ内にある ContentControl の表示内容となる。
     /// </summary>
-    internal interface IDialogViewModel
+    public interface IDialogViewModel
     {
         /// <summary>
         /// ダイアログパラメータを設定する

@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 
 using YasT.Framework.Logging;
+using YasT.Framework.WPF;
 
 namespace MemorieDeFleurs.UI.WPF.Views.Helpers
 {

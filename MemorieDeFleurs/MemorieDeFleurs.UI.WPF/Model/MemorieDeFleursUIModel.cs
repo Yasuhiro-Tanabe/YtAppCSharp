@@ -11,6 +11,7 @@ using System.Data.Common;
 using System.Linq;
 
 using YasT.Framework.Logging;
+using YasT.Framework.WPF;
 
 namespace MemorieDeFleurs.UI.WPF.Model
 {

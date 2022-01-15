@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class InventoryTransitionTableChangedCommand : CommandBase
+    internal class InventoryTransitionTableChangedCommand : CommandBase<InventoryTransitionTableViewModel>
     {
-        public InventoryTransitionTableChangedCommand() : base(typeof(InventoryTransitionTableViewModel), UpdateTable) { }
-
-        private static void UpdateTable(object parameter) => (parameter as InventoryTransitionTableViewModel).UpdateProperties();
+        protected override void Execute(InventoryTransitionTableViewModel parameter) => parameter.UpdateProperties();
     }
 }

@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class ChangeInspectionDateCommand : CommandBase
+    internal class ChangeInspectionDateCommand : CommandBase<OrderToSupplierInspectionListViewModel>
     {
-        public ChangeInspectionDateCommand() : base(typeof(OrderToSupplierInspectionListViewModel), Reload) { }
-
-        private static void Reload(object parameter) => (parameter as OrderToSupplierInspectionListViewModel).ReloadOrders();
+        protected override void Execute(OrderToSupplierInspectionListViewModel parameter) => parameter.ReloadOrders();
     }
 }

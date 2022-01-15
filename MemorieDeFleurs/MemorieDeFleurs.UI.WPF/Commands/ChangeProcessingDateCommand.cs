@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class ChangeProcessingDateCommand : CommandBase
+    internal class ChangeProcessingDateCommand : CommandBase<ProcessingInstructionViewModel>
     {
-        public ChangeProcessingDateCommand() : base(typeof(ProcessingInstructionViewModel), ChangeProcessingDate) { }
-
-        private static void ChangeProcessingDate(object parameter) => (parameter as ProcessingInstructionViewModel).ChangeProcessingDate();
+        protected override void Execute(ProcessingInstructionViewModel parameter) => parameter.ChangeProcessingDate();
     }
 }

@@ -3,26 +3,19 @@ using MemorieDeFleurs.UI.WPF.Views;
 
 using System;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class DialogOkCommand : CommandBase
+    internal class DialogOkCommand : CommandBase<DialogWindow>
     {
         public event EventHandler DialogClosing;
 
-        public DialogOkCommand() : base()
+        protected override void Execute(DialogWindow dialog)
         {
-            AddAction(typeof(DialogWindow), Ok);
-        }
-
-        private void Ok(object parameter)
-        {
-            var dialog = parameter as DialogWindow;
-            if(dialog != null)
-            {
-                (dialog.DataContext as DialogViewModel).DialogUser.DialogOK();
-                DialogClosing?.Invoke(this, null);
-                dialog.Close();
-            }
+            (dialog.DataContext as DialogViewModel).DialogUser.DialogOK();
+            DialogClosing?.Invoke(this, null);
+            dialog.Close();
         }
     }
 }
