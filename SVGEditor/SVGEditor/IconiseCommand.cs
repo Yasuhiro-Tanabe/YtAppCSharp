@@ -3,14 +3,14 @@
 using Microsoft.Win32;
 
 using System.IO;
+using YasT.Framework.WPF;
 
 namespace SVGEditor
 {
-    internal class IconiseCommand : CommandBase
+    internal class IconiseCommand : CommandBase<MainWindowViewModel>
     {
-        public override void Execute(object parameter)
+        protected override void Execute(MainWindowViewModel vm)
         {
-            var vm = parameter as MainWindowViewModel;
             var view = App.Current.MainWindow as MainWindow;
 
             var dialog = new SaveFileDialog()

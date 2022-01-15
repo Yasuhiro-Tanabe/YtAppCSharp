@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\YasT.Framework\YasT.Framework.Logging\YasT.Framework.Logging.csproj" />
+    <ProjectReference Include="..\..\YasT.Framework\YasT.Framework.WPF\YasT.Framework.WPF.csproj" />
   </ItemGroup>
 
   <ItemGroup>

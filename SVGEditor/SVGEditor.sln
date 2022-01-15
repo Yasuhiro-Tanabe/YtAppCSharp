@@ -9,6 +9,8 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SetupSVGEditor", "SetupSVGE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YasT.Framework.Logging", "..\YasT.Framework\YasT.Framework.Logging\YasT.Framework.Logging.csproj", "{77A79B65-A580-4570-A4C7-740237A75037}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YasT.Framework.WPF", "..\YasT.Framework\YasT.Framework.WPF\YasT.Framework.WPF.csproj", "{FAA6587A-9F4A-4A9A-8914-6FB1921C563E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,14 @@ Global
 		{77A79B65-A580-4570-A4C7-740237A75037}.Release|Any CPU.Build.0 = Release|Any CPU
 		{77A79B65-A580-4570-A4C7-740237A75037}.Release|x64.ActiveCfg = Release|x64
 		{77A79B65-A580-4570-A4C7-740237A75037}.Release|x64.Build.0 = Release|x64
+		{FAA6587A-9F4A-4A9A-8914-6FB1921C563E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAA6587A-9F4A-4A9A-8914-6FB1921C563E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAA6587A-9F4A-4A9A-8914-6FB1921C563E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FAA6587A-9F4A-4A9A-8914-6FB1921C563E}.Debug|x64.Build.0 = Debug|Any CPU
+		{FAA6587A-9F4A-4A9A-8914-6FB1921C563E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAA6587A-9F4A-4A9A-8914-6FB1921C563E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FAA6587A-9F4A-4A9A-8914-6FB1921C563E}.Release|x64.ActiveCfg = Release|Any CPU
+		{FAA6587A-9F4A-4A9A-8914-6FB1921C563E}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

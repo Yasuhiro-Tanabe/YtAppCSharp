@@ -1,12 +1,13 @@
 ﻿using System.Windows;
 
+using YasT.Framework.WPF;
+
 namespace SVGEditor
 {
-    internal class RenderCommand : CommandBase
+    internal class RenderCommand : CommandBase<MainWindowViewModel>
     {
-        public override void Execute(object parameter)
+        protected override void Execute(MainWindowViewModel vm)
         {
-            var vm = parameter as MainWindowViewModel;
             if(vm != null)
             {
                 var code = (App.Current.MainWindow as MainWindow)?.Editor?.Text;

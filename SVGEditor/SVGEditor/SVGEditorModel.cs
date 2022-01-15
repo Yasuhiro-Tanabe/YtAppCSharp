@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using System.Xml;
 
+using YasT.Framework.WPF;
+
 namespace SVGEditor
 {
     internal class SVGEditorModel : NotificationObject
