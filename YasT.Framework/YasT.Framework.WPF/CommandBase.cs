@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Input;
 
+using YasT.Framework.Logging;
+
 namespace YasT.Framework.WPF
 {
     /// <summary>
@@ -46,12 +48,20 @@ namespace YasT.Framework.WPF
         /// <param name="parameter">コマンドパラメータ</param>
         public void Execute(object? parameter)
         {
-            if(parameter == null) { throw new ArgumentNullException(nameof(parameter)); }
-            CommandExecuting?.Invoke(this, parameter);
-            if(_canExecute && parameter is T)
+            try
             {
-                Execute((T)parameter);
-                CommandExecuted?.Invoke(this, parameter);
+                if (parameter == null) { throw new ArgumentNullException(nameof(parameter)); }
+                CommandExecuting?.Invoke(this, parameter);
+                if (_canExecute && parameter is T)
+                {
+                    Execute((T)parameter);
+                    CommandExecuted?.Invoke(this, parameter);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogUtil.Warn(ex);
+                this.PopupWarning(ex.Message); // MessageBoxExtension 参照
             }
         }
 
