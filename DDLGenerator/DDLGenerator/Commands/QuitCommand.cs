@@ -1,39 +1,17 @@
 ﻿using YasT.Framework.Logging;
-
-using System;
 using System.Windows;
-using System.Windows.Input;
+using DDLGenerator.ViewModels;
+using YasT.Framework.WPF;
 
 namespace DDLGenerator.Commands
 {
     /// <summary>
     /// 終了コマンド：アプリケーションを終了する
     /// </summary>
-    public class QuitCommand : ICommand
-
+    public class QuitCommand : CommandBase<TabItemControlBase>
     {
-        public event EventHandler CanExecuteChanged;
-
-        /// <summary>
-        /// コマンドの実行可否を判定する
-        /// </summary>
-        /// <param name="parameter">コマンド送信元</param>
-        /// <returns>コマンド実行可否：実行可能の時真</returns>
-        public bool CanExecute(object parameter)
+        protected override void Execute(TabItemControlBase parameter)
         {
-            LogUtil.Debug($"{this.GetType().Name}#CanExecute() called. parameter={parameter?.GetType().Name}");
-            return true;
-        }
-
-        /// <summary>
-        /// コマンドを実行する
-        /// </summary>
-        /// <param name="parameter">コマンド送信元</param>
-        public void Execute(object parameter)
-        {
-            // 警告 CS0067 対策 (イベント 'QuitCommand.CanExecuteChanged' は使用されていません)
-            CanExecuteChanged?.Invoke(this, null);
-
             LogUtil.Debug($"{this.GetType().Name}#Execute() called. parameter={parameter?.GetType().Name}");
             Application.Current.Shutdown();
         }

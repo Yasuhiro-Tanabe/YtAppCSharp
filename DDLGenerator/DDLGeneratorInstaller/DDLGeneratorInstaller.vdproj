@@ -19,12 +19,6 @@
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
-        "Entry"
-        {
-        "MsmKey" = "8:_73DC8133DF21444AB967287315FB3137"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
     }
     "Configurations"
     {
@@ -50,6 +44,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -74,6 +76,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
     }
@@ -106,26 +116,6 @@
         }
         "File"
         {
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_73DC8133DF21444AB967287315FB3137"
-            {
-            "SourcePath" = "8:..\\DDLGenerator\\doc\\データベース設計書Sample.xlsx"
-            "TargetName" = "8:データベース設計書Sample.xlsx"
-            "Tag" = "8:"
-            "Folder" = "8:_937875929B424644839FFCD7243E89AB"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
         }
         "FileType"
         {
@@ -194,7 +184,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:DDLGenerator"
         "ProductCode" = "8:{04ACF64F-B472-40E1-B926-C5FDB0E34F06}"
-        "PackageCode" = "8:{385B5A2C-F981-449B-9F0D-C463834590A5}"
+        "PackageCode" = "8:{4DA0912B-F4EA-4133-BF8A-5A9A02AC7C79}"
         "UpgradeCode" = "8:{FA38D9C2-2A02-408D-AB56-2B211CECF9F2}"
         "AspNetVersion" = "8:"
         "RestartWWWService" = "11:FALSE"
@@ -729,7 +719,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_6977CCE903B34C3195ED0E133F4FA0CE"
             {
-            "SourcePath" = "8:..\\DDLGenerator\\obj\\Debug\\net5.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\DDLGenerator\\obj\\Debug\\net6.0-windows10.0.22000.0\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_847BB07AD14D47FA948AB882201630E1"

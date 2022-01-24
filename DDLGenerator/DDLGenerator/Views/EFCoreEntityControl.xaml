@@ -78,7 +78,7 @@
             <Button Grid.Column="2"
                     Margin="20,3"
                     VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                    Content="終了" Command="{Binding QuitApplication}"/>
+                    Content="終了" Command="{Binding QuitApplication}" CommandParameter="{Binding}"/>
         </Grid>
     </Grid>
 </UserControl>

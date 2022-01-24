@@ -5,7 +5,7 @@
     <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>DDLGenerator.ico</ApplicationIcon>
-    <AssemblyVersion>2.1.0.0</AssemblyVersion>
+    <AssemblyVersion>2.1.1.0</AssemblyVersion>
     <FileVersion>2.1.0.0</FileVersion>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\YasT.Framework\YasT.Framework.Logging\YasT.Framework.Logging.csproj" />
+    <ProjectReference Include="..\..\YasT.Framework\YasT.Framework.WPF\YasT.Framework.WPF.csproj" />
   </ItemGroup>
 
 </Project>

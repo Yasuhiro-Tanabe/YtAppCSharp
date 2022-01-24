@@ -2,59 +2,47 @@
 using DDLGenerator.Models.Parsers;
 using DDLGenerator.Models.Writers;
 using DDLGenerator.ViewModels;
-
-using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using System.Windows.Threading;
+using YasT.Framework.WPF;
 
 namespace DDLGenerator.Commands
 {
-    public class GenerateEFCoreSourceFilesCommand : ICommand
+    public class GenerateEFCoreSourceFilesCommand : CommandBase<EFCoreEntityViewModel>
     {
-        public event EventHandler CanExecuteChanged;
+        public GenerateEFCoreSourceFilesCommand() : base(false) { }
 
-        public bool CanExecute(object parameter)
+        private bool IsTableDefinitionFileSelected
         {
-            return IsTableDefinitionFileSelected && IsOutputFolderPathSelected && IsNameSpaceDefined;
-        }
-
-        public void Execute(object parameter)
-        {
-            LogUtil.Debug($"{this.GetType().Name}#Execute() called. parameter={parameter?.GetType().Name}");
-
-            Task.Run(() => Dispatcher.CurrentDispatcher.Invoke(() =>
+            get { return _tableDefinitonFileSelected; }
+            set
             {
-                if (parameter is EFCoreEntityViewModel)
-                {
-                    var vm = parameter as EFCoreEntityViewModel;
-                    var generator = new Models.DDLGenerator()
-                    {
-                        Parser = new TableDefinitionWorksheetParser()
-                        {
-                            DataDefinitionFileName = vm.TableDefinitionFilePath
-                        },
-                        Writer = new EFCoreCsEntityWriter()
-                        {
-                            OutputPath = vm.OutputFolderPath,
-                            NameSpace = vm.OutputNameSpace,
-                            WriterActionMode = EFCoreCsEntityWriter.ActionIfClassFileExists.ForceOverwrite
-                        }
-                    };
-                    generator.GenerateDDL();
-                    LogUtil.Info("ファイル出力完了");
-                }
-                else
-                {
-                    LogUtil.Warn($"Unexpected View: {parameter.GetType().Name}");
-                }
-            }));
+                _tableDefinitonFileSelected = value;
+                SetExecutability(_tableDefinitonFileSelected && _outputFolderPathSelected && _namespaceDefined);
+            }
         }
-
-        private bool IsTableDefinitionFileSelected { get; set; } = false;
-        private bool IsOutputFolderPathSelected { get; set; } = false;
-        private bool IsNameSpaceDefined { get; set; } = false;
+        private bool _tableDefinitonFileSelected = false;
+        private bool IsOutputFolderPathSelected
+        {
+            get { return _outputFolderPathSelected; }
+            set
+            {
+                _outputFolderPathSelected = value;
+                SetExecutability(_tableDefinitonFileSelected && _outputFolderPathSelected && _namespaceDefined);
+            }
+        }
+        private bool _outputFolderPathSelected = false;
+        private bool IsNameSpaceDefined
+        {
+            get { return _namespaceDefined; }
+            set
+            {
+                _namespaceDefined = value;
+                SetExecutability(_tableDefinitonFileSelected && _outputFolderPathSelected && _namespaceDefined);
+            }
+        }
+        private bool _namespaceDefined = false;
 
         public void OnViewModelPropertiesChanged(object sender, PropertyChangedEventArgs args)
         {
@@ -64,19 +52,40 @@ namespace DDLGenerator.Commands
                 if(args.PropertyName == nameof(EFCoreEntityViewModel.TableDefinitionFilePath))
                 {
                     IsTableDefinitionFileSelected = !string.IsNullOrWhiteSpace(vm.TableDefinitionFilePath);
-                    CanExecuteChanged?.Invoke(this, null);
                 }
                 if (args.PropertyName == nameof(EFCoreEntityViewModel.OutputFolderPath))
                 {
                     IsOutputFolderPathSelected = !string.IsNullOrWhiteSpace(vm.OutputFolderPath);
-                    CanExecuteChanged?.Invoke(this, null);
                 }
                 if (args.PropertyName == nameof(EFCoreEntityViewModel.OutputNameSpace))
                 {
                     IsNameSpaceDefined = !string.IsNullOrWhiteSpace(vm.OutputNameSpace);
-                    CanExecuteChanged?.Invoke(this, null);
                 }
             }
+        }
+
+        protected override void Execute(EFCoreEntityViewModel parameter)
+        {
+            LogUtil.Debug($"{this.GetType().Name}#Execute() called. parameter={parameter?.GetType().Name}");
+
+            Task.Run(() => Dispatcher.CurrentDispatcher.Invoke(() =>
+            {
+                var generator = new Models.DDLGenerator()
+                {
+                    Parser = new TableDefinitionWorksheetParser()
+                    {
+                        DataDefinitionFileName = parameter.TableDefinitionFilePath
+                    },
+                    Writer = new EFCoreCsEntityWriter()
+                    {
+                        OutputPath = parameter.OutputFolderPath,
+                        NameSpace = parameter.OutputNameSpace,
+                        WriterActionMode = EFCoreCsEntityWriter.ActionIfClassFileExists.ForceOverwrite
+                    }
+                };
+                generator.GenerateDDL();
+                LogUtil.Info("ファイル出力完了");
+            }));
         }
     }
 }

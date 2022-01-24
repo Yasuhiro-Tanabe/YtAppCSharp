@@ -5,22 +5,19 @@ using Microsoft.WindowsAPICodePack.Dialogs;
 
 using System;
 using System.Windows.Input;
-
+using YasT.Framework.WPF;
 
 namespace DDLGenerator.Commands
 {
-    class SelectOutputFolderCommand : ICommand
+    public class SelectOutputFolderCommand : CommandBase<EFCoreEntityViewModel>
     {
-        public event EventHandler CanExecuteChanged;
+        public void OnGenerationStarted(object sender, EventArgs unused) => ToUnexecutable();
 
-        public bool CanExecute(object parameter)
-        {
-            return IsExecutable;
-        }
+        public void OnGenerationFinished(object sender, EventArgs unused) => ToExecutable();
 
-        public void Execute(object parameter)
+        protected override void Execute(EFCoreEntityViewModel parameter)
         {
-            if(CommonOpenFileDialog.IsPlatformSupported)
+            if (CommonOpenFileDialog.IsPlatformSupported)
             {
                 using (var dialog = new CommonOpenFileDialog() { IsFolderPicker = true, Title = "出力先フォルダの選択" })
                 {
@@ -29,32 +26,11 @@ namespace DDLGenerator.Commands
                     {
                         LogUtil.Info("出力先フォルダ：" + dialog.FileName);
 
-                        if (parameter is EFCoreEntityViewModel)
-                        {
-                            LogUtil.Debug($"EFCoreEntityViewModel.OutputFolderPath = '{dialog.FileName}'");
-                            (parameter as EFCoreEntityViewModel).OutputFolderPath = dialog.FileName;
-                        }
-                        else
-                        {
-                            LogUtil.Warn($"Unexpected View: {parameter.GetType().Name}");
-                        }
+                        LogUtil.Debug($"EFCoreEntityViewModel.OutputFolderPath = '{dialog.FileName}'");
+                        parameter.OutputFolderPath = dialog.FileName;
                     }
                 }
             }
-        }
-
-        private bool IsExecutable { get; set; } = true;
-
-        public void OnGenerationStarted(object sender, EventArgs unused)
-        {
-            IsExecutable = false;
-            CanExecuteChanged?.Invoke(this, null);
-        }
-
-        public void OnGenerationFinished(object sender, EventArgs unused)
-        {
-            IsExecutable = true;
-            CanExecuteChanged?.Invoke(this, null);
         }
     }
 }

@@ -1,13 +1,14 @@
 ﻿using YasT.Framework.Logging;
 
 using System.ComponentModel;
+using YasT.Framework.WPF;
 
 namespace DDLGenerator.ViewModels
 {
     /// <summary>
     /// DDLGeneratorのビューモデル
     /// </summary>
-    public class MainWindowViewModel : ViewModelBase
+    public class MainWindowViewModel : NotificationObject
     {
         private string _title = "データ定義ファイルジェネレータ";
         /// <summary>

@@ -4,24 +4,19 @@ using DDLGenerator.ViewModels;
 using Microsoft.Win32;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
+using YasT.Framework.WPF;
 
 namespace DDLGenerator.Commands
 {
-    class SelectOutputFileCommand : ICommand
+    public class SelectOutputFileCommand : CommandBase<SQLiteDDLViewModel>
     {
-        public event EventHandler CanExecuteChanged;
+        private bool IsExecutable { get; set; } = true;
 
-        public bool CanExecute(object parameter)
-        {
-            return IsExecutable;
-        }
+        public void OnGenerationStarted(object sender, EventArgs unused) => ToUnexecutable();
 
-        public void Execute(object parameter)
+        public void OnGenerationFinished(object sender, EventArgs unused) => ToExecutable();
+
+        protected override void Execute(SQLiteDDLViewModel parameter)
         {
             LogUtil.Debug($"{this.GetType().Name}#Execute() called. parameter={parameter?.GetType().Name}");
 
@@ -36,33 +31,9 @@ namespace DDLGenerator.Commands
             var result = dialog.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                if (parameter is SQLiteDDLViewModel)
-                {
-                    var vm = parameter as SQLiteDDLViewModel;
-                    vm.OutputDdlFilePath = dialog.FileName;
-
-                }
+                parameter.OutputDdlFilePath = dialog.FileName;
                 LogUtil.Info("出力ファイル:" + dialog.FileName);
             }
-            else
-            {
-                LogUtil.Warn($"Unexpected View: {parameter.GetType().Name}");
-            }
-
-        }
-
-        private bool IsExecutable { get; set; } = true;
-
-        public void OnGenerationStarted(object sender, EventArgs unused)
-        {
-            IsExecutable = false;
-            CanExecuteChanged?.Invoke(this, null);
-        }
-
-        public void OnGenerationFinished(object sender, EventArgs unused)
-        {
-            IsExecutable = true;
-            CanExecuteChanged?.Invoke(this, null);
         }
     }
 }

@@ -30,6 +30,15 @@ namespace YasT.Framework.WPF
         private bool _canExecute = true;
 
         /// <summary>
+        /// コンストラクタ
+        /// </summary>
+        /// <param name="canExecute">実行可否の初期状態</param>
+        public CommandBase(bool canExecute = true)
+        {
+            _canExecute = canExecute;
+        }
+
+        /// <summary>
         /// コマンド実行可否を返す。
         /// <para>実行可否を動的に変更したい場合は、このメソッドを継承せず
         /// <see cref="SetExecutability(bool)"/>, <see cref="ToExecutable()"/>, <see cref="ToUnexecutable()"/>
