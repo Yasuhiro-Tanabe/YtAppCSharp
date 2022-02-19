@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.Models;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,9 +6,10 @@ using System;
 using System.Collections.Generic;
 
 using MemorieDeFleursTest.ModelTest.Fluent;
-using MemorieDeFleurs.Logging;
 using MemorieDeFleurs.Databese.SQLite;
 using System.Linq;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleursTest.ModelTest
 {

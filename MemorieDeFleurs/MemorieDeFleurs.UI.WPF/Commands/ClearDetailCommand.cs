@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class ClearDetailCommand : CommandBase
+    internal class ClearDetailCommand : CommandBase<DetailViewModelBase>
     {
-        public ClearDetailCommand() : base(typeof(DetailViewModelBase), Clear) { }
-
-        private static void Clear(object parameter) => (parameter as DetailViewModelBase).ClearProperties();
+        protected override void Execute(DetailViewModelBase parameter) => parameter.ClearProperties();
     }
 }

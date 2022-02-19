@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class OpenProcessingInstructionsPreviewCommand : CommandBase
+    internal class OpenProcessingInstructionsPreviewCommand : CommandBase<MainWindowViiewModel>
     {
-        public OpenProcessingInstructionsPreviewCommand() : base(typeof(MainWindowViiewModel), OpenTubItem) { }
-
-        private static void OpenTubItem(object parameter) => (parameter as MainWindowViiewModel).OpenTabItem(new ProcessingInstructionViewModel());
+        protected override void Execute(MainWindowViiewModel parameter) => parameter.OpenTabItem(new ProcessingInstructionViewModel());
     }
 }

@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:DDLGenerator.ViewModels"
         xmlns:v="clr-namespace:DDLGenerator.Views"
+        xmlns:fw="clr-namespace:YasT.Framework.WPF;assembly=YasT.Framework.WPF"
         mc:Ignorable="d"
         ResizeMode="NoResize"
         Title="{Binding WindowTitle}" Height="600" Width="800">
@@ -33,7 +34,7 @@
                 BorderBrush="Black" BorderThickness="1">
             <ScrollViewer VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Auto"
-                          v:ScrollViewerHelper.AutoScrollToBottom="True">
+                          fw:ScrollViewerHelper.AutoScrollToBottom="True">
                 <TextBlock Text="{Binding Log, Mode=OneWay}"/>
             </ScrollViewer>
         </Border>

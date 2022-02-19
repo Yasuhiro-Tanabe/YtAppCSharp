@@ -1,15 +1,13 @@
-﻿namespace MemorieDeFleurs.UI.WPF.Commands
+﻿using YasT.Framework.WPF;
+
+namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// <see cref="IEditableAndFixable"/> 実装に必要な、追加表示領域を開くコマンド
     /// </summary>
-    public class EditCommand : CommandBase
+    public class EditCommand : CommandBase<IEditableAndFixable>
     {
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public EditCommand() : base(typeof(IEditableAndFixable), OpenEditView) { }
-
-        private static void OpenEditView(object parameter) => (parameter as IEditableAndFixable).OpenEditView();
+        /// <inheritdoc/>
+        protected override void Execute(IEditableAndFixable parameter) => parameter.OpenEditView();
     }
 }

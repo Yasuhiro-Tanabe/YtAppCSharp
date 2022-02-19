@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
@@ -9,6 +8,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -120,7 +121,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
         #region IPrintable
         /// <inheritdoc/>
-        public PrintCommand Print { get; } = new PrintCommand();
+        public PrintCommand Print { get; } = new PrintProcessingInstructionCommand();
 
         /// <inheritdoc/>
         public void ValidateBeforePrinting() { }

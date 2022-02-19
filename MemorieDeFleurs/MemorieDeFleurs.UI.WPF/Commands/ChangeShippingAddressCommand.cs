@@ -1,10 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class ChangeShippingAddressCommand : CommandBase
+    internal class ChangeShippingAddressCommand : CommandBase<OrderFromCustomerDetailViewModel>
     {
-        public ChangeShippingAddressCommand() : base(typeof(OrderFromCustomerDetailViewModel), ChangeShippingAddress) { }
-        private static void ChangeShippingAddress(object parameter) => (parameter as OrderFromCustomerDetailViewModel).LoadShippingAddresses();
+        protected override void Execute(OrderFromCustomerDetailViewModel parameter) => parameter.LoadShippingAddresses();
     }
 }

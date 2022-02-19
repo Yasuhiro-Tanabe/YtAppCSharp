@@ -1,10 +1,12 @@
 ﻿using System.Windows;
 
+using YasT.Framework.WPF;
+
 namespace SVGEditor
 {
-    internal class ExitCommand : CommandBase
+    internal class ExitCommand : CommandBase<MainWindowViewModel>
     {
-        public override void Execute(object parameter)
+        protected override void Execute(MainWindowViewModel unUsed)
         {
             Application.Current.Shutdown();
         }

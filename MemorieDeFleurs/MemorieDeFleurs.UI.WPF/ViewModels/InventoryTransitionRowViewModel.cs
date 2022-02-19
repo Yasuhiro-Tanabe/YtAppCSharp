@@ -1,5 +1,7 @@
 ﻿using System;
 
+using YasT.Framework.WPF;
+
 using static MemorieDeFleurs.Models.InventoryTransitionTable;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels

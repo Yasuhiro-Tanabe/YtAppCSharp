@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Model;
+﻿using MemorieDeFleurs.UI.WPF.Model;
 
 using System;
 using System.Collections.Generic;
@@ -7,6 +6,7 @@ using System.Globalization;
 using System.Threading;
 using System.Windows;
 
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.Views.Helpers
 {

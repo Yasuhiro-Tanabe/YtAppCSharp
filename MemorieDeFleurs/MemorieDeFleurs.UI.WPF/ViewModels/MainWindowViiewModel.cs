@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.Commands;
+﻿using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System;
@@ -8,6 +7,9 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Controls;
 using System.Windows.Input;
+
+using YasT.Framework.Logging;
+using YasT.Framework.WPF;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -56,7 +58,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 単品登録メニュー選択時に実行するコマンド
         /// </summary>
-        public ICommand OpenPartsDetailView { get; } = new OpenDetailViewCommand<BouquetPartsDetailViewModel>();
+        public ICommand OpenPartsDetailView { get; } = new MainWindowOpenDetailViewCommand<BouquetPartsDetailViewModel>();
         /// <summary>
         /// 単品一覧メニュー選択時に実行するコマンド
         /// </summary>
@@ -64,7 +66,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 商品登録メニュー選択時に実行するコマンド
         /// </summary>
-        public ICommand OpenBouquetDetailView { get; } = new OpenDetailViewCommand<BouquetDetailViewModel>();
+        public ICommand OpenBouquetDetailView { get; } = new MainWindowOpenDetailViewCommand<BouquetDetailViewModel>();
         /// <summary>
         /// 商品一覧メニュー選択時に実行するコマンド
         /// </summary>
@@ -76,7 +78,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 仕入先登録メニュー選択時に実行するコマンド
         /// </summary>
-        public ICommand OpenSupplierDetailView { get; } = new OpenDetailViewCommand<SupplierDetailViewModel>();
+        public ICommand OpenSupplierDetailView { get; } = new MainWindowOpenDetailViewCommand<SupplierDetailViewModel>();
         /// <summary>
         /// 得意先一覧メニュー選択時に実行するコマンド
         /// </summary>
@@ -84,7 +86,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 得意先登録メニュー選択時に実行するコマンド
         /// </summary>
-        public ICommand OpenCustomerDetailView { get; } = new OpenDetailViewCommand<CustomerDetailViewModel>();
+        public ICommand OpenCustomerDetailView { get; } = new MainWindowOpenDetailViewCommand<CustomerDetailViewModel>();
         /// <summary>
         /// 仕入先発注一覧メニュー選択時に実行するコマンド
         /// </summary>
@@ -92,7 +94,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 仕入先発注登録メニュー選択時に実行するコマンド
         /// </summary>
-        public ICommand OpenOrderToSupplierDetailView { get; } = new OpenDetailViewCommand<OrderToSupplierDetailViewModel>();
+        public ICommand OpenOrderToSupplierDetailView { get; } = new MainWindowOpenDetailViewCommand<OrderToSupplierDetailViewModel>();
         /// <summary>
         /// 得意先受注一覧メニュー選択時に実行するコマンド
         /// </summary>
@@ -100,7 +102,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// 得意先受注登録メニュー選択時に実行するコマンド
         /// </summary>
-        public ICommand OpenOrderFromCustomerDetailView { get; } = new OpenDetailViewCommand<OrderFromCustomerDetailViewModel>();
+        public ICommand OpenOrderFromCustomerDetailView { get; } = new MainWindowOpenDetailViewCommand<OrderFromCustomerDetailViewModel>();
         /// <summary>
         /// 在庫推移表メニュー選択時に実行するコマンド
         /// </summary>
@@ -219,7 +221,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
                 if (sender is ListViewModelBase)
                 {
                     CurrentItem = (sender as ListViewModelBase).OpenDetailTabItem(this);
-                    RaisePropertyChanged(nameof(TabItemControlCollection), nameof(CurrentItem));
+                    RaisePropertyChanged(nameof(TabItemControlCollection));
                 }
                 else
                 {

@@ -1,17 +1,15 @@
-﻿namespace MemorieDeFleurs.UI.WPF.Commands
+﻿using YasT.Framework.WPF;
+
+namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// <see cref="IAppendableRemovable"/> で実装必要な、コレクション間のアイテム移動コマンド
     /// 
     /// <see cref="AppendToListCommand"/> とは逆方向にコレクションアイテムを移動する
     /// </summary>
-    public class RemoveFromListCommand : CommandBase
+    public class RemoveFromListCommand : CommandBase<IAppendableRemovable>
     {
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public RemoveFromListCommand() : base(typeof(IAppendableRemovable), RemoveFromList) { }
-
-        private static void RemoveFromList(object parameter) => (parameter as IAppendableRemovable).RemoveFromList();
+        /// <inheritdoc/>
+        protected override void Execute(IAppendableRemovable parameter) => parameter.RemoveFromList();
     }
 }

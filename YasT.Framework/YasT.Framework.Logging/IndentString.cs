@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace MemorieDeFleurs.Logging
+namespace YasT.Framework.Logging
 {
     /// <summary>
     /// デバッグログ出力時に使用する字下げ文字列

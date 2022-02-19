@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
+using YasT.Framework.Logging;
+
 namespace MemorieDeFleurs.Models
 {
     /// <summary>

@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class DeleteFromDatabase : CommandBase
+    internal class DeleteFromDatabase : CommandBase<ListItemViewModelBase>
     {
-        public DeleteFromDatabase() : base(typeof(ListItemViewModelBase), RemoveMe) { }
-
-        public static void RemoveMe(object parameter) => (parameter as ListItemViewModelBase).RemoveMe();
+        protected override void Execute(ListItemViewModelBase parameter) => parameter.RemoveMe();
     }
 }

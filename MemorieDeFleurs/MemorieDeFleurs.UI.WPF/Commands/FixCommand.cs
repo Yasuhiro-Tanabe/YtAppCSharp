@@ -1,15 +1,13 @@
-﻿namespace MemorieDeFleurs.UI.WPF.Commands
+﻿using YasT.Framework.WPF;
+
+namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// <see cref="IEditableAndFixable"/> 実装に必要な、追加表示領域を閉じるコマンド
     /// </summary>
-    public class FixCommand : CommandBase
+    public class FixCommand : CommandBase<IEditableAndFixable>
     {
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public FixCommand() : base(typeof(IEditableAndFixable), FixEditing) { }
-
-        private static void FixEditing(object parameter) => (parameter as IEditableAndFixable).FixEditing();
+        /// <inheritdoc/>
+        protected override void Execute(IEditableAndFixable parameter) => parameter.FixEditing();
     }
 }

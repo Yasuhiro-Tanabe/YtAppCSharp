@@ -4,24 +4,36 @@ using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
 using System.Windows.Controls;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
-    /// <see cref="IPrintable"/> 実装に必要な印刷コマンド
+    /// <see cref="IPrintable"/> 実装に必要な印刷コマンドのベースクラス
     /// </summary>
-    public class PrintCommand : CommandBase
+    public abstract class PrintCommand : CommandBase<IPrintable> 
     {
-        /// <summary>
-        /// コンストラクタ
-        /// </summary>
-        public PrintCommand() : base()
+    }
+
+    /// <summary>
+    /// <see cref="IPrintable"/> 実装に必要な印刷コマンドのベースクラス
+    /// </summary>
+    public abstract class PrintCommand<T> : PrintCommand where T : NotificationObject, IPrintable, IReloadable
+    {
+        /// <inheritdoc/>
+        /// <remarks>
+        /// サブクラスではこのメソッドのオーバーライドを許可しない。
+        /// 代わりに <see cref="Execute(T)"/> を実装させる。
+        /// </remarks>
+        protected override sealed void Execute(IPrintable parameter)
         {
-            AddAction(typeof(ProcessingInstructionViewModel), Print<ProcessingInstructionViewModel, ProcessingInstructionControl>);
-            AddAction(typeof(OrderToSupplierDetailViewModel), Print<OrderToSupplierDetailViewModel, OrderSheetToSupplier>);
-            AddAction(typeof(InventoryTransitionTableViewModel), Print<InventoryTransitionTableViewModel, InventoryTransitionTableControl>);
+            Execute(parameter as T);
         }
 
-        private static void Print<VM, V>(object parameter) where VM : NotificationObject, IPrintable, IReloadable where V : UserControl, new()
-            => UserControlPrinter.PrintDocument<VM, V>(parameter as VM);
+        /// <summary>
+        /// 印刷処理を実行する。各サブクラスは、このメソッドを実装しなければならない。
+        /// </summary>
+        /// <param name="parameter">コマンドパラメータ</param>
+        protected abstract void Execute(T parameter);
     }
 }

@@ -1,7 +1,4 @@
-﻿using MemorieDeFleurs;
-using MemorieDeFleurs.Logging;
-
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using System;
@@ -9,6 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleursTest
 {

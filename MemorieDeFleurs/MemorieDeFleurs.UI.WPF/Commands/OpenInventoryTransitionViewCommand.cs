@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class OpenInventoryTransitionViewCommand : CommandBase 
+    internal class OpenInventoryTransitionViewCommand : CommandBase <MainWindowViiewModel>
     {
-        public OpenInventoryTransitionViewCommand() : base(typeof(MainWindowViiewModel), OpenTabItem) { }
-
-        private static void OpenTabItem(object parameter) => (parameter as MainWindowViiewModel).OpenTabItem(new InventoryTransitionTableViewModel());
+        protected override void Execute(MainWindowViiewModel parameter) => parameter.OpenTabItem(new InventoryTransitionTableViewModel());
     }
 }

@@ -1,5 +1,4 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.Model;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
@@ -9,6 +8,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -178,9 +179,8 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
 
             if(Orders.Count > 0)
             {
-                _from = Orders.FirstOrDefault().OrderDate;
-                _to = Orders.LastOrDefault().OrderDate;
-                RaisePropertyChanged(nameof(From), nameof(To));
+                From = Orders.FirstOrDefault().OrderDate;
+                To = Orders.LastOrDefault().OrderDate;
             }
 
             SelectedSupplier = Suppliers[0];

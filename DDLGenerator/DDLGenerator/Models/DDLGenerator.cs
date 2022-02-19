@@ -1,4 +1,4 @@
-﻿using DDLGenerator.Models.Logging;
+﻿using YasT.Framework.Logging;
 using DDLGenerator.Models.Parsers;
 using DDLGenerator.Models.Writers;
 

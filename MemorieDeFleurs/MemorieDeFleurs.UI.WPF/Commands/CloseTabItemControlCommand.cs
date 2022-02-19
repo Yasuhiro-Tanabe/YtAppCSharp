@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class CloseTabItemControlCommand :CommandBase
+    internal class CloseTabItemControlCommand :CommandBase<TabItemControlViewModelBase>
     {
-        public CloseTabItemControlCommand() : base(typeof(TabItemControlViewModelBase), CloseControl) { }
-
-        private static void CloseControl(object parameter) => (parameter as TabItemControlViewModelBase).CloseControl();
+        protected override void Execute(TabItemControlViewModelBase parameter) => parameter.CloseControl();
     }
 }

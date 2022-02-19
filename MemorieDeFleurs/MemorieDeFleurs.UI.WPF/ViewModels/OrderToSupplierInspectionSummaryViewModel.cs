@@ -6,6 +6,8 @@ using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 using System;
 using System.Linq;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
     /// <summary>

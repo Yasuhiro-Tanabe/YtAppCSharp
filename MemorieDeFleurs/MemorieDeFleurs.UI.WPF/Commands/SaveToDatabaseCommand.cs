@@ -2,25 +2,25 @@
 
 using System.ComponentModel;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class SaveToDatabaseCommand : CommandBase
+    internal class SaveToDatabaseCommand : CommandBase<DetailViewModelBase>
     {
-        public SaveToDatabaseCommand(NotificationObject vm) : base(typeof(DetailViewModelBase), SaveToDatabase, IsDirty)
+        public SaveToDatabaseCommand(NotificationObject vm)
         {
             vm.PropertyChanged += CheckDirtyFlag;
         }
 
-        private static bool IsDirty(object parameter) => (parameter as TabItemControlViewModelBase).IsDirty;
-        private static void SaveToDatabase(object parameter) => (parameter as DetailViewModelBase).SaveToDatabase();
-
-        public void CheckDirtyFlag(object sender, PropertyChangedEventArgs args)
+        private void CheckDirtyFlag(object sender, PropertyChangedEventArgs args)
         {
-            var vm = sender as TabItemControlViewModelBase;
-            if (args.PropertyName == nameof(vm.IsDirty))
+            if (sender is TabItemControlViewModelBase && args.PropertyName == nameof(TabItemControlViewModelBase.IsDirty))
             {
-                RaiseStatusChanged();
+                SetExecutability((sender as TabItemControlViewModelBase).IsDirty);
             }
         }
+
+        protected override void Execute(DetailViewModelBase parameter) => parameter.SaveToDatabase();
     }
 }

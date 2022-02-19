@@ -1,10 +1,12 @@
-﻿namespace SVGEditor
+﻿using YasT.Framework.WPF;
+
+namespace SVGEditor
 {
-    internal class SaveToFileCommand : CommandBase
+    internal class SaveToFileCommand : CommandBase<MainWindowViewModel>
     {
-        public override void Execute(object parameter)
+        protected override void Execute(MainWindowViewModel vm)
         {
-            (parameter as MainWindowViewModel).SaveToCurrentFile();
+            vm.SaveToCurrentFile();
         }
     }
 }

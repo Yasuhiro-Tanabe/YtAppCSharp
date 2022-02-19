@@ -14,7 +14,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public OrderFromCustomerSummaryViewModel() : base(new OpenDetailViewCommand<OrderFromCustomerDetailViewModel>()) { }
+        public OrderFromCustomerSummaryViewModel() : base(new OpenDetailViewCommand()) { }
 
         #region プロパティ
         /// <summary>

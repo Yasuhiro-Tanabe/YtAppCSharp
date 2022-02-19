@@ -18,7 +18,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
     /// 一方から他方 (A → B)へ Item を移動する際は Append コマンドを、
     /// 逆方向 (B → A) へ Item を移動する際は Remove コマンドを実行する。
     /// </summary>
-    internal interface IAppendableRemovable
+    public interface IAppendableRemovable
     {
         /// <summary>
         /// <see cref="ObservableCollection{T}"/> の要素を一方の他方へ移動する

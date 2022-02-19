@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace MemorieDeFleurs.Logging
+namespace YasT.Framework.Logging
 {
     /// <summary>
     /// 汎用ログユーティリティ
@@ -32,7 +32,7 @@ namespace MemorieDeFleurs.Logging
         /// <summary>
         /// WPFコントロールにログ出力を通知するためのアペンダ
         /// </summary>
-        public static NotifyAppender Appender
+        public static NotifyAppender? Appender
         {
             get
             {

@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+using YasT.Framework.WPF;
 
 namespace DDLGenerator.ViewModels
 {
-    public class TabItemControlBase : ViewModelBase
+    public class TabItemControlBase : NotificationObject
     {
         /// <summary>
         /// ファイル出力が開始されたときに発行されるイベント

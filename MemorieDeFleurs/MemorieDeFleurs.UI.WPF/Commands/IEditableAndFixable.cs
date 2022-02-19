@@ -6,7 +6,7 @@
     /// 
     /// 
     /// </summary>
-    internal interface IEditableAndFixable
+    public interface IEditableAndFixable
     {
         /// <summary>
         /// 追加表示領域を開く。

@@ -3,32 +3,23 @@ using MemorieDeFleurs.UI.WPF.ViewModels;
 
 using Microsoft.Win32;
 
-using System;
+using YasT.Framework.WPF;
 
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class SQLiteOpenDbFileCommand : CommandBase
+    internal class SQLiteOpenDbFileCommand : CommandBase<MainWindowViiewModel>
     {
-        public SQLiteOpenDbFileCommand() : base(typeof(MainWindowViiewModel), OpenDatabase) { }
-
-        private static void OpenDatabase(object parameter)
+        protected override void Execute(MainWindowViiewModel parameter)
         {
-            if(parameter is MainWindowViiewModel)
-            {
-                var dialog = new OpenFileDialog();
-                dialog.Title = "データベースファイル選択";
-                dialog.Filter = "データベースファイル (*.db)|*.db";
-                dialog.DefaultExt = ".db";
+            var dialog = new OpenFileDialog();
+            dialog.Title = "データベースファイル選択";
+            dialog.Filter = "データベースファイル (*.db)|*.db";
+            dialog.DefaultExt = ".db";
 
-                var result = dialog.ShowDialog();
-                if (result.HasValue && result.Value)
-                {
-                    MemorieDeFleursUIModel.Instance.OpenSQLiteDatabaseFile(dialog.FileName);
-                }
-            }
-            else
+            var result = dialog.ShowDialog();
+            if (result.HasValue && result.Value)
             {
-                throw new NotImplementedException($"{typeof(SQLiteOpenDbFileCommand).Name}.{nameof(OpenDatabase)}({parameter.GetType().Name})");
+                MemorieDeFleursUIModel.Instance.OpenSQLiteDatabaseFile(dialog.FileName);
             }
         }
     }

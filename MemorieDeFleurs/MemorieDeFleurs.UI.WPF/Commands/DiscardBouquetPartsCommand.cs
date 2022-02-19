@@ -1,11 +1,11 @@
 ﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class DiscardBouquetPartsCommand : CommandBase
+    internal class DiscardBouquetPartsCommand : CommandBase<InventoryViewModel>
     {
-        public DiscardBouquetPartsCommand() : base(typeof(InventoryViewModel), Discard) { }
-
-        private static void Discard(object parameter) => (parameter as InventoryViewModel).DiscardBouquetParts();
+        protected override void Execute(InventoryViewModel parameter) => parameter.DiscardBouquetParts();
     }
 }

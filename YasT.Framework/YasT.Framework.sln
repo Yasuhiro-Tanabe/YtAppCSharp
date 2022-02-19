@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YasT.Framework.Logging", "YasT.Framework.Logging\YasT.Framework.Logging.csproj", "{7E4FDB56-646D-413C-B25D-1E4044F89E0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YasT.Framework.WPF", "YasT.Framework.WPF\YasT.Framework.WPF.csproj", "{52A443D9-9DA1-4708-8A6D-0701DECCB680}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E4FDB56-646D-413C-B25D-1E4044F89E0F}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{7E4FDB56-646D-413C-B25D-1E4044F89E0F}.Debug|Any CPU.Build.0 = Release|Any CPU
+		{7E4FDB56-646D-413C-B25D-1E4044F89E0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E4FDB56-646D-413C-B25D-1E4044F89E0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52A443D9-9DA1-4708-8A6D-0701DECCB680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52A443D9-9DA1-4708-8A6D-0701DECCB680}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52A443D9-9DA1-4708-8A6D-0701DECCB680}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52A443D9-9DA1-4708-8A6D-0701DECCB680}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0631D6D9-9326-4FD2-B44E-068631418868}
+	EndGlobalSection
+EndGlobal

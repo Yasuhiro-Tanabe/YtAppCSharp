@@ -1,7 +1,8 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.Models.Entities;
+﻿using MemorieDeFleurs.Models.Entities;
 using MemorieDeFleurs.UI.WPF.Commands;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
+
+using YasT.Framework.Logging;
 
 namespace MemorieDeFleurs.UI.WPF.ViewModels
 {
@@ -13,7 +14,7 @@ namespace MemorieDeFleurs.UI.WPF.ViewModels
         /// <summary>
         /// コンストラクタ
         /// </summary>
-        public CustomerSummaryViewModel() : base(new OpenDetailViewCommand<CustomerDetailViewModel>()) { }
+        public CustomerSummaryViewModel() : base(new OpenDetailViewCommand()) { }
 
         /// <summary>
         /// コンストラクタ

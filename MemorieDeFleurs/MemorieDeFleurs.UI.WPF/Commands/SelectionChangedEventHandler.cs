@@ -1,24 +1,17 @@
-﻿using MemorieDeFleurs.Logging;
-using MemorieDeFleurs.UI.WPF.ViewModels;
+﻿using MemorieDeFleurs.UI.WPF.ViewModels;
 using MemorieDeFleurs.UI.WPF.ViewModels.Bases;
 
 using System.Windows.Controls;
 
+using YasT.Framework.Logging;
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
-    internal class SelectionChangedEventHandler : CommandBase
+    internal class SelectionChangedEventHandler : CommandBase<SelectionChangedEventArgs>
     {
-        public SelectionChangedEventHandler() : base()
+        protected override void Execute(SelectionChangedEventArgs args)
         {
-            AddAction(typeof(SelectionChangedEventArgs), ChangeCommandButtonVisibility);
-            AddAction(typeof(OrderToSupplierListViewModel), ReloadItems);
-        }
-
-        private static void ChangeCommandButtonVisibility(object parameter)
-        {
-            LogUtil.DEBUGLOG_BeginMethod(parameter == null ? "parameter=null" : $"parameter={parameter.GetType().Name}");
-            var args = parameter as SelectionChangedEventArgs;
-
             if (args.RemovedItems.Count > 0)
             {
                 foreach (var item in args.RemovedItems)
@@ -27,7 +20,7 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                     {
                         (item as ListItemViewModelBase).IsActionVisible = false;
                     }
-                    if(item is InventorySummaryViewModel)
+                    if (item is InventorySummaryViewModel)
                     {
                         (item as InventorySummaryViewModel).IsSelected = false;
                     }
@@ -44,15 +37,12 @@ namespace MemorieDeFleurs.UI.WPF.Commands
                         vm.IsActionVisible = true;
                         LogUtil.Debug($"[{vm.GetType().Name}] {vm.Key} selected.");
                     }
-                    if(item is InventorySummaryViewModel)
+                    if (item is InventorySummaryViewModel)
                     {
                         (item as InventorySummaryViewModel).IsSelected = true;
                     }
                 }
             }
-            LogUtil.DEBUGLOG_EndMethod();
         }
-
-        private static void ReloadItems(object parameter) => (parameter as OrderToSupplierListViewModel).UpdateProperties();
     }
 }

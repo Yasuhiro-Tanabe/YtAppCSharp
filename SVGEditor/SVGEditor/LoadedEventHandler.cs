@@ -1,9 +1,10 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
+
+using YasT.Framework.WPF;
 
 namespace SVGEditor
 {
-    internal class LoadedEventHandler : CommandBase
+    internal class LoadedEventHandler : CommandBase<RoutedEventArgs>
     {
         private MainWindowViewModel _viewModel;
 
@@ -12,9 +13,9 @@ namespace SVGEditor
             _viewModel = viewModel;
         }
 
-        public override void Execute(object parameter)
+        protected override void Execute(RoutedEventArgs args)
         {
-            var view = (parameter as RoutedEventArgs).Source as MainWindow;
+            var view = (args as RoutedEventArgs).Source as MainWindow;
 
             _viewModel.LoadFileNameSelected += view.LoadFile;
             _viewModel.SaveFileNameSelected += view.SaveFile;

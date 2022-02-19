@@ -1,51 +1,38 @@
-﻿using DDLGenerator.Models.Logging;
+﻿using YasT.Framework.Logging;
 using DDLGenerator.ViewModels;
-
-using System;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using System.Windows.Threading;
 using DDLGenerator.Models.Writers;
 using DDLGenerator.Models.Parsers;
 using System.ComponentModel;
+using YasT.Framework.WPF;
 
 namespace DDLGenerator.Commands
 {
-    class GenerateSQLiteDDLFileCommand : ICommand
+    public class GenerateSQLiteDDLFileCommand : CommandBase<SQLiteDDLViewModel>
     {
-        public event EventHandler CanExecuteChanged;
+        public GenerateSQLiteDDLFileCommand() : base(false) { }
 
-        public bool CanExecute(object parameter)
+        private bool IsTableDefinitionFileSelected
         {
-            LogUtil.Debug($"{this.GetType().Name}#{nameof(CanExecute)}() called. parameter={parameter?.GetType().Name}");
-
-            return IsTableDefinitionFileSelected && IsOutputDDLFileSelected;
-        }
-
-        public void Execute(object parameter)
-        {
-            LogUtil.Debug($"{this.GetType().Name}#{nameof(Execute)}() called. parameter={parameter?.GetType().Name}");
-
-            if(parameter is SQLiteDDLViewModel)
+            get { return _tableDefinitionFileSelected; }
+            set
             {
-                var vm = parameter as SQLiteDDLViewModel;
-
-                Task.Run(() => Dispatcher.CurrentDispatcher.Invoke(() =>
-                {
-                    var generator = new Models.DDLGenerator()
-                    {
-                        Parser = new TableDefinitionWorksheetParser() { DataDefinitionFileName = vm.TableDefinitionFilePath },
-                        Writer = new SQLiteDDLWriter() { OutputFileName = vm.OutputDdlFilePath }
-                    };
-
-                    generator.GenerateDDL();
-                    LogUtil.Info("ファイル出力完了");
-                }));
+                _tableDefinitionFileSelected = value;
+                SetExecutability(_tableDefinitionFileSelected && _outputDDLFileSelected);
             }
         }
-
-        private bool IsTableDefinitionFileSelected { get; set; } = false;
-        private bool IsOutputDDLFileSelected { get; set; } = false;
+        private bool _tableDefinitionFileSelected = false;
+        private bool IsOutputDDLFileSelected
+        {
+            get { return _outputDDLFileSelected; }
+            set
+            {
+                _outputDDLFileSelected = value;
+                SetExecutability(_tableDefinitionFileSelected && _outputDDLFileSelected);
+            }
+        }
+        private bool _outputDDLFileSelected = false;
         public void OnViewModelPropertyChanged(object sender, PropertyChangedEventArgs args)
         {
             if(sender is SQLiteDDLViewModel)
@@ -54,15 +41,30 @@ namespace DDLGenerator.Commands
                 if(args.PropertyName == nameof(SQLiteDDLViewModel.TableDefinitionFilePath))
                 {
                     IsTableDefinitionFileSelected = !string.IsNullOrWhiteSpace(vm.TableDefinitionFilePath);
-                    CanExecuteChanged?.Invoke(this, null);
                 }
                 if (args.PropertyName == nameof(SQLiteDDLViewModel.OutputDdlFilePath))
                 {
                     IsOutputDDLFileSelected = !string.IsNullOrWhiteSpace(vm.OutputDdlFilePath);
-                    CanExecuteChanged?.Invoke(this, null);
                 }
 
             }
+        }
+
+        protected override void Execute(SQLiteDDLViewModel parameter)
+        {
+            LogUtil.Debug($"{this.GetType().Name}#{nameof(Execute)}() called. parameter={parameter?.GetType().Name}");
+
+            Task.Run(() => Dispatcher.CurrentDispatcher.Invoke(() =>
+            {
+                var generator = new Models.DDLGenerator()
+                {
+                    Parser = new TableDefinitionWorksheetParser() { DataDefinitionFileName = parameter.TableDefinitionFilePath },
+                    Writer = new SQLiteDDLWriter() { OutputFileName = parameter.OutputDdlFilePath }
+                };
+
+                generator.GenerateDDL();
+                LogUtil.Info("ファイル出力完了");
+            }));
         }
     }
 }

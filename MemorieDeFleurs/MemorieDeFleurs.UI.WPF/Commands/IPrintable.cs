@@ -1,5 +1,7 @@
 ﻿using MemorieDeFleurs.UI.WPF.Views.Helpers;
 
+using YasT.Framework.WPF;
+
 namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>

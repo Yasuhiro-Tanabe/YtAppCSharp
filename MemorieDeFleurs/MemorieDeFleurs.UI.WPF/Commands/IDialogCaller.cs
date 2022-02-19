@@ -1,4 +1,6 @@
-﻿namespace MemorieDeFleurs.UI.WPF.Commands
+﻿using YasT.Framework.WPF;
+
+namespace MemorieDeFleurs.UI.WPF.Commands
 {
     /// <summary>
     /// ダイアログを開く側が実装しなければならないビューモデル

@@ -1,10 +1,12 @@
 ﻿using Microsoft.Win32;
 
+using YasT.Framework.WPF;
+
 namespace SVGEditor
 {
-    internal class OpenFileCommand : CommandBase
+    internal class OpenFileCommand : CommandBase<MainWindowViewModel>
     {
-        public override void Execute(object parameter)
+        protected override void Execute(MainWindowViewModel vm)
         {
             var dialog = new OpenFileDialog()
             {
@@ -15,7 +17,7 @@ namespace SVGEditor
             var result = dialog.ShowDialog();
             if (result.HasValue && result.Value)
             {
-                (parameter as MainWindowViewModel).LoadFile(dialog.FileName);
+                vm.LoadFile(dialog.FileName);
             }
         }
     }
