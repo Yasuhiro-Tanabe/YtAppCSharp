@@ -7,9 +7,6 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="Views\AboutThisApplicationControl.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="Views\BouquetDetailControl.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -72,9 +69,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="Views\AboutThisApplicationControl.xaml">
-      <SubType>Designer</SubType>
-    </Page>
     <Page Update="Views\BouquetDetailControl.xaml">
       <SubType>Designer</SubType>
     </Page>
