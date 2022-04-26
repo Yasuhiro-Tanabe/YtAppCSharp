@@ -6,9 +6,11 @@
              xmlns:vm="clr-namespace:DDLGenerator.ViewModels"
              mc:Ignorable="d" 
              d:DesignHeight="200" d:DesignWidth="800">
+    <!--
     <UserControl.DataContext>
         <vm:SQLiteDDLViewModel/>
     </UserControl.DataContext>
+    -->
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>

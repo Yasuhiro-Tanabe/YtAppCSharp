@@ -6,16 +6,6 @@ namespace DDLGenerator.ViewModels
 {
     public class SQLiteDDLViewModel : TabItemControlBase
     {
-        private string _tableDefinitionFile;
-        /// <summary>
-        /// テーブル定義書ファイル名 (パスを含む)
-        /// </summary>
-        public string TableDefinitionFilePath
-        {
-            get { return _tableDefinitionFile; }
-            set { SetProperty(ref _tableDefinitionFile, value); }
-        }
-
         private string _outputFIle;
         /// <summary>
         /// 生成するデータ定義スクリプトファイル名 (パスを含む)
@@ -46,7 +36,7 @@ namespace DDLGenerator.ViewModels
         /// </summary>
         public ICommand SelectOutputFile { get; } = new SelectOutputFileCommand();
 
-        public SQLiteDDLViewModel()
+        public SQLiteDDLViewModel(MainWindowViewModel parent) : base("SQLite", parent)
         {
 
             PropertyChanged += ((GenerateSQLiteDDLFileCommand)GenerateDDL).OnViewModelPropertyChanged;

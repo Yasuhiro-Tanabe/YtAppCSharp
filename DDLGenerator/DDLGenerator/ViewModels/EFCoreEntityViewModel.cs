@@ -7,16 +7,6 @@ namespace DDLGenerator.ViewModels
 {
     public class EFCoreEntityViewModel : TabItemControlBase
     {
-        private string _tableDefinitionFile;
-        /// <summary>
-        /// テーブル定義書ファイル名 (パスを含む)
-        /// </summary>
-        public string TableDefinitionFilePath
-        {
-            get { return _tableDefinitionFile; }
-            set { SetProperty(ref _tableDefinitionFile, value); }
-        }
-
         /// <summary>
         /// ソースファイル出力先
         /// </summary>
@@ -54,7 +44,7 @@ namespace DDLGenerator.ViewModels
         /// </summary>
         public ICommand GenerateEFSourceCode { get; } = new GenerateEFCoreSourceFilesCommand();
 
-        public EFCoreEntityViewModel()
+        public EFCoreEntityViewModel(MainWindowViewModel parent) : base("EFCore", parent)
         {
             PropertyChanged += ((GenerateEFCoreSourceFilesCommand)GenerateEFSourceCode).OnViewModelPropertiesChanged;
 

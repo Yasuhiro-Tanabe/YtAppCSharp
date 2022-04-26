@@ -19,13 +19,20 @@
         </Grid.RowDefinitions>
 
         <!-- 上：各ファイル出力のためのインタフェース -->
-        <TabControl Grid.Row="0">
-            <TabItem x:Name="SQLiteTab" Header="SQLite">
-                <v:SQLiteDDLControl VerticalAlignment="Top" HorizontalAlignment="Stretch" />
-            </TabItem>
-            <TabItem x:Name="EFCoreTabl" Header="EFCore">
-                <v:EFCoreEntityControl VerticalAlignment="Top" HorizontalAlignment="Stretch" />
-            </TabItem>
+        <TabControl Grid.Row="0" ItemsSource="{Binding TabItems}">
+            <TabControl.Resources>
+                <DataTemplate DataType="{x:Type vm:SQLiteDDLViewModel}">
+                    <v:SQLiteDDLControl VerticalAlignment="Top" HorizontalAlignment="Stretch" />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:EFCoreEntityViewModel}">
+                    <v:EFCoreEntityControl VerticalAlignment="Top" HorizontalAlignment="Stretch" />
+                </DataTemplate>
+            </TabControl.Resources>
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Header}"/>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
         </TabControl>
 
         <!-- 下：作業ログ出力 -->

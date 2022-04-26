@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 using YasT.Framework.WPF;
 
@@ -20,6 +21,41 @@ namespace DDLGenerator.ViewModels
         /// ファイル出力に失敗したときに発行されるイベント
         /// </summary>
         public event EventHandler FileGenerationFailed;
+
+        /// <summary>
+        /// タブのヘッダ情報
+        /// </summary>
+        public string Header { get; private set; } = string.Empty;
+
+        /// <summary>
+        /// 親ビューモデル
+        /// </summary>
+        public MainWindowViewModel Parent { get; private set; }
+
+        /// <summary>
+        /// テーブル定義書ファイル名 (パスを含む)
+        /// </summary>
+        public string TableDefinitionFilePath
+        {
+            get { return Parent.TableDefinitionFilePath; }
+            set { Parent.TableDefinitionFilePath = value; }
+        }
+
+        public TabItemControlBase(string header, MainWindowViewModel parent)
+        {
+            Header = header;
+            Parent = parent;
+
+            parent.PropertyChanged += OnTableDefinitionFilePathChanged;
+        }
+
+        private void OnTableDefinitionFilePathChanged(object sender, PropertyChangedEventArgs args)
+        {
+            if(args.PropertyName == nameof(Parent.TableDefinitionFilePath))
+            {
+                RaisePropertyChanged(nameof(TableDefinitionFilePath));
+            }
+        }
 
         /// <summary>
         /// ファイル出力を開始する
