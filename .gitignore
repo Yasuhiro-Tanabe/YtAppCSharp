@@ -46,3 +46,9 @@
 /YasT.Framework/YasT.Framework.WPF/obj
 /YasT.Framework/YasT.Framework.WPF.Test/bin/
 /YasT.Framework/YasT.Framework.WPF.Test/obj
+
+/ResourceGenerator/.vs
+/ResourceGenerator/ResourceGenerator/bin
+/ResourceGenerator/ResourceGenerator/obj
+/ResourceGenerator/ResourceGeneratorInstaller/Debug
+/ResourceGenerator/ResourceGeneratorInstaller/Release

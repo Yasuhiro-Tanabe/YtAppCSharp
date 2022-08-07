@@ -1,0 +1,16 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+
+    <s:String x:Key="DefaultResourceManagementFileName">ResourceManagementFileTemplate.xlsx</s:String>
+    <s:String x:Key="DefaultResourceManagementFilePath">Resources/tmpl/ResourceManagementFileTemplate.xlsx</s:String>
+    <s:String x:Key="PropertySheetName">_Properties</s:String>
+    <s:String x:Key="NumCulturesPropertyName">Cultures</s:String>
+    <s:String x:Key="CulturePropertyName">Culture.{0}</s:String>
+    <s:String x:Key="OutputFolderPropertyName">OutputFolder</s:String>
+    <s:String x:Key="NameSpecePropertyName">NameSpace</s:String>
+    <s:String x:Key="ResourceFinderClassFileName">ResourceFinder.cs</s:String>
+    <s:String x:Key="ResourceManagerClassFileName">ResourceManager.cs</s:String>
+    <s:String x:Key="AppXamlFileName">App.xaml</s:String>
+    
+</ResourceDictionary>

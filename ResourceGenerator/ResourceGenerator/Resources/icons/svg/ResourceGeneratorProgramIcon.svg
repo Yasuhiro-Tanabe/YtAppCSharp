@@ -1,0 +1,14 @@
+<svg width="32px" height="32px" viewBox="0 0 32 32" stroke="none" fill="none" opacity="0">
+	<path stroke="black" fill="none" d="M1.5,4 L17.5,4 L25,11.5 L25,30 L1.5,30 Z"/>
+	<path stroke="black" fill="none" d="M17.5,4 V11.5 H25"/>
+	<path stroke="black" fill="none" d="M5,12.5 H20" stroke-width="2" stroke-dasharray="2,1" stroke-opacity="0.5"/>  
+	<path stroke="black" fill="none" d="M5,20 H22.5" stroke-width="2" stroke-dasharray="2,1" stroke-opacity="0.5"/>  
+	<path stroke="black" fill="none" d="M5,27.5 H22.5" stroke-width="2" stroke-dasharray="2,1" stroke-opacity="0.5"/>  
+	<g transform="rotate(-35,15,10)">
+		<polygon stroke="black" fill="black" points="5,20 10,17.5, 10,22.5"/>
+		<path stroke="black" fill="white" d="M10,17.5 L15,15 L15,25 L10,22.5 Z"/>
+		<path stroke="black" fill="green" d="M15,15 H35 V17.5 H15 Z"/>
+		<path stroke="black" fill="green" d="M15,25 H35 V22.5 H15 Z"/>
+		<path stroke="black" fill="green" d="M15,17.5 H35 V22.5 H15 Z"/>
+	</g>
+</svg>

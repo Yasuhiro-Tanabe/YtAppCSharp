@@ -1,0 +1,13 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:s="clr-namespace:System;assembly=mscorlib">
+    <!-- Culture = ja-JP -->
+    <s:String x:Key="QueryFileExists">ファイル '{0}' はすでに存在します。上書きしますか？</s:String>
+    <s:String x:Key="CannotCreateNewResourceManagementFile">ファイル '{0}' の生成に失敗しました： {1}</s:String>
+    <s:String x:Key="CannotOpenResourceManagementFile">ファイル '{0}' が見つかりません。</s:String>
+    <s:String x:Key="FileMayNotBeResourceManagementFile">ファイル '{0}' はリソース管理ファイルではありません： {1}</s:String>
+    <s:String x:Key="InputFileNameIsNotFound">リソース管理ファイルが指定されていません。</s:String>
+    <s:String x:Key="OutputFolderNameIsNotFound">出力先フォルダ名が指定されていません。</s:String>
+    <s:String x:Key="NoSuchCultureName">該当するカルチャーのリソースが定義されていません。カルチャー：{0}, シート：{1}</s:String>
+    <s:String x:Key="NamespaceUndefined">サンプルクラスの名前空間が指定されていません。</s:String>
+</ResourceDictionary>

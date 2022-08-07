@@ -1,0 +1,89 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows10.0.22000.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <PlatformTarget>x64</PlatformTarget>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <ApplicationIcon>Resources\icons\ResourceGeneratorProgramIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\icons\ResourceGeneratorProgramIcon.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.96.0" />
+    <PackageReference Include="Microsoft-Windows10-APICodePack-Shell" Version="1.1.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\YasT.Framework\YasT.Framework.Logging\YasT.Framework.Logging.csproj" />
+    <ProjectReference Include="..\..\YasT.Framework\YasT.Framework.WPF\YasT.Framework.WPF.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\tmpl\AppXamlResourceCodeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>AppXamlResourceCodeTemplate.cs</LastGenOutput>
+      <CustomToolNamespace>ResourceGenerator.Templates</CustomToolNamespace>
+    </None>
+    <None Update="Resources\tmpl\ResourceFinderSourceCodeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ResourceFinderSourceCodeTemplate.cs</LastGenOutput>
+      <CustomToolNamespace>ResourceGenerator.Templates</CustomToolNamespace>
+    </None>
+    <None Update="Resources\tmpl\ResourceManagementFileTemplate.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\tmpl\ResourceManagerSourceCodeTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ResourceManagerSourceCodeTemplate.cs</LastGenOutput>
+      <CustomToolNamespace>ResourceGenerator.Templates</CustomToolNamespace>
+    </None>
+    <None Update="Resources\tmpl\ResourceXamlTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ResourceXamlTemplate.cs</LastGenOutput>
+      <CustomToolNamespace>ResourceGenerator.Templates</CustomToolNamespace>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\tmpl\AppXamlResourceCodeTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AppXamlResourceCodeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\tmpl\ResourceFinderSourceCodeTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ResourceFinderSourceCodeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\tmpl\ResourceManagerSourceCodeTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ResourceManagerSourceCodeTemplate.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Resources\tmpl\ResourceXamlTemplate.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ResourceXamlTemplate.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\icons\svg\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,171 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Globalization" #>
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Threading;
+using System.Windows;
+
+namespace <#= Namespace #>
+{
+    /// <summary>
+    /// リソース管理クラス。
+    /// <para>XAMLファイル内では、App.xamlに登録し StaticResource/DynamicResource でリソースを参照する。</para>
+<# if(IsGenerateResourceFinder) { #>
+    /// <para>C#ソースコード中では、<see cref="ResourceFinder"/>を使ってリソースを参照する。</para>
+<# } else { #>
+    /// <para>C#ソースコード中では、<see cref="Application.FindResource(object)"/>を使ってリソースを参照する。</para>
+<# } #>
+    /// </summary>
+    public class ResourceManager
+    {
+        /// <summary>
+        /// 管理情報クラス。
+        /// </summary>
+        private class CultureResource
+        {
+            public CultureInfo Culture { get; set; } = CultureInfo.InvariantCulture;
+
+            public CultureResource(string culture)
+            {
+                if (string.IsNullOrEmpty(culture)) { throw new ArgumentNullException(nameof(culture)); }
+                Culture = new CultureInfo(culture);
+                CreateResourceFiles();
+                CreateCultureIndependentResourceFiles();
+            }
+
+            public Collection<ResourceDictionary> ResourceFiles { get; private set; } = new Collection<ResourceDictionary>();
+            public Collection<ResourceDictionary> CultureIndependentResourceFiles { get; private set; } = new Collection<ResourceDictionary>();
+
+            private void CreateResourceFiles()
+            {
+                foreach (var f in _resourceFiles)
+                {
+                    var res = new ResourceDictionary() { Source = new Uri($"Resources/{Culture}/{f}.xaml", UriKind.Relative) };
+                    ResourceFiles.Add(res);
+                }
+            }
+
+            private void CreateCultureIndependentResourceFiles()
+            {
+                foreach (var f in _cultureIndependent)
+                {
+                    var res = new ResourceDictionary() { Source = new Uri($"Resources/{f}.xaml", UriKind.Relative) };
+                    CultureIndependentResourceFiles.Add(res);
+                }
+            }
+
+<# if(ResourceFiles.Count == 0) { #>
+            private static readonly string[] _resourceFiles = new string[] { };
+<# } else { #> 
+            private static readonly string[] _resourceFiles = new string[]
+            {
+<#     foreach(var f in ResourceFiles) { #>
+                "<#= f #>",
+<#     } #>
+            };
+<# } #>
+
+<# if(CultureIndependentResourceFiles.Count == 0) {#>
+            private static string[] _cultureIndependent = new string[] { };
+<# } else { #>
+            private static string[] _cultureIndependent = new string[]
+            {
+<#     foreach(var f in CultureIndependentResourceFiles) { #>
+                "<#= f #>",
+<#     } #>
+            };
+<# } #>
+        }
+
+        /// <summary>
+        /// カルチャ(≒言語)単位のリソース管理情報。
+        /// </summary>
+<# if(Cultures.Count == 0) { #>
+        private readonly IReadOnlyDictionary<string, CultureResource> _cultures = new SortedDictionary<string, CultureResource>();
+<# } else { #>
+        private readonly IReadOnlyDictionary<string, CultureResource> _cultures = new SortedDictionary<string, CultureResource>()
+        {
+<#     foreach(var c in Cultures) { #>
+            { "<#= c.Name #>", new CultureResource("<#= c.Name #>") },
+<#     } #>
+        };
+<# } #>
+
+        /// <summary>
+        /// このクラスのシングルトンオブジェクト。
+        /// </summary>
+        public static ResourceManager Instance { get { return _instance; } }
+        private static readonly ResourceManager _instance = new ResourceManager();
+
+        /// <summary>
+        /// カルチャーを変更する。
+        /// </summary>
+        /// <param name="culture">変更したいカルチャー</param>
+        public void UpdateCulture(CultureInfo culture)
+        {
+            if(culture == null) { return; /* リソース管理情報を検索できないので何もしない。 */ }
+            if(culture == CultureInfo.InvariantCulture) { return; /* リソース管理情報として登録していないので何もしない。 */ }
+
+            var th = Thread.CurrentThread;
+
+            if(culture == th.CurrentUICulture)
+            {
+                // 変更不要。
+                return;
+            }
+            else
+            {
+                if (_cultures.TryGetValue(culture.Name, out CultureResource? res))
+                {
+                    th.CurrentUICulture = res.Culture;
+                    th.CurrentCulture = res.Culture;
+
+                    var appResDic = Application.Current.Resources.MergedDictionaries;
+                    appResDic.Clear();
+                    foreach (var f in res.ResourceFiles)
+                    {
+                        appResDic.Add(f);
+                    }
+                    foreach (var f in res.CultureIndependentResourceFiles)
+                    {
+                        appResDic.Add(f);
+                    }
+                }
+                else
+                {
+                    // 該当するリソースなし。
+                    return;
+                }
+            }
+        }
+    }
+}
+<#+
+/// <summary>
+/// クラスの名前空間。
+/// </summary>
+public string Namespace { get; set; }
+/// <summary>
+/// ResourceFinder クラスのソースコードを同時生成するかどうか。
+/// 同時生成するかどうかでコメントが変わる。
+/// </summary>
+public bool IsGenerateResourceFinder { get; set; }
+/// <summary>
+/// カルチャーに依存するリソースファイルのファイル名 (拡張子を除く)：リソース管理ファイルにあるシートのシート名。
+/// </summary>
+public ICollection<string> ResourceFiles { get; } = new List<string>();
+/// <summary>
+/// カルチャーに依存しないリソースファイルのファイル名 (拡張子を除く)。
+/// </summary>
+public ICollection<string> CultureIndependentResourceFiles { get; } = new List<string>();
+/// <summary>
+/// リソースファイルを生成するカルチャー。
+/// </summary>
+public ICollection<CultureInfo> Cultures { get; } = new List<CultureInfo>();
+#>

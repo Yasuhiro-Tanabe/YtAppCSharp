@@ -1,0 +1,41 @@
+﻿using System.Windows;
+
+namespace ResourceGenerator.Resources
+{
+    /// <summary>
+    /// C#コード中でリソースディクショナリ内のリソースを参照するためのクラス。
+    /// </summary>
+    public static class ResourceFinder
+    {
+        /// <summary>
+        /// key に該当するリソースを取得する。
+        /// </summary>
+        /// <typeparam name="T">取得するリソースのデータ型。</typeparam>
+        /// <param name="key">リソースキー。</param>
+        /// <returns>key に該当するリソース。リソースが見つからなかったときは null を返す。</returns>
+        public static T? FindResource<T>(string key)
+        {
+            return (T)Application.Current.TryFindResource(key);
+        }
+
+        /// <summary>
+        /// key に該当するリソース文字列を取得する。
+        /// リソース文字列がフォーマット文字列の場合、argsで与えられたパラメータを埋めた文字列を取得する。
+        /// </summary>
+        /// <param name="key">リソースキー。</param>
+        /// <param name="args">key に該当するフォーマット文字列をに埋めるパラメータ。
+        /// パラメータ不要の場合は省略可。</param>
+        /// <returns></returns>
+        public static string FindText(string key, params object[] args)
+        {
+            if(args == null || args.Length == 0)
+            {
+                return FindResource<string>(key) ?? string.Empty;
+            }
+            else
+            {
+                return string.Format(FindResource<string>(key) ?? string.Empty, args);
+            }
+        }
+    }
+}
