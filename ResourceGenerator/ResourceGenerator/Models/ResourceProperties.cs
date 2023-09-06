@@ -121,13 +121,13 @@ namespace ResourceGenerator.Models
             // セルの情報は 1-origin なので、それを考慮してループを回す。
             for (int i = 1; ; i++)
             {
-                var key = sheet.Cell($"A{i}").Value?.ToString();
+                var key = sheet.Cell($"A{i}").Value.ToString();
                 if (string.IsNullOrWhiteSpace(key))
                 {
                     break;
                 }
 
-                var value = sheet.Cell($"B{i}").Value?.ToString();
+                var value = sheet.Cell($"B{i}").Value.ToString();
 
                 _properties.Add(key, value ?? string.Empty);
 
@@ -175,7 +175,7 @@ namespace ResourceGenerator.Models
 
             for(int i = 1; ; i++)
             {
-                var key = sheet.Cell($"A{i}").Value?.ToString();
+                var key = sheet.Cell($"A{i}").Value.ToString();
                 if (string.IsNullOrWhiteSpace(key))
                 {
                     break;
