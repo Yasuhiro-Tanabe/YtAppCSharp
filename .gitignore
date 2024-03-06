@@ -52,3 +52,7 @@
 /ResourceGenerator/ResourceGenerator/obj
 /ResourceGenerator/ResourceGeneratorInstaller/Debug
 /ResourceGenerator/ResourceGeneratorInstaller/Release
+
+/WinWhich/.vs
+/WinWhich/bin
+/WinWhich/obj
